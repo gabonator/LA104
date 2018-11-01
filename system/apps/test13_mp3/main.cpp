@@ -1,9 +1,9 @@
 //#include <library.h>
 #include "MD_YX5300.h"
 #include "shapes.h"
-#include "../host/source/bios/Bios.h"
-#include "../host/source/framework/Wnd.h"
-#include "../host/source/gui/Gui.h"
+#include "../../os_host/source/bios/Bios.h"
+#include "../../os_host/source/framework/Wnd.h"
+#include "../../os_host/source/gui/Gui.h"
 #include "Menu.h"
 
 //#include "../host/source/framework/BufferedIo.h"
