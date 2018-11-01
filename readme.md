@@ -49,7 +49,7 @@ When I was developing alternative firmware for DS203, I was trying to design som
       - test13_mp3 - mp3 player gui application, works with MD_YX5300 module
     - hybrid - run any application as OSX native app for debugging and designing layouts
 
-![Hybrid app on mac OSX](resources/mybridmp3.png)
+![Hybrid app on mac OSX](resources/hybridmp3.png)
 
 #### TODO list
 
