@@ -1,0 +1,213 @@
+ELF Header:
+  Magic:   7f 45 4c 46 01 01 01 00 00 00 00 00 00 00 00 00 
+  Class:                             ELF32
+  Data:                              2's complement, little endian
+  Version:                           1 (current)
+  OS/ABI:                            UNIX - System V
+  ABI Version:                       0
+  Type:                              EXEC (Executable file)
+  Machine:                           ARM
+  Version:                           0x1
+  Entry point address:               0x8008000
+  Start of program headers:          52 (bytes into file)
+  Start of section headers:          69768 (bytes into file)
+  Flags:                             0x5000200, Version5 EABI, soft-float ABI
+  Size of this header:               52 (bytes)
+  Size of program headers:           32 (bytes)
+  Number of program headers:         3
+  Size of section headers:           40 (bytes)
+  Number of section headers:         10
+  Section header string table index: 9
+
+Section Headers:
+  [Nr] Name              Type            Addr     Off    Size   ES Flg Lk Inf Al
+  [ 0]                   NULL            00000000 000000 000000 00      0   0  0
+  [ 1] .bios             NOBITS          08000100 000100 000023 00 WAX  0   0  2
+  [ 2] .text             PROGBITS        08008000 008000 00050c 00  AX  0   0  4
+  [ 3] .data             PROGBITS        20000000 010000 000004 00  WA  0   0  4
+  [ 4] .bss              NOBITS          20000004 010004 000004 00  WA  0   0  4
+  [ 5] .comment          PROGBITS        00000000 010004 00007f 01  MS  0   0  1
+  [ 6] .ARM.attributes   ARM_ATTRIBUTES  00000000 010083 000031 00      0   0  1
+  [ 7] .symtab           SYMTAB          00000000 0100b4 000880 10      8  30  4
+  [ 8] .strtab           STRTAB          00000000 010934 000709 00      0   0  1
+  [ 9] .shstrtab         STRTAB          00000000 01103d 00004b 00      0   0  1
+Key to Flags:
+  W (write), A (alloc), X (execute), M (merge), S (strings), I (info),
+  L (link order), O (extra OS processing required), G (group), T (TLS),
+  C (compressed), x (unknown), o (OS specific), E (exclude),
+  y (purecode), p (processor specific)
+
+There are no section groups in this file.
+
+Program Headers:
+  Type           Offset   VirtAddr   PhysAddr   FileSiz MemSiz  Flg Align
+  LOAD           0x000000 0x08000000 0x08000000 0x00094 0x00123 RWE 0x10000
+  LOAD           0x008000 0x08008000 0x08008000 0x0050c 0x0050c R E 0x10000
+  LOAD           0x010000 0x20000000 0x0800850c 0x00004 0x00008 RW  0x10000
+
+ Section to Segment mapping:
+  Segment Sections...
+   00     .bios 
+   01     .text 
+   02     .data .bss 
+
+There is no dynamic section in this file.
+
+There are no relocations in this file.
+
+There are no unwind sections in this file.
+
+Symbol table '.symtab' contains 136 entries:
+   Num:    Value  Size Type    Bind   Vis      Ndx Name
+     0: 00000000     0 NOTYPE  LOCAL  DEFAULT  UND 
+     1: 08000100     0 SECTION LOCAL  DEFAULT    1 
+     2: 08008000     0 SECTION LOCAL  DEFAULT    2 
+     3: 20000000     0 SECTION LOCAL  DEFAULT    3 
+     4: 20000004     0 SECTION LOCAL  DEFAULT    4 
+     5: 00000000     0 SECTION LOCAL  DEFAULT    5 
+     6: 00000000     0 SECTION LOCAL  DEFAULT    6 
+     7: 00000000     0 FILE    LOCAL  DEFAULT  ABS startup.c
+     8: 0800832c     0 NOTYPE  LOCAL  DEFAULT    2 $t
+     9: 0800835c     0 NOTYPE  LOCAL  DEFAULT    2 $d
+    10: 08008370     0 NOTYPE  LOCAL  DEFAULT    2 $t
+    11: 08008000     0 NOTYPE  LOCAL  DEFAULT    2 $d
+    12: 00000000     0 FILE    LOCAL  DEFAULT  ABS main.c
+    13: 08008130     0 NOTYPE  LOCAL  DEFAULT    2 $t
+    14: 08008198     0 NOTYPE  LOCAL  DEFAULT    2 $d
+    15: 0800819c     0 NOTYPE  LOCAL  DEFAULT    2 $t
+    16: 0800823c     0 NOTYPE  LOCAL  DEFAULT    2 $d
+    17: 08008260     0 NOTYPE  LOCAL  DEFAULT    2 $t
+    18: 08008280     0 NOTYPE  LOCAL  DEFAULT    2 $d
+    19: 08008290     0 NOTYPE  LOCAL  DEFAULT    2 $t
+    20: 080082b8     0 NOTYPE  LOCAL  DEFAULT    2 $t
+    21: 08008328     0 NOTYPE  LOCAL  DEFAULT    2 $d
+    22: 08008470     0 NOTYPE  LOCAL  DEFAULT    2 $d
+    23: 20000000     0 NOTYPE  LOCAL  DEFAULT    3 $d
+    24: 20000000     4 OBJECT  LOCAL  DEFAULT    3 nSeed.6666
+    25: 20000004     0 NOTYPE  LOCAL  DEFAULT    4 $d
+    26: 20000004     4 OBJECT  LOCAL  DEFAULT    4 nX.6667
+    27: 00000000     0 FILE    LOCAL  DEFAULT  ABS lib_a-memcpy.o
+    28: 08008384     0 NOTYPE  LOCAL  DEFAULT    2 $t
+    29: 08000102     0 NOTYPE  LOCAL  DEFAULT    1 $d
+    30: 0800832f     2 FUNC    WEAK   DEFAULT    2 EXTI2_IRQHandler
+    31: 0800832f     2 FUNC    WEAK   DEFAULT    2 MemManageException
+    32: 0800832f     2 FUNC    WEAK   DEFAULT    2 TIM8_TRG_COM_IRQHandler
+    33: 0800832f     2 FUNC    WEAK   DEFAULT    2 TIM8_CC_IRQHandler
+    34: 0800832f     2 FUNC    WEAK   DEFAULT    2 DebugMon_Handler
+    35: 0800832f     2 FUNC    WEAK   DEFAULT    2 BusFaultException
+    36: 080081b5     4 FUNC    GLOBAL DEFAULT    2 WriteDword
+    37: 0800832f     2 FUNC    WEAK   DEFAULT    2 TIM1_CC_IRQHandler
+    38: 0800832f     2 FUNC    WEAK   DEFAULT    2 TIM6_IRQHandler
+    39: 0800832f     2 FUNC    WEAK   DEFAULT    2 SysTick_Handler
+    40: 0800832f     2 FUNC    WEAK   DEFAULT    2 PVD_IRQHandler
+    41: 0800832f     2 FUNC    WEAK   DEFAULT    2 SDIO_IRQHandler
+    42: 0800850c     0 NOTYPE  GLOBAL DEFAULT    2 _sidata
+    43: 0800832f     2 FUNC    WEAK   DEFAULT    2 PendSV_Handler
+    44: 08008000     0 NOTYPE  GLOBAL DEFAULT    2 _vectors
+    45: 0800832f     2 FUNC    WEAK   DEFAULT    2 EXTI3_IRQHandler
+    46: 0800850c     0 NOTYPE  GLOBAL DEFAULT    2 _etext
+    47: 20000004     0 NOTYPE  GLOBAL DEFAULT    4 _sbss
+    48: 0800832d     2 FUNC    WEAK   DEFAULT    2 DebugMonitor
+    49: 0800832d     2 FUNC    WEAK   DEFAULT    2 SVCHandler
+    50: 08008151    76 FUNC    GLOBAL DEFAULT    2 Test
+    51: 0800832f     2 FUNC    WEAK   DEFAULT    2 HardFaultException
+    52: 08008385   236 FUNC    GLOBAL DEFAULT    2 memcpy
+    53: 0800832d     2 FUNC    WEAK   DEFAULT    2 USB_HP_CAN_TX_IRQHandler
+    54: 0800832f     2 FUNC    WEAK   DEFAULT    2 EXTI0_IRQHandler
+    55: 0800832f     2 FUNC    WEAK   DEFAULT    2 I2C2_EV_IRQHandler
+    56: 0800832f     2 FUNC    WEAK   DEFAULT    2 UsageFault_Handler
+    57: 0800832f     2 FUNC    WEAK   DEFAULT    2 ADC1_2_IRQHandler
+    58: 20000000     0 NOTYPE  GLOBAL DEFAULT    3 _sdata
+    59: 0800832f     2 FUNC    WEAK   DEFAULT    2 SPI1_IRQHandler
+    60: 0800832d     2 FUNC    WEAK   DEFAULT    2 CAN_SCE_IRQHandler
+    61: 0800832f     2 FUNC    WEAK   DEFAULT    2 TAMPER_IRQHandler
+    62: 0800832f     2 FUNC    WEAK   DEFAULT    2 TIM8_UP_IRQHandler
+    63: 0800832f     2 FUNC    WEAK   DEFAULT    2 DMA2_Channel2_IRQHandler
+    64: 0800832f     2 FUNC    WEAK   DEFAULT    2 DMA1_Channel4_IRQHandler
+    65: 0800832f     2 FUNC    WEAK   DEFAULT    2 NMIException
+    66: 0800832f     2 FUNC    WEAK   DEFAULT    2 USART3_IRQHandler
+    67: 080081b9     2 FUNC    GLOBAL DEFAULT    2 ExecEntry
+    68: 0800832f     2 FUNC    WEAK   DEFAULT    2 RTC_IRQHandler
+    69: 0800832d     2 FUNC    WEAK   DEFAULT    2 SysTickHandler
+    70: 20000008     0 NOTYPE  GLOBAL DEFAULT    4 _ebss
+    71: 0800832f     2 FUNC    WEAK   DEFAULT    2 DMA1_Channel7_IRQHandler
+    72: 08008371    20 FUNC    GLOBAL DEFAULT    2 Reset_Handler
+    73: 0800832f     2 FUNC    WEAK   DEFAULT    2 CAN1_RX1_IRQHandler
+    74: 0800832d     2 FUNC    WEAK   DEFAULT    2 PendSVC
+    75: 0800832f     2 FUNC    WEAK   DEFAULT    2 UART5_IRQHandler
+    76: 0800832f     2 FUNC    WEAK   DEFAULT    2 ADC3_IRQHandler
+    77: 0800832d     2 FUNC    GLOBAL DEFAULT    2 Dummy_Handler
+    78: 0800832f     2 FUNC    WEAK   DEFAULT    2 TIM4_IRQHandler
+    79: 0800832d     2 FUNC    WEAK   DEFAULT    2 CAN_RX1_IRQHandler
+    80: 0800832f     2 FUNC    WEAK   DEFAULT    2 DMA2_Channel1_IRQHandler
+    81: 0800832f     2 FUNC    WEAK   DEFAULT    2 I2C1_EV_IRQHandler
+    82: 0800832f     2 FUNC    WEAK   DEFAULT    2 DMA1_Channel6_IRQHandler
+    83: 0800832f     2 FUNC    WEAK   DEFAULT    2 UART4_IRQHandler
+    84: 0800832f     2 FUNC    WEAK   DEFAULT    2 TIM3_IRQHandler
+    85: 0800832f     2 FUNC    WEAK   DEFAULT    2 RCC_IRQHandler
+    86: 0800832f     2 FUNC    WEAK   DEFAULT    2 TIM1_TRG_COM_IRQHandler
+    87: 0800832f     2 FUNC    WEAK   DEFAULT    2 DMA1_Channel1_IRQHandler
+    88: 0800832f     2 FUNC    GLOBAL DEFAULT    2 Default_Handler
+    89: 080081bb   166 FUNC    GLOBAL DEFAULT    2 experiment
+    90: 0800832f     2 FUNC    WEAK   DEFAULT    2 EXTI15_10_IRQHandler
+    91: 0800832f     2 FUNC    WEAK   DEFAULT    2 TIM7_IRQHandler
+    92: 08008331    64 FUNC    GLOBAL DEFAULT    2 __Init_Data
+    93: 0800832f     2 FUNC    WEAK   DEFAULT    2 TIM5_IRQHandler
+    94: 0800832f     2 FUNC    WEAK   DEFAULT    2 EXTI9_5_IRQHandler
+    95: 0800832f     2 FUNC    WEAK   DEFAULT    2 SPI2_IRQHandler
+    96: 0800832d     2 FUNC    WEAK   DEFAULT    2 USB_LP_CAN_RX0_IRQHandler
+    97: 0800832f     2 FUNC    WEAK   DEFAULT    2 MemManage_Handler
+    98: 080082b9   116 FUNC    GLOBAL DEFAULT    2 main
+    99: 08008131    24 FUNC    GLOBAL DEFAULT    2 Set_Posi
+   100: 0800832f     2 FUNC    WEAK   DEFAULT    2 SVC_Handler
+   101: 0800832f     2 FUNC    WEAK   DEFAULT    2 DMA1_Channel5_IRQHandler
+   102: 0800832f     2 FUNC    WEAK   DEFAULT    2 EXTI4_IRQHandler
+   103: 0800832f     2 FUNC    WEAK   DEFAULT    2 USB_LP_CAN1_RX0_IRQHandle
+   104: 08000101     0 FUNC    GLOBAL DEFAULT    1 __Bios
+   105: 0800832f     2 FUNC    WEAK   DEFAULT    2 USB_HP_CAN1_TX_IRQHandler
+   106: 0800832f     2 FUNC    WEAK   DEFAULT    2 DMA1_Channel3_IRQHandler
+   107: 0800832f     2 FUNC    WEAK   DEFAULT    2 FSMC_IRQHandler
+   108: 0800832f     2 FUNC    WEAK   DEFAULT    2 TIM1_UP_IRQHandler
+   109: 08008149     8 FUNC    GLOBAL DEFAULT    2 Set_Pixel
+   110: 0800832f     2 FUNC    WEAK   DEFAULT    2 WWDG_IRQHandler
+   111: 0800832f     2 FUNC    WEAK   DEFAULT    2 TIM2_IRQHandler
+   112: 0800832f     2 FUNC    WEAK   DEFAULT    2 TIM1_BRK_IRQHandler
+   113: 20002700     0 NOTYPE  GLOBAL DEFAULT    1 _estack
+   114: 0800819d    24 FUNC    GLOBAL DEFAULT    2 WriteMem
+   115: 0800832f     2 FUNC    WEAK   DEFAULT    2 EXTI1_IRQHandler
+   116: 08008291    40 FUNC    GLOBAL DEFAULT    2 Clear
+   117: 20000004     0 NOTYPE  GLOBAL DEFAULT    3 _edata
+   118: 0800832f     2 FUNC    WEAK   DEFAULT    2 RTCAlarm_IRQHandler
+   119: 0800832f     2 FUNC    WEAK   DEFAULT    2 DMA2_Channel4_5_IRQHandle
+   120: 0800832f     2 FUNC    WEAK   DEFAULT    2 USART2_IRQHandler
+   121: 08008000   304 OBJECT  GLOBAL DEFAULT    2 g_pfnVectors
+   122: 0800832f     2 FUNC    WEAK   DEFAULT    2 I2C2_ER_IRQHandler
+   123: 0800832f     2 FUNC    WEAK   DEFAULT    2 DMA1_Channel2_IRQHandler
+   124: 0800832f     2 FUNC    WEAK   DEFAULT    2 TIM8_BRK_IRQHandler
+   125: 0800832f     2 FUNC    WEAK   DEFAULT    2 CAN1_SCE_IRQHandler
+   126: 0800832f     2 FUNC    WEAK   DEFAULT    2 UsageFaultException
+   127: 0800832f     2 FUNC    WEAK   DEFAULT    2 FLASH_IRQHandler
+   128: 0800832f     2 FUNC    WEAK   DEFAULT    2 BusFault_Handler
+   129: 0800832f     2 FUNC    WEAK   DEFAULT    2 USART1_IRQHandler
+   130: 0800832f     2 FUNC    WEAK   DEFAULT    2 SPI3_IRQHandler
+   131: 0800832f     2 FUNC    WEAK   DEFAULT    2 I2C1_ER_IRQHandler
+   132: 0800832f     2 FUNC    WEAK   DEFAULT    2 MMI_Handler
+   133: 08008261    48 FUNC    GLOBAL DEFAULT    2 PRNG
+   134: 0800832f     2 FUNC    WEAK   DEFAULT    2 USBWakeUp_IRQHandler
+   135: 0800832f     2 FUNC    WEAK   DEFAULT    2 DMA2_Channel3_IRQHandler
+
+No version information found in this file.
+Attribute Section: aeabi
+File Attributes
+  Tag_CPU_name: "Cortex-M3"
+  Tag_CPU_arch: v7
+  Tag_CPU_arch_profile: Microcontroller
+  Tag_THUMB_ISA_use: Thumb-2
+  Tag_ABI_PCS_wchar_t: 4
+  Tag_ABI_FP_denormal: Needed
+  Tag_ABI_FP_exceptions: Needed
+  Tag_ABI_FP_number_model: IEEE 754
+  Tag_ABI_align_needed: 8-byte
+  Tag_ABI_enum_size: small
+  Tag_ABI_optimization_goals: Aggressive Size
+  Tag_CPU_unaligned_access: v6

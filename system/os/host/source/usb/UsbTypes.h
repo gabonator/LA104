@@ -1,0 +1,20 @@
+#include <usb_type.h>
+//typedef const unsigned short uc16;
+typedef unsigned char ui8;
+//typedef unsigned char ui8;
+typedef unsigned short u16;
+typedef signed short si16;
+typedef signed char si8;
+typedef unsigned short ui16;
+typedef unsigned long ui32;
+typedef signed long si32;
+typedef signed short si16;
+typedef void* PVOID;
+typedef bool BOOL;
+typedef float FLOAT;
+typedef int INT;
+typedef const char * PCSTR;
+typedef char * PSTR;
+typedef char CHAR;
+typedef ui32 UINT;
+void Delay_mS(uint32_t mS);
