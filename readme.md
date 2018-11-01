@@ -47,6 +47,9 @@ When I was developing alternative firmware for DS203, I was trying to design som
       - test4_snake - just snake game, not easy to control with the rotating encoders
       - test7_pwm_app - gui application for controlling PWM outputs, great tool for playing with RGB leds
       - test13_mp3 - mp3 player gui application, works with MD_YX5300 module
+    - hybrid - run any application as OSX native app for debugging and designing layouts
+
+![Hybrid app on mac OSX](resources/mybridmp3.png)
 
 #### TODO list
 
@@ -58,8 +61,8 @@ When I was developing alternative firmware for DS203, I was trying to design som
   - DS1820 network scanner app
   - beeper
   - remote control using ESP or BLE - possible to attach to UART0?
-  - recover hibryd app
-  - consider using cmake
+  - hybrid app use relative paths
+  - consider using cmake for hybrid app
   - CC1101 RF waveform recorder / player
   - obtain FPGA code from manufacturer 
   - setup FPGA build environment
