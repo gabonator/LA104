@@ -1,5 +1,7 @@
 #include <library.h>
-#include "Snake.h"
+//#include "../../os_host/source/bios/Bios.h"
+//#include "../../os_host/source/framework/Wnd.h"
+//#include "../../os_host/source/gui/Gui.h"
 
 void _HandleAssertion(const char* file, int line, const char* cond)
 {
@@ -7,30 +9,25 @@ void _HandleAssertion(const char* file, int line, const char* cond)
     while (1);
 }
 
+#include "CharMap.h"
+
 __attribute__((__section__(".entry"))) int main(void)
 { 
-  CWndSnake snake;
+  CWndCharMap app;
 
-  snake.Create(nullptr, CWnd::WsVisible);
-  snake.OnMessage(nullptr, ToWord('L', 'E'), 0);
-  snake.SetFocus();
-  snake.OnPaint();
+  app.Create(nullptr, CWnd::WsVisible);
+  app.OnMessage(nullptr, ToWord('L', 'E'), 0);
+  app.SetFocus();
+  app.OnPaint();
 
   BIOS::KEY::EKey key = BIOS::KEY::None;
   while (key != BIOS::KEY::Escape)
   {
-/*
-    if (!snake.IsRunning())
-    {
-      BIOS::DBG::Print("Restart\n");
-      snake.WindowMessage(CWnd::WmPaint, 0);
-    }
-*/    
     key = BIOS::KEY::GetKey();
     if (key != BIOS::KEY::None)
-      snake.WindowMessage(CWnd::WmKey, key);
+      app.WindowMessage(CWnd::WmKey, key);
 
-    snake.WindowMessage(CWnd::WmTick, 0);
+    app.WindowMessage(CWnd::WmTick, 0);
   }
   return 0;
 }

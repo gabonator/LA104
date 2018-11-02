@@ -1,9 +1,9 @@
-//#include <library.h>
+#include <library.h>
 #include "MD_YX5300.h"
 #include "shapes.h"
-#include "../../os_host/source/bios/Bios.h"
-#include "../../os_host/source/framework/Wnd.h"
-#include "../../os_host/source/gui/Gui.h"
+//#include "../../os_host/source/bios/Bios.h"
+//#include "../../os_host/source/framework/Wnd.h"
+//#include "../../os_host/source/gui/Gui.h"
 #include "Menu.h"
 
 //#include "../host/source/framework/BufferedIo.h"
@@ -63,11 +63,11 @@ public:
                     default: return TItem{"     ", TItem::Static};
                 }
                 break;
-            case 1: return TItem{"<<", TItem::Default, [](){ mp3->playPrev(); }};
-            case 2: return TItem{"|>", TItem::Default, [](){ mp3->playStart(); }};
-            case 3: return TItem{"||", TItem::Default, [](){ mp3->playPause(); }};
-            case 4: return TItem{"[]", TItem::Default, [](){ mp3->playStop(); }};
-            case 5: return TItem{">>", TItem::Default, [](){ mp3->playNext(); }};
+            case 1: return TItem{"\x11\x11", TItem::Default, [](){ mp3->playPrev(); }};
+            case 2: return TItem{" \x10 ", TItem::Default, [](){ mp3->playStart(); }};
+            case 3: return TItem{"\xdd\xdd", TItem::Default, [](){ mp3->playPause(); }};
+            case 4: return TItem{" \xfe ", TItem::Default, [](){ mp3->playStop(); }};
+            case 5: return TItem{"\x10\x10", TItem::Default, [](){ mp3->playNext(); }};
             default: return TItem{nullptr, TItem::None, nullptr};
         }
     }

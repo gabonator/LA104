@@ -23,7 +23,7 @@ for (var i in lines)
   {
     namespace.pop();
   }
-  var matchDecl = line.match("^\\s*(\\w*)\\s*(\\w*)\\s*\\((.*)\\)");
+  var matchDecl = line.match("^\\s*([a-zA-Z\\*0-9_]*)\\s*(\\w*)\\s*\\((.*)\\)");
   if (matchDecl)
   {
     var decl = matchDecl[1];
@@ -52,6 +52,7 @@ execute(_path + "arm-none-eabi-nm --demangle ./build/libbios.so", out =>
     for (var i in lines)
     {
       var tokens = lines[i].match("^.* T (.*)$")
+
       if (tokens && tokens.length == 2)
         mangled.push(tokens[1]);
     }
@@ -75,6 +76,14 @@ uint32_t GetProcAddress(char* symbol)
   {
     symbol += 7;
   } else
+  if (strncmp(symbol, "_ZN7PRIVATE", 11) == 0)
+  {
+    symbol += 11;
+  } else
+  if (strncmp(symbol, "_Z", 2) == 0)
+  {
+    symbol += 2;
+  } else
   {
     return 0;
   }
@@ -88,7 +97,7 @@ uint32_t GetProcAddress(char* symbol)
   {
     var tokens = demangled[i].match("^(.*)(\\(.*\\))$")
     var mname = mangled[i];
-    mname = mname.replace("_ZN4BIOS", "").replace("_ZN3GUI", "");
+    mname = ("$"+mname).replace("$_ZN4BIOS", "").replace("$_ZN3GUI", "").replace("$_Z7", "");
     while ("0123456789".indexOf(mname.substr(0, 1)) != -1)
       mname = mname.substr(1);
 

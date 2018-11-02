@@ -33,6 +33,14 @@ void BIOS::LCD::Bar(const CRect& rc, unsigned short clr)
   BIOS::LCD::Bar(rc.left, rc.top, rc.right, rc.bottom, clr);
 }
 
+void BIOS::LCD::Rectangle(const CRect& rc, unsigned short clr)
+{
+	BIOS::LCD::Bar(rc.left, rc.top, rc.right, rc.top+1, clr);
+	BIOS::LCD::Bar(rc.left, rc.bottom-1, rc.right, rc.bottom, clr);
+	BIOS::LCD::Bar(rc.left, rc.top, rc.left+1, rc.bottom, clr);
+	BIOS::LCD::Bar(rc.right-1, rc.top, rc.right, rc.bottom, clr);
+}
+
 void BIOS::LCD::PutPixel(int x, int y, unsigned short clr)
 {
   Set_Posi(x, FLIP(y));

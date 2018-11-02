@@ -2,7 +2,7 @@
 
 namespace GUI
 {
-  void Background(CRect& rc, uint32_t clr1, uint32_t clr2)
+  void Background(const CRect& rc, uint32_t clr1, uint32_t clr2)
   {
     static int8_t randpat[8][8];
     static bool randpatinit = true;

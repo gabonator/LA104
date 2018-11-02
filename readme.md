@@ -1,8 +1,8 @@
-# LA104 pocket logic analyser operating systems
+# LA104 pocket logic analyser operating system
 
 LA104 is another nice piece of handheld hardware coming from [e-design / miniware company](http://www.miniware.com.cn/) similar to their previous product - pocket digital storage oscillosope DS203. 
 
-This time they designed wholly digital device without analog circuitry featuring 4 general purpose IO signals and 4 digital inputs processed by [AG1K FPGA chip](http://www.alta-gate.com/products.aspx?id=43&p=14), the processor used is the same as in DS203 - STM32F103VCT6. Device is battery powered, charged through USB micro connector, its display offers resolution of 320x240 pixels and the storage EEPROM has this time capacity of 8MB. Check the [scheme here](resources/LA104+V1.5B_SCH.pdf)
+This time they designed wholly digital device without analog circuitry featuring 4 general purpose IO signals and 4 digital inputs processed by [AG1K FPGA chip](http://www.alta-gate.com/products.aspx?id=43&p=14), the processor used is the same as in DS203 - STM32F103VCT6. Device is battery powered, charged through USB micro connector, its display offers resolution of 320x240 pixels and the storage EEPROM has this time capacity of 8MB. Check the [scheme here](resources/LA104%20V1.5B_SCH.pdf)
 
 ![Product brief](resources/productBrief.png)
 
@@ -40,6 +40,7 @@ When I was developing alternative firmware for DS203, I was trying to design som
       - test9_dht - the same but with DHT22 temperature / humidity sensor
       - test10_i2c_direct - again with core library files to configure I2C transceiver to interface with BMP180 (BMP085) barometric pressure sensor. After merging this support code into host app, test11_i2c_api was made
       - test12_uart_api - after adding support code to host, this is the api test for UART on pins P1 & P2 (no other pins support HW uart on LA104)
+      - test16_cc1101 - CC1101 transceiver sniffing Oregon scientific weather station sensors
     - apps_arduino - demonstration how to use arduino libraries in LA104
       - test11_i2c_api - interfacing BMP180 (BMP085) arduino library with I2C api calls
       - test14_apds9960 - again I2C communication with APDS9960 color sensor / gesture recognizer. This time with original sparkfun arduino library and sample code without almost any changes. Showing how to run your arduino code directly on LA104
@@ -47,6 +48,7 @@ When I was developing alternative firmware for DS203, I was trying to design som
       - test4_snake - just snake game, not easy to control with the rotating encoders
       - test7_pwm_app - gui application for controlling PWM outputs, great tool for playing with RGB leds
       - test13_mp3 - mp3 player gui application, works with MD_YX5300 module
+      - test15_charmap - shows ASCII character table used by OS
     - hybrid - run any application as OSX native app for debugging and designing layouts
 
 ![Hybrid app on mac OSX](resources/hybridmp3.png)
@@ -68,3 +70,5 @@ When I was developing alternative firmware for DS203, I was trying to design som
   - setup FPGA build environment
   - PCF8574 sequencer + BCD to 7 segment test application
   - midi player app
+  - what toolchain to use, how to install...
+  - add desc: toolchain, building, ld script?

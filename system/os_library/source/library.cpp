@@ -1,4 +1,4 @@
-#include "library.h"
+#include "../include/library.h"
 
 namespace BIOS
 {
@@ -22,6 +22,7 @@ namespace BIOS
 
     void Bar(int x1, int y1, int x2, int y2, unsigned short clr) {}
     void Bar(const CRect& rc, unsigned short clr) {}
+    void Rectangle(const CRect& rc, unsigned short clr) {}
     void RoundRect(int x1, int y1, int x2, int y2, unsigned short clr) {}
     void RoundRect(const CRect& rc, unsigned short clr) {}
 
@@ -96,13 +97,17 @@ namespace BIOS
       uint8_t Read() {return 0;}
       void Write(uint8_t) {}
     }
+  }
 
+  namespace PRIVATE
+  {
+    const void* GetCharRom() { return nullptr; }
   }
 }
 
 namespace GUI
 {
-  void Background(CRect& rc, uint32_t clr1, uint32_t clr2) {}
+  void Background(const CRect& rc, uint32_t clr1, uint32_t clr2) {}
   void Window(const CRect& rcRect, uint16_t clr) {}
 }
 

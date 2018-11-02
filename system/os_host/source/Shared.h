@@ -10,6 +10,10 @@ uint32_t GetProcAddress(char* symbol)
   {
     symbol += 7;
   } else
+  if (strncmp(symbol, "_ZN7PRIVATE", 11) == 0)
+  {
+    symbol += 11;
+  } else
   if (strncmp(symbol, "_Z", 2) == 0)
   {
     symbol += 2;
@@ -24,8 +28,8 @@ uint32_t GetProcAddress(char* symbol)
 
   if (strcmp(symbol, "sprintfPcPKcz") == 0)
     return (uint32_t)static_cast<int(*)(char*, char const*, ...)>(sprintf);
-  if (strcmp(symbol, "BackgroundER5CRectmm") == 0)
-    return (uint32_t)static_cast<void(*)(CRect&, unsigned long, unsigned long)>(GUI::Background);
+  if (strcmp(symbol, "BackgroundERK5CRectmm") == 0)
+    return (uint32_t)static_cast<void(*)(CRect const&, unsigned long, unsigned long)>(GUI::Background);
   if (strcmp(symbol, "WindowERK5CRectt") == 0)
     return (uint32_t)static_cast<void(*)(CRect const&, unsigned short)>(GUI::Window);
   if (strcmp(symbol, "DBG5PrintEPKcz") == 0)
@@ -80,6 +84,8 @@ uint32_t GetProcAddress(char* symbol)
     return (uint32_t)static_cast<void(*)(int, int, unsigned short)>(BIOS::LCD::PutPixel);
   if (strcmp(symbol, "LCD9BufferEndEv") == 0)
     return (uint32_t)static_cast<void(*)()>(BIOS::LCD::BufferEnd);
+  if (strcmp(symbol, "LCD9RectangleERK5CRectt") == 0)
+    return (uint32_t)static_cast<void(*)(CRect const&, unsigned short)>(BIOS::LCD::Rectangle);
   if (strcmp(symbol, "LCD9RoundRectERK5CRectt") == 0)
     return (uint32_t)static_cast<void(*)(CRect const&, unsigned short)>(BIOS::LCD::RoundRect);
   if (strcmp(symbol, "LCD9RoundRectEiiiit") == 0)
@@ -128,5 +134,7 @@ uint32_t GetProcAddress(char* symbol)
     return (uint32_t)static_cast<bool(*)(unsigned long, unsigned char*, int)>(BIOS::MEMORY::LinearProgram);
   if (strcmp(symbol, "MEMORY15GetSharedBufferEv") == 0)
     return (uint32_t)static_cast<PVOID(*)()>(BIOS::MEMORY::GetSharedBuffer);
+  if (strcmp(symbol, "PRIVATE10GetCharRomEv") == 0)
+    return (uint32_t)static_cast<const void*(*)()>(BIOS::PRIVATE::GetCharRom);
   return 0;
 }

@@ -264,3 +264,14 @@ const ui8* GetFont(ui8 Code)
 {
 	return font + (Code*14);
 }
+
+namespace BIOS
+{
+  namespace PRIVATE
+  {
+    const void* GetCharRom()
+    {
+      return font;
+    }
+  }
+}

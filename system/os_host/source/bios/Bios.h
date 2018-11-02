@@ -33,6 +33,7 @@ namespace BIOS
 
     void Bar(int x1, int y1, int x2, int y2, unsigned short clr);
     void Bar(const CRect& rc, unsigned short clr);
+    void Rectangle(const CRect& rc, unsigned short clr);
     void RoundRect(int x1, int y1, int x2, int y2, unsigned short clr);
     void RoundRect(const CRect& rc, unsigned short clr);
 
@@ -150,5 +151,10 @@ namespace BIOS
       uint8_t Read();
       void Write(uint8_t);
     }
+  }
+
+  namespace PRIVATE
+  {
+    const void* GetCharRom();
   }
 }
