@@ -53,6 +53,24 @@ When I was developing alternative firmware for DS203, I was trying to design som
 
 ![Hybrid app on mac OSX](resources/hybridmp3.png)
 
+#### Screenshots
+
+![File manager](resources/imgManager.png)
+
+![PWM controller](resources/imgPwm.png)
+
+![Charset viewer](resources/imgCharset.png)
+
+![DS1820 temperature sensor](resources/imgDs1820.png)
+
+![DHT22 sensor](resources/imgDht.png)
+
+![I2C rgb sensor](resources/imgApds1.png)
+
+![I2C barometric sensor](resources/imgBmp180.png)
+
+![MP3 player](resources/imgMp3.png)
+
 #### TODO list
 
   - add snapshotting to host app
