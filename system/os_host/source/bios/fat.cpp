@@ -27,26 +27,15 @@ extern "C"
 
   DRESULT disk_write(BYTE drv, const BYTE *buff, DWORD sector, BYTE count)
   {
-/*
       if (drv != 0 || count == 0) return RES_PARERR;
-      
-      while (count--)
-      {
-          if (__ProgDiskPage((u8*)buff, sector * 512) != 0)
-              return RES_ERROR;
-          
-          if (__ProgDiskPage((u8*)buff + 256, sector * 512 + 256) != 0)
-              return RES_ERROR;
-          
-          sector++;
-          buff += 512;
-      }
-      
+      // TODO: check for usb conflict??
+
+      _ASSERT(count == 1);
+      ExtFlashSecWr((BYTE*)buff, sector * BIOS::FAT::SectorSize);
       return RES_OK;
-*/
-    // TODO:!
     return RES_PARERR;
   }
+
 /*
 Bytes per sector: 4096
 Sectors per cluster: 1

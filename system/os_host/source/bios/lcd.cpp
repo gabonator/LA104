@@ -53,6 +53,12 @@ void BIOS::LCD::PutPixel(const CPoint& cp, unsigned short clr)
   Set_Pixel(clr);
 }
 
+uint16_t BIOS::LCD::GetPixel(int x, int y)
+{
+  Set_Posi(x, FLIP(y));
+  return Get_Pixel();
+}
+
 int BIOS::LCD::Print (int x, int y, unsigned short clrf, unsigned short clrb, const char *str)
 {
 	if (!str || !*str)

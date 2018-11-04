@@ -100,6 +100,11 @@ void Set_Pixel(uint16_t Color)
     __Bios(WrPIXEL, Color);
 }
 
+uint16_t Get_Pixel()
+{
+    return __Bios(RdPIXEL, 0);
+}
+
 void ExtFlash_CS_LOW(void)
 {
     __Bios(FLSHDEV, DSBL);
