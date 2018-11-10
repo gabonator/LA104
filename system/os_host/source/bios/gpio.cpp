@@ -651,7 +651,7 @@ namespace BIOS
       void Setup(int baudrate, EConfig config)
       {
         _ASSERT((int)config == 0);
-        ::UART::uart_configure(9600); 
+        ::UART::uart_configure(baudrate); 
       }
 
       bool Available()

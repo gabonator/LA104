@@ -448,6 +448,13 @@ void CWndUserManager::OnKey(ui16 nKey)
 			}
 		}
 	}
+
+	if ( nKey == BIOS::KEY::F4 )
+        {
+          BIOS::OS::SetArgument(m_arrFiles[nSelected].strName);
+	  m_wndMessage.Show(this, "Manager", "File selected as argument", RGB565(00FF00));
+        }
+
 	if ( nKey == BIOS::KEY::Enter )
 	{
 		if ( m_arrFiles[nSelected].nAtrib & BIOS::FAT::EDirectory )

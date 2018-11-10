@@ -154,6 +154,12 @@ namespace BIOS
     }
   }
 
+  namespace OS
+  {
+    void SetArgument(char* argument);
+    char* GetArgument();
+  }
+
   namespace PRIVATE
   {
     const void* GetCharRom();

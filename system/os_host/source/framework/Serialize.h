@@ -28,7 +28,7 @@ public:
 	CStream( PSTR strBuffer )
 	{
 		m_pBuffer = strBuffer;
-		m_nLength = strlen(strBuffer);
+		m_nLength = (int)strlen(strBuffer);
 		m_nOffset = 0;
 	}
 

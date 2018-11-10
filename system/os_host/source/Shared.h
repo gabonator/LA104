@@ -32,6 +32,10 @@ uint32_t GetProcAddress(char* symbol)
     return (uint32_t)static_cast<void(*)(CRect const&, unsigned long, unsigned long)>(GUI::Background);
   if (strcmp(symbol, "WindowERK5CRectt") == 0)
     return (uint32_t)static_cast<void(*)(CRect const&, unsigned short)>(GUI::Window);
+  if (strcmp(symbol, "OS11GetArgumentEv") == 0)
+    return (uint32_t)static_cast<char*(*)()>(BIOS::OS::GetArgument); 
+  if (strcmp(symbol, "OS11SetArgumentEPc") == 0)
+    return (uint32_t)static_cast<void(*)(char*)>(BIOS::OS::SetArgument); 
   if (strcmp(symbol, "DBG5PrintEPKcz") == 0)
     return (uint32_t)static_cast<void(*)(char const*, ...)>(BIOS::DBG::Print);
   if (strcmp(symbol, "FAT11GetFileSizeEv") == 0)

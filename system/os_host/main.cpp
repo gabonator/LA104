@@ -11,6 +11,7 @@ int main()
 {
   Hardware_Init();
   BIOS::FAT::Init();
+  BIOS::OS::SetArgument((char*)"");
 
   while (1)
   {
