@@ -89,13 +89,13 @@ enum
     EXT_TXD, // ??? PIO ???     Var: PIOCFG+PinDef      Rtn: SUCC
 };
 
-void Set_Posi(uint16_t x, uint16_t y)
+void Set_Posi(uint_fast16_t x, uint_fast16_t y)
 {
     __Bios(PIXEL_X, x);
     __Bios(PIXEL_Y, y);
 }
 
-void Set_Pixel(uint16_t Color)
+void Set_Pixel(uint_fast16_t Color)
 {
     __Bios(WrPIXEL, Color);
 }

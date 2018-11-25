@@ -16,16 +16,12 @@ void BIOS::LCD::Clear(unsigned short clr)
 
 void BIOS::LCD::Bar(int x1, int y1, int x2, int y2, unsigned short clr)
 {
-  int t = FLIP(y1)+1;
-  y1 = FLIP(y2)+1;
-  y2 = t;
+  Set_Block(x1, FLIP(y2)+1, x2, FLIP(y1)+1);
+  int32_t count = (x2-x1)*(y2-y1);
+  const uint_fast16_t _clr = clr;
 
-  for(int x=x1; x<x2; x++)
-    for(int y=y1; y<y2; y++)
-    {
-      Set_Posi(x, y);
-      Set_Pixel(clr);
-    }
+  while (count--)
+    Set_Pixel(_clr);
 }
 
 void BIOS::LCD::Bar(const CRect& rc, unsigned short clr)

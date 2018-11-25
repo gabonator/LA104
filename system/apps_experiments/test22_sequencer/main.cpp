@@ -1,0 +1,725 @@
+#include <library.h>
+#include "../../os_host/source/framework/BufferedIo.h"
+#include "shapes.h"
+
+using namespace BIOS;
+
+void _HandleAssertion(const char* file, int line, const char* cond)
+{
+    //BIOS::DBG::Print("Assertion failed in %s [%d]: %s\n", file, line, cond);
+    while (1);
+}
+
+#include "PCF8574.h"
+
+class CPort
+{
+    PCF8574 mPCF1{0x38};
+    PCF8574 mPCF2{0x39};
+
+    uint8_t mDataWrite[2] {0xff, 0xff};
+    uint8_t mDataRead[2] {0xff, 0xff};
+    
+public:
+    enum EMode {Input, Output};
+    
+public:
+    void Init()
+    {
+        Wire.begin();
+        mPCF1.begin();
+        mPCF2.begin();
+    }
+
+    void Sync()
+    {
+        mDataRead[0] = mPCF1.read8();
+        mDataRead[1] = mPCF2.read8();
+        mPCF1.write8(mDataWrite[0]);
+        mPCF2.write8(mDataWrite[1]);
+    }
+    
+    bool Read(int pin)
+    {
+        int port = pin / 8;
+        int bit = pin % 8;
+        
+        return !!(mDataRead[port] & (1<<bit));
+    }
+    
+    void Mode(int pin, EMode mode)
+    {
+        if (mode == Input)
+            Write(pin, true); // disable NPN, 100uA weak pull up
+        else
+            Write(pin, false); // short to ground
+    }
+    
+    void Write(int pin, bool level)
+    {
+        int port = pin / 8;
+        int bit = pin % 8;
+        
+        if (level)
+            mDataWrite[port] |= 1<<bit; // pull up
+        else
+            mDataWrite[port] &= ~(1<<bit); // strong
+    }
+};
+
+class CTopMenu : public CWnd
+{
+public:
+    struct TItem
+    {
+        const char* strName;
+        enum EState {None, Static, Default, Selected} eState;
+    };
+    
+    int mItem{-1};
+    int mSelected{-1};
+    
+public:
+    virtual TItem GetItem(int i) = 0;
+    
+    virtual void OnPaint()
+    {
+        GUI::Background(m_rcClient, RGB565(4040b0), RGB565(404040));
+        
+        if (!HasFocus())
+            mItem = mSelected;
+        
+        int x = m_rcClient.left, y = m_rcClient.top;
+        TItem item;
+        for (int i=0; (item = GetItem(i)).strName; i++)
+        {
+            TItem::EState state = item.eState;
+            if (mItem == -1 && state != TItem::Static)
+            {
+                mItem = i;
+                mSelected = i;
+            }
+            
+            if (mItem == i && state == TItem::Default)
+                state = TItem::Selected;
+            
+            if (x+8+strlen(item.strName)*8+8 >= BIOS::LCD::Width)
+                return;
+            
+            switch (state)
+            {
+                case TItem::Static:
+                    BIOS::LCD::Bar(x, y, x+4, y+14, RGB565(b0b0b0));
+                    x += 4;
+                    x += BIOS::LCD::Print(x, y, RGB565(000000), RGB565(b0b0b0), item.strName);
+                    x += BIOS::LCD::Draw( x, y, RGB565(b0b0b0), RGBTRANS, CShapes_sel_right);
+                    break;
+                case TItem::Default:
+                    x += 8;
+                    x += BIOS::LCD::Print(x, y, RGB565(b0b0b0), RGBTRANS, item.strName);
+                    x += 8;
+                    break;
+                case TItem::Selected:
+                    if (HasFocus())
+                    {
+                        x += BIOS::LCD::Draw( x, y, RGB565(ffffff), RGBTRANS, CShapes_sel_left);
+                        x += BIOS::LCD::Print(x, y, RGB565(000000), RGB565(ffffff), item.strName);
+                        x += BIOS::LCD::Draw( x, y, RGB565(ffffff), RGBTRANS, CShapes_sel_right);
+                    } else
+                    {
+                        x += BIOS::LCD::Draw( x, y, RGB565(b0b0b0), RGBTRANS, CShapes_sel_left);
+                        x += BIOS::LCD::Print(x, y, RGB565(000000), RGB565(b0b0b0), item.strName);
+                        x += BIOS::LCD::Draw( x, y, RGB565(b0b0b0), RGBTRANS, CShapes_sel_right);
+                    }
+                    break;
+                default:
+                    break;
+            }
+        }
+    }
+    
+    virtual void OnKey(ui16 nKey)
+    {
+        if (nKey == BIOS::KEY::Left)
+        {
+            for (int i=mItem-1; i>=0; i--)
+                if (GetItem(i).eState == TItem::Default)
+                {
+                    mItem = i;
+                    Invalidate();
+                    break;
+                }
+        }
+        
+        if (nKey == BIOS::KEY::Right)
+        {
+            for (int i=mItem+1; true; i++)
+            {
+                if (GetItem(i).eState == TItem::None)
+                    break;
+                if (GetItem(i).eState == TItem::Default)
+                {
+                    mItem = i;
+                    Invalidate();
+                    break;
+                }
+            }
+        }
+        
+        if (nKey == BIOS::KEY::Enter)
+        {
+            mSelected = mItem;
+            SendMessage(m_pParent, ToWord('M', 'S'), mItem);
+            //OnItem(mItem);
+        }
+        CWnd::OnKey(nKey);
+    }
+    
+};
+
+class CMenuMain : public CTopMenu
+{
+public:
+    virtual TItem GetItem(int i)
+    {
+        switch (i)
+        {
+            case 0: return TItem{"Sequencer", TItem::Static};
+            case 1: return TItem{"Editor", TItem::Default};
+            case 2: return TItem{"Settings", TItem::Default};
+            case 3: return TItem{"File", TItem::Default};
+            default: return TItem{nullptr, TItem::None};
+        }
+    }
+};
+
+uint_fast16_t InterpolateColor( uint_fast16_t clrA, uint_fast16_t clrB, uint_fast8_t nLevel )
+{
+    int br = Get565R(clrB)*nLevel;
+    int bg = Get565G(clrB)*nLevel;
+    int bb = Get565B(clrB)*nLevel;
+    nLevel = 255-nLevel;
+    int ar = Get565R(clrA)*nLevel;
+    int ag = Get565G(clrA)*nLevel;
+    int ab = Get565B(clrA)*nLevel;
+    ar = (ar+br) / 256;
+    ag = (ag+bg) / 256;
+    ab = (ab+bb) / 256;
+    return RGB565RGB(ar, ag, ab);
+}
+
+static constexpr uint16_t mPalette[] = {
+    RGB565(ffff00), RGB565(00ffff), RGB565(40ff40), RGB565(4040ff),
+    RGB565(ff40ff), RGB565(ff4040), RGB565(ffb000), RGB565(00ffb0),
+    RGB565(ff00b0)
+};
+
+
+class CSequencer
+{
+protected:
+    struct TChannelInfo
+    {
+        enum EDirection {Disabled, Input, Output};
+        
+        TChannelInfo() = default;
+        
+        TChannelInfo(uint32_t channel, uint32_t sequence, char* _name, uint16_t color, EDirection direction) :
+        channel(channel), sequence(sequence), color(color), direction(direction)
+        {
+            if (_name)
+                strcpy(name, _name);
+            else
+                strcpy(name, "");
+            
+            colorBlend = InterpolateColor(color, RGB565(404040), 128);
+        }
+        
+        uint32_t channel;
+        uint32_t sequence;
+        char name[4];
+        uint_fast16_t color;
+        uint_fast16_t colorBlend;
+        EDirection direction;
+    } mChannel[9];
+
+    uint32_t mMask {0b11111111111111110000};
+    CPort mPort;
+    
+public:
+    CSequencer()
+    {
+        mChannel[0] = {0, 0b01010101010101010000, (char*)"A1", mPalette[0], TChannelInfo::Output};
+        mChannel[1] = {1, 0b00110011001100110000, (char*)"A2", mPalette[1], TChannelInfo::Output};
+        mChannel[2] = {2, 0b00001111000011110000, (char*)"A3", mPalette[2], TChannelInfo::Output};
+        mChannel[3] = {3, 0b00000000111111110000, (char*)"A4", mPalette[3], TChannelInfo::Output};
+        
+        mChannel[4] = {8, 0b00000000000000000000, (char*)"B1", mPalette[4], TChannelInfo::Input};
+        mChannel[5] = {9, 0b00000000000000000000, (char*)"B2", mPalette[5], TChannelInfo::Input};
+        mChannel[6] = {10, 0b00000000000000000000, (char*)"B3", mPalette[6], TChannelInfo::Input};
+        mChannel[7] = {11, 0b00000000000000000000, (char*)"B4", mPalette[7], TChannelInfo::Input};
+        
+        for (int i=8; i<COUNT(mChannel); i++)
+            mChannel[i] = {0, 0b00000000000000000000, nullptr, mPalette[i%COUNT(mPalette)], TChannelInfo::Disabled};
+    }
+    
+    void Init()
+    {
+        mPort.Init();
+    }
+    
+    void Write(int index)
+    {
+        for (int i=0; i<COUNT(mChannel); i++)
+        {
+            TChannelInfo& channel = mChannel[i];
+            if (channel.direction == TChannelInfo::Output)
+            {
+                mPort.Write(channel.channel, channel.sequence & (1<<(19-index)));
+            }
+        }
+        mPort.Sync();
+    }
+    
+    void Read()
+    {
+        mPort.Sync();
+        for (int i=0; i<COUNT(mChannel); i++)
+        {
+            TChannelInfo& channel = mChannel[i];
+            if (channel.direction == TChannelInfo::Input)
+            {
+                channel.sequence <<= 1;
+                channel.sequence |= mPort.Read(channel.channel);
+            }
+        }
+    }
+};
+
+class CSequencerGui : public CSequencer, public CWnd
+{
+    int mCursorX{0};
+    int mCursorY{0};
+    int mPlayX{0};
+    bool mLoop{false};
+
+public:
+    void Create( const char* pszId, ui16 dwFlags, const CRect& rc, CWnd* pParent )
+    {
+        CWnd::Create(pszId, dwFlags, rc, pParent);
+        CSequencer::Init();
+    }
+
+    void DrawStep(int x, bool highlight)
+    {
+        int _y = m_rcClient.top;
+        int _x = 32+x*16;
+        if (highlight)
+            LCD::Bar(_x, _y-2, _x+16, _y+6, RGB565(ffff00));
+        else if (mCursorY == -1 && mCursorX == x && GetFocus() == this)
+            LCD::Bar(_x, _y-2, _x+16, _y+6, RGB565(ffffff));
+        else
+            LCD::Bar(_x, _y-2, _x+16, _y+6, RGB565(404040));
+        
+        bool enabled = mMask & (1 << (19-x));
+        uint_fast16_t color = enabled ? RGB565(b0b0b0) : RGB565(505050);
+        LCD::Bar(_x+2, _y, _x+14, _y+1, color);
+        LCD::Bar(_x+1, _y+1, _x+15, _y+3, color);
+        LCD::Bar(_x+2, _y+3, _x+14, _y+4, color);
+    }
+    
+    void DrawRange()
+    {
+        LCD::Bar(0, m_rcClient.top, LCD::Width, m_rcClient.top+8, RGB565(404040));
+        for (int i=0; i<18; i++)
+            DrawStep(i, false);
+    }
+
+    void DrawAddChannel(int row, char* id)
+    {
+        int y = m_rcClient.top+row*20+8;
+        const uint_fast16_t& color = mChannel[row].color;
+        const uint_fast16_t& colorBlend = mChannel[row].colorBlend;
+        
+        if (mCursorY == row)
+            LCD::Bar(0, y, 32, y+18, RGB565(ffffff));
+        else
+            LCD::Bar(0, y, 32, y+18, color);
+        LCD::Bar(0, y+18, LCD::Width, y+20, colorBlend);
+        LCD::Print(1, y+3, RGB565(000000), RGBTRANS, "Add");
+        LCD::Bar(32, y, LCD::Width, y+20, RGB565(404040));
+    }
+
+    void DrawBit(int row, int x, int value)
+    {
+        int y = m_rcClient.top+row*20+8;
+        const uint_fast16_t& color = mChannel[row].color;
+        const uint_fast16_t& colorBlend = mChannel[row].colorBlend;
+
+        LCD::BufferBegin(CRect(32+x, y, 33+x, y+20), 0);
+        if (value == 1)
+        {
+            uint_fast16_t buffer[20] = {RGB565(404040), RGB565(404040), color, colorBlend, colorBlend,
+                colorBlend, colorBlend, colorBlend, colorBlend, colorBlend,
+                colorBlend, colorBlend, colorBlend, colorBlend, colorBlend,
+                colorBlend, colorBlend, colorBlend, colorBlend, colorBlend,
+            };
+            for (int i=COUNT(buffer)-1; i>=0; i--)
+                LCD::BufferPush(buffer[i]);
+        }
+        if (value == 0)
+        {
+            uint_fast16_t buffer[20] = {RGB565(404040), RGB565(404040), RGB565(404040), RGB565(404040), RGB565(404040),
+                RGB565(404040), RGB565(404040), RGB565(404040), RGB565(404040), RGB565(404040),
+                RGB565(404040), RGB565(404040), RGB565(404040), RGB565(404040), RGB565(404040),
+                RGB565(404040), RGB565(404040), color, colorBlend, colorBlend
+            };
+            for (int i=COUNT(buffer)-1; i>=0; i--)
+                LCD::BufferPush(buffer[i]);
+        }
+        if (value == 2)
+        {
+            uint_fast16_t buffer[20] = {RGB565(404040), RGB565(404040), color, color, color,
+                color, color, color, color, color,
+                color, color, color, color, color,
+                color, color, color, colorBlend, colorBlend,
+            };
+            for (int i=COUNT(buffer)-1; i>=0; i--)
+                LCD::BufferPush(buffer[i]);
+        }
+    }
+
+    void DrawChannel(int row, char* id, uint8_t* sequence, int length)
+    {
+        int y = m_rcClient.top+row*20+8;
+        const uint_fast16_t& color = mChannel[row].color;
+        const uint_fast16_t& colorBlend = mChannel[row].colorBlend;
+
+        LCD::Bar(0, y+18, LCD::Width, y+20, colorBlend);
+        if (row == mCursorY && mCursorX == -1)
+            LCD::Bar(0, y, 32, y+18, RGB565(ffffff));
+        else
+            LCD::Bar(0, y, 32, y+18, color);
+
+        LCD::Print(1, y+3, RGB565(000000), color, id);
+
+        static const char shape_output[] =
+        "\x11"
+        " .... ..  .  ... "
+        "  ..  ..  . ..  ."
+        "  ..  ..  . ..  ."
+        "  ..  ..  . ..  ."
+        "  ..   ...   ... ";
+
+        static const char shape_input[] =
+        "\x11"
+        "   ..   .  ....  "
+        "   ..  ..   ..   "
+        "   .. . .   ..   "
+        "   ...  .   ..   "
+        "   ..   .  ....  ";
+
+        BIOS::LCD::Draw( 32-6, y, colorBlend, RGBTRANS, sequence ? shape_output : shape_input);
+        
+        if (!sequence || length <= 0)
+        {
+            LCD::Bar(32, y, LCD::Width, y+18, RGB565(404040));
+            return;
+        }
+        
+        int prev = sequence[0];
+        for (int i=0; i<length; i++)
+        {
+            int _x = 32 + i*16;
+            int cur = sequence[i] & 1;
+            int sel = mCursorY == row && i == mCursorX;
+            
+            if (sel)
+            {
+                LCD::Bar(_x, y, _x+16, y+2, RGB565(404040));
+                LCD::Bar(_x, y+2, _x+16, y+20, RGB565(ffffff));
+            } else
+            {
+                if (cur)
+                    LCD::Bar(_x, y, _x+16, y+2, RGB565(404040));
+                else
+                    LCD::Bar(_x, y, _x+16, y+17, RGB565(404040));
+            }
+            if (cur)
+            {
+                LCD::Bar(_x, y+2, _x+16, y+3, color);
+                if (sel)
+                {
+                    LCD::Bar(_x, y+3, _x+16, y+18, RGB565(ffffff));
+                    LCD::Bar(_x, y+18, _x+16, y+20, colorBlend);
+                } else {
+                    LCD::Bar(_x, y+3, _x+16, y+20, colorBlend);
+                }
+                LCD::Print(_x+4, y+3, colorBlend - RGB565(101010), sel ? RGB565(ffffff) : colorBlend, "1");
+            }
+            else
+            {
+                LCD::Bar(_x, y+17, _x+16, y+18, color);
+                LCD::Bar(_x, y+18, _x+16, y+20, colorBlend);
+                LCD::Print(_x+4, y+3, RGB565(505050), sel ? RGB565(ffffff) : RGB565(404040), "0");
+            }
+            if (prev != cur)
+            {
+                LCD::Bar(_x, y+2, _x+1, y+18, color);
+                prev = cur;
+            }
+        }
+    }
+    
+    virtual void OnPaint()
+    {
+//        int32_t t0 = SYS::GetTick();
+        DrawRange();
+        for (int i=0; i<9; i++)
+        {
+            TChannelInfo& channel = mChannel[i];
+            
+            uint8_t sequence[20];
+            for (int j=0; j<20; j++)
+                sequence[j] = (channel.sequence >> (20-j-1)) & 1;
+            
+            switch (channel.direction)
+            {
+                case TChannelInfo::Disabled:
+                    DrawAddChannel(i, (char*)"Add");
+                    break;
+                case TChannelInfo::Input:
+                    DrawChannel(i, channel.name, nullptr, 0);
+                    break;
+                case TChannelInfo::Output:
+                    DrawChannel(i, channel.name, sequence, COUNT(sequence)-2);
+                    break;
+            }
+        }
+//        int32_t t1 = SYS::GetTick();
+//        char msg[32];
+//        sprintf(msg, "took %d ms", t1-t0);
+//        LCD::Print(160, LCD::Height-20, RGB565(ffffff), RGB565(000000), msg);
+    }
+    
+    virtual void OnKey(ui16 nKey)
+    {
+        if (nKey == BIOS::KEY::Left && mCursorX > -1)
+        {
+            mCursorX--;
+            Invalidate();
+        }
+        if (nKey == BIOS::KEY::Right && mCursorX < 20)
+        {
+            mCursorX++;
+            Invalidate();
+        }
+        if (nKey == BIOS::KEY::Up && mCursorY == -1)
+        {
+            CWnd::OnKey(nKey);
+            return;
+        }
+        if (nKey == BIOS::KEY::Up && mCursorY > -1)
+        {
+            mCursorY--;
+            Invalidate();
+        }
+        if (nKey == BIOS::KEY::Down && mCursorY < 8)
+        {
+            mCursorY++;
+            Invalidate();
+        }
+        if (nKey == BIOS::KEY::F1)
+        {
+            if (mCursorY >= 0 && mCursorX >= 0 && mCursorX < 20 && mChannel[mCursorY].direction == TChannelInfo::Output)
+            {
+                mChannel[mCursorY].sequence ^= 1<<(19-mCursorX);
+                Invalidate();
+            }
+            if (mCursorY == -1 && mCursorX >= 0 && mCursorX < 20)
+            {
+                mMask ^= 1<<(19-mCursorX);
+                Invalidate();
+            }
+        }
+    }
+    
+    virtual void OnTimer()
+    {
+        Read();
+        for (int i=0; i<9; i++)
+        {
+            TChannelInfo& channel = mChannel[i];
+            if (channel.direction == TChannelInfo::Input)
+            {
+                switch (channel.sequence & 3)
+                {
+                    case 0b00: DrawBit(i, mPlayX, 0); break;
+                    case 0b01: DrawBit(i, mPlayX, 2); break;
+                    case 0b10: DrawBit(i, mPlayX, 2); break;
+                    case 0b11: DrawBit(i, mPlayX, 1); break;
+                }
+            }
+        }
+        
+        // TODO: check enabled
+        int step = mPlayX / 16;
+        if ((mPlayX & 15) == 0)
+        {
+            Write(step);
+            if (step > 0)
+                DrawStep(step-1, false);
+            DrawStep(step, true);
+        }
+        mPlayX++;
+        if (mPlayX == 18*16)
+        {
+            DrawStep(step, false);
+            if (mLoop)
+                mPlayX = 0;
+            else
+                KillTimer();
+        }
+    }
+
+    void Play()
+    {
+        SetTimer(10);
+        mPlayX = 0;
+    }
+    
+    void Loop()
+    {
+        if (mLoop)
+        {
+            mLoop = false;
+            KillTimer();
+            return;
+        }
+        mLoop = true;
+        Play();
+    }
+    // 620 ms
+    // no print 530ms
+    // no sequence 424ms
+    // only sequence no background 265
+};
+
+class CButton : public CWnd
+{
+public:
+    virtual void OnPaint()
+    {
+        if (GetFocus() == this)
+        {
+            LCD::RoundRect(m_rcClient, RGB565(ffffff));
+            LCD::Print(m_rcClient.left+4, m_rcClient.top+1, RGB565(000000), RGBTRANS, m_pszId);
+        } else
+        {
+            LCD::RoundRect(m_rcClient, RGB565(b0b0b0));
+            LCD::Print(m_rcClient.left+4, m_rcClient.top+1, RGB565(ffffff), RGBTRANS, m_pszId);
+        }
+    }
+    
+    virtual void OnKey(ui16 nKey)
+    {
+        if (nKey == BIOS::KEY::F1)
+        {
+            SendMessage(GetParent(), 0, 0);
+            return;
+        }
+        if (nKey == BIOS::KEY::Left)
+        {
+            CWnd::OnKey(KEY::Up);
+            return;
+        }
+        if (nKey == BIOS::KEY::Right)
+        {
+            CWnd::OnKey(KEY::Down);
+            return;
+        }
+        CWnd::OnKey(nKey);
+    }
+
+};
+
+class CSelect : public CButton
+{
+};
+
+class CApplication : public CWnd
+{
+    CMenuMain mMenu;
+    CButton mPlay;
+    CButton mLoop;
+//    CButton mManual;
+    CSequencerGui mSequencer;
+    
+public:
+    void Create()
+    {
+        CWnd::Create("Application", CWnd::WsVisible, CRect(0, 0, BIOS::LCD::Width, BIOS::LCD::Height), nullptr);
+        mMenu.Create("MainMenu", CWnd::WsVisible, CRect(0, 0, BIOS::LCD::Width, 14), this);
+        
+        constexpr int base = 15;
+        constexpr int width = 65;
+        constexpr int space = 10;
+        int _x = base;
+        constexpr int _y = 22;
+        
+        mPlay.Create("Play", CWnd::WsVisible, CRect(_x, _y, _x+width, _y+16), this);
+        _x += space + width;
+        mLoop.Create("Loop", CWnd::WsVisible, CRect(_x, _y, _x+width, _y+16), this);
+        /*
+        _x += space + width;
+        mManual.Create("Manual", CWnd::WsVisible, CRect(_x, _y, _x+width, _y+16), this);
+         */
+        //_x += space + width;
+        //mDuration.Create("500ms", CWnd::WsVisible, CRect(_x, _y, _x+width, _y+16), this);
+        mSequencer.Create("Player", CWnd::WsVisible, CRect(0, 14+32, BIOS::LCD::Width, BIOS::LCD::Height), this);
+    }
+
+    virtual void OnPaint()
+    {
+        CRect rcTop(m_rcClient);
+        rcTop.bottom = rcTop.top + 32;
+        GUI::Background(m_rcClient, RGB565(404040), RGB565(101010));
+    }
+    
+    virtual void OnMessage(CWnd* pSender, ui16 code, ui32 data)
+    {
+        if (pSender == &mPlay)
+            mSequencer.Play();
+
+        if (pSender == &mLoop)
+            mSequencer.Loop();
+    }
+
+    void Destroy()
+    {
+    }
+};
+
+
+#ifdef _ARM
+__attribute__((__section__(".entry")))
+#endif
+int _main(void)
+{
+    CApplication app;
+    
+    app.Create();
+    app.SetFocus();
+    app.WindowMessage( CWnd::WmPaint );
+    
+    BIOS::KEY::EKey key;
+    while ((key = BIOS::KEY::GetKey()) != BIOS::KEY::Escape)
+    {
+        if (key != BIOS::KEY::None)
+            app.WindowMessage(CWnd::WmKey, key);
+        app.WindowMessage(CWnd::WmTick);
+    }
+    
+    app.Destroy();
+    return 0;
+}

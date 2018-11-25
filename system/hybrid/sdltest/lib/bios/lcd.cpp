@@ -184,22 +184,18 @@ int BIOS::LCD::Draw(int x, int y, unsigned short clrf, unsigned short clrb, cons
 
 void BIOS::LCD::Pattern(int x1, int y1, int x2, int y2, const ui16 *pat, int l)
 {
-    assert(0);
-    /*
-//  if (x2 > 320)
-//    return;
-  Set_Area(x1, y1, x2, y2);
-
-  const ui16* patb = pat;
-  const ui16* pate = patb + l;
-
-  for (int y=y1; y<y2; y++)
-    for (int x=x1; x<x2; x++)
-    {
-      Set_Pixel(*pat);
-      if (++pat == pate) 
-        pat = patb;
-    }*/
+    int t = FLIP(y1)+1;
+    y1 = FLIP(y2)+1;
+    y2 = t;
+    int i = 0;
+    for(int x=x1; x<x2; x++)
+        for(int y=y1; y<y2; y++)
+        {
+            Set_Posi(x, y);
+            Set_Pixel(pat[i]);
+            if (++i == l)
+                i = 0;
+        }
 }
 
 void BIOS::LCD::Shadow(int x1, int y1, int x2, int y2, unsigned int nColor)
