@@ -4,6 +4,10 @@
 #include "gui/Gui.h"
 #include "Shared.h"
 
+// TODO: cleanup
+//enum {DISABLE=0, ENABLE=1};
+//extern "C" void USB_Connect(uint8_t Status);
+
 bool CWndUserManager::ElfGetInterpreter( char* strName, char* strInterpreter )
 {
 	CBufferedReader2 fw;
@@ -181,6 +185,8 @@ uint32_t CWndUserManager::ElfExecute( char* strName )
 		at memory location not colliding with loaded image! Same limitation apply to the
 		code area in flash occupied by this function!
 	*/
+//	USB_Connect(DISABLE);
+
 	BIOS::LCD::Clear(0);
 	BIOS::DBG::Print("Executing ELF image\n");
 	CBufferedReader2 fw;
@@ -382,11 +388,18 @@ uint32_t CWndUserManager::ElfExecute( char* strName )
 					fw >> CStream(&strSymbolName, sizeof(strSymbolName)); 
 
 					ui32 dwProcAddr = GetProcAddress( strSymbolName );
-					BIOS::DBG::Print("%s, ", strSymbolName);
-					if ( i == nSymbolCount-1 )
-					{
-						BIOS::DBG::Print("\n");
-					}
+/*
+char temp[64];
+sprintf(temp, "S:'%s'     ", strSymbolName);
+BIOS::LCD::Print(0,80, RGB565(ffffff), RGB565(ff0000), temp);
+sprintf(temp, "%08x -> %08x", dwProcAddr, elfRelocation.r_offset);
+BIOS::LCD::Print(0,80+16, RGB565(ffffff), RGB565(ff0000), temp);
+*/
+//					BIOS::DBG::Print("%s, ", strSymbolName);
+//					if ( i == nSymbolCount-1 )
+//					{
+//						BIOS::DBG::Print("\n");
+//					}
 					_ASSERT(dwProcAddr);
 #ifndef _WIN32
 					/*
@@ -396,11 +409,17 @@ uint32_t CWndUserManager::ElfExecute( char* strName )
 					ui32* pRelocation = (ui32*)elfRelocation.r_offset;
 					*pRelocation = dwProcAddr;
 #endif
+//sprintf(temp, "%08x ?= %08x", *(ui32*)elfRelocation.r_offset, dwProcAddr);
+//BIOS::LCD::Print(0,80+32, RGB565(ffffff), RGB565(ff0000), temp);
+//BIOS::SYS::DelayMs(1000);
+
 				}
 				break;
 			}
 			case SecInit:
 			{
+
+					BIOS::DBG::Print("\nInitArray:");
 				// last processed section before jumping to entry
 				int nCount = elfSection.size/sizeof(ui32);
 				fw.Seek( elfSection.offset );
@@ -444,5 +463,6 @@ uint32_t CWndUserManager::ElfExecute( char* strName )
 	}
 
 	BIOS::DBG::Print("Load ok. Jumping to entry %08x \n", elfHeader.entry);
+//	USB_Connect(ENABLE);
 	return elfHeader.entry;
 }

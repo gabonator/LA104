@@ -10,6 +10,30 @@ Flashing is done by holding first function button during powering up and by copy
 
 When I was developing alternative firmware for DS203, I was trying to design some simple operating system that would allow me to upload easily new programs to the devie with ability to switch between them without flashing it again. Something similar that [jpa did before](https://jpa.kapsi.fi/dsoquad/) with his PAWN interpreter on DS203 with a little difference that the application will be native C/C++ compiled code offering full computational power of the device. Unfortunately the GCC toolchain I was using had some bug which produced ARM32 instructions in PLT section which are not supported by STM32F103 and I was not able to force the compiler to use Thumb instruction set. So the dynamic relocation of imported symbols was an impossible task to implement. Now after few years, this problem was fixed and finally I could continue developing this operating system I have started before.
 
+#### News
+
+##### Logic sequencer app
+
+16 channel logic analyser and sequencer. Generator of 4 bit pattern attached to CD4543 BCD to seven segment decoder. PCF8574 used as 16 bit expander
+
+[![Logic sequencer video](https://img.youtube.com/vi/D8OnXzE7OwU/0.jpg)](https://www.youtube.com/watch?v=D8OnXzE7OwU "LA104 logic sequencer")
+
+![Logic sequencer 1](resources/imgSequencer1.png)
+
+![Logic sequencer 2](resources/imgSequencer2.png)
+
+##### Midi player - midi parser and player
+
+Connect your midi keyboard with two wires (3V and P1 through 100-330 ohm resistor).
+
+[![Midi player video](https://img.youtube.com/vi/-MRcrPu_1kQ/0.jpg)](https://www.youtube.com/watch?v=-MRcrPu_1kQ "LA104 midi player")
+
+https://www.youtube.com/watch?v=-MRcrPu_1kQ
+![Logic sequencer 1](resources/imgMidi1.png)
+
+![Logic sequencer 2](resources/imgMidi2.png)
+
+
 #### In this repository you will find
 
   - [resources](resources) - official resources from manufacturer, shematics and memory layout information
@@ -71,22 +95,29 @@ When I was developing alternative firmware for DS203, I was trying to design som
 
 ![MP3 player](resources/imgMp3.png)
 
+
+#### Features
+  - add snapshotting to host app - DONE (23screen.elf)
+  - c++ global variables memory placement, currently all variables on stack - DONE (fixed linker script)
+  - DS1820 network scanner app (50% done, 18onew.elf)
+  - API signals: file added / fat changed, usb connection/disconnection (50% done, GetIntVect/SetIntVect)
+  - PCF8574 sequencer + BCD to 7 segment test application (95%, 22sequen.elf)
+  - midi player app (95%, 21mplay.elf)
+
 #### TODO list
 
-  - add snapshotting to host app
-  - add pictures
-  - c++ global variables memory placement, currently all variables on stack
-  - finish GIF loading, or consider other image formats (PCX, LBM?)
-  - API signals (file added / fat changed, usb connection/disconnection)
-  - DS1820 network scanner app
+  - CC1101 RF waveform recorder / player (10%, not enough IO pins)
+  - relative paths in app arguments
+  - Graphical shell with icons
+  - finish GIF loading, or consider other image formats (PCX, LBM, BMP?)
   - beeper
-  - remote control using ESP or BLE - possible to attach to UART0?
+  - remote control using ESP or BLE - possible to attach to UART0? (not possible, use USB CDC instead)
+  - USB toolkit - serial port, midi device, HID keyboard and mouse emulator, joystick (10%)
   - hybrid app use relative paths
   - consider using cmake for hybrid app
-  - CC1101 RF waveform recorder / player
   - obtain FPGA code from manufacturer 
   - setup FPGA build environment
-  - PCF8574 sequencer + BCD to 7 segment test application
-  - midi player app
   - what toolchain to use, how to install...
   - add desc: toolchain, building, ld script?
+  - CNC g code decoder and player
+  - swiss army knife for hardware engineers - package of applications that can talk to any electronic device and monitor any digital bus

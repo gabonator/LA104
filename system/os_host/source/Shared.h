@@ -25,7 +25,6 @@ uint32_t GetProcAddress(char* symbol)
   while (*symbol >= '0' && *symbol <= '9')
     symbol++;
 
-
   if (strcmp(symbol, "sprintfPcPKcz") == 0)
     return (uint32_t)static_cast<int(*)(char*, char const*, ...)>(sprintf);
   if (strcmp(symbol, "BackgroundERK5CRectmm") == 0)
@@ -36,6 +35,14 @@ uint32_t GetProcAddress(char* symbol)
     return (uint32_t)static_cast<char*(*)()>(BIOS::OS::GetArgument); 
   if (strcmp(symbol, "OS11SetArgumentEPc") == 0)
     return (uint32_t)static_cast<void(*)(char*)>(BIOS::OS::SetArgument); 
+  if (strcmp(symbol, "OS18GetInterruptVectorENS0_16EInterruptVectorE") == 0)
+    return (uint32_t)BIOS::OS::GetInterruptVector;
+  if (strcmp(symbol, "OS18SetInterruptVectorENS0_16EInterruptVectorEPFvvE") == 0)
+    return (uint32_t)BIOS::OS::SetInterruptVector;
+  if (strcmp(symbol, "USB6EnableEv") == 0)
+    return (uint32_t)static_cast<void(*)()>(BIOS::USB::Enable);
+  if (strcmp(symbol, "USB7DisableEv") == 0)
+    return (uint32_t)static_cast<void(*)()>(BIOS::USB::Disable);
   if (strcmp(symbol, "DBG5PrintEPKcz") == 0)
     return (uint32_t)static_cast<void(*)(char const*, ...)>(BIOS::DBG::Print);
   if (strcmp(symbol, "FAT11GetFileSizeEv") == 0)
@@ -86,6 +93,8 @@ uint32_t GetProcAddress(char* symbol)
     return (uint32_t)static_cast<void(*)(CPoint const&, unsigned short)>(BIOS::LCD::PutPixel);
   if (strcmp(symbol, "LCD8PutPixelEiit") == 0)
     return (uint32_t)static_cast<void(*)(int, int, unsigned short)>(BIOS::LCD::PutPixel);
+  if (strcmp(symbol, "LCD8GetPixelEii") == 0)
+    return (uint32_t)static_cast<uint16_t(*)(int, int)>(BIOS::LCD::GetPixel);
   if (strcmp(symbol, "LCD9BufferEndEv") == 0)
     return (uint32_t)static_cast<void(*)()>(BIOS::LCD::BufferEnd);
   if (strcmp(symbol, "LCD9RectangleERK5CRectt") == 0)

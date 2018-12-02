@@ -241,7 +241,7 @@ protected:
         uint_fast16_t color;
         uint_fast16_t colorBlend;
         EDirection direction;
-    } mChannel[9];
+    } mChannel[16];
 
     uint32_t mMask {0b11111111111111110000};
     CPort mPort;
@@ -258,8 +258,11 @@ public:
         mChannel[5] = {9, 0b00000000000000000000, (char*)"B2", mPalette[5], TChannelInfo::Input};
         mChannel[6] = {10, 0b00000000000000000000, (char*)"B3", mPalette[6], TChannelInfo::Input};
         mChannel[7] = {11, 0b00000000000000000000, (char*)"B4", mPalette[7], TChannelInfo::Input};
-        
-        for (int i=8; i<COUNT(mChannel); i++)
+        mChannel[8] = {12, 0b00000000000000000000, (char*)"B5", mPalette[6], TChannelInfo::Input};
+        mChannel[9] = {13, 0b00000000000000000000, (char*)"B6", mPalette[7], TChannelInfo::Input};
+        mChannel[10] = {14, 0b00000000000000000000, (char*)"B7", mPalette[6], TChannelInfo::Input};
+
+        for (int i=11; i<COUNT(mChannel); i++)
             mChannel[i] = {0, 0b00000000000000000000, nullptr, mPalette[i%COUNT(mPalette)], TChannelInfo::Disabled};
     }
     
@@ -289,6 +292,7 @@ public:
             TChannelInfo& channel = mChannel[i];
             if (channel.direction == TChannelInfo::Input)
             {
+                //TODO: current value/reading?
                 channel.sequence <<= 1;
                 channel.sequence |= mPort.Read(channel.channel);
             }
@@ -298,10 +302,15 @@ public:
 
 class CSequencerGui : public CSequencer, public CWnd
 {
-    int mCursorX{0};
-    int mCursorY{0};
+    int mCursorX{-1};
+    int mCursorY{-1};
+    int mScrollY{0};
     int mPlayX{0};
+    int mLastDrawnStep{-1};
     bool mLoop{false};
+    bool mPlay{false};
+    bool mFollow{false};
+    bool mFollowing{false};
 
 public:
     void Create( const char* pszId, ui16 dwFlags, const CRect& rc, CWnd* pParent )
@@ -312,8 +321,15 @@ public:
 
     void DrawStep(int x, bool highlight)
     {
+        if (x==-1)
+            return;
+        
         int _y = m_rcClient.top;
         int _x = 32+x*16;
+        
+        if (mCursorY == -1 && mCursorX == -1)
+            mCursorX = 0;
+        
         if (highlight)
             LCD::Bar(_x, _y-2, _x+16, _y+6, RGB565(ffff00));
         else if (mCursorY == -1 && mCursorX == x && GetFocus() == this)
@@ -338,8 +354,8 @@ public:
     void DrawAddChannel(int row, char* id)
     {
         int y = m_rcClient.top+row*20+8;
-        const uint_fast16_t& color = mChannel[row].color;
-        const uint_fast16_t& colorBlend = mChannel[row].colorBlend;
+        const uint_fast16_t& color = mChannel[mScrollY+row].color;
+        const uint_fast16_t& colorBlend = mChannel[mScrollY+row].colorBlend;
         
         if (mCursorY == row)
             LCD::Bar(0, y, 32, y+18, RGB565(ffffff));
@@ -353,8 +369,8 @@ public:
     void DrawBit(int row, int x, int value)
     {
         int y = m_rcClient.top+row*20+8;
-        const uint_fast16_t& color = mChannel[row].color;
-        const uint_fast16_t& colorBlend = mChannel[row].colorBlend;
+        const uint_fast16_t& color = mChannel[mScrollY+row].color;
+        const uint_fast16_t& colorBlend = mChannel[mScrollY+row].colorBlend;
 
         LCD::BufferBegin(CRect(32+x, y, 33+x, y+20), 0);
         if (value == 1)
@@ -392,11 +408,13 @@ public:
     void DrawChannel(int row, char* id, uint8_t* sequence, int length)
     {
         int y = m_rcClient.top+row*20+8;
-        const uint_fast16_t& color = mChannel[row].color;
-        const uint_fast16_t& colorBlend = mChannel[row].colorBlend;
+        const uint_fast16_t& color = mChannel[mScrollY+row].color;
+        const uint_fast16_t& colorBlend = mChannel[mScrollY+row].colorBlend;
 
+        bool highlight = row == mCursorY && (mCursorX == -1 || mChannel[mScrollY+row].direction == TChannelInfo::Input);
+        
         LCD::Bar(0, y+18, LCD::Width, y+20, colorBlend);
-        if (row == mCursorY && mCursorX == -1)
+        if (highlight)
             LCD::Bar(0, y, 32, y+18, RGB565(ffffff));
         else
             LCD::Bar(0, y, 32, y+18, color);
@@ -423,7 +441,8 @@ public:
         
         if (!sequence || length <= 0)
         {
-            LCD::Bar(32, y, LCD::Width, y+18, RGB565(404040));
+            //if (!mFollow)
+                LCD::Bar(32, y, LCD::Width, y+18, RGB565(404040));
             return;
         }
         
@@ -477,8 +496,9 @@ public:
         DrawRange();
         for (int i=0; i<9; i++)
         {
-            TChannelInfo& channel = mChannel[i];
+            TChannelInfo& channel = mChannel[mScrollY+i];
             
+            // TODO: remove
             uint8_t sequence[20];
             for (int j=0; j<20; j++)
                 sequence[j] = (channel.sequence >> (20-j-1)) & 1;
@@ -508,11 +528,15 @@ public:
         {
             mCursorX--;
             Invalidate();
+            if (mFollow)
+                StartFollow(mCursorX);
         }
-        if (nKey == BIOS::KEY::Right && mCursorX < 20)
+        if (nKey == BIOS::KEY::Right && mCursorX < 17)
         {
             mCursorX++;
             Invalidate();
+            if (mFollow)
+                StartFollow(mCursorX);
         }
         if (nKey == BIOS::KEY::Up && mCursorY == -1)
         {
@@ -521,20 +545,28 @@ public:
         }
         if (nKey == BIOS::KEY::Up && mCursorY > -1)
         {
-            mCursorY--;
+            if (mCursorY == 0 && mScrollY > 0)
+                mScrollY--;
+            else
+                mCursorY--;
             Invalidate();
         }
-        if (nKey == BIOS::KEY::Down && mCursorY < 8)
+        if (nKey == BIOS::KEY::Down && mCursorY + mScrollY < 15)
         {
-            mCursorY++;
+            if (mCursorY < 8)
+                mCursorY++;
+            else
+                mScrollY++;
             Invalidate();
         }
         if (nKey == BIOS::KEY::F1)
         {
-            if (mCursorY >= 0 && mCursorX >= 0 && mCursorX < 20 && mChannel[mCursorY].direction == TChannelInfo::Output)
+            if (mCursorY >= 0 && mCursorX >= 0 && mCursorX < 20 && mChannel[mCursorY+mScrollY].direction == TChannelInfo::Output)
             {
-                mChannel[mCursorY].sequence ^= 1<<(19-mCursorX);
+                mChannel[mCursorY+mScrollY].sequence ^= 1<<(19-mCursorX);
                 Invalidate();
+                if (mFollow)
+                    StartFollow(mCursorX);
             }
             if (mCursorY == -1 && mCursorX >= 0 && mCursorX < 20)
             {
@@ -543,13 +575,37 @@ public:
             }
         }
     }
-    
+
+    int FindNextStep(int step)
+    {
+        for (int i=step/16+1; i<18; i++)
+            if (IsStepEnabled(i))
+                return i*16;
+        
+        return -1;
+    }
+
     virtual void OnTimer()
     {
+        if (mPlayX == -1)
+        {
+            // find first step;
+            mPlayX = FindNextStep(-16);
+            
+            if (mPlayX == -1)
+            {
+                mPlay = false;
+                mLoop = false;
+                mFollow = false;
+                mFollowing = false;
+                KillTimer();
+            }
+        }
+        
         Read();
         for (int i=0; i<9; i++)
         {
-            TChannelInfo& channel = mChannel[i];
+            TChannelInfo& channel = mChannel[mScrollY+i];
             if (channel.direction == TChannelInfo::Input)
             {
                 switch (channel.sequence & 3)
@@ -562,30 +618,69 @@ public:
             }
         }
         
-        // TODO: check enabled
-        int step = mPlayX / 16;
         if ((mPlayX & 15) == 0)
         {
+            int step = mPlayX / 16;
+            
             Write(step);
-            if (step > 0)
-                DrawStep(step-1, false);
+            DrawStep(mLastDrawnStep, false);
             DrawStep(step, true);
+            mLastDrawnStep = step;
         }
         mPlayX++;
-        if (mPlayX == 18*16)
+        
+        if ((mPlayX & 15) == 0)
         {
-            DrawStep(step, false);
-            if (mLoop)
-                mPlayX = 0;
-            else
+            mPlayX = FindNextStep(mPlayX-1);
+        } else if ((mPlayX & 15) == 15)
+        {
+            if (mFollow)
+            {
                 KillTimer();
+                mFollowing = false;
+            }
         }
+        
+        if (mPlayX == -1)
+        {
+            DrawStep(mLastDrawnStep, false);
+            mLastDrawnStep = -1;
+            if (mLoop)
+            {
+                mPlayX = -1;
+            } else
+            {
+                KillTimer();
+                mFollowing = false;
+                mPlay = false;
+                SendMessage(GetParent(), 0, 0);
+            }
+        }
+    }
+    
+    bool IsStepEnabled(int step)
+    {
+        return mMask & (1 << (19-step));
     }
 
     void Play()
     {
+        if (mPlay)
+            return;
+        if (mFollow)
+        {
+            mFollow = false;
+            if (mFollowing)
+                KillTimer();
+        }
+        if (mLoop)
+        {
+            mLoop = false;
+            KillTimer();
+        }
+        mPlayX = -1;
         SetTimer(10);
-        mPlayX = 0;
+        SendMessage(GetParent(), 0, 0);
     }
     
     void Loop()
@@ -596,9 +691,53 @@ public:
             KillTimer();
             return;
         }
-        mLoop = true;
         Play();
+        mLoop = true;
     }
+    
+    bool Looping()
+    {
+        return mLoop;
+    }
+    
+    void Follow()
+    {
+        if (mFollow)
+        {
+            KillTimer();
+            SendMessage(GetParent(), 0, 0);
+            mFollow = false;
+            return;
+        }
+        
+        if (mPlay || mLoop)
+        {
+            mPlay = false;
+            mLoop = false;
+            KillTimer();
+            SendMessage(GetParent(), 0, 0);
+        }
+        mFollow = true;
+    }
+    
+    bool Following()
+    {
+        return mFollow;
+    }
+    
+    void StartFollow(int index)
+    {
+        if (index < 0)
+            return;
+        
+        mPlayX = index*16;
+        if (!mFollowing)
+        {
+            SetTimer(10);
+            mFollowing = true;
+        }
+    }
+    
     // 620 ms
     // no print 530ms
     // no sequence 424ms
@@ -650,10 +789,13 @@ class CSelect : public CButton
 class CApplication : public CWnd
 {
     CMenuMain mMenu;
+    // Tab1
     CButton mPlay;
     CButton mLoop;
-//    CButton mManual;
+    CButton mFollow;
     CSequencerGui mSequencer;
+    
+    // Tab2
     
 public:
     void Create()
@@ -667,15 +809,12 @@ public:
         int _x = base;
         constexpr int _y = 22;
         
-        mPlay.Create("Play", CWnd::WsVisible, CRect(_x, _y, _x+width, _y+16), this);
+        mPlay.Create("Burst", CWnd::WsVisible, CRect(_x, _y, _x+width, _y+16), this);
         _x += space + width;
         mLoop.Create("Loop", CWnd::WsVisible, CRect(_x, _y, _x+width, _y+16), this);
-        /*
         _x += space + width;
-        mManual.Create("Manual", CWnd::WsVisible, CRect(_x, _y, _x+width, _y+16), this);
-         */
-        //_x += space + width;
-        //mDuration.Create("500ms", CWnd::WsVisible, CRect(_x, _y, _x+width, _y+16), this);
+        mFollow.Create("Follow", CWnd::WsVisible, CRect(_x, _y, _x+width, _y+16), this);
+
         mSequencer.Create("Player", CWnd::WsVisible, CRect(0, 14+32, BIOS::LCD::Width, BIOS::LCD::Height), this);
     }
 
@@ -693,6 +832,24 @@ public:
 
         if (pSender == &mLoop)
             mSequencer.Loop();
+
+        if (pSender == &mFollow)
+            mSequencer.Follow();
+        
+        if (pSender == &mFollow || pSender == &mLoop ||pSender == &mSequencer)
+        {
+            if (mSequencer.Following())
+                mFollow.m_pszId = "\xfb" "Follow";
+            else
+                mFollow.m_pszId = "Follow";
+            mFollow.Invalidate();
+
+            if (mSequencer.Looping())
+                mLoop.m_pszId = "\xfb" "Loop";
+            else
+                mLoop.m_pszId = "Loop";
+            mLoop.Invalidate();
+        }
     }
 
     void Destroy()
@@ -700,14 +857,13 @@ public:
     }
 };
 
+CApplication app;
 
 #ifdef _ARM
 __attribute__((__section__(".entry")))
 #endif
 int _main(void)
-{
-    CApplication app;
-    
+{    
     app.Create();
     app.SetFocus();
     app.WindowMessage( CWnd::WmPaint );

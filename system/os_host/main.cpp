@@ -1,9 +1,6 @@
 #include "STM32F10x.h"
 #include "source/bios/Bios.h"
 #include "source/Manager.h"
-#ifdef _SCREENSHOT
-#include "source/optional/screenshot.h"
-#endif
 
 extern "C" void Hardware_Init();
 
@@ -41,9 +38,6 @@ int main()
     if (dwExecute)
     {
       int nRet = BIOS::SYS::Execute( dwExecute );
-#ifdef _SCREENSHOT
-      SaveScreenshot16((char*)"SCREEN.BMP");
-#endif
       BIOS::DBG::Print("Return code=%d.\n", nRet);
       //manager.Invalidate();
     }

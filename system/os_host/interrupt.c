@@ -2,9 +2,12 @@
 #include "source/usb/Disk.h"
 #include "lib/STM32_USB-FS-Device_Driver/inc/usb_core.h"
 #include "lib/STM32_USB-FS-Device_Driver/inc/usb_init.h"
+#include "lib/STM32F10x_StdPeriph_Driver/inc/misc.h"
 #include "USB_istr.h"
 #include "system_stm32f10x.h"
 #include <stdbool.h>
+
+//#define _DEBUG_SP
 
 enum
 {
@@ -112,12 +115,22 @@ void DiskConfig(void)
 }
 #define BITMAP          0xFFFC0000
 
+extern void (* g_pfnVectors[76])(void);
+extern void (* g_pfnRamVectorTable[76])(void);
+
 void Hardware_Init(void)
 {
 
     __Bios(PWRCTRL, INIT);        // 
     __Bios(KEYnDEV, INIT);        // 
-    __Bios(NIVCPTR, 0x8000);      // 
+
+//      memcpy(g_pfnRamVectorTable, g_pfnVectors, 76*4);
+//   for (int i=0; i<76; i++)
+//     g_pfnRamVectorTable[i] = g_pfnVectors[i];
+
+//      NVIC_SetVectorTable(NVIC_VectTab_RAM, (uint32_t)g_pfnRamVectorTable - NVIC_VectTab_RAM);
+      NVIC_SetVectorTable(NVIC_VectTab_FLASH, (uint32_t)g_pfnVectors - NVIC_VectTab_FLASH);
+//    __Bios(NIVCPTR, 0x8000);      // 
     SysTick_Config(SystemCoreClock / 1000);
     __Bios(BUZZDEV, INIT);        // 
     __Bios(BUZZDEV, 50);
@@ -139,8 +152,21 @@ char GetLastChar()
 
 void Beep(bool);
 
+#ifdef _DEBUG_SP
+uint32_t GetStackPointer();
+#endif
+
 void SysTickHandler(void)
 {
+#ifdef _DEBUG_SP
+  static uint32_t dcounter = 0;
+  if (dcounter++ == 500)
+  {
+    dcounter = 0;
+    dbgPrint("$<%08x>", GetStackPointer());
+  } 
+#endif
+
   gCounter++;
   if (Dly_mS)
     Dly_mS--;

@@ -123,11 +123,6 @@ void Set_Block(int x1, int y1, int x2, int y2)
   __Bios(BLOCK_Y, (y2-1) | (y1 << 16));
 }
 
-uint32_t _Keys()
-{
-  return __Bios(KEYnDEV, BITMAP);
-}
-
 void Beep(bool b)
 {
   if (b)

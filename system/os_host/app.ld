@@ -51,6 +51,7 @@ SECTIONS
 
   .data : {
     _sdata = . ;
+    *(.isr_ram_vectors)      /* Vector table */
     *(.data)        /* Data memory */
     _edata = .;
   } >ram AT >rom

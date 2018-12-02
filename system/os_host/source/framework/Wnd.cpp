@@ -283,13 +283,12 @@ void CWnd::ShowWindow(bool b)
 	if (b)
 	{
 		if ( !(m_dwFlags & WsVisible) )
-            WindowMessage(WmWillShow, 0);
 		m_dwFlags |= WsVisible;
 	}
 	else
 	{
 		if ( m_dwFlags & WsVisible )
-            WindowMessage(WmWillShow, 0);
+			WindowMessage(WmWillHide, 0);
 		m_dwFlags &= ~WsVisible;
 	}
 }

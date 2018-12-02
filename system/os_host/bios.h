@@ -98,8 +98,3 @@ void PutPixel(uint16_t x, uint16_t y, uint16_t c)
   Set_Posi(x, y);
   Set_Pixel(c);
 }
-
-uint32_t _Keys()
-{
-  return __Bios(KEYnDEV, BITMAP);
-}

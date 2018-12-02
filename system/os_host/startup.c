@@ -106,7 +106,7 @@ void WEAK BusFaultException(void);
 void WEAK UsageFaultException(void);
 
 __attribute__ ((section(".isr_vectors")))
-void (* const g_pfnVectors[])(void) = {
+void (*g_pfnVectors[76])(void) = {
     (intfunc)((unsigned long)&_estack), /* The stack pointer after relocation */
 Reset_Handler, NMIException, HardFaultException,
 MemManageException, BusFaultException, UsageFaultException, 0, 0,
@@ -134,6 +134,9 @@ TIM6_IRQHandler, TIM7_IRQHandler, DMA2_Channel1_IRQHandler,
 DMA2_Channel2_IRQHandler, DMA2_Channel3_IRQHandler,
 DMA2_Channel4_5_IRQHandler
 };
+
+__attribute__ ((section(".isr_ram_vectors")))
+uint32_t g_pfnRamVectorTable[76] = {0};
 
 void __Init_Data(void) {
 	unsigned long *src, *dst;

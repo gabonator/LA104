@@ -2,6 +2,9 @@
 #include "../library/spf.h"
 #include <stdarg.h>
 
+int px = 0;
+int py = 0;
+
 extern int _DrawChar(int x, int y, unsigned short clrf, unsigned short clrb, char ch);
 
 extern "C" {
@@ -21,8 +24,13 @@ void dbgPrint(const char* msg, ...)
 
 void BIOS::DBG::Print(const char * format, ...)
 {
-	static int px = 0;
-	static int py = 0;
+  if (format[0] == '$')
+  {
+    px = 0;
+    py = 0;
+    format++;
+  }
+
 
 	char buf[128];
 	char* bbuf = buf; 
@@ -31,7 +39,6 @@ void BIOS::DBG::Print(const char * format, ...)
         
         va_start( args, format );
         sfp_print( &bbuf, format, args );
-
 	for ( bbuf = buf; *bbuf; bbuf++ )
 	{
 		if ( *bbuf == '\n' || px > BIOS::LCD::Width-8 )

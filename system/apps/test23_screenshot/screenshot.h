@@ -1,5 +1,3 @@
-#include "../framework/BufferedIo.h"
-
 #pragma pack(push)
 #pragma pack(2)
 	struct BmpHdr 

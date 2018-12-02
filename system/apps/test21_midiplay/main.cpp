@@ -1030,9 +1030,9 @@ int _main(void)
         if (!midi.Open(fileName))
         {
             strcpy(strDisplay, "Failed to load midi file");
-            loaded = true;
         } else
         {
+            loaded = true;
             if (strlen(fileName)>=40)
             {
                 strcpy(strDisplay, "...");

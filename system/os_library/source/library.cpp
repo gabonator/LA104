@@ -19,6 +19,7 @@ namespace BIOS
 
     void PutPixel(int x, int y, unsigned short clr) {}
     void PutPixel(const CPoint& cp, unsigned short clr) {}
+    uint16_t GetPixel(int x, int y) { return 0; }
 
     void Bar(int x1, int y1, int x2, int y2, unsigned short clr) {}
     void Bar(const CRect& rc, unsigned short clr) {}
@@ -103,12 +104,19 @@ namespace BIOS
   {
     void SetArgument(char* argument) {}
     char* GetArgument() {return nullptr;}
+    TInterruptHandler GetInterruptVector(EInterruptVector) {return nullptr;}
+    void SetInterruptVector(EInterruptVector, TInterruptHandler) {}
   }
-
 
   namespace PRIVATE
   {
     const void* GetCharRom() { return nullptr; }
+  }
+
+  namespace USB
+  {
+    void Enable() {}
+    void Disable() {}
   }
 }
 
