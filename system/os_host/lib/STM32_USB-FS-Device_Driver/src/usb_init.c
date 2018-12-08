@@ -49,7 +49,6 @@ DEVICE_PROP *pProperty;
 /*  at the end of interrupt process */
 uint16_t	SaveState ;
 uint16_t  wInterrupt_Mask;
-DEVICE_INFO	Device_Info;
 USER_STANDARD_REQUESTS  *pUser_Standard_Requests;
 
 /* Extern variables ----------------------------------------------------------*/
@@ -63,6 +62,7 @@ USER_STANDARD_REQUESTS  *pUser_Standard_Requests;
 * Output         : None.
 * Return         : None.
 *******************************************************************************/
+#if 0
 void USB_Init(void)
 {
   pInformation = &Device_Info;
@@ -72,5 +72,5 @@ void USB_Init(void)
   /* Initialize devices one by one */
   pProperty->Init();
 }
-
+#endif
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/

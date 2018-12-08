@@ -45,12 +45,12 @@
 * Output         : None.
 * Return         : Status.
 *******************************************************************************/
-uint32_t USB_SIL_Init(void)
+uint32_t USB_SIL_Init(uint16_t nIMR_MSK)
 {
   /* USB interrupts initialization */
   /* clear pending interrupts */
   _SetISTR(0);
-  wInterrupt_Mask = IMR_MSK;
+  wInterrupt_Mask = nIMR_MSK;
   /* set interrupts mask */
   _SetCNTR(wInterrupt_Mask);
   return 0;
