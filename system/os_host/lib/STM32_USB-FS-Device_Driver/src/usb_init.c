@@ -47,7 +47,7 @@ DEVICE_PROP *pProperty;
 /*  Whenever the Rx or Tx state is changed, its value is saved */
 /*  in this variable first and will be set to the EPRB or EPRA */
 /*  at the end of interrupt process */
-uint16_t	SaveState ;
+uint16_t	SaveState;
 uint16_t  wInterrupt_Mask;
 USER_STANDARD_REQUESTS  *pUser_Standard_Requests;
 

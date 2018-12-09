@@ -2,15 +2,17 @@
  File Name : USB_prop.c
  Version   : STM32 USB Disk Ver 3.4       Author : MCD Application Team & bure
 *******************************************************************************/
+#include <usb_lib.h>
 #include "msdusb_desc.h"
-#include "msdusb_pwr.h"
+#include "../COMMON/commonusb_pwr.h"
 #include "msdusb_bot.h"
 #include "msdusb_prop.h"
 #include "msdusb_conf.h"
-#include <usb_lib.h>
 #include "../../source/library/spf.h"
 
 u32 Max_Lun = 0;
+
+DEVICE_STATE massbDeviceState = UNCONNECTED; /* USB device status */
 
 DEVICE_INFO massDevice_Info;
 
@@ -64,10 +66,8 @@ void MASS_init()
 {
   MASS_Get_SerialNum(); // Update the serial number string descriptor with the data from the unique ID
   pInformation->Current_Configuration = 0;
-  MASS_PowerOn();       // Connect the device
-  _SetISTR(0);     // USB interrupts initialization. clear pending interrupts
-  wInterrupt_Mask = IMR_MSK;
-  _SetCNTR(wInterrupt_Mask); // set interrupts mask
+  common_PowerOn();       // Connect the device
+  USB_SIL_Init(IMR_MSK);			/* Perform basic device initialization operations */
   massbDeviceState = UNCONNECTED;
 }
 /*******************************************************************************

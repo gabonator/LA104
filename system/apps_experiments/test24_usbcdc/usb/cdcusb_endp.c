@@ -12,8 +12,42 @@
 #include <usb_mem.h>
 #include "cdcusb_desc.h"
 #include "cdcusb_app.h"
-#include "cdcusb_istr.h"
-#include "cdcusb_pwr.h"
+#include "cdcusb_conf.h"
+
+void cdcEP3_OUT_Callback(void);
+void cdcEP1_IN_Callback (void);
+void cdcSOF_Callback(void);
+
+void (*cdcpEpInt_IN[7])(void) = {
+	cdcEP1_IN_Callback,
+	cdcEP2_IN_Callback,
+	cdcEP3_IN_Callback,
+	cdcEP4_IN_Callback,
+	cdcEP5_IN_Callback,
+	cdcEP6_IN_Callback,
+	cdcEP7_IN_Callback,
+};
+
+void (*cdcpEpInt_OUT[7])(void) = {
+	cdcEP1_OUT_Callback,
+	cdcEP2_OUT_Callback,
+	cdcEP3_OUT_Callback,
+	cdcEP4_OUT_Callback,
+	cdcEP5_OUT_Callback,
+	cdcEP6_OUT_Callback,
+	cdcEP7_OUT_Callback,
+};
+
+void (*cdcpCallbacks[8])(void) = {
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  cdcSOF_Callback,
+  0
+};
 
 int FrameCount = 0;
 __IO DEVICE_STATE cdcbDeviceState = UNCONNECTED; /* USB device status */

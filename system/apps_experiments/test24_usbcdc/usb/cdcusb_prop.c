@@ -11,7 +11,6 @@
 #include "cdcusb_conf.h"
 #include "cdcusb_prop.h"
 #include "cdcusb_desc.h"
-#include "cdcusb_pwr.h"
 #include "cdcusb_app.h"
 
 DEVICE_INFO cdcDevice_Info;
@@ -81,9 +80,11 @@ void CDC_Init(void)
 	pInformation->Current_Configuration = 0;
 
 	USB_Config();
-
+	InitializeFinish(IMR_MSK);
+#if 0
 	CDC_PowerOn();				/* Connect the device */
 	USB_SIL_Init(IMR_MSK);			/* Perform basic device initialization operations */
+#endif
 
 	cdcbDeviceState = UNCONNECTED;
 }

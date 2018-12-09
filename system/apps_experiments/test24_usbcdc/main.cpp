@@ -6,14 +6,14 @@ typedef void (*THandler)(void);
 extern "C" 
 {
   void _Initialize(void* pDeviceInfo, void* pDevice, void* pDeviceProperty, void* pUserStandardRequests,
-        THandler arrHandlerIn[], THandler arrHandlerOut[], THandler istrHandler)
+        THandler arrHandlerIn[], THandler arrHandlerOut[], THandler callbacks[])
   {
-    BIOS::USB::Initialize(pDeviceInfo, pDevice, pDeviceProperty, pUserStandardRequests, arrHandlerIn, arrHandlerOut, istrHandler);
+    BIOS::USB::Initialize(pDeviceInfo, pDevice, pDeviceProperty, pUserStandardRequests, arrHandlerIn, arrHandlerOut, callbacks);
   }
 
-  void _CTR_LP()
+  void InitializeFinish(int imr_msk)
   {
-    BIOS::USB::CTR_LP();
+    BIOS::USB::InitializeFinish(imr_msk);
   }
 }
 

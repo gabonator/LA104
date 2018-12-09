@@ -11,8 +11,9 @@
 #include "cdcusb_conf.h"
 #include "cdcusb_prop.h"
 #include "cdcusb_desc.h"
-#include "cdcusb_pwr.h"
+//#include "cdcusb_pwr.h"
 #include "cdcusb_app.h"
+#include "../COMMON/commonusb_pwr.h"
 
 DEVICE_INFO cdcDevice_Info;
 
@@ -82,7 +83,7 @@ void CDC_Init(void)
 
 	USB_Config();
 
-	CDC_PowerOn();				/* Connect the device */
+	common_PowerOn();				/* Connect the device */
 	USB_SIL_Init(IMR_MSK);			/* Perform basic device initialization operations */
 
 	cdcbDeviceState = UNCONNECTED;
@@ -147,11 +148,6 @@ void CDC_SetConfiguration(void)
 
 	if (pInfo->Current_Configuration != 0)
 	{	/* Device configured */
-//TODO: VYHODIT!!!!!!!!!!!
-//gabo
-    ClearDTOG_TX(ENDP1);  // Initialize Endpoint 1
-    ClearDTOG_RX(ENDP2);  // Initialize Endpoint 2
-
 		cdcbDeviceState = CONFIGURED;
 	}
 }
@@ -217,10 +213,6 @@ RESULT CDC_NoData_Setup(uint8_t RequestNo)
 {
 	if (Type_Recipient == (CLASS_REQUEST | INTERFACE_RECIPIENT))
 	{
-//gabo
-    ClearDTOG_TX(ENDP1);  // Initialize Endpoint 1
-    ClearDTOG_RX(ENDP2);  // Initialize Endpoint 2
-
 		if (RequestNo == SET_COMM_FEATURE)
 			return USB_SUCCESS;
 		else if (RequestNo == SET_CONTROL_LINE_STATE)

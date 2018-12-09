@@ -1,7 +1,10 @@
 #ifndef __HW_CONFIG_H
 #define __HW_CONFIG_H
 
+#include <stdint.h>
 #include <usb_lib.h>
+
+//#include <usb_lib.h>
 //#include <usb_core.h>
 //#include <usb_type.h>
 //#include <stdint.h>
@@ -58,6 +61,9 @@ typedef enum _DEVICE_STATE {
 	CONFIGURED
 } DEVICE_STATE;
 
+#define false FALSE
+#define true TRUE
+
 typedef RESULT USB_RESULT;
 
 extern DEVICE_INFO cdcDevice_Info;
@@ -66,5 +72,5 @@ extern bool USB_Tx_Active;
 
 void dbgPrint(const char* msg, ...);
 void dbgPushPrint(const char* msg, ...);
-void CTR_LP();
+void InitializeFinish(int);
 #endif  /*__HW_CONFIG_H*/

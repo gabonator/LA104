@@ -8,22 +8,23 @@
  ******************************************************************************
  */
 #include <usb_lib.h>
-#include "cdcusb_conf.h"
-#include "cdcusb_pwr.h"
-#include "cdcusb_app.h"
+#include "commonusb_conf.h"
+#include "commonusb_pwr.h"
+#include "commonusb_app.h"
 
-bool remotewakeupon = false; // GABO
+extern uint16_t wInterrupt_Mask;
+bool common_remotewakeupon = false; // GABO
 
 struct {
-	__IO RESUME_STATE eState;
+	__IO common_RESUME_STATE eState;
 	__IO uint8_t bESOFcnt;
-} CDC_ResumeS;
+} common_ResumeS;
 
 /******************************************************************************
  * @brief	PowerOn
  * @retval	USB_SUCCESS.
  */
-USB_RESULT CDC_PowerOn(void)
+USB_RESULT common_PowerOn(void)
 {
 	uint16_t wRegVal;
 
@@ -47,7 +48,7 @@ USB_RESULT CDC_PowerOn(void)
  * @brief	Handles switch-off conditions
  * @retval	USB_SUCCESS.
  */
-USB_RESULT CDC_PowerOff()
+USB_RESULT common_PowerOff()
 {
 	_SetCNTR(CNTR_FRES);				/* disable all interrupts and force USB reset */
 	_SetISTR(0);						/* clear interrupt status register */
@@ -65,7 +66,7 @@ USB_RESULT CDC_PowerOff()
  * @brief	Sets suspend mode operating conditions
  * @retval	USB_SUCCESS.
  */
-void CDC_Suspend(void)
+void common_Suspend(void)
 {
 	uint32_t i = 0;
 	uint16_t wCNTR;
@@ -165,7 +166,7 @@ void CDC_Suspend(void)
 /******************************************************************************
  * @brief	Handles wake-up restoring normal operations
  */
-void CDC_Resume_Init(void)
+void common_Resume_Init(void)
 {
 	uint16_t wCNTR;
 
@@ -198,62 +199,62 @@ void CDC_Resume_Init(void)
  *			RESUME_ESOF doesn't change ResumeS.eState allowing
  *			decrementing of the ESOF counter in different states.
  */
-void CDC_Resume(RESUME_STATE eResumeSetVal)
+void common_Resume(common_RESUME_STATE eResumeSetVal)
 {
 	uint16_t wCNTR;
 
 	if (eResumeSetVal != RESUME_ESOF)
-		CDC_ResumeS.eState = eResumeSetVal;
+		common_ResumeS.eState = eResumeSetVal;
 
-	switch (CDC_ResumeS.eState)
+	switch (common_ResumeS.eState)
 	{
 	case RESUME_EXTERNAL:
-		if (remotewakeupon == false)
+		if (common_remotewakeupon == false)
 		{
-			CDC_Resume_Init();
-			CDC_ResumeS.eState = RESUME_OFF;
+			common_Resume_Init();
+			common_ResumeS.eState = RESUME_OFF;
 		}
 		else
 		{	 /* RESUME detected during the RemoteWAkeup signalling => keep RemoteWakeup handling */
-			CDC_ResumeS.eState = RESUME_ON;
+			common_ResumeS.eState = RESUME_ON;
 		}
 		break;
 	case RESUME_INTERNAL:
-		CDC_Resume_Init();
-		CDC_ResumeS.eState = RESUME_START;
-		remotewakeupon = true;
+		common_Resume_Init();
+		common_ResumeS.eState = RESUME_START;
+		common_remotewakeupon = true;
 		break;
 	case RESUME_LATER:
-		CDC_ResumeS.bESOFcnt = 2;
-		CDC_ResumeS.eState = RESUME_WAIT;
+		common_ResumeS.bESOFcnt = 2;
+		common_ResumeS.eState = RESUME_WAIT;
 		break;
 	case RESUME_WAIT:
-		CDC_ResumeS.bESOFcnt--;
-		if (CDC_ResumeS.bESOFcnt == 0)
-			CDC_ResumeS.eState = RESUME_START;
+		common_ResumeS.bESOFcnt--;
+		if (common_ResumeS.bESOFcnt == 0)
+			common_ResumeS.eState = RESUME_START;
 		break;
 	case RESUME_START:
 		wCNTR = _GetCNTR();
 		wCNTR |= CNTR_RESUME;
 		_SetCNTR(wCNTR);
-		CDC_ResumeS.eState = RESUME_ON;
-		CDC_ResumeS.bESOFcnt = 10;
+		common_ResumeS.eState = RESUME_ON;
+		common_ResumeS.bESOFcnt = 10;
 		break;
 	case RESUME_ON:	
-		CDC_ResumeS.bESOFcnt--;
-		if (CDC_ResumeS.bESOFcnt == 0)
+		common_ResumeS.bESOFcnt--;
+		if (common_ResumeS.bESOFcnt == 0)
 		{
 			wCNTR = _GetCNTR();
 			wCNTR &= (~CNTR_RESUME);
 			_SetCNTR(wCNTR);
-			CDC_ResumeS.eState = RESUME_OFF;
-			remotewakeupon = false;
+			common_ResumeS.eState = RESUME_OFF;
+			common_remotewakeupon = false;
 		}
 		break;
 	case RESUME_OFF:
 	case RESUME_ESOF:
 	default:
-		CDC_ResumeS.eState = RESUME_OFF;
+		common_ResumeS.eState = RESUME_OFF;
 		break;
 	}
 }

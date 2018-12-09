@@ -1,3 +1,4 @@
+//TODO: MOVE IT!!!
 
 /**********************(C) COPYRIGHT 2017 e-Design Co.,Ltd.*********************
  * FileName    : Disk.c
@@ -12,7 +13,7 @@
 #include "msdusb_bot.h"
 #include <usb_mem.h>
 #include <usb_lib.h>
-#include "msdusb_pwr.h"
+#include "../../lib/COMMON/commonusb_pwr.h"
 #include "stm32f10x_flash.h"
 #include "../bios/fatfs/Ext_Flash.h"
 

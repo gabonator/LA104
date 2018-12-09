@@ -37,18 +37,22 @@ arm-none-eabi-gcc -Wall -Os -Werror -fno-common -mcpu=cortex-m3 -mthumb -msoft-f
   ../lib/STM32F10x_StdPeriph_Driver/src/stm32f10x_usart.c \
   ../lib/STM32F10x_StdPeriph_Driver/src/misc.c \
   ../lib/CDC/cdcusb_endp.c \
-  ../lib/CDC/cdcusb_istr.c \
   ../lib/CDC/cdcusb_desc.c \
-  ../lib/CDC/cdcusb_pwr.c \
   ../lib/CDC/cdcusb_prop.c \
   ../lib/CDC/cdcusb_app.c \
   ../source/usb/Disk.c \
   ../lib/MSD/msdusb_scsi.c \
   ../lib/MSD/msdusb_bot.c \
-  ../lib/MSD/msdusb_istr.c \
   ../lib/MSD/msdusb_desc.c \
-  ../lib/MSD/msdusb_pwr.c \
   ../lib/MSD/msdusb_prop.c \
+  ../lib/MSD/msdusb_endp.c \
+  ../lib/COMMON/commonusb_pwr.c \
+  ../lib/COMMON/commonusb_istr.c \
+  ../lib/COMMON/commonusb_app.c \
+
+
+#  ../lib/MSD/msdusb_istr.c \
+#  ../lib/MSD/msdusb_pwr.c \
 
 arm-none-eabi-g++ -Wall -Os -Werror -fno-common -mcpu=cortex-m3 -mthumb -msoft-float -MD -fno-exceptions -fno-rtti -fno-threadsafe-statics -Wno-psabi -c -Wall -Werror -D USE_STDPERIPH_DRIVER -D STM32F10X_HD ${INCLUDES} -c \
   ../main.cpp \
@@ -107,9 +111,7 @@ arm-none-eabi-gcc -mcpu=cortex-m3 -mthumb -o output.elf -nostartfiles -T ../app.
   ./stm32f10x_usart.o \
   ./misc.o \
   ./cdcusb_prop.o \
-  ./cdcusb_istr.o \
   ./cdcusb_desc.o \
-  ./cdcusb_pwr.o \
   ./cdcusb_endp.o \
   ./cdcusb_app.o \
   ./Disk.o \
@@ -117,8 +119,13 @@ arm-none-eabi-gcc -mcpu=cortex-m3 -mthumb -o output.elf -nostartfiles -T ../app.
   ./msdusb_bot.o \
   ./msdusb_prop.o \
   ./msdusb_desc.o \
-  ./msdusb_istr.o \
-  ./msdusb_pwr.o \
+  ./msdusb_endp.o \
+  ./commonusb_pwr.o \
+  ./commonusb_istr.o \
+  ./commonusb_app.o \
+
+#  ./msdusb_istr.o \
+#  ./msdusb_pwr.o \
 
 
 arm-none-eabi-objcopy -O binary ./output.elf ./output.bin

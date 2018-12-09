@@ -5,6 +5,7 @@
 #include <usb_type.h>
 #include <stdint.h>
 #include <stdbool.h>
+#include "../COMMON/commonusb_app.h"
 
 #define USART_RX_DATA_SIZE	256
 #define USART_TX_DATA_SIZE	256
@@ -48,14 +49,6 @@ void delay(uint32_t ms);
 void EnterSleepMode(void);
 
 /////////////
-typedef enum _DEVICE_STATE {
-	UNCONNECTED,
-	ATTACHED,
-	POWERED,
-	SUSPENDED,
-	ADDRESSED,
-	CONFIGURED
-} DEVICE_STATE;
 
 typedef RESULT USB_RESULT;
 

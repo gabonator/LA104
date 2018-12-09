@@ -4,8 +4,7 @@
 #include "lib/STM32F10x_StdPeriph_Driver/inc/misc.h"
 
 extern "C" {
-//#include "USB_type.h"
-//#include "USB_lib.h"
+#include "lib/COMMON/commonusb_app.h"
 #include "usb_core.h"
 #include "usb_init.h"
 }
@@ -43,6 +42,8 @@ void EnableUsb()
 extern "C" {
   void USB_Init(void);
   void Disk_Init(void);
+  void common_PowerOn();
+  void USB_SIL_Init(uint16_t);
 
   // placement for non instantiaed required attributes
   void (*pEpInt_IN[7])(void) = {};
@@ -56,7 +57,7 @@ extern "C" {
   extern USER_STANDARD_REQUESTS massUser_Standard_Requests;
   extern void (*masspEpInt_IN[7])(void);
   extern void (*masspEpInt_OUT[7])(void);
-  extern void massUSB_Istr(void);
+  extern void (*masspCallbacks[8])(void);
 
   // imports for cdc
   extern DEVICE_INFO cdcDevice_Info;
@@ -65,22 +66,15 @@ extern "C" {
   extern USER_STANDARD_REQUESTS cdcUser_Standard_Requests;
   extern void (*cdcpEpInt_IN[7])(void);
   extern void (*cdcpEpInt_OUT[7])(void);
-  extern void cdcUSB_Istr(void);
+  extern void (*cdcpCallbacks[8])(void);
 
-  // placement for instantiated handlers
-  BIOS::USB::THandler pUsbIstrHandler = nullptr;
+  extern void commonUSB_Istr(void);
 
   void USB_Istr(void)
   {
-    if (pUsbIstrHandler)
-      pUsbIstrHandler();
+    commonUSB_Istr();
   }
-   
-  void CTR_LP(void);
 }
-
-
-
 
 namespace BIOS
 {
@@ -90,9 +84,10 @@ namespace BIOS
 //      THandler arrHandlerIn[], THandler arrHandlerOut[], THandler istrHandler)
 
     void Initialize(void* pDeviceInfo, void* pDevice, void* pDeviceProperty, void* pUserStandardRequests,
-      THandler arrHandlerIn[], THandler arrHandlerOut[], THandler istrHandler)
+      THandler arrHandlerIn[], THandler arrHandlerOut[], THandler arrCallbacks[])
     {
-      pUsbIstrHandler = istrHandler;      
+      commmon_Initialize((DEVICE_PROP*)pDeviceProperty, arrCallbacks);
+
       for (int i=0; i<7; i++)
       {
         pEpInt_IN[i] = arrHandlerIn[i];
@@ -109,13 +104,15 @@ namespace BIOS
 
     void InitializeMass()
     {
-      Initialize(&massDevice_Info, &massDevice_Table, &massDevice_Property, &massUser_Standard_Requests, masspEpInt_IN, masspEpInt_OUT, massUSB_Istr);
+      Disable();
+      Initialize(&massDevice_Info, &massDevice_Table, &massDevice_Property, &massUser_Standard_Requests, masspEpInt_IN, masspEpInt_OUT, masspCallbacks);
       Disk_Init();
     }
 
     void InitializeSerial()
     {
-      Initialize(&cdcDevice_Info, &cdcDevice_Table, &cdcDevice_Property, &cdcUser_Standard_Requests, cdcpEpInt_IN, cdcpEpInt_OUT, cdcUSB_Istr);
+      Disable();
+      Initialize(&cdcDevice_Info, &cdcDevice_Table, &cdcDevice_Property, &cdcUser_Standard_Requests, cdcpEpInt_IN, cdcpEpInt_OUT, cdcpCallbacks);
     }
 
     void Enable()
@@ -129,10 +126,10 @@ namespace BIOS
       EnableUsb(false);
     }
 
-    void CTR_LP()
+    void InitializeFinish(int imr_msk)
     {
-      ::CTR_LP();
+	common_PowerOn();				/* Connect the device */
+	USB_SIL_Init(imr_msk);			/* Perform basic device initialization operations */
     }
-
   }
 }

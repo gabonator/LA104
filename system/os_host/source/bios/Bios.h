@@ -195,11 +195,12 @@ namespace BIOS
 
     void Enable();
     void Initialize(void* pDeviceInfo, void* pDevice, void* pDeviceProperty, void* pUserStandardRequests,
-      THandler arrHandlerIn[], THandler arrHandlerOut[], THandler istrHandler);
+      THandler arrHandlerIn[], THandler arrHandlerOut[], THandler arrCallbacks[]);
     void InitializeMass();
     void InitializeSerial();
     void Disable();
-    void CTR_LP();
+
+    void InitializeFinish(int msk);
   }
 }
 

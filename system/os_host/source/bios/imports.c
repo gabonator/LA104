@@ -146,7 +146,13 @@ void Set_Area(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2)
 
 void EnableUsb(bool enable)
 {
-  __Bios(USBDEV, INIT);         // USB
+  if (enable)
+  {
+    __Bios(USBDEV, INIT);         // USB
+  } else
+  {
+    // TODO
+  }
 }
 
 void HardwareInit()

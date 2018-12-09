@@ -1,3 +1,4 @@
+#pragma once
 /**
   ******************************************************************************
   * @file    usb_istr.h
@@ -25,70 +26,46 @@
   ******************************************************************************
   */
 
-
-/* Define to prevent recursive inclusion -------------------------------------*/
-#ifndef __USB_ISTR_H
-#define __USB_ISTR_H
-
 /* Includes ------------------------------------------------------------------*/
-#include "cdcusb_conf.h"
+#include "commonusb_conf.h"
 
 /* Exported types ------------------------------------------------------------*/
 /* Exported constants --------------------------------------------------------*/
 /* Exported macro ------------------------------------------------------------*/
 /* Exported functions ------------------------------------------------------- */
 
- void cdcUSB_Istr(void);
-
-/* function prototypes Automatically built defining related macros */
-
-void cdcEP1_IN_Callback(void);
-void cdcEP2_IN_Callback(void);
-void cdcEP3_IN_Callback(void);
-void cdcEP4_IN_Callback(void);
-void cdcEP5_IN_Callback(void);
-void cdcEP6_IN_Callback(void);
-void cdcEP7_IN_Callback(void);
-
-void cdcEP1_OUT_Callback(void);
-void cdcEP2_OUT_Callback(void);
-void cdcEP3_OUT_Callback(void);
-void cdcEP4_OUT_Callback(void);
-void cdcEP5_OUT_Callback(void);
-void cdcEP6_OUT_Callback(void);
-void cdcEP7_OUT_Callback(void);
+void common_USB_Istr(void);
 
 #ifdef CTR_CALLBACK
-void cdcCTR_Callback(void);
+void common_CTR_Callback(void);
 #endif
 
 #ifdef DOVR_CALLBACK
-void cdcDOVR_Callback(void);
+void common_DOVR_Callback(void);
 #endif
 
 #ifdef ERR_CALLBACK
-void cdcERR_Callback(void);
+void common_ERR_Callback(void);
 #endif
 
 #ifdef WKUP_CALLBACK
-void cdcWKUP_Callback(void);
+void common_WKUP_Callback(void);
 #endif
 
 #ifdef SUSP_CALLBACK
-void cdcSUSP_Callback(void);
+void common_SUSP_Callback(void);
 #endif
 
 #ifdef RESET_CALLBACK
-void cdcRESET_Callback(void);
+void common_RESET_Callback(void);
 #endif
 
 #ifdef SOF_CALLBACK
-void cdcSOF_Callback(void);
+void common_SOF_Callback(void);
 #endif
 
 #ifdef ESOF_CALLBACK
-void cdcESOF_Callback(void);
+void common_ESOF_Callback(void);
 #endif
-#endif /*__USB_ISTR_H*/
 
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/

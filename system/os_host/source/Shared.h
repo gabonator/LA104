@@ -40,7 +40,7 @@ uint32_t GetProcAddress(char* symbol)
   if (strcmp(symbol, "OS18SetInterruptVectorENS0_16EInterruptVectorEPFvvE") == 0)
     return (uint32_t)BIOS::OS::SetInterruptVector;
 
-  if (strcmp(symbol, "USB10InitializeEPvS1_S1_S1_PPFvvES4_S3_") == 0)
+  if (strcmp(symbol, "USB10InitializeEPvS1_S1_S1_PPFvvES4_S4_") == 0)
     return (uint32_t)BIOS::USB::Initialize;
   if (strcmp(symbol, "USB14InitializeMassEv") == 0)
     return (uint32_t)static_cast<void(*)()>(BIOS::USB::InitializeMass);
@@ -50,8 +50,8 @@ uint32_t GetProcAddress(char* symbol)
     return (uint32_t)static_cast<void(*)()>(BIOS::USB::Enable);
   if (strcmp(symbol, "USB7DisableEv") == 0)
     return (uint32_t)static_cast<void(*)()>(BIOS::USB::Disable);
-  if (strcmp(symbol, "USB6CTR_LPEv") == 0)
-    return (uint32_t)static_cast<void(*)()>(BIOS::USB::CTR_LP);
+  if (strcmp(symbol, "USB16InitializeFinishEi") == 0)
+    return (uint32_t)static_cast<void(*)(int)>(BIOS::USB::InitializeFinish);
 
   if (strcmp(symbol, "DBG5PrintEPKcz") == 0)
     return (uint32_t)static_cast<void(*)(char const*, ...)>(BIOS::DBG::Print);
