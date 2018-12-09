@@ -3,8 +3,11 @@
 #include <stdint.h>
 #include <stdbool.h>
 
+#ifdef __cplusplus
 extern "C" 
 {
+#endif
+
   void Set_Posi(uint_fast16_t x, uint_fast16_t y);
   void Set_Pixel(uint_fast16_t Color);
   uint16_t Get_Pixel();
@@ -15,4 +18,9 @@ extern "C"
   char GetLastChar();
   void Set_Area(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2);
   void EnableUsb(bool enable);
+  void HardwareInit();
+  uint32_t GetKeys();
+
+#ifdef __cplusplus
 }
+#endif

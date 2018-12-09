@@ -16,7 +16,6 @@ INCLUDES="\
   -I ../lib/CMSIS/Device/STM32F10x/Include \
   -I ../lib"
 
-arm-none-eabi-gcc -mcpu=cortex-m3 -mthumb -c ../bios.s
 arm-none-eabi-gcc -Wall -Os -Werror -fno-common -mcpu=cortex-m3 -mthumb -msoft-float -MD -D USE_STDPERIPH_DRIVER -D STM32F10X_HD ${INCLUDES} -c \
   ../startup.c \
   ../interrupt.c \

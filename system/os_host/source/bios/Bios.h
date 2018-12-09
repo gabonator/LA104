@@ -5,6 +5,7 @@ namespace BIOS
 {
   namespace SYS
   {
+    void Init();
     uint32_t GetTick();
     int Execute(uint32_t addr);
     void Beep(int intervalMs);

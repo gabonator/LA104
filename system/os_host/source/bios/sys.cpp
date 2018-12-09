@@ -1,4 +1,5 @@
 #include "Bios.h"
+#include "imports.h"
 
 extern "C" volatile uint32_t gCounter;
 extern "C" volatile uint32_t gBeepCounter;
@@ -11,6 +12,10 @@ void Delay_mS(uint32_t mS)
     while(Dly_mS);
 }
 
+void BIOS::SYS::Init()
+{
+  HardwareInit();
+}
 
 void BIOS::SYS::DelayUs(int intervalUs)
 {

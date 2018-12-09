@@ -1,13 +1,12 @@
 //#include "imports.h"
 #include <stdint.h>
 #include <stdbool.h>
+#include "lib/STM32F10x_StdPeriph_Driver/inc/misc.h"
 
-uint32_t __Bios(uint8_t Item, uint32_t Var);
+extern void (* g_pfnVectors[76])(void);
 
-#define BITMAP          0xFFFC0000
-#define INIT            0xFFFF0000
-#define ENBL 1
-#define DSBL            0
+__attribute__ ((section(".biosfunc"), optimize("O0")))
+uint32_t __Bios(uint8_t Item, uint32_t Var) { return 0; }
 
 enum
 {
@@ -89,6 +88,10 @@ enum
     EXT_TXD, // ??? PIO ???     Var: PIOCFG+PinDef      Rtn: SUCC
 };
 
+#define INIT            0xFFFF0000
+#define ENBL 1
+#define DSBL            0
+
 void Set_Posi(uint_fast16_t x, uint_fast16_t y)
 {
     __Bios(PIXEL_X, x);
@@ -145,3 +148,25 @@ void EnableUsb(bool enable)
 {
   __Bios(USBDEV, INIT);         // USB
 }
+
+void HardwareInit()
+{
+    __Bios(PWRCTRL, INIT);        // 
+    __Bios(KEYnDEV, INIT);        // 
+    NVIC_SetVectorTable(NVIC_VectTab_FLASH, (uint32_t)g_pfnVectors - NVIC_VectTab_FLASH);
+//    __Bios(NIVCPTR, 0x8000);      // 
+    SysTick_Config(SystemCoreClock / 1000);
+    __Bios(BUZZDEV, INIT);        // 
+    __Bios(BUZZDEV, 50);
+    //Beep_mS(200);
+    __Bios(FLSHDEV, INIT);        // SPI
+    __Bios(IN_PORT, INIT);        // DAC
+}
+
+uint32_t GetKeys()
+{
+  const uint32_t KEYnDEV = 6;
+  const uint32_t BITMAP = 0xFFFC0000;
+  return ~__Bios(KEYnDEV, BITMAP);
+}
+

@@ -3,11 +3,11 @@
 #include "source/Manager.h"
 
 extern "C" void Hardware_Init();
-//extern "C" void dbgPopPrint();
+extern "C" void dbgPopPrint();
 
 int main()
 {
-  Hardware_Init();
+  BIOS::SYS::Init();
   BIOS::FAT::Init();
   BIOS::USB::Enable();
 //  BIOS::USB::InitializeSerial();
