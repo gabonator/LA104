@@ -75,7 +75,8 @@ extern "C" {
     if (pUsbIstrHandler)
       pUsbIstrHandler();
   }
-
+   
+  void CTR_LP(void);
 }
 
 
@@ -127,5 +128,11 @@ namespace BIOS
     {
       EnableUsb(false);
     }
+
+    void CTR_LP()
+    {
+      ::CTR_LP();
+    }
+
   }
 }

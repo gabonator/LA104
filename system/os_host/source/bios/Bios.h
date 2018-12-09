@@ -199,6 +199,7 @@ namespace BIOS
     void InitializeMass();
     void InitializeSerial();
     void Disable();
+    void CTR_LP();
   }
 }
 

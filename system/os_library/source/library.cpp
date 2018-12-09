@@ -117,6 +117,10 @@ namespace BIOS
   {
     void Enable() {}
     void Disable() {}
+    void Initialize(void* pDeviceInfo, void* pDevice, void* pDeviceProperty, void* pUserStandardRequests, THandler arrHandlerIn[], THandler arrHandlerOut[], THandler istrHandler) {}
+    void InitializeMass() {}
+    void InitializeSerial() {}
+    void CTR_LP() {}
   }
 }
 

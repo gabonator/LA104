@@ -5,7 +5,7 @@
 #ifndef __USB_ISTR_H
 #define __USB_ISTR_H
 
-#include <usb_conf.h>
+#include "msdusb_conf.h"
 
 void CTR_HP(void);
 void massUSB_Istr(void);

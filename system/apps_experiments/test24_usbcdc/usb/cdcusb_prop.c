@@ -147,7 +147,6 @@ void CDC_SetConfiguration(void)
 
 	if (pInfo->Current_Configuration != 0)
 	{	/* Device configured */
-//TODO: VYHODIT!!!!!!!!!!!
 //gabo
     ClearDTOG_TX(ENDP1);  // Initialize Endpoint 1
     ClearDTOG_RX(ENDP2);  // Initialize Endpoint 2
