@@ -2,7 +2,7 @@
  File Name : USB_desc.c
  Version   : STM32_USB Disk Ver 3.4       Author : MCD Application Team & bure
 *******************************************************************************/
-#include "USB_desc.h"
+#include "msdusb_desc.h"
 
 const u8 MASS_DeviceDescriptor[MASS_SIZ_DEVICE_DESC] ={
     0x12,   /* bLength  */

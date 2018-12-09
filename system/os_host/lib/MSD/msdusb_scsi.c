@@ -2,10 +2,10 @@
  File Name : USB_scsi.c
  Version   : STM32 USB Disk Ver 3.4       Author : MCD Application Team & bure
 *******************************************************************************/
-#include "USB_scsi.h"
-#include "USB_bot.h"
-#include "USB_regs.h"
-#include "usb_lib.h"
+#include "msdusb_scsi.h"
+#include "msdusb_bot.h"
+#include <usb_regs.h>
+#include <usb_lib.h>
 #include "source/usb/Disk.h"
 
 u8 Page00_Inquiry_Data[] ={ 0, 0, 0, 0, 0};

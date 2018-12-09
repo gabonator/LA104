@@ -5,7 +5,7 @@
 #ifndef __USB_SCSI_H
 #define __USB_SCSI_H
 
-#include "stm32f10x.h"
+#include <stm32f10x.h>
 
 /* SCSI Commands */
 #define SCSI_FORMAT_UNIT                            0x04

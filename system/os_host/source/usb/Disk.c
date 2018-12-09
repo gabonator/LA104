@@ -1,3 +1,4 @@
+
 /**********************(C) COPYRIGHT 2017 e-Design Co.,Ltd.*********************
  * FileName    : Disk.c
  * Description : 
@@ -5,13 +6,13 @@
  * History     :
 *******************************************************************************/
 #include "Disk.h"
-#include "USB_scsi.h"
-#include "USB_regs.h"
-#include "USB_conf.h"
-#include "USB_bot.h"
-#include "USB_mem.h"
-#include "USB_lib.h"
-#include "USB_pwr.h"
+#include "msdusb_scsi.h"
+#include <usb_regs.h>
+#include "msdusb_conf.h"
+#include "msdusb_bot.h"
+#include <usb_mem.h>
+#include <usb_lib.h>
+#include "msdusb_pwr.h"
 #include "stm32f10x_flash.h"
 #include "../bios/fatfs/Ext_Flash.h"
 
@@ -175,6 +176,7 @@ void Write_Memory(u32 WrOffset, u32 WrLength)
  * Description  : USB
  * Param        : u8 Status  ENBL/DSBL
 *******************************************************************************/
+#if 0
 void USB_Connect(u8 Status)
 {
     if(Status == DISABLE)  
@@ -193,4 +195,5 @@ void USB_Connect(u8 Status)
         USB_Init();
     }
 }
+#endif
 /*********************************  END OF FILE  ******************************/

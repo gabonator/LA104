@@ -2,12 +2,12 @@
  File Name : USB_bot.c
  Version   : STM32_USB Disk Ver 3.4        Author : MCD Application Team & bure
 *******************************************************************************/
-#include "USB_scsi.h"
-#include "USB_regs.h"
-#include "USB_mem.h"
-#include "USB_conf.h"
-#include "USB_bot.h"
-#include "USB_prop.h"
+#include "msdusb_scsi.h"
+#include <usb_regs.h>
+#include <usb_mem.h>
+#include "msdusb_conf.h"
+#include "msdusb_bot.h"
+#include "msdusb_prop.h"
 
 u8 Bot_State;
 u8 Bulk_Buff[BULK_MAX_PACKET_SIZE];  // Data_ data buffer

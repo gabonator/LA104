@@ -2,45 +2,47 @@
  File Name : USB_istr.c
  Version   : STM32 USB Disk Ver 3.4        Author : MCD Application Team & bure
 *******************************************************************************/
-#include "USB_type.h"
-#include "USB_regs.h"
-#include "USB_pwr.h"
-#include "USB_istr.h"
-#include "USB_init.h"
-#include "USB_int.h"
-#include "USB_bot.h"
+#include <usb_type.h>
+#include <usb_regs.h>
+#include <usb_init.h>
+#include <usb_int.h>
+#include "msdusb_pwr.h"
+#include "msdusb_istr.h"
+#include "msdusb_bot.h"
+#include "msdusb_conf.h"
 
-volatile u16 wIstr;           /* ISTR register last read value */
-volatile u8 bIntPackSOF = 0;  /* SOFs received between 2 consecutive packets */
+//volatile u16 wIstr;           /* ISTR register last read value */
+volatile u8 massbIntPackSOF = 0;  /* SOFs received between 2 consecutive packets */
+extern DEVICE_PROP massDevice_Property;
 
-void (*pEpInt_IN[7])(void) ={
-    EP1_IN_Callback,
-    EP2_IN_Callback,
-    EP3_IN_Callback,
-    EP4_IN_Callback,
-    EP5_IN_Callback,
-    EP6_IN_Callback,
-    EP7_IN_Callback,
+void (*masspEpInt_IN[7])(void) ={
+    massEP1_IN_Callback,
+    massEP2_IN_Callback,
+    massEP3_IN_Callback,
+    massEP4_IN_Callback,
+    massEP5_IN_Callback,
+    massEP6_IN_Callback,
+    massEP7_IN_Callback,
   };
-void (*pEpInt_OUT[7])(void) ={
-    EP1_OUT_Callback,
-    EP2_OUT_Callback,
-    EP3_OUT_Callback,
-    EP4_OUT_Callback,
-    EP5_OUT_Callback,
-    EP6_OUT_Callback,
-    EP7_OUT_Callback,
+void (*masspEpInt_OUT[7])(void) ={
+    massEP1_OUT_Callback,
+    massEP2_OUT_Callback,
+    massEP3_OUT_Callback,
+    massEP4_OUT_Callback,
+    massEP5_OUT_Callback,
+    massEP6_OUT_Callback,
+    massEP7_OUT_Callback,
   };
 /*******************************************************************************
   USB_Istr: ISTR events interrupt service routine
 *******************************************************************************/
-void USB_Istr(void)
+void massUSB_Istr(void)
 {
-  wIstr = _GetISTR();
+  u16 wIstr = _GetISTR();
 #if (IMR_MSK & ISTR_RESET)
   if (wIstr & ISTR_RESET & wInterrupt_Mask){
 //    _SetISTR((u16)CLR_RESET);
-    Device_Property.Reset();
+    massDevice_Property.Reset();
     _SetISTR((u16)CLR_RESET);
 //#ifdef RESET_CALLBACK
 //    RESET_Callback();
@@ -79,7 +81,7 @@ void USB_Istr(void)
 //-----------------------------------------------------------------------------
 #if (IMR_MSK & ISTR_SUSP)
   if (wIstr & ISTR_SUSP & wInterrupt_Mask){ // check if SUSPEND is possible
-    if (fSuspendEnabled)  Suspend();
+    if (fSuspendEnabled)  MASS_Suspend();
     else                  Resume(RESUME_LATER); // if not possible then resume after xx ms
     _SetISTR((u16)CLR_SUSP); // clear of the ISTR bit must be done after setting of CNTR_FSUSP
 //#ifdef SUSP_CALLBACK
@@ -91,7 +93,7 @@ void USB_Istr(void)
 #if (IMR_MSK & ISTR_SOF)
   if (wIstr & ISTR_SOF & wInterrupt_Mask){
     _SetISTR((u16)CLR_SOF);
-    bIntPackSOF++;
+    massbIntPackSOF++;
 //#ifdef SOF_CALLBACK
 //    SOF_Callback();
 //#endif
@@ -123,14 +125,14 @@ void USB_Istr(void)
 /*******************************************************************************
   EP1_IN_Callback: EP1 IN Callback Routine
 *******************************************************************************/
-void EP1_IN_Callback(void)
+void massEP1_IN_Callback(void)
 {
   Mass_Storage_In();
 }
 /*******************************************************************************
   EP2_OUT_Callback: EP2 OUT Callback Routine.
 *******************************************************************************/
-void EP2_OUT_Callback(void)
+void massEP2_OUT_Callback(void)
 {
   Mass_Storage_Out();
 }

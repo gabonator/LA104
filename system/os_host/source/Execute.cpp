@@ -187,8 +187,8 @@ uint32_t CWndUserManager::ElfExecute( char* strName )
 	*/
 //	USB_Connect(DISABLE);
 
-	BIOS::LCD::Clear(0);
-	BIOS::DBG::Print("Executing ELF image\n");
+	BIOS::LCD::Clear(RGB565(0000b0));
+	BIOS::DBG::Print("$Executing ELF image\n");
 	CBufferedReader2 fw;
 	if ( !fw.Open( strName ) )
 		return 0;
@@ -362,7 +362,7 @@ uint32_t CWndUserManager::ElfExecute( char* strName )
 			}
 			case SecRelPlt:
 			{
-				BIOS::DBG::Print("Matching imports...\n");
+				BIOS::DBG::Print("Matching imports...");
 				_ASSERT( arrSectionOffset[SecDynSym] != -1 );
 				_ASSERT( arrSectionOffset[SecDynStr] != -1 );
 
@@ -419,7 +419,7 @@ BIOS::LCD::Print(0,80+16, RGB565(ffffff), RGB565(ff0000), temp);
 			case SecInit:
 			{
 
-					BIOS::DBG::Print("\nInitArray:");
+					BIOS::DBG::Print("InitArray:");
 				// last processed section before jumping to entry
 				int nCount = elfSection.size/sizeof(ui32);
 				fw.Seek( elfSection.offset );
@@ -462,7 +462,7 @@ BIOS::LCD::Print(0,80+16, RGB565(ffffff), RGB565(ff0000), temp);
 		BIOS::DBG::Print("\n");
 	}
 
-	BIOS::DBG::Print("Load ok. Jumping to entry %08x \n", elfHeader.entry);
+	BIOS::DBG::Print("Load ok. Jumping to entry %08x.\n", elfHeader.entry);
 //	USB_Connect(ENABLE);
 	return elfHeader.entry;
 }

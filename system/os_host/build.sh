@@ -4,12 +4,123 @@ export PATH="/Users/gabrielvalky/Downloads/gcc-arm-none-eabi-7-2018-q2-update/bi
 mkdir -p build
 cd build
 
-INCLUDES="-I ../sources -I ../lib/STM32_USB-FS-Device_Driver/inc -I ../lib/MSD -I ../lib/CMSIS/Include -I ../lib/STM32F10x_StdPeriph_Driver/inc  -I .. -I ../source -I ../lib/CMSIS/Device/STM32F10x/Include -I ../lib"
+INCLUDES="\
+  -I ../sources \
+  -I ../lib/STM32_USB-FS-Device_Driver/inc \
+  -I ../lib/MSD \
+  -I ../lib/CDC \
+  -I ../lib/CMSIS/Include \
+  -I ../lib/STM32F10x_StdPeriph_Driver/inc \
+  -I .. \
+  -I ../source \
+  -I ../lib/CMSIS/Device/STM32F10x/Include \
+  -I ../lib"
 
 arm-none-eabi-gcc -mcpu=cortex-m3 -mthumb -c ../bios.s
-arm-none-eabi-gcc -Wall -Os -Werror -fno-common -mcpu=cortex-m3 -mthumb -msoft-float -MD -D USE_STDPERIPH_DRIVER -D STM32F10X_HD ${INCLUDES} -c ../startup.c ../interrupt.c ../lib/STM32F10x_StdPeriph_Driver/src/stm32f10x_flash.c ../lib/STM32F10x_StdPeriph_Driver/src/stm32f10x_spi.c ../lib/STM32F10x_StdPeriph_Driver/src/stm32f10x_rcc.c ../lib/STM32_USB-FS-Device_Driver/src/usb_init.c ../lib/MSD/USB_scsi.c ../source/usb/Disk.c ../lib/MSD/USB_bot.c ../lib/STM32_USB-FS-Device_Driver/src/usb_mem.c ../lib/STM32_USB-FS-Device_Driver/src/usb_regs.c ../lib/CMSIS/Device/STM32F10x/Source/system_stm32f10x.c ../lib/MSD/USB_prop.c ../lib/STM32_USB-FS-Device_Driver/src/usb_core.c ../lib/STM32_USB-FS-Device_Driver/src/usb_int.c ../lib/MSD/USB_istr.c ../lib/MSD/USB_desc.c ../lib/MSD/USB_pwr.c ../source/bios/fatfs/Ext_Flash.c ../source/bios/imports.c ../lib/STM32F10x_StdPeriph_Driver/src/stm32f10x_gpio.c ../lib/STM32F10x_StdPeriph_Driver/src/stm32f10x_tim.c ../lib/STM32F10x_StdPeriph_Driver/src/stm32f10x_i2c.c ../lib/STM32F10x_StdPeriph_Driver/src/stm32f10x_usart.c ../lib/STM32F10x_StdPeriph_Driver/src/misc.c
-arm-none-eabi-g++ -Wall -Os -Werror -fno-common -mcpu=cortex-m3 -mthumb -msoft-float -MD -fno-exceptions -fno-rtti -fno-threadsafe-statics -Wno-psabi -c -Wall -Werror -D USE_STDPERIPH_DRIVER -D STM32F10X_HD ${INCLUDES} -c ../main.cpp ../source/Manager.cpp ../source/framework/Wnd.cpp ../source/bios/sys.cpp ../source/bios/lcd.cpp ../source/bios/memory.cpp ../source/bios/fat.cpp ../source/bios/key.cpp ../source/bios/os.cpp ../source/bios/usb.cpp ../source/framework/Utils.cpp ../source/bios/dbg.cpp ../source/bios/gpio.cpp ../source/library/spf.c ../source/Execute.cpp ../source/Framework/Serialize.cpp ../source/gui/Gui.cpp
-arm-none-eabi-gcc -mcpu=cortex-m3 -mthumb -o output.elf -nostartfiles -T ../app.ld ./main.o ./startup.o ./interrupt.o ./sys.o ./Wnd.o ./lcd.o ./memory.o ./fat.o ./key.o ./Utils.o ./dbg.o ./os.o ./usb.o ./spf.o ./Execute.o ./Serialize.o ./imports.o ./stm32f10x_flash.o ./stm32f10x_spi.o ./stm32f10x_rcc.o ./Manager.o ./usb_init.o ./USB_scsi.o ./Disk.o ./USB_bot.o ./usb_mem.o ./usb_regs.o ./system_stm32f10x.o ./USB_prop.o ./usb_core.o ./usb_int.o ./USB_istr.o ./USB_desc.o ./USB_pwr.o ./Ext_Flash.o ./Gui.o ./stm32f10x_gpio.o ./stm32f10x_tim.o ./gpio.o ./stm32f10x_i2c.o ./stm32f10x_usart.o ./misc.o
+arm-none-eabi-gcc -Wall -Os -Werror -fno-common -mcpu=cortex-m3 -mthumb -msoft-float -MD -D USE_STDPERIPH_DRIVER -D STM32F10X_HD ${INCLUDES} -c \
+  ../startup.c \
+  ../interrupt.c \
+  ../lib/STM32F10x_StdPeriph_Driver/src/stm32f10x_flash.c \
+  ../lib/STM32F10x_StdPeriph_Driver/src/stm32f10x_spi.c \
+  ../lib/STM32F10x_StdPeriph_Driver/src/stm32f10x_rcc.c \
+  ../lib/STM32_USB-FS-Device_Driver/src/usb_init.c \
+  ../lib/STM32_USB-FS-Device_Driver/src/usb_mem.c \
+  ../lib/STM32_USB-FS-Device_Driver/src/usb_core.c \
+  ../lib/STM32_USB-FS-Device_Driver/src/usb_int.c \
+  ../lib/STM32_USB-FS-Device_Driver/src/usb_regs.c \
+  ../lib/STM32_USB-FS-Device_Driver/src/usb_sil.c \
+  ../lib/CMSIS/Device/STM32F10x/Source/system_stm32f10x.c \
+  ../source/bios/fatfs/Ext_Flash.c \
+  ../source/bios/imports.c \
+  ../lib/STM32F10x_StdPeriph_Driver/src/stm32f10x_gpio.c \
+  ../lib/STM32F10x_StdPeriph_Driver/src/stm32f10x_tim.c \
+  ../lib/STM32F10x_StdPeriph_Driver/src/stm32f10x_i2c.c \
+  ../lib/STM32F10x_StdPeriph_Driver/src/stm32f10x_usart.c \
+  ../lib/STM32F10x_StdPeriph_Driver/src/misc.c \
+  ../lib/CDC/cdcusb_endp.c \
+  ../lib/CDC/cdcusb_istr.c \
+  ../lib/CDC/cdcusb_desc.c \
+  ../lib/CDC/cdcusb_pwr.c \
+  ../lib/CDC/cdcusb_prop.c \
+  ../lib/CDC/cdcusb_app.c \
+  ../source/usb/Disk.c \
+  ../lib/MSD/msdusb_scsi.c \
+  ../lib/MSD/msdusb_bot.c \
+  ../lib/MSD/msdusb_istr.c \
+  ../lib/MSD/msdusb_desc.c \
+  ../lib/MSD/msdusb_pwr.c \
+  ../lib/MSD/msdusb_prop.c \
+
+arm-none-eabi-g++ -Wall -Os -Werror -fno-common -mcpu=cortex-m3 -mthumb -msoft-float -MD -fno-exceptions -fno-rtti -fno-threadsafe-statics -Wno-psabi -c -Wall -Werror -D USE_STDPERIPH_DRIVER -D STM32F10X_HD ${INCLUDES} -c \
+  ../main.cpp \
+  ../source/Manager.cpp \
+  ../source/framework/Wnd.cpp \
+  ../source/bios/sys.cpp \
+  ../source/bios/lcd.cpp \
+  ../source/bios/memory.cpp \
+  ../source/bios/fat.cpp \
+  ../source/bios/key.cpp \
+  ../source/bios/os.cpp \
+  ../source/bios/usb.cpp \
+  ../source/framework/Utils.cpp \
+  ../source/bios/dbg.cpp \
+  ../source/bios/gpio.cpp \
+  ../source/library/spf.c \
+  ../source/Execute.cpp \
+  ../source/Framework/Serialize.cpp \
+  ../source/gui/Gui.cpp \
+
+arm-none-eabi-gcc -mcpu=cortex-m3 -mthumb -o output.elf -nostartfiles -T ../app.ld \
+  ./main.o \
+  ./startup.o \
+  ./interrupt.o \
+  ./sys.o \
+  ./Wnd.o \
+  ./lcd.o \
+  ./memory.o \
+  ./fat.o \
+  ./key.o \
+  ./Utils.o \
+  ./dbg.o \
+  ./os.o \
+  ./usb.o \
+  ./spf.o \
+  ./Execute.o \
+  ./Serialize.o \
+  ./imports.o \
+  ./stm32f10x_flash.o \
+  ./stm32f10x_spi.o \
+  ./stm32f10x_rcc.o \
+  ./Manager.o \
+  ./usb_init.o \
+  ./usb_mem.o \
+  ./usb_regs.o \
+  ./usb_core.o \
+  ./usb_int.o \
+  ./usb_sil.o \
+  ./system_stm32f10x.o \
+  ./Ext_Flash.o \
+  ./Gui.o \
+  ./stm32f10x_gpio.o \
+  ./stm32f10x_tim.o \
+  ./gpio.o \
+  ./stm32f10x_i2c.o \
+  ./stm32f10x_usart.o \
+  ./misc.o \
+  ./cdcusb_prop.o \
+  ./cdcusb_istr.o \
+  ./cdcusb_desc.o \
+  ./cdcusb_pwr.o \
+  ./cdcusb_endp.o \
+  ./cdcusb_app.o \
+  ./Disk.o \
+  ./msdusb_scsi.o \
+  ./msdusb_bot.o \
+  ./msdusb_prop.o \
+  ./msdusb_desc.o \
+  ./msdusb_istr.o \
+  ./msdusb_pwr.o \
+
 
 arm-none-eabi-objcopy -O binary ./output.elf ./output.bin
 arm-none-eabi-objcopy -O ihex ./output.elf ./manager.hex

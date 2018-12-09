@@ -2,23 +2,23 @@
  File Name : USB_pwr.c
  Version   : STM32 USB Disk Ver 3.4       Author : MCD Application Team & bure
 *******************************************************************************/
-#include "USB_lib.h"
-#include "USB_conf.h"
-#include "USB_pwr.h"
+#include <usb_lib.h>
+#include "msdusb_conf.h"
+#include "msdusb_pwr.h"
 
-vu32 bDeviceState = UNCONNECTED; // USB device status
+vu32 massbDeviceState = UNCONNECTED; // USB device status
 vu8 fSuspendEnabled = TRUE;      // true when suspend is possible
 
 struct{
   volatile RESUME_STATE eState;
   volatile u8 bESOFcnt;
-} ResumeS;
+} MASS_ResumeS;
 
 /*******************************************************************************
   PowerOn                                                 Return : USB_SUCCESS
 
 *******************************************************************************/
-RESULT PowerOn(void)
+RESULT MASS_PowerOn(void)
 {
   u16 wRegVal;
 
@@ -39,7 +39,7 @@ RESULT PowerOn(void)
 /*******************************************************************************
   PowerOff: handles switch-off conditions                 Return : USB_SUCCESS
 *******************************************************************************/
-RESULT PowerOff()
+RESULT MASS_PowerOff()
 {
   /* disable all ints and force USB reset */
   _SetCNTR(CNTR_FRES);
@@ -58,7 +58,7 @@ RESULT PowerOff()
   Suspend: sets suspend mode operating conditions
   Return : USB_SUCCESS.
 *******************************************************************************/
-void Suspend(void)
+void MASS_Suspend(void)
 {
   u16 wCNTR;
   /* suspend preparation */
@@ -78,7 +78,7 @@ void Suspend(void)
   Resume_Init: Handles wake-up restoring normal operations
 * Return     : USB_SUCCESS.
 *******************************************************************************/
-void Resume_Init(void)
+void MASS_Resume_Init(void)
 {
   u16 wCNTR;
   /* ------------------ ONLY WITH BUS-POWERED DEVICES ---------------------- */
@@ -103,49 +103,49 @@ void Resume_Init(void)
           RESUME_ESOF doesn't change ResumeS.eState allowing
           decrementing of the ESOF counter in different states.
 *******************************************************************************/
-void Resume(RESUME_STATE eResumeSetVal)
+void MASS_Resume(RESUME_STATE eResumeSetVal)
 {
   u16 wCNTR;
 
-  if (eResumeSetVal != RESUME_ESOF)  ResumeS.eState = eResumeSetVal;
-  switch (ResumeS.eState){
+  if (eResumeSetVal != RESUME_ESOF)  MASS_ResumeS.eState = eResumeSetVal;
+  switch (MASS_ResumeS.eState){
     case RESUME_EXTERNAL:
-      Resume_Init();
-      ResumeS.eState = RESUME_OFF;
+      MASS_Resume_Init();
+      MASS_ResumeS.eState = RESUME_OFF;
       break;
     case RESUME_INTERNAL:
-      Resume_Init();
-      ResumeS.eState = RESUME_START;
+      MASS_Resume_Init();
+      MASS_ResumeS.eState = RESUME_START;
       break;
     case RESUME_LATER:
-      ResumeS.bESOFcnt = 2;
-      ResumeS.eState = RESUME_WAIT;
+      MASS_ResumeS.bESOFcnt = 2;
+      MASS_ResumeS.eState = RESUME_WAIT;
       break;
     case RESUME_WAIT:
-      ResumeS.bESOFcnt--;
-      if (ResumeS.bESOFcnt == 0)
-        ResumeS.eState = RESUME_START;
+      MASS_ResumeS.bESOFcnt--;
+      if (MASS_ResumeS.bESOFcnt == 0)
+        MASS_ResumeS.eState = RESUME_START;
       break;
     case RESUME_START:
       wCNTR = _GetCNTR();
       wCNTR |= CNTR_RESUME;
       _SetCNTR(wCNTR);
-      ResumeS.eState = RESUME_ON;
-      ResumeS.bESOFcnt = 10;
+      MASS_ResumeS.eState = RESUME_ON;
+      MASS_ResumeS.bESOFcnt = 10;
       break;
     case RESUME_ON:
-      ResumeS.bESOFcnt--;
-      if (ResumeS.bESOFcnt == 0){
+      MASS_ResumeS.bESOFcnt--;
+      if (MASS_ResumeS.bESOFcnt == 0){
         wCNTR = _GetCNTR();
         wCNTR &= (~CNTR_RESUME);
         _SetCNTR(wCNTR);
-        ResumeS.eState = RESUME_OFF;
+        MASS_ResumeS.eState = RESUME_OFF;
       }
       break;
     case RESUME_OFF:
     case RESUME_ESOF:
     default:
-      ResumeS.eState = RESUME_OFF;
+      MASS_ResumeS.eState = RESUME_OFF;
       break;
   }
 }

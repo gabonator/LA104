@@ -2,16 +2,21 @@
  File Name : USB_prop.c
  Version   : STM32 USB Disk Ver 3.4       Author : MCD Application Team & bure
 *******************************************************************************/
-#include "USB_desc.h"
-#include "USB_pwr.h"
-#include "USB_bot.h"
-#include "USB_prop.h"
-#include "USB_lib.h"
+#include "msdusb_desc.h"
+#include "msdusb_pwr.h"
+#include "msdusb_bot.h"
+#include "msdusb_prop.h"
+#include "msdusb_conf.h"
+#include <usb_lib.h>
+#include "../../source/library/spf.h"
 
 u32 Max_Lun = 0;
 
-DEVICE Device_Table ={ EP_NUM, 1 };
-DEVICE_PROP Device_Property ={
+DEVICE_INFO massDevice_Info;
+
+DEVICE massDevice_Table = { EP_NUM, 1 };
+
+DEVICE_PROP massDevice_Property ={
     MASS_init,
     MASS_Reset,
     MASS_Status_In,
@@ -25,7 +30,7 @@ DEVICE_PROP Device_Property ={
     0,
     0x40 // MAX PACKET SIZE
   };
-USER_STANDARD_REQUESTS User_Standard_Requests ={
+USER_STANDARD_REQUESTS massUser_Standard_Requests ={
     Mass_Storage_GetConfiguration,
     Mass_Storage_SetConfiguration,
     Mass_Storage_GetInterface,
@@ -36,15 +41,15 @@ USER_STANDARD_REQUESTS User_Standard_Requests ={
     Mass_Storage_SetDeviceFeature,
     Mass_Storage_SetDeviceAddress
   };
-ONE_DESCRIPTOR Device_Descriptor ={
+ONE_DESCRIPTOR massDevice_Descriptor ={
     (u8*)MASS_DeviceDescriptor,
     MASS_SIZ_DEVICE_DESC
   };
-ONE_DESCRIPTOR Config_Descriptor ={
+ONE_DESCRIPTOR massConfig_Descriptor ={
     (u8*)MASS_ConfigDescriptor,
     MASS_SIZ_CONFIG_DESC
   };
-ONE_DESCRIPTOR String_Descriptor[5] ={
+ONE_DESCRIPTOR massString_Descriptor[5] ={
     {(u8*)MASS_StringLangID, MASS_SIZ_STRING_LANGID},
     {(u8*)MASS_StringVendor, MASS_SIZ_STRING_VENDOR},
     {(u8*)MASS_StringProduct, MASS_SIZ_STRING_PRODUCT},
@@ -57,27 +62,27 @@ ONE_DESCRIPTOR String_Descriptor[5] ={
 *******************************************************************************/
 void MASS_init()
 {
-  Get_SerialNum(); // Update the serial number string descriptor with the data from the unique ID
+  MASS_Get_SerialNum(); // Update the serial number string descriptor with the data from the unique ID
   pInformation->Current_Configuration = 0;
-  PowerOn();       // Connect the device
+  MASS_PowerOn();       // Connect the device
   _SetISTR(0);     // USB interrupts initialization. clear pending interrupts
   wInterrupt_Mask = IMR_MSK;
   _SetCNTR(wInterrupt_Mask); // set interrupts mask
-  bDeviceState = UNCONNECTED;
+  massbDeviceState = UNCONNECTED;
 }
 /*******************************************************************************
   MASS_Reset: Mass Storage reset routine.
 *******************************************************************************/
 void MASS_Reset()
 {
-  Device_Info.Current_Configuration = 0; // Set the device as not configured
+  massDevice_Info.Current_Configuration = 0; // Set the device as not configured
   pInformation->Current_Feature = MASS_ConfigDescriptor[7]; // Current Feature initialization
   SetBTABLE(BTABLE_ADDRESS);
   // Initialize Endpoint 0
   SetEPType(ENDP0, EP_CONTROL);
   SetEPTxStatus(ENDP0, EP_TX_NAK);
   SetEPRxAddr(ENDP0, ENDP0_RXADDR);
-  SetEPRxCount(ENDP0, Device_Property.MaxPacketSize);
+  SetEPRxCount(ENDP0, massDevice_Property.MaxPacketSize);
   SetEPTxAddr(ENDP0, ENDP0_TXADDR);
   Clear_Status_Out(ENDP0);
   SetEPRxValid(ENDP0);
@@ -89,16 +94,16 @@ void MASS_Reset()
   // Initialize Endpoint 2
   SetEPType(ENDP2, EP_BULK);
   SetEPRxAddr(ENDP2, ENDP2_RXADDR);
-  SetEPRxCount(ENDP2, Device_Property.MaxPacketSize);
+  SetEPRxCount(ENDP2, massDevice_Property.MaxPacketSize);
   SetEPRxStatus(ENDP2, EP_RX_VALID);
   SetEPTxStatus(ENDP2, EP_TX_DIS);
 
-  SetEPRxCount(ENDP0, Device_Property.MaxPacketSize);
+  SetEPRxCount(ENDP0, massDevice_Property.MaxPacketSize);
   SetEPRxValid(ENDP0);
   // Set the device to response on default address
   SetDeviceAddress(0);
 
-  bDeviceState = ATTACHED;
+  massbDeviceState = ATTACHED;
 
   CBW.dSignature = BOT_CBW_SIGNATURE;
   Bot_State = BOT_IDLE;
@@ -110,7 +115,7 @@ void MASS_Reset()
 void Mass_Storage_SetConfiguration(void)
 {
   if (pInformation->Current_Configuration != 0){
-    bDeviceState = CONFIGURED; // Device configured
+    massbDeviceState = CONFIGURED; // Device configured
     ClearDTOG_TX(ENDP1);
     ClearDTOG_RX(ENDP2);
     Bot_State = BOT_IDLE;      // set the Bot state machine to the IDLE state
@@ -131,7 +136,7 @@ void Mass_Storage_ClearFeature(void)
 *******************************************************************************/
 void Mass_Storage_SetDeviceAddress (void)
 {
-  bDeviceState = ADDRESSED;
+  massbDeviceState = ADDRESSED;
 }
 /*******************************************************************************
   MASS_Status_In: Mass Storage Status IN routine.
@@ -199,14 +204,14 @@ RESULT MASS_Get_Interface_Setting(u8 Interface, u8 AlternateSetting)
 *******************************************************************************/
 u8 *MASS_GetDeviceDescriptor(u16 Length)
 {
-  return Standard_GetDescriptorData(Length, &Device_Descriptor );
+  return Standard_GetDescriptorData(Length, &massDevice_Descriptor );
 }
 /*******************************************************************************
    MASS_GetConfigDescriptor: Get the configuration descriptor.
 *******************************************************************************/
 u8 *MASS_GetConfigDescriptor(u16 Length)
 {
-  return Standard_GetDescriptorData(Length, &Config_Descriptor );
+  return Standard_GetDescriptorData(Length, &massConfig_Descriptor );
 }
 
 /*******************************************************************************
@@ -217,7 +222,7 @@ u8 *MASS_GetStringDescriptor(u16 Length)
 {
   u8 wValue0 = pInformation->USBwValue0;
   if (wValue0 > 5)  return NULL;
-  else  return Standard_GetDescriptorData(Length, &String_Descriptor[wValue0]);
+  else  return Standard_GetDescriptorData(Length, &massString_Descriptor[wValue0]);
 }
 /*******************************************************************************
   Get_Max_Lun: Handle the Get Max Lun request.
@@ -232,29 +237,21 @@ u8 *Get_Max_Lun(u16 Length)
 /*******************************************************************************
 Get_SerialNum :   Create the serial number string descriptor.
 *******************************************************************************/
-void Get_SerialNum(void)
+void MASS_Get_SerialNum(void)
 {
-  u32 Device_Serial0, Device_Serial1, Device_Serial2;
+/*
+   u32 Device_Serial0, Device_Serial1, Device_Serial2;
 
    Device_Serial0 = *(vu32*)(0x1FFFF7E8);
    Device_Serial1 = *(vu32*)(0x1FFFF7EC);
    Device_Serial2 = *(vu32*)(0x1FFFF7F0);
 
-  if (Device_Serial0 != 0){
-    MASS_StringSerial[ 2] = (u8)( Device_Serial0 & 0x000000FF);
-    MASS_StringSerial[ 4] = (u8)((Device_Serial0 & 0x0000FF00) >> 8);
-    MASS_StringSerial[ 6] = (u8)((Device_Serial0 & 0x00FF0000) >> 16);
-    MASS_StringSerial[ 8] = (u8)((Device_Serial0 & 0xFF000000) >> 24);
-
-    MASS_StringSerial[10] = (u8)( Device_Serial1 & 0x000000FF);
-    MASS_StringSerial[12] = (u8)((Device_Serial1 & 0x0000FF00) >> 8);
-    MASS_StringSerial[14] = (u8)((Device_Serial1 & 0x00FF0000) >> 16);
-    MASS_StringSerial[16] = (u8)((Device_Serial1 & 0xFF000000) >> 24);
-
-    MASS_StringSerial[18] = (u8)( Device_Serial2 & 0x000000FF);
-    MASS_StringSerial[20] = (u8)((Device_Serial2 & 0x0000FF00) >> 8);
-    MASS_StringSerial[22] = (u8)((Device_Serial2 & 0x00FF0000) >> 16);
-    MASS_StringSerial[24] = (u8)((Device_Serial2 & 0xFF000000) >> 24);
-  }
+   if (Device_Serial0 != 0)
+   {
+     uint64_t serial = Device_Serial0 | ((uint64_t)(Device_Serial1 + Device_Serial2)) << 32;
+     for (int i=0; i<12; i++)
+       MASS_StringSerial[2+i*2] = 'A' + ((serial>>(i*4))%15);
+   }
+*/
 }
 /*********************************  END OF FILE  ******************************/

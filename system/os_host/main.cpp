@@ -3,11 +3,15 @@
 #include "source/Manager.h"
 
 extern "C" void Hardware_Init();
+//extern "C" void dbgPopPrint();
 
 int main()
 {
   Hardware_Init();
   BIOS::FAT::Init();
+  BIOS::USB::Enable();
+//  BIOS::USB::InitializeSerial();
+  BIOS::USB::InitializeMass();
   BIOS::OS::SetArgument((char*)"");
 
   while (1)
@@ -24,6 +28,8 @@ int main()
 
       while (dwExecute == 0)
       {
+        dbgPopPrint();
+
         BIOS::KEY::EKey key = BIOS::KEY::GetKey();
 
         if (key != BIOS::KEY::None)

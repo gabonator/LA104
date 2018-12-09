@@ -14,4 +14,5 @@ extern "C"
   void Beep(bool on);
   char GetLastChar();
   void Set_Area(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2);
+  void EnableUsb(bool enable);
 }

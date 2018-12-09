@@ -3,7 +3,6 @@
 #include "lib/STM32_USB-FS-Device_Driver/inc/usb_core.h"
 #include "lib/STM32_USB-FS-Device_Driver/inc/usb_init.h"
 #include "lib/STM32F10x_StdPeriph_Driver/inc/misc.h"
-#include "USB_istr.h"
 #include "system_stm32f10x.h"
 #include <stdbool.h>
 
@@ -99,7 +98,8 @@ volatile uint32_t gCounter = 0;
 volatile uint32_t Dly_mS = 0;
 volatile uint32_t gBeepCounter = 0;
 
-//void USB_LP_CAN1_RX0_IRQHandler(void)
+void USB_Istr(void);
+
 void USB_LP_CAN_RX0_IRQHandler(void)
 {
     USB_Istr();
@@ -107,12 +107,6 @@ void USB_LP_CAN_RX0_IRQHandler(void)
 
 ui32  __Bios(ui8 Item, ui32 Var);
 
-void DiskConfig(void)
-{
-    USB_Init();
-    Disk_Init();
-//    Init_Fat_Value();
-}
 #define BITMAP          0xFFFC0000
 
 extern void (* g_pfnVectors[76])(void);
@@ -120,15 +114,8 @@ extern void (* g_pfnRamVectorTable[76])(void);
 
 void Hardware_Init(void)
 {
-
     __Bios(PWRCTRL, INIT);        // 
     __Bios(KEYnDEV, INIT);        // 
-
-//      memcpy(g_pfnRamVectorTable, g_pfnVectors, 76*4);
-//   for (int i=0; i<76; i++)
-//     g_pfnRamVectorTable[i] = g_pfnVectors[i];
-
-//      NVIC_SetVectorTable(NVIC_VectTab_RAM, (uint32_t)g_pfnRamVectorTable - NVIC_VectTab_RAM);
       NVIC_SetVectorTable(NVIC_VectTab_FLASH, (uint32_t)g_pfnVectors - NVIC_VectTab_FLASH);
 //    __Bios(NIVCPTR, 0x8000);      // 
     SysTick_Config(SystemCoreClock / 1000);
@@ -136,8 +123,6 @@ void Hardware_Init(void)
     __Bios(BUZZDEV, 50);
     //Beep_mS(200);
     __Bios(FLSHDEV, INIT);        // SPI
-    __Bios(USBDEV, INIT);         // USB
-    DiskConfig();                 // 
     __Bios(IN_PORT, INIT);        // DAC
 }
 

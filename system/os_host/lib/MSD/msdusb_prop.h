@@ -5,8 +5,8 @@
 #ifndef __usb_prop_H
 #define __usb_prop_H
 
-#include "USB_core.h"
-#include "stm32f10x.h"
+#include <USB_core.h>
+#include <stm32f10x.h>
 
 #define Mass_Storage_GetConfiguration          NOP_Process
 /* #define Mass_Storage_SetConfiguration          NOP_Process*/
@@ -39,7 +39,7 @@ u8 *MASS_GetDeviceDescriptor(u16 );
 u8 *MASS_GetConfigDescriptor(u16);
 u8 *MASS_GetStringDescriptor(u16);
 u8 *Get_Max_Lun(u16 Length);
-void Get_SerialNum(void);
+void MASS_Get_SerialNum(void);
 
 #endif 
 /*********************************  END OF FILE  ******************************/

@@ -53,6 +53,7 @@ extern void (*pEpInt_OUT[7])(void);   /*  Handles OUT interrupts   */
 void CTR_LP(void)
 {
   __IO uint16_t wEPVal = 0;
+  uint16_t wIstr;
   /* stay in loop while pending interrupts */
   while (((wIstr = _GetISTR()) & ISTR_CTR) != 0)
   {
@@ -161,6 +162,7 @@ void CTR_LP(void)
 void CTR_HP(void)
 {
   uint32_t wEPVal = 0;
+  uint16_t wIstr;
 
   while (((wIstr = _GetISTR()) & ISTR_CTR) != 0)
   {

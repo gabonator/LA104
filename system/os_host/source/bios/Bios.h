@@ -190,7 +190,13 @@ namespace BIOS
 
   namespace USB
   {
+    typedef void (*THandler)(void);
+
     void Enable();
+    void Initialize(void* pDeviceInfo, void* pDevice, void* pDeviceProperty, void* pUserStandardRequests,
+      THandler arrHandlerIn[], THandler arrHandlerOut[], THandler istrHandler);
+    void InitializeMass();
+    void InitializeSerial();
     void Disable();
   }
 }

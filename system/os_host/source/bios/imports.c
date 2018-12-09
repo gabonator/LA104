@@ -140,3 +140,8 @@ void Set_Area(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2)
   __Bios(BLOCK_X, (x2-1) | (x1 << 16));
   __Bios(BLOCK_Y, (y2-1) | (y1 << 16));
 }
+
+void EnableUsb(bool enable)
+{
+  __Bios(USBDEV, INIT);         // USB
+}

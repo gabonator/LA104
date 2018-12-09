@@ -129,9 +129,9 @@ namespace BIOS
 	}
 	if ( nIoMode == BIOS::FAT::IoRead )
 	{
-	    FRESULT r = f_open(&g_file, strName, FA_READ | FA_OPEN_EXISTING);
-
-		BIOS::DBG::Print("OPEN RESULT=%d\n", r);
+		FRESULT r = f_open(&g_file, strName, FA_READ | FA_OPEN_EXISTING);
+		if (r != 0)
+			BIOS::DBG::Print("OPEN RESULT=%d\n", r);
 		return Result(r);
 	}
         return BIOS::FAT::EIntError;
