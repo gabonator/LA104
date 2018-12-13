@@ -6,18 +6,19 @@
 //#include "../../os_host/source/gui/Gui.h"
 #include "Menu.h"
 
-//#include "../host/source/framework/BufferedIo.h"
-//#include "../host/source/framework/Serialize.h"
-//#include "../host/source/framework/Serialize.cpp"
-//#include "gif/GifDecoder.h"
+#include "../../os_host/source/framework/BufferedIo.h"
+#include "../../os_host/source/framework/Serialize.h"
+#include "../../os_host/source/framework/Serialize.cpp"
+#include "gif/GifDecoder.h"
 
 // void *__dso_handle = (void *)NULL;
 // void *_fini = (void *)NULL;
 // TODO: var init problem
+
 //GifDecoder<11> decoder;
 //CBufferedReader2 reader;
-//MD_YX5300 I;
-MD_YX5300* mp3;  // = nullptr
+
+MD_YX5300 mp3;  // = nullptr
 
 void _HandleAssertion(const char* file, int line, const char* cond)
 {
@@ -63,11 +64,11 @@ public:
                     default: return TItem{"     ", TItem::Static};
                 }
                 break;
-            case 1: return TItem{"\x11\x11", TItem::Default, [](){ mp3->playPrev(); }};
-            case 2: return TItem{" \x10 ", TItem::Default, [](){ mp3->playStart(); }};
-            case 3: return TItem{"\xdd\xdd", TItem::Default, [](){ mp3->playPause(); }};
-            case 4: return TItem{" \xfe ", TItem::Default, [](){ mp3->playStop(); }};
-            case 5: return TItem{"\x10\x10", TItem::Default, [](){ mp3->playNext(); }};
+            case 1: return TItem{"\x11\x11", TItem::Default, [](){ mp3.playPrev(); }};
+            case 2: return TItem{" \x10 ", TItem::Default, [](){ mp3.playStart(); }};
+            case 3: return TItem{"\xdd\xdd", TItem::Default, [](){ mp3.playPause(); }};
+            case 4: return TItem{" \xfe ", TItem::Default, [](){ mp3.playStop(); }};
+            case 5: return TItem{"\x10\x10", TItem::Default, [](){ mp3.playNext(); }};
             default: return TItem{nullptr, TItem::None, nullptr};
         }
     }
@@ -92,8 +93,8 @@ public:
 
     void Query()
     {
-      mp3->queryStatus();
-      mp3->queryFile();
+      mp3.queryStatus();
+      mp3.queryFile();
     }
 };
 
@@ -120,11 +121,11 @@ public:
         {
             case 1:
                 mRepeat = !mRepeat;
-                mp3->repeat(mRepeat);
+                mp3.repeat(mRepeat);
                 break;
             case 3:
                 mShuffle = !mShuffle;
-                mp3->shuffle(mShuffle);
+                mp3.shuffle(mShuffle);
                 break;
         }
         Invalidate();
@@ -146,8 +147,8 @@ public:
         {
             case 0: return TItem{"Volume ", TItem::Static};
             case 1: return TItem{mMute ? "muted" : mStrVolume, TItem::Static, nullptr};
-            case 2: return TItem{" + ", TItem::Default, [](){ _this->AddVolume(+2); /*mp3->volumeInc();*/ }};
-            case 3: return TItem{" - ", TItem::Default,  [](){ _this->AddVolume(-2); /*mp3->volumeDec();*/ }};
+            case 2: return TItem{" + ", TItem::Default, [](){ _this->AddVolume(+2); /*mp3.volumeInc();*/ }};
+            case 3: return TItem{" - ", TItem::Default,  [](){ _this->AddVolume(-2); /*mp3.volumeDec();*/ }};
             case 4: return TItem{mMute ? "Unmute" : "Mute", TItem::Default}; // highlight?
             default: return TItem{nullptr, TItem::None, nullptr};
         }
@@ -158,7 +159,7 @@ public:
         {
             case 4:
                 mMute = !mMute;
-                mp3->volumeMute(mMute);
+                mp3.volumeMute(mMute);
                 Invalidate();
                 break;
         }
@@ -172,7 +173,7 @@ public:
       if (nOld == mVolume)
         return;
 
-      mp3->volume(mVolume);
+      mp3.volume(mVolume);
       sprintf(mStrVolume, "%d%%", mVolume*100/0x20);
       Invalidate();
     }
@@ -194,12 +195,12 @@ public:
         switch (i)
         {
             case 0: return TItem{"Equalizer", TItem::Static};
-            case 1: return TItem{"Normal", TItem::Radio, [](){ mp3->equalizer(0); }};
-            case 2: return TItem{"Pop", TItem::Radio, [](){ mp3->equalizer(1); }};
-            case 3: return TItem{"Rock", TItem::Radio, [](){ mp3->equalizer(2); }};
-            case 4: return TItem{"Jazz", TItem::Radio, [](){ mp3->equalizer(3); }};
-            case 5: return TItem{"Classic", TItem::Radio, [](){ mp3->equalizer(4); }};
-            case 6: return TItem{"Base", TItem::Radio, [](){ mp3->equalizer(5); }};
+            case 1: return TItem{"Normal", TItem::Radio, [](){ mp3.equalizer(0); }};
+            case 2: return TItem{"Pop", TItem::Radio, [](){ mp3.equalizer(1); }};
+            case 3: return TItem{"Rock", TItem::Radio, [](){ mp3.equalizer(2); }};
+            case 4: return TItem{"Jazz", TItem::Radio, [](){ mp3.equalizer(3); }};
+            case 5: return TItem{"Classic", TItem::Radio, [](){ mp3.equalizer(4); }};
+            case 6: return TItem{"Base", TItem::Radio, [](){ mp3.equalizer(5); }};
             default: return TItem{nullptr, TItem::None, nullptr};
         }
     }
@@ -212,9 +213,9 @@ public:
     {
         switch (i)
         {
-            case 0: return TItem{"Reset", TItem::Default, [](){ mp3->reset(); }};
-            case 1: return TItem{"Sleep", TItem::Default, [](){ mp3->sleep(); }};
-            case 2: return TItem{"WakeUp", TItem::Default, [](){ mp3->wakeUp(); }};
+            case 0: return TItem{"Reset", TItem::Default, [](){ mp3.reset(); }};
+            case 1: return TItem{"Sleep", TItem::Default, [](){ mp3.sleep(); }};
+            case 2: return TItem{"WakeUp", TItem::Default, [](){ mp3.wakeUp(); }};
             default: return TItem{nullptr, TItem::None};
         }
     }
@@ -301,10 +302,10 @@ class CPlayer : public CWnd
 public:
     void Create( const char* pszId, ui16 dwFlags, const CRect& rc, CWnd* pParent )
     {
-        //mp3->setTimeout(200);
-        //mp3->setSynchronous(true);
-        //mp3->begin();
-        //mp3->setTimeout(200);
+        //mp3.setTimeout(200);
+        //mp3.setSynchronous(true);
+        //mp3.begin();
+        //mp3.setTimeout(200);
 
         pParent->m_dwFlags |= CWnd::WsTick;
         CWnd::Create(pszId, dwFlags | CWnd::WsTick, rc, pParent);
@@ -326,7 +327,7 @@ public:
         
         static CPlayer* _this = this;
         
-        mp3->setCallback([](const MD_YX5300::cbData *status) {
+        mp3.setCallback([](const MD_YX5300::cbData *status) {
             const char* strCode = "";
             switch (status->code)
             {
@@ -421,7 +422,7 @@ public:
 
         if (mRequestFiles != -1 && mRequestFiles - tick < 0)
         {
-            mp3->queryFilesCount();
+            mp3.queryFilesCount();
             mRequestFiles = -1;
         }
 
@@ -431,7 +432,7 @@ public:
             // every 200 x 100ms, calling this often cause choppy sound
             mRequestStatus = -1;
             n = 0;
-            mp3->queryStatus();
+            mp3.queryStatus();
         }
     }
 
@@ -443,7 +444,7 @@ public:
     virtual void WindowMessage(int nMsg, int nParam)
     {
         if (nMsg == CWnd::WmTick)
-            mp3->check();
+            mp3.check();
 
         if (nMsg == CWnd::WmWillShow)
             SetTimer(100);
@@ -461,7 +462,7 @@ public:
     virtual void OnPaint()
     {
         BIOS::LCD::Bar(m_rcClient, RGB565(ffffff));
-#if 0
+#if 1
         int _x = m_rcClient.left + 8;
         int _y = m_rcClient.top;
         BIOS::LCD::Print(_x, _y+=14, RGB565(000000), RGBTRANS, "Compatible devices:");
@@ -477,7 +478,7 @@ public:
         BIOS::LCD::Print(_x, _y+=14, RGB565(000000), RGBTRANS, "  GND: -> GND        3V+: -> VCC");
 #endif
 #if 0
-        reader.Open((char*)"sch_mp3->gif");
+        reader.Open((char*)"sch_mp3.gif");
         
         decoder.setFileReadCallback([]() -> uint8_t { uint8_t d; reader >> d; return d; });
         decoder.setFileReadBlockCallback([](void *buffer, int numberOfBytes) { reader >> CStream(buffer, numberOfBytes); });
@@ -505,14 +506,12 @@ class CApplication : public CWnd
     CMenuMain mMenu;
     CPlayer mPlayer;
     CSchematic mSchematic;
-    MD_YX5300 mp3Instance;
 
 public:
     void Create()
     {
         // TODO: global var not working!
-        mp3 = &mp3Instance;
-        mp3Instance.begin();
+        mp3.begin();
         
         CWnd::Create("Application", CWnd::WsVisible, CRect(0, 0, BIOS::LCD::Width, BIOS::LCD::Height), nullptr);
         mMenu.Create("MainMenu", CWnd::WsVisible, CRect(0, 0, BIOS::LCD::Width, 14), this);
@@ -547,14 +546,15 @@ public:
 
 };
 
+CApplication app;
+
 // todo: move to library?
 #ifdef ENTRY
 __attribute__((__section__(".entry")))
 #endif
 int _main(void)
 {
-    CApplication app;
-
+//BIOS::LCD::Clear(RGB565(606060));
     app.Create();
 
     app.WindowMessage( CWnd::WmPaint );
