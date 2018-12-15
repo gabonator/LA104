@@ -1,3 +1,30 @@
+#pragma once
+/*
+#define RB_ATOMIC_START disableInterrupts()
+#define RB_ATOMIC_END enbleInterrupts()
+
+int u32 lastInterrupts = 0;
+
+void disableInterrupts(void)
+{
+  __asm volatile (			   \
+    "	mrs %0, primask\n" \
+    : "=r" (lastInterrupts)  \
+    "	mov r0, #1     \n" \
+    "	msr primask, r0\n" \
+    :::"r0"	 \
+    );
+}
+
+void enableInterrupts(void)
+{
+  __asm volatile ( \
+    "	msr primask, %0\n" \
+    :: "r" (lastInterrupts)  \
+    );
+}
+*/
+
 #define RB_ATOMIC_START
 #define RB_ATOMIC_END
 
@@ -53,8 +80,9 @@ public:
           if (size() > 0) {
               tail = getTail();
               Type dest = _buf[tail];
-              _numElements--;
-              return dest; // TODO: ATOMIC?
+              _numElemen
+ts--;
+              return dest; // ATOMIC???
           }
       }
       RB_ATOMIC_END
@@ -70,7 +98,7 @@ public:
       {
           if (size() > 0) {
               tail = getTail();
-              return _buf[tail]; // TODO: ATOMIC?
+              return _buf[tail];// ATOMIC???
           }
       }
       RB_ATOMIC_END

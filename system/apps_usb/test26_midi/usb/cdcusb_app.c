@@ -75,6 +75,7 @@ const u8 mios32_midi_pcktype_num_bytes[16] = {
 char* _tohex(int);
 char* _tox(int, int, int);
 
+/*
 s32 MIOS32_MIDI_SendPackageToRxCallback(mios32_midi_port_t port, mios32_midi_package_t midi_package)
 {
 dbgPrint("send: ");
@@ -86,12 +87,21 @@ dbgPrint("send: ");
 }
   return 0;
 }
-
+*/
 DEVICE_STATE bDeviceState;
 
 void MIOS32_USB_MIDI_TxBufferHandler(void);
 void MIOS32_USB_MIDI_RxBufferHandler(void);
 
+void onReceive(uint_fast8_t);
+bool onReceiveAvailable(int);
+int onTransmitAvailable();
+uint_fast8_t onTransmitPeek();
+uint_fast8_t onTransmitGet();
+
+
+//RingBuffer<uint32_t, 32> bufferReceive;
+/*
 // Rx buffer
 u32 rx_buffer[MIOS32_USB_MIDI_RX_BUFFER_SIZE];
 volatile u16 rx_buffer_tail = 0;
@@ -104,25 +114,27 @@ u32 tx_buffer[MIOS32_USB_MIDI_TX_BUFFER_SIZE];
 volatile u16 tx_buffer_tail = 0;
 volatile u16 tx_buffer_head = 0;
 volatile u16 tx_buffer_size = 0;
-volatile u8 tx_buffer_busy = 0; // todo: zero??
-
+*/
 // transfer possible?
 static u8 transfer_possible = 0;
+volatile u8 rx_buffer_new_data = 0;
+volatile u8 tx_buffer_busy = 1;
 
 
 s32 MIOS32_USB_MIDI_ChangeConnectionState(u8 connected)
 {
-dbgPrint("rst,");
   // in all cases: re-initialize USB MIDI driver
   // clear buffer counters and busy/wait signals again (e.g., so that no invalid data will be sent out)
-  rx_buffer_tail = rx_buffer_head = rx_buffer_size = 0;
+//  rx_buffer_tail = rx_buffer_head = rx_buffer_size = 0;
   rx_buffer_new_data = 0; // no data received yet
-  tx_buffer_tail = tx_buffer_head = tx_buffer_size = 0;
+//  tx_buffer_tail = tx_buffer_head = tx_buffer_size = 0;
 
   if( connected ) {
+    dbgPrint("[connected]");
     transfer_possible = 1;
     tx_buffer_busy = 0; // buffer not busy anymore
   } else {
+    dbgPrint("[disconnected]");
     // cable disconnected: disable transfers
     transfer_possible = 0;
     tx_buffer_busy = 1; // buffer busy
@@ -209,29 +221,60 @@ void MIOS32_USB_MIDI_TxBufferHandler(void)
 
   // atomic operation to avoid conflict with other interrupts
   MIOS32_IRQ_Disable();
-  if( !tx_buffer_busy && tx_buffer_size && transfer_possible ) {
+  if( !tx_buffer_busy && onTransmitAvailable() && transfer_possible ) {
+//  if( onTransmitAvailable() ) {
     u32 *pma_addr = (u32 *)(PMAAddr + (MIOS32_USB_ENDP1_TXADDR<<1));
-    s16 count = (tx_buffer_size > (MIOS32_USB_MIDI_DATA_IN_SIZE/4)) ? (MIOS32_USB_MIDI_DATA_IN_SIZE/4) : tx_buffer_size;
-
     // notify that new package is sent
-    tx_buffer_busy = 1;
-
-    // send to IN pipe
-    SetEPTxCount(ENDP1, 4*count);
-
-    tx_buffer_size -= count;
 
     // copy into PMA buffer (16bit word with, only 32bit addressable)
+    int sentSize = 0;
     do {
-      *pma_addr++ = tx_buffer[tx_buffer_tail] & 0xffff;
-      *pma_addr++ = (tx_buffer[tx_buffer_tail]>>16) & 0xffff;
-      if( ++tx_buffer_tail >= MIOS32_USB_MIDI_TX_BUFFER_SIZE )
-	tx_buffer_tail = 0;
-    } while( --count );
+      while (onTransmitAvailable() && (onTransmitPeek() & 0xf0) == 0)
+        onTransmitGet(); // ignore all
 
-    // send buffer
-    SetEPTxValid(ENDP1);
+      if (!onTransmitAvailable())
+        break;
+
+      mios32_midi_package_t package;
+      package.ALL = 0;
+      package.evnt0 = onTransmitPeek();
+      package.cin = package.evnt0 >> 4;
+      int required = mios32_midi_pcktype_num_bytes[package.cin];
+      if (onTransmitAvailable() < required)
+        break;
+
+//      dbgPrint("[");
+      package.evnt0 = onTransmitGet();
+//      dbgHex(package.evnt0);
+      if (required >= 2)
+      {
+        package.evnt1 = onTransmitGet();
+//        dbgHex(package.evnt1);
+      }
+      if (required >= 3)
+      {
+        package.evnt2 = onTransmitGet();
+//        dbgHex(package.evnt2);
+      }
+//      dbgPrint("]");
+
+//      package.cin_cable = package.evnt0 >> 4;
+
+      *pma_addr++ = package.ALL & 0xffff;
+      *pma_addr++ = (package.ALL>>16) & 0xffff;
+      sentSize += 4;
+    } while( sentSize < MIOS32_USB_MIDI_DATA_IN_SIZE - 4);
+
+    if (sentSize > 0)
+    {
+      // send to IN pipe
+      SetEPTxCount(ENDP1, sentSize);
+      // send buffer
+      SetEPTxValid(ENDP1);
+      tx_buffer_busy = 1;
+    }
   }
+
   MIOS32_IRQ_Enable();
 }
 
@@ -242,11 +285,10 @@ void MIOS32_USB_MIDI_RxBufferHandler(void)
   // atomic operation to avoid conflict with other interrupts
   MIOS32_IRQ_Disable();
 
-//dbgPrint(_tox(GetEPRxCount(ENDP2), MIOS32_USB_MIDI_RX_BUFFER_SIZE, rx_buffer_size));
-  if( rx_buffer_new_data && (count=GetEPRxCount(ENDP2)>>2) ) {
+  if( rx_buffer_new_data && (count=GetEPRxCount(ENDP2)/4) ) {
 
     // check if buffer is free
-    if( count < (MIOS32_USB_MIDI_RX_BUFFER_SIZE-rx_buffer_size) ) {
+    if( onReceiveAvailable(count) ) {
       u32 *pma_addr = (u32 *)(PMAAddr + (MIOS32_USB_ENDP2_RXADDR<<1));
       // copy received packages into receive buffer
       // this operation should be atomic
@@ -257,13 +299,10 @@ void MIOS32_USB_MIDI_RxBufferHandler(void)
 	mios32_midi_package_t package;
 	package.ALL = (ph << 16) | pl;
 
-	if( MIOS32_MIDI_SendPackageToRxCallback(USB0 + package.cable, package) == 0 ) {
-	  rx_buffer[rx_buffer_head] = package.ALL;
-
-	  if( ++rx_buffer_head >= MIOS32_USB_MIDI_RX_BUFFER_SIZE )
-	    rx_buffer_head = 0;
-	  ++rx_buffer_size;
-	}
+        u8 buffer[3] = {package.evnt0, package.evnt1, package.evnt2};
+        int len = mios32_midi_pcktype_num_bytes[package.cin];
+        for(int i=0; i<len; ++i)
+          onReceive(buffer[i]);
       } while( --count > 0 );
 
       // notify, that data has been put into buffer
@@ -278,11 +317,5 @@ void MIOS32_USB_MIDI_RxBufferHandler(void)
 
 s32 MIOS32_USB_ForceSingleUSB(void)
 {
-/*
-  u8 *single_usb_confirm = (u8 *)MIOS32_SYS_ADDR_SINGLE_USB_CONFIRM;
-  u8 *single_usb = (u8 *)MIOS32_SYS_ADDR_SINGLE_USB;
-  if( *single_usb_confirm == 0x42 && *single_usb < 0x80 )
-    return *single_usb;
-*/
   return 0;
 }
