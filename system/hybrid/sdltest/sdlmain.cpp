@@ -22,6 +22,19 @@ void setPixel(int x, int y, int c)
     pixels[ offset + 3 ] = SDL_ALPHA_OPAQUE;
 }
 
+int getPixel(int x, int y)
+{
+    y = BIOS::LCD::Height-1-y;
+    assert(x >= 0 && x < BIOS::LCD::Width);
+    assert(y >= 0 && y < BIOS::LCD::Height);
+    
+    const unsigned int offset = ( BIOS::LCD::Width * 4 * y ) + x * 4;
+    int b = pixels[ offset + 0 ];
+    int g = pixels[ offset + 1 ];
+    int r = pixels[ offset + 2 ];
+    return RGB565RGB(r, g, b);
+}
+
 SDL_Renderer* renderer;
 SDL_Texture* texture;
 SDL_Window* window;

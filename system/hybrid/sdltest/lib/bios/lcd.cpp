@@ -45,6 +45,12 @@ void BIOS::LCD::PutPixel(const CPoint& cp, unsigned short clr)
   Set_Pixel(clr);
 }
 
+unsigned short BIOS::LCD::GetPixel(int x, int y)
+{
+    Set_Posi(x, FLIP(y));
+    return Get_Pixel();
+}
+
 int BIOS::LCD::Print (int x, int y, unsigned short clrf, unsigned short clrb, const char *str)
 {
 	if (!str || !*str)
@@ -235,6 +241,22 @@ void Set_Pixel(uint16_t Color)
             lcdY = lcdY1;
         }
     }
+}
+int getPixel(int, int);
+int Get_Pixel()
+{
+    int c = getPixel(lcdX, lcdY);
+    lcdX++;
+    if (lcdX >= lcdX2)
+    {
+        lcdX = lcdX1;
+        lcdY++;
+        if (lcdY >= lcdY2)
+        {
+            lcdY = lcdY1;
+        }
+    }
+    return c;
 }
 
 void Set_Block(int x1, int y1, int x2, int y2)

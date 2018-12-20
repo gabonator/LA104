@@ -1,8 +1,11 @@
 #pragma once
 #include <assert.h>
+#ifdef __cplusplus
 #include <algorithm>
+#endif
 #include <string.h>
 #include <stdint.h>
+#include <stdbool.h>
 #include "../library/spf.h"
 #include "Rgb.h"
 

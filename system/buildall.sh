@@ -72,6 +72,9 @@ done
 for d in apps_arduino/*/ ; do
     buildApp "$d"
 done
+for d in apps_usb/*/ ; do
+    buildApp "$d"
+done
 
 # copy fresh builds
 cp os_host/build/manager.hex bin/manager.hex
@@ -87,5 +90,8 @@ for d in apps/*/ ; do
     cleanApp "$d"
 done
 for d in apps_arduino/*/ ; do
+    cleanApp "$d"
+done
+for d in apps_usb/*/ ; do
     cleanApp "$d"
 done

@@ -9,7 +9,7 @@
 /* Begin PBXBuildFile section */
 		2DE3E03C215BA0370034ABD9 /* sdlmain.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2DE3E03B215BA0370034ABD9 /* sdlmain.cpp */; };
 		2DE3E049215BB7CC0034ABD9 /* SDL2.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2DE3E043215BA06C0034ABD9 /* SDL2.framework */; };
-		2DEC602E219764FF00D9D2F9 /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2DEC602D219764FF00D9D2F9 /* main.cpp */; };
+		2DED752A21A8774D000AECDD /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2DED752921A8774D000AECDD /* main.cpp */; };
 		2DFF77A02182FA0E0008F565 /* fat.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2DFF77972182FA0D0008F565 /* fat.cpp */; };
 		2DFF77A12182FA0E0008F565 /* lcd.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2DFF779A2182FA0E0008F565 /* lcd.cpp */; };
 		2DFF77A22182FA0E0008F565 /* memory.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2DFF779B2182FA0E0008F565 /* memory.cpp */; };
@@ -17,7 +17,7 @@
 		2DFF77A42182FA0E0008F565 /* sys.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2DFF779D2182FA0E0008F565 /* sys.cpp */; };
 		2DFF77A52182FA0E0008F565 /* dbg.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2DFF779E2182FA0E0008F565 /* dbg.cpp */; };
 		2DFF77A62182FA0E0008F565 /* key.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2DFF779F2182FA0E0008F565 /* key.cpp */; };
-		2DFF77B8218319A90008F565 /* Framework.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2DFF77B7218319A90008F565 /* Framework.cpp */; };
+		2DFF77B8218319A90008F565 /* framework.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2DFF77B7218319A90008F565 /* framework.cpp */; };
 		2DFF77D8218BB76F0008F565 /* Gui.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2DFF77D7218BB76F0008F565 /* Gui.cpp */; };
 /* End PBXBuildFile section */
 
@@ -37,7 +37,7 @@
 		2DE3E038215BA0370034ABD9 /* sdltest */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = sdltest; sourceTree = BUILT_PRODUCTS_DIR; };
 		2DE3E03B215BA0370034ABD9 /* sdlmain.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = sdlmain.cpp; sourceTree = "<group>"; };
 		2DE3E043215BA06C0034ABD9 /* SDL2.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SDL2.framework; path = sdltest/lib/SDL2.framework; sourceTree = "<group>"; };
-		2DEC602D219764FF00D9D2F9 /* main.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = main.cpp; path = ../../../apps_experiments/test21_midiplay/main.cpp; sourceTree = "<group>"; };
+		2DED752921A8774D000AECDD /* main.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = main.cpp; path = ../../../apps_experiments/test22_sequencer/main.cpp; sourceTree = "<group>"; };
 		2DFF77972182FA0D0008F565 /* fat.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = fat.cpp; path = sdltest/lib/bios/fat.cpp; sourceTree = SOURCE_ROOT; };
 		2DFF77982182FA0D0008F565 /* Bios.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Bios.h; path = sdltest/lib/bios/Bios.h; sourceTree = SOURCE_ROOT; };
 		2DFF77992182FA0E0008F565 /* font.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = font.h; path = sdltest/lib/bios/font.h; sourceTree = SOURCE_ROOT; };
@@ -47,7 +47,7 @@
 		2DFF779D2182FA0E0008F565 /* sys.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = sys.cpp; path = sdltest/lib/bios/sys.cpp; sourceTree = SOURCE_ROOT; };
 		2DFF779E2182FA0E0008F565 /* dbg.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = dbg.cpp; path = sdltest/lib/bios/dbg.cpp; sourceTree = SOURCE_ROOT; };
 		2DFF779F2182FA0E0008F565 /* key.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = key.cpp; path = sdltest/lib/bios/key.cpp; sourceTree = SOURCE_ROOT; };
-		2DFF77B7218319A90008F565 /* Framework.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Framework.cpp; path = sdltest/lib/framework/Framework.cpp; sourceTree = SOURCE_ROOT; };
+		2DFF77B7218319A90008F565 /* framework.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = framework.cpp; path = sdltest/lib/framework/framework.cpp; sourceTree = SOURCE_ROOT; };
 		2DFF77D6218BB76F0008F565 /* Gui.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Gui.h; path = ../../../../os_host/source/gui/Gui.h; sourceTree = "<group>"; };
 		2DFF77D7218BB76F0008F565 /* Gui.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Gui.cpp; path = ../../../../os_host/source/gui/Gui.cpp; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -138,7 +138,7 @@
 		2DFF77AD21830DC60008F565 /* source */ = {
 			isa = PBXGroup;
 			children = (
-				2DEC602D219764FF00D9D2F9 /* main.cpp */,
+				2DED752921A8774D000AECDD /* main.cpp */,
 			);
 			path = source;
 			sourceTree = "<group>";
@@ -146,7 +146,7 @@
 		2DFF77B6218319950008F565 /* framework */ = {
 			isa = PBXGroup;
 			children = (
-				2DFF77B7218319A90008F565 /* Framework.cpp */,
+				2DFF77B7218319A90008F565 /* framework.cpp */,
 			);
 			path = framework;
 			sourceTree = "<group>";
@@ -207,11 +207,11 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				2DFF77B8218319A90008F565 /* Framework.cpp in Sources */,
+				2DFF77B8218319A90008F565 /* framework.cpp in Sources */,
 				2DFF77A22182FA0E0008F565 /* memory.cpp in Sources */,
 				2DFF77A62182FA0E0008F565 /* key.cpp in Sources */,
 				2DFF77A52182FA0E0008F565 /* dbg.cpp in Sources */,
-				2DEC602E219764FF00D9D2F9 /* main.cpp in Sources */,
+				2DED752A21A8774D000AECDD /* main.cpp in Sources */,
 				2DFF77D8218BB76F0008F565 /* Gui.cpp in Sources */,
 				2DFF77A12182FA0E0008F565 /* lcd.cpp in Sources */,
 				2DE3E03C215BA0370034ABD9 /* sdlmain.cpp in Sources */,

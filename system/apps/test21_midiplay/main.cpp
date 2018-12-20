@@ -27,10 +27,13 @@ public:
     
     void Panic()
     {
-        Send(0xb0);
-        Send(0x7b);
-        Send(0x00);
-        // data!!!
+        for (int i=0; i<16; i++)
+        {
+            Send(0xb0 | i);
+            Send(0x7b);
+            Send(0x00);
+            Send(0x0b);
+        }
     }
 };
 

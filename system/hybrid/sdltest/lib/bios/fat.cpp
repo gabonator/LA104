@@ -66,7 +66,8 @@ namespace BIOS
 
     EResult Seek(ui32 lOffset)
     {
-    	return BIOS::FAT::EIntError;
+        fseek(f, lOffset, SEEK_SET);
+    	return BIOS::FAT::EOk;
     }
   }
 }

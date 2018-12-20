@@ -90,6 +90,7 @@ public:
 	{
 		m_nOffset = lOffset % BIOS::FAT::SectorSize;
 		lOffset -= m_nOffset;
+        // TODO: multiple reads when seeking in the same block!
 		BIOS::FAT::Seek( lOffset );
 		BIOS::FAT::EResult eResult = BIOS::FAT::Read( m_pData );
 		_ASSERT( eResult == BIOS::FAT::EOk );

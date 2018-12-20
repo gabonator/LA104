@@ -96,28 +96,33 @@ https://www.youtube.com/watch?v=-MRcrPu_1kQ
 ![MP3 player](resources/imgMp3.png)
 
 
-#### Features
-  - add snapshotting to host app - DONE (23screen.elf)
-  - c++ global variables memory placement, currently all variables on stack - DONE (fixed linker script)
+#### Finished Features
+  - add snapshotting to host app - DONE (95% done, 23screen.elf)
+  - C++ global variables memory placement, currently all variables on stack - DONE (100%, fixed linker script)
   - DS1820 network scanner app (50% done, 18onew.elf)
   - API signals: file added / fat changed, usb connection/disconnection (50% done, GetIntVect/SetIntVect)
   - PCF8574 sequencer + BCD to 7 segment test application (95%, 22sequen.elf)
   - midi player app (95%, 21mplay.elf)
   - USB toolkit - serial port, midi device, HID keyboard and mouse emulator, joystick (95%)
 
-#### TODO list
+#### In progress
+  - finish conversion of original firmware into ELF (80%)
+  - Graphical shell with icons
+  - separate file manager from host app
+  - solve problem how to pass file as argument to app run through gui shell
+  - Fast USB streamer through CDC into web based PC app & some simple analysis 
+  - use external logical analyser app (sigrok / pulseview) emulating SUMP protocol
   - move attribute section entry directive to library.h
   - universal IR remote control app (70% done)
+  - fix execution failures due to corrupted reads
+
+#### TODO list
+  - optimize memory usage, switch to 500 byte clusters instead of 4k (2 buffers required => 8kb wasted)
   - advanced IR remote control (record & play)
-  - fix execution failures due to corrupted reads (disabling interrupts during flashing should be enough)
-  - finish conversion of original firmware into ELF
-  - Graphical shell with icons
-  - Fast USB streamer through CDC into web based PC app & some simple analysis 
   - CC1101 RF waveform recorder / player (10%, not enough IO pins)
   - relative paths in app arguments
   - finish GIF loading, or consider other image formats (PCX, LBM, BMP?)
   - beeper
-  - remote control using ESP or BLE - possible to attach to UART0? (not possible, use USB CDC instead)
   - hybrid app use relative paths
   - consider using cmake for hybrid app
   - obtain FPGA code from manufacturer 
@@ -126,3 +131,6 @@ https://www.youtube.com/watch?v=-MRcrPu_1kQ
   - add desc: toolchain, building, ld script?
   - CNC g code decoder and player
   - swiss army knife for hardware engineers - package of applications that can talk to any electronic device and monitor any digital bus
+
+#### Abandoned ideas
+  - remote control using ESP or BLE - possible to attach to UART0? (not possible, use USB CDC instead)
