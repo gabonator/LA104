@@ -10,6 +10,11 @@ Flashing is done by holding first function button during powering up and by copy
 
 When I was developing alternative firmware for DS203, I was trying to design some simple operating system that would allow me to upload easily new programs to the devie with ability to switch between them without flashing it again. Something similar that [jpa did before](https://jpa.kapsi.fi/dsoquad/) with his PAWN interpreter on DS203 with a little difference that the application will be native C/C++ compiled code offering full computational power of the device. Unfortunately the GCC toolchain I was using had some bug which produced ARM32 instructions in PLT section which are not supported by STM32F103 and I was not able to force the compiler to use Thumb instruction set. So the dynamic relocation of imported symbols was an impossible task to implement. Now after few years, this problem was fixed and finally I could continue developing this operating system I have started before.
 
+#### Installation
+
+Download [manager.hex](system/bin/manager.hex) by clicking on "Raw" button, be carefull not to download the HTML page instead. Power on the LA104 while holding first button. Connect the device using USB cable with your computer. New disk drive should appear, copy the manager.hex file there. The disk should disconnect and reconnect shortly after finishing uploading. If you are lucky, you will see *manager.rdy* on the disk. Turn the unit off and on and copy remaining files from [system/bin](system/bin/) folder to the LA104.
+
+
 #### News
 
 ##### Logic sequencer app
@@ -104,6 +109,7 @@ https://www.youtube.com/watch?v=-MRcrPu_1kQ
   - PCF8574 sequencer + BCD to 7 segment test application (95%, 22sequen.elf)
   - midi player app (95%, 21mplay.elf)
   - USB toolkit - serial port, midi device, HID keyboard and mouse emulator, joystick (95%)
+  - hybrid app using cmake (hybrid = app is running on desktop in synthetic environment)
 
 #### In progress
   - finish conversion of original firmware into ELF (80%)
@@ -124,7 +130,6 @@ https://www.youtube.com/watch?v=-MRcrPu_1kQ
   - finish GIF loading, or consider other image formats (PCX, LBM, BMP?)
   - beeper
   - hybrid app use relative paths
-  - consider using cmake for hybrid app
   - obtain FPGA code from manufacturer 
   - setup FPGA build environment
   - tutorials: what toolchain to use, how to install...
