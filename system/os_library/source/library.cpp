@@ -29,8 +29,9 @@ namespace BIOS
 
     void Shadow(int x1, int y1, int x2, int y2, unsigned int nColor) {}
 
-    void BufferBegin(const CRect& rc, ui8 nMode) {}
-    void BufferPush(ui16 clr) {}
+    void BufferBegin(const CRect& rc) {}
+    void BufferWrite(uint16_t clr) {}
+    uint16_t BufferRead() {return 0;}
     void BufferEnd() {}
 
     // TODO: duplicity?

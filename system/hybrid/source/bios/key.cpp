@@ -18,6 +18,7 @@ namespace BIOS {
             case SDL_SCANCODE_UP: c = '<'; break;
             case SDL_SCANCODE_DOWN: c = '>'; break;
             case SDL_SCANCODE_RETURN: c = '1'; break;
+            case SDL_SCANCODE_BACKSPACE: c = '3'; break;
         }
         
         if (!sdl_running())

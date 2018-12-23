@@ -510,22 +510,22 @@ public:
     void Do()
     {
         CRect rcDraw(mPos, mBaseY, mPos+1, mBaseY+128);
-        BIOS::LCD::BufferBegin(rcDraw, 0);
+        BIOS::LCD::BufferBegin(rcDraw);
         for (int i=0; i<128; i++)
         {
             if (mKeys[i/8] & (1<<(i&7)))
-                BIOS::LCD::BufferPush(RGB565(ffffff));
+                BIOS::LCD::BufferWrite(RGB565(ffffff));
             else
-                BIOS::LCD::BufferPush(RGB565(808080));
+                BIOS::LCD::BufferWrite(RGB565(808080));
         }
         mPos++;
         if (mPos >= BIOS::LCD::Width)
             mPos = 0;
 
         CRect rcDraw2(mPos, mBaseY, mPos+1, mBaseY+128);
-        BIOS::LCD::BufferBegin(rcDraw2, 0);
+        BIOS::LCD::BufferBegin(rcDraw2);
         for (int i=0; i<128; i++)
-            BIOS::LCD::BufferPush(RGB565(404040));
+            BIOS::LCD::BufferWrite(RGB565(404040));
     }
     
     void Reset()

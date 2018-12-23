@@ -3,7 +3,8 @@ cmake_policy(SET CMP0054 NEW)
 cmake_policy(SET CMP0025 NEW)
 project(LA140_emulator)
 
-set (CMAKE_CXX_STANDARD 11)
+set(CMAKE_SUPPRESS_REGENERATION true)
+set (CMAKE_CXX_STANDARD 17)
 
 # call "brew install sdl2"
 

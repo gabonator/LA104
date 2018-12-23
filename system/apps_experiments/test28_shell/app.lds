@@ -31,7 +31,7 @@ MEMORY
 */
   rom (rx) :   ORIGIN = 0x08020000, LENGTH = 64K
   ram (rwx) :  ORIGIN = 0x20005000, LENGTH = 10K
-  null (rwx) : ORIGIN = 0xf0000000, LENGTH = 4K
+  null (rwx) : ORIGIN = 0xf0000000, LENGTH = 10K
 
 }
 

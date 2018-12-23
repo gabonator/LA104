@@ -130,8 +130,6 @@ namespace BIOS
 	if ( nIoMode == BIOS::FAT::IoRead )
 	{
 		FRESULT r = f_open(&g_file, strName, FA_READ | FA_OPEN_EXISTING);
-		if (r != 0)
-			BIOS::DBG::Print("OPEN RESULT=%d\n", r);
 		return Result(r);
 	}
         return BIOS::FAT::EIntError;
@@ -141,6 +139,9 @@ namespace BIOS
     {
       ui32 rcount;
       FRESULT r = f_read(&g_file, pSectorData, BIOS::FAT::SectorSize, &rcount);
+      if (r != 0)
+        BIOS::DBG::Print("FAT:READ RESULT=%d\n", r);
+
       return Result(r);
     }
 

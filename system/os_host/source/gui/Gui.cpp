@@ -25,8 +25,9 @@ namespace GUI
     bool interpolate = clr1 != clr2;
     CRect rect(rc);
     rect.bottom = rect.top + 1;
-    int w = rect.Width();
-
+    int shift = rc.left & 7;
+    int w = rect.Width() + shift;
+      
     for (int y=rc.top; y<rc.bottom; y++)
     {
         int r = r1;
@@ -50,13 +51,12 @@ namespace GUI
             _b = max(0, min(_b, 255));
             pat[x] = RGB565RGB(_r, _g, _b);
         }
-        BIOS::LCD::BufferBegin(rect, 0);
+        BIOS::LCD::BufferBegin(rect);
         rect.top++;
         rect.bottom++;
-
-        for (int x=0; x<w; x++)
+        for (int x = shift; x<w; x++)
         {
-          BIOS::LCD::BufferPush(pat[x&7]);
+          BIOS::LCD::BufferWrite(pat[x&7]);
         }
     }
   }

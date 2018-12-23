@@ -45,5 +45,22 @@ namespace BIOS
       g_pfnRamVectorTable[i] = handler;
     }
 
+    void EnableInterrupts(uint32_t mask)
+    {
+      __asm volatile (
+      "	msr primask, %0\n"
+      :: "r" (mask) 
+      );
+    }
+
+    uint32_t DisableInterrupts()
+    {
+      uint32_t mask;
+      __asm volatile (			   \
+      "	mrs %0, primask\n"
+      : "=r" (mask) 
+      );
+      return mask;
+    }
   }
 }

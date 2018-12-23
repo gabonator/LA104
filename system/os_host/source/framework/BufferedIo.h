@@ -25,7 +25,7 @@ public:
 	{
 		// unsafe!
 		int i;
-		int nLimit = 64;
+        int nLimit = 128;
 		for ( i = 0; i < nLimit-1; i++ )
 		{
 			str[i] = m_pData[m_nOffset++];

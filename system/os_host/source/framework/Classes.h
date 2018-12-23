@@ -164,12 +164,12 @@ public:
 		_ASSERT( m_nCount > 0 );
 		return m_arrElements[m_nCount-1];
 	}
-	
-	TYPE RemoveLast()
+    
+    // returns pointer to existing element
+    TYPE& RemoveLast()
 	{
 		_ASSERT( m_nCount > 0 );
-		TYPE& t = m_arrElements[--m_nCount];
-		return t;
+		return m_arrElements[--m_nCount];
 	}
 
 	void Resize( int nDif )

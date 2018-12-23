@@ -372,7 +372,7 @@ public:
         const uint_fast16_t& color = mChannel[mScrollY+row].color;
         const uint_fast16_t& colorBlend = mChannel[mScrollY+row].colorBlend;
 
-        LCD::BufferBegin(CRect(32+x, y, 33+x, y+20), 0);
+        LCD::BufferBegin(CRect(32+x, y, 33+x, y+20));
         if (value == 1)
         {
             uint_fast16_t buffer[20] = {RGB565(404040), RGB565(404040), color, colorBlend, colorBlend,
@@ -381,7 +381,7 @@ public:
                 colorBlend, colorBlend, colorBlend, colorBlend, colorBlend,
             };
             for (int i=COUNT(buffer)-1; i>=0; i--)
-                LCD::BufferPush(buffer[i]);
+                LCD::BufferWrite(buffer[i]);
         }
         if (value == 0)
         {
@@ -391,7 +391,7 @@ public:
                 RGB565(404040), RGB565(404040), color, colorBlend, colorBlend
             };
             for (int i=COUNT(buffer)-1; i>=0; i--)
-                LCD::BufferPush(buffer[i]);
+                LCD::BufferWrite(buffer[i]);
         }
         if (value == 2)
         {
@@ -401,7 +401,7 @@ public:
                 color, color, color, colorBlend, colorBlend,
             };
             for (int i=COUNT(buffer)-1; i>=0; i--)
-                LCD::BufferPush(buffer[i]);
+                LCD::BufferWrite(buffer[i]);
         }
     }
 

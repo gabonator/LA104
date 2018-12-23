@@ -150,14 +150,19 @@ uint8_t _Round(int x, int y)
 	return 0;
 }
 
-void BIOS::LCD::BufferBegin(const CRect& rc, ui8 nMode)
+void BIOS::LCD::BufferBegin(const CRect& rc)
 {
   Set_Block(rc.left, FLIP(rc.bottom)+1, rc.right, FLIP(rc.top)+1);
 }
 
-void BIOS::LCD::BufferPush(ui16 clr)
+void BIOS::LCD::BufferWrite(uint16_t clr)
 {
   Set_Pixel(clr);
+}
+
+uint16_t BIOS::LCD::BufferRead()
+{
+    return Get_Pixel();
 }
 
 void BIOS::LCD::BufferEnd()

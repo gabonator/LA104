@@ -18,12 +18,6 @@ namespace BIOS
     const int Width = 320;
     const int Height = 240;
 
-    enum { // TODO: named enum
-      // BufferBegin mode
-      BfXY = 1,
-      BfYX = 2
-    };
-
     void Clear(unsigned short clr);
 
     int Print (int x, int y, unsigned short clrf, unsigned short clrb, char* str);
@@ -41,8 +35,9 @@ namespace BIOS
 
     void Shadow(int x1, int y1, int x2, int y2, unsigned int nColor);
 
-    void BufferBegin(const CRect& rc, ui8 nMode);
-    void BufferPush(ui16 clr);
+    void BufferBegin(const CRect& rc);
+    void BufferWrite(uint16_t clr);
+    uint16_t BufferRead();
     void BufferEnd();
 
     // TODO: duplicity?
@@ -182,6 +177,8 @@ namespace BIOS
     char* GetArgument();
     TInterruptHandler GetInterruptVector(EInterruptVector);
     void SetInterruptVector(EInterruptVector, TInterruptHandler);
+    uint32_t DisableInterrupts();
+    void EnableInterrupts(uint32_t);
   }
 
   namespace PRIVATE

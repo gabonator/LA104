@@ -1,4 +1,8 @@
 #include "Bios.h"
+#include <sys/types.h>
+#include <dirent.h>
+
+DIR* dirp;
 
 namespace BIOS
 {
@@ -24,6 +28,11 @@ namespace BIOS
             f = fopen(strName, "rb");
             return f ? BIOS::FAT::EOk : BIOS::FAT::EIntError;
         }
+        if (nIoMode == BIOS::FAT::IoWrite)
+        {
+            f = fopen(strName, "wb");
+            return f ? BIOS::FAT::EOk : BIOS::FAT::EIntError;
+        }
         return BIOS::FAT::EIntError;
     }
 
@@ -36,28 +45,44 @@ namespace BIOS
 
     EResult Write(ui8* pSectorData)
     {
-      return BIOS::FAT::EIntError;
+        fwrite(sharedBuffer, BIOS::FAT::SectorSize, 1, f);
+        return BIOS::FAT::EOk;
     }
 
     EResult Close(int nSize /*= -1*/)
     {
+//        fclose(f);
       return BIOS::FAT::EIntError;
     }
 
     EResult Close()
     {
+        fclose(f);
       return BIOS::FAT::EOk;
     }
 
     EResult OpenDir(char* strPath)
     {
-    	return BIOS::FAT::EIntError;
+        dirp = opendir(strPath);
+        return dirp ? BIOS::FAT::EOk : BIOS::FAT::EIntError;
     }
 
     EResult FindNext(TFindFile* pFile)
     {
-    	return BIOS::FAT::EIntError;	
-    } 
+        struct dirent * dp;
+        dp = readdir(dirp);
+        
+        if (!dp)
+        {
+            closedir(dirp);
+            return BIOS::FAT::ENoFile;
+        }
+        
+        pFile->nAtrib = dp->d_type & DT_DIR ? FAT::EAttribute::EDirectory : FAT::EAttribute::EArchive;
+        pFile->nFileLength = 0;
+        strcpy(pFile->strName, dp->d_name);
+        return BIOS::FAT::EOk;
+    }
 
     ui32 GetFileSize()
     {

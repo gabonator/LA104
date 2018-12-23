@@ -108,13 +108,13 @@ public:
 
 	static void ListItemEnabled(const CRect& rcRect)
 	{
-		BIOS::LCD::BufferBegin( rcRect, BIOS::LCD::BfXY );
+		BIOS::LCD::BufferBegin(rcRect);
 		ui8 c = 0xd0;
 		for (int y=0; y<rcRect.Height(); y++)
 		{
 			ui16 clr = RGB565RGB(c, c, c);
 			for (int x=rcRect.Width(); x--; )
-				BIOS::LCD::BufferPush(clr);
+				BIOS::LCD::BufferWrite(clr);
 			c -= 0x0d;
 		}
 		BIOS::LCD::BufferEnd();

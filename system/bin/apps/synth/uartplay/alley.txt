@@ -1,0 +1,1591 @@
+baud 31250
+b0 0a 40 
+b0 07 64 
+e0 00 40 
+b0 65 00 
+b0 64 00 
+b0 06 0c 
+c0 01 
+b0 65 00 
+b0 64 00 
+b0 06 0c 
+c0 01 
+90 31 63 
+wait 15
+80 31 63 
+wait 81
+90 31 63 
+wait 15
+80 31 63 
+wait 81
+90 30 63 
+wait 15
+80 30 63 
+wait 81
+90 30 63 
+wait 15
+80 30 63 
+wait 81
+90 2e 63 
+wait 15
+80 2e 63 
+wait 49
+90 30 63 
+wait 15
+80 30 63 
+wait 17
+90 2e 63 
+wait 15
+80 2e 63 
+wait 49
+90 2c 63 
+wait 15
+80 2c 63 
+wait 81
+90 2c 63 
+wait 15
+80 2c 63 
+wait 17
+90 2c 63 
+wait 15
+80 2c 63 
+wait 17
+90 2e 63 
+wait 15
+80 2e 63 
+wait 17
+90 30 63 
+wait 15
+80 30 63 
+wait 113
+90 31 63 
+wait 15
+80 31 63 
+wait 177
+90 30 63 
+wait 15
+80 30 63 
+wait 177
+90 2e 63 
+wait 15
+80 2e 63 
+wait 49
+90 2c 63 
+wait 15
+80 2c 63 
+wait 209
+90 3d 63 
+wait 15
+80 3d 63 
+wait 81
+90 3d 63 
+wait 15
+80 3d 63 
+wait 49
+90 3c 63 
+wait 15
+80 3c 63 
+wait 1
+90 3d 63 
+wait 15
+80 3d 63 
+wait 1
+90 3c 63 
+wait 15
+80 3c 63 
+wait 81
+90 3c 63 
+wait 15
+80 3c 63 
+wait 49
+90 3a 63 
+wait 15
+80 3a 63 
+wait 1
+90 3c 63 
+wait 15
+80 3c 63 
+wait 1
+90 3a 63 
+wait 15
+80 3a 63 
+wait 49
+90 3c 63 
+wait 15
+80 3c 63 
+wait 17
+90 3a 63 
+wait 15
+80 3a 63 
+wait 49
+90 38 63 
+wait 15
+80 38 63 
+wait 81
+90 38 63 
+wait 15
+80 38 63 
+wait 17
+90 38 63 
+wait 15
+80 38 63 
+wait 17
+90 3a 63 
+wait 15
+80 3a 63 
+wait 17
+90 3c 63 
+wait 15
+80 3c 63 
+wait 113
+90 3d 63 
+wait 15
+80 3d 63 
+wait 145
+90 3c 63 
+wait 15
+80 3c 63 
+wait 17
+90 3c 63 
+wait 15
+80 3c 63 
+wait 145
+90 37 63 
+wait 15
+80 37 63 
+wait 1
+90 38 63 
+wait 15
+80 38 63 
+wait 1
+90 3a 63 
+wait 15
+80 3a 63 
+wait 49
+90 38 63 
+wait 15
+80 38 63 
+wait 145
+90 45 63 
+wait 15
+80 45 63 
+wait 1
+90 46 63 
+wait 15
+80 46 63 
+wait 1
+90 47 63 
+wait 15
+80 47 63 
+wait 1
+90 48 63 
+wait 15
+80 48 63 
+wait 1
+90 49 63 
+wait 15
+80 49 63 
+wait 81
+90 49 63 
+wait 15
+80 49 63 
+wait 49
+90 48 63 
+wait 15
+80 48 63 
+wait 1
+90 49 63 
+wait 15
+80 49 63 
+wait 1
+90 48 63 
+wait 15
+80 48 63 
+wait 49
+90 48 63 
+wait 15
+80 48 63 
+wait 1
+90 49 63 
+wait 15
+80 49 63 
+wait 1
+90 48 63 
+wait 15
+80 48 63 
+wait 49
+90 46 63 
+wait 15
+80 46 63 
+wait 1
+90 48 63 
+wait 15
+80 48 63 
+wait 1
+90 46 63 
+wait 15
+80 46 63 
+wait 49
+90 48 63 
+wait 15
+80 48 63 
+wait 17
+90 46 63 
+wait 15
+80 46 63 
+wait 1
+90 48 63 
+wait 15
+80 48 63 
+wait 1
+90 46 63 
+wait 15
+80 46 63 
+wait 17
+90 44 63 
+wait 15
+80 44 63 
+wait 81
+90 44 63 
+wait 15
+80 44 63 
+wait 17
+90 44 63 
+wait 15
+80 44 63 
+wait 17
+90 46 63 
+wait 15
+80 46 63 
+wait 17
+90 48 63 
+wait 15
+80 48 63 
+wait 113
+90 49 63 
+wait 15
+80 49 63 
+wait 1
+90 48 63 
+wait 15
+80 48 63 
+wait 1
+90 49 63 
+wait 15
+80 49 63 
+wait 1
+90 48 63 
+wait 15
+80 48 63 
+wait 1
+90 49 63 
+wait 15
+80 49 63 
+wait 81
+90 48 63 
+wait 15
+80 48 63 
+wait 17
+90 48 63 
+wait 15
+80 48 63 
+wait 145
+90 43 63 
+wait 15
+80 43 63 
+wait 1
+90 44 63 
+wait 15
+80 44 63 
+wait 1
+90 46 63 
+wait 15
+80 46 63 
+wait 49
+90 44 63 
+wait 15
+80 44 63 
+wait 97
+90 44 63 
+wait 15
+80 44 63 
+wait 1
+90 43 63 
+wait 15
+80 43 63 
+wait 1
+90 42 63 
+wait 15
+80 42 63 
+wait 1
+90 41 63 
+wait 15
+80 41 63 
+wait 1
+90 40 63 
+wait 15
+80 40 63 
+wait 1
+90 3f 63 
+wait 15
+80 3f 63 
+wait 1
+90 3e 63 
+wait 15
+80 3e 63 
+wait 1
+90 3d 63 
+wait 15
+80 3d 63 
+wait 81
+90 49 63 
+wait 15
+80 49 63 
+wait 49
+90 3c 63 
+wait 15
+80 3c 63 
+wait 1
+90 3d 63 
+wait 15
+80 3d 63 
+wait 1
+90 3c 63 
+wait 15
+80 3c 63 
+wait 81
+90 48 63 
+wait 15
+80 48 63 
+wait 49
+90 3a 63 
+wait 15
+80 3a 63 
+wait 1
+90 3c 63 
+wait 15
+80 3c 63 
+wait 1
+90 3a 63 
+wait 15
+80 3a 63 
+wait 49
+90 3c 63 
+wait 15
+80 3c 63 
+wait 49
+90 3a 63 
+wait 15
+80 3a 63 
+wait 1
+90 3c 63 
+wait 15
+80 3c 63 
+wait 1
+90 3a 63 
+wait 15
+80 3a 63 
+wait 17
+90 38 63 
+wait 15
+80 38 63 
+wait 81
+90 50 63 
+wait 15
+80 50 63 
+wait 145
+90 3d 63 
+wait 15
+80 3d 63 
+wait 17
+90 3d 63 
+wait 15
+80 3d 63 
+wait 145
+90 48 63 
+wait 15
+80 48 63 
+wait 17
+90 48 63 
+wait 15
+80 48 63 
+wait 1
+90 49 63 
+wait 15
+80 49 63 
+wait 1
+90 48 63 
+wait 15
+80 48 63 
+wait 1
+90 49 63 
+wait 15
+80 49 63 
+wait 1
+90 48 63 
+wait 15
+80 48 63 
+wait 1
+90 49 63 
+wait 15
+80 49 63 
+wait 1
+90 4a 63 
+wait 15
+80 4a 63 
+wait 1
+90 4b 63 
+wait 15
+80 4b 63 
+wait 1
+90 4c 63 
+wait 15
+80 4c 63 
+wait 17
+90 4e 63 
+wait 15
+80 4e 63 
+wait 1
+90 5b 63 
+wait 15
+80 5b 63 
+wait 1
+90 52 63 
+wait 15
+80 52 63 
+wait 49
+90 50 63 
+wait 15
+80 50 63 
+wait 209
+90 3d 63 
+wait 15
+80 3d 63 
+wait 17
+90 44 63 
+wait 15
+80 44 63 
+wait 49
+90 3d 63 
+wait 15
+80 3d 63 
+wait 17
+90 41 63 
+wait 15
+80 41 63 
+wait 49
+90 3c 63 
+wait 15
+80 3c 63 
+wait 1
+90 3d 63 
+wait 15
+80 3d 63 
+wait 1
+90 3c 63 
+wait 15
+80 3c 63 
+wait 17
+90 3f 63 
+wait 15
+80 3f 63 
+wait 17
+90 3c 63 
+wait 15
+80 3c 63 
+wait 81
+90 3a 63 
+wait 15
+80 3a 63 
+wait 1
+90 3d 63 
+wait 15
+80 3d 63 
+wait 1
+90 3a 63 
+wait 15
+80 3a 63 
+wait 1
+90 3d 63 
+wait 15
+80 3d 63 
+wait 1
+90 3c 63 
+wait 15
+80 3c 63 
+wait 17
+90 3a 63 
+wait 15
+80 3a 63 
+wait 49
+90 38 63 
+wait 15
+80 38 63 
+wait 1
+90 3c 63 
+wait 15
+80 3c 63 
+wait 1
+90 38 63 
+wait 15
+80 38 63 
+wait 1
+90 3c 63 
+wait 15
+80 3c 63 
+wait 33
+90 38 63 
+wait 15
+80 38 63 
+wait 17
+90 38 63 
+wait 15
+80 38 63 
+wait 17
+90 3a 63 
+wait 15
+80 3a 63 
+wait 17
+90 3c 63 
+wait 15
+80 3c 63 
+wait 113
+90 3d 63 
+wait 15
+80 3d 63 
+wait 17
+90 44 63 
+wait 15
+80 44 63 
+wait 17
+90 3d 63 
+wait 15
+80 3d 63 
+wait 17
+90 44 63 
+wait 15
+80 44 63 
+wait 81
+90 48 63 
+wait 15
+80 48 63 
+wait 1
+90 3c 63 
+wait 15
+80 3c 63 
+wait 1
+90 48 63 
+wait 15
+80 48 63 
+wait 1
+90 3c 63 
+wait 15
+80 3c 63 
+wait 1
+90 48 63 
+wait 15
+80 48 63 
+wait 1
+90 3c 63 
+wait 15
+80 3c 63 
+wait 1
+90 49 63 
+wait 15
+80 49 63 
+wait 81
+90 3a 63 
+wait 15
+80 3a 63 
+wait 49
+90 38 63 
+wait 15
+80 38 63 
+wait 1
+90 48 63 
+wait 15
+80 48 63 
+wait 1
+90 38 63 
+wait 15
+80 38 63 
+wait 1
+90 48 63 
+wait 15
+80 48 63 
+wait 1
+90 38 63 
+wait 15
+80 38 63 
+wait 1
+90 48 63 
+wait 15
+80 48 63 
+wait 1
+90 38 63 
+wait 15
+80 38 63 
+wait 1
+90 48 63 
+wait 15
+80 48 63 
+wait 1
+90 38 63 
+wait 15
+80 38 63 
+wait 1
+90 48 63 
+wait 15
+80 48 63 
+wait 1
+90 38 63 
+wait 15
+80 38 63 
+wait 1
+90 48 63 
+wait 15
+80 48 63 
+wait 1
+90 38 63 
+wait 15
+80 38 63 
+wait 1
+90 48 63 
+wait 15
+80 48 63 
+wait 1
+90 3d 63 
+wait 15
+80 3d 63 
+wait 17
+90 50 63 
+wait 15
+80 50 63 
+wait 49
+90 3d 63 
+wait 15
+80 3d 63 
+wait 81
+90 3c 63 
+wait 15
+80 3c 63 
+wait 1
+90 3d 63 
+wait 15
+80 3d 63 
+wait 1
+90 3c 63 
+wait 15
+80 3c 63 
+wait 49
+90 4b 63 
+wait 15
+80 4b 63 
+wait 17
+90 3c 63 
+wait 15
+80 3c 63 
+wait 49
+90 3a 63 
+wait 15
+80 3a 63 
+wait 1
+90 49 63 
+wait 15
+80 49 63 
+wait 1
+90 3a 63 
+wait 15
+80 3a 63 
+wait 1
+90 49 63 
+wait 15
+80 49 63 
+wait 1
+90 3c 63 
+wait 15
+80 3c 63 
+wait 1
+90 4b 63 
+wait 15
+80 4b 63 
+wait 1
+90 3c 63 
+wait 15
+80 3c 63 
+wait 1
+90 4b 63 
+wait 15
+80 4b 63 
+wait 1
+90 3a 63 
+wait 15
+80 3a 63 
+wait 1
+90 49 63 
+wait 15
+80 49 63 
+wait 1
+90 3a 63 
+wait 15
+80 3a 63 
+wait 1
+90 49 63 
+wait 15
+80 49 63 
+wait 1
+90 38 63 
+wait 15
+80 38 63 
+wait 1
+90 48 63 
+wait 15
+80 48 63 
+wait 1
+90 38 63 
+wait 15
+80 38 63 
+wait 1
+90 48 63 
+wait 15
+80 48 63 
+wait 1
+90 38 63 
+wait 15
+80 38 63 
+wait 1
+90 48 63 
+wait 15
+80 48 63 
+wait 1
+90 38 63 
+wait 15
+80 38 63 
+wait 1
+90 3c 63 
+wait 15
+80 3c 63 
+wait 1
+90 3f 63 
+wait 15
+80 3f 63 
+wait 1
+90 3c 63 
+wait 15
+80 3c 63 
+wait 1
+90 38 63 
+wait 15
+80 38 63 
+wait 1
+90 3c 63 
+wait 15
+80 3c 63 
+wait 1
+90 3f 63 
+wait 15
+80 3f 63 
+wait 1
+90 44 63 
+wait 15
+80 44 63 
+wait 1
+90 3f 63 
+wait 15
+80 3f 63 
+wait 1
+90 3c 63 
+wait 15
+80 3c 63 
+wait 1
+90 3f 63 
+wait 15
+80 3f 63 
+wait 1
+90 44 63 
+wait 15
+80 44 63 
+wait 1
+90 3d 63 
+wait 15
+80 3d 63 
+wait 17
+90 50 63 
+wait 15
+80 50 63 
+wait 49
+90 50 63 
+wait 15
+80 50 63 
+wait 17
+90 50 63 
+wait 15
+80 50 63 
+wait 1
+90 54 63 
+wait 15
+80 54 63 
+wait 1
+90 50 63 
+wait 15
+80 50 63 
+wait 1
+90 54 63 
+wait 15
+80 54 63 
+wait 1
+90 3c 63 
+wait 15
+80 3c 63 
+wait 81
+90 3c 63 
+wait 15
+80 3c 63 
+wait 81
+90 3a 63 
+wait 15
+80 3a 63 
+wait 81
+90 56 63 
+wait 15
+80 56 63 
+wait 17
+90 3a 63 
+wait 15
+80 3a 63 
+wait 17
+90 38 63 
+wait 15
+80 38 63 
+wait 1
+90 57 63 
+wait 15
+80 57 63 
+wait 1
+90 38 63 
+wait 15
+80 38 63 
+wait 1
+90 57 63 
+wait 15
+80 57 63 
+wait 1
+90 38 63 
+wait 15
+80 38 63 
+wait 1
+90 57 63 
+wait 15
+80 57 63 
+wait 1
+90 38 63 
+wait 15
+80 38 63 
+wait 1
+90 57 63 
+wait 15
+80 57 63 
+wait 1
+90 39 63 
+wait 15
+80 39 63 
+wait 1
+90 58 63 
+wait 15
+80 58 63 
+wait 1
+90 3a 63 
+wait 15
+80 3a 63 
+wait 1
+90 59 63 
+wait 15
+80 59 63 
+wait 1
+90 3b 63 
+wait 15
+80 3b 63 
+wait 1
+90 5a 63 
+wait 15
+80 5a 63 
+wait 1
+90 31 63 
+wait 15
+80 31 63 
+wait 49
+90 50 63 
+wait 15
+80 50 63 
+wait 17
+90 31 63 
+wait 15
+80 31 63 
+wait 49
+90 50 63 
+wait 15
+80 50 63 
+wait 17
+90 30 63 
+wait 15
+80 30 63 
+wait 1
+90 4b 63 
+wait 15
+80 4b 63 
+wait 33
+90 50 63 
+wait 15
+80 50 63 
+wait 17
+90 30 63 
+wait 15
+80 30 63 
+wait 1
+90 4b 63 
+wait 15
+80 4b 63 
+wait 33
+90 50 63 
+wait 15
+80 50 63 
+wait 17
+90 2e 63 
+wait 15
+80 2e 63 
+wait 1
+90 49 63 
+wait 15
+80 49 63 
+wait 1
+90 49 63 
+wait 15
+80 49 63 
+wait 17
+90 30 63 
+wait 15
+80 30 63 
+wait 1
+90 50 63 
+wait 15
+80 50 63 
+wait 1
+90 2e 63 
+wait 15
+80 2e 63 
+wait 1
+90 49 63 
+wait 15
+80 49 63 
+wait 1
+90 4b 63 
+wait 15
+80 4b 63 
+wait 17
+90 2c 63 
+wait 15
+80 2c 63 
+wait 17
+90 4b 63 
+wait 15
+80 4b 63 
+wait 17
+90 53 63 
+wait 15
+80 53 63 
+wait 17
+90 54 63 
+wait 15
+80 54 63 
+wait 17
+90 50 63 
+wait 15
+80 50 63 
+wait 17
+90 53 63 
+wait 15
+80 53 63 
+wait 17
+90 54 63 
+wait 15
+80 54 63 
+wait 17
+90 50 63 
+wait 15
+80 50 63 
+wait 49
+90 5c 63 
+wait 15
+80 5c 63 
+wait 17
+90 31 63 
+wait 15
+80 31 63 
+wait 1
+90 59 63 
+wait 15
+80 59 63 
+wait 33
+90 50 63 
+wait 15
+80 50 63 
+wait 17
+90 50 63 
+wait 15
+80 50 63 
+wait 49
+90 5c 63 
+wait 15
+80 5c 63 
+wait 17
+90 30 63 
+wait 15
+80 30 63 
+wait 1
+90 57 63 
+wait 15
+80 57 63 
+wait 33
+90 50 63 
+wait 15
+80 50 63 
+wait 17
+90 5c 63 
+wait 15
+80 5c 63 
+wait 17
+90 5b 63 
+wait 15
+80 5b 63 
+wait 17
+90 59 63 
+wait 15
+80 59 63 
+wait 17
+90 2e 63 
+wait 15
+80 2e 63 
+wait 1
+90 5b 63 
+wait 15
+80 5b 63 
+wait 1
+90 59 63 
+wait 15
+80 59 63 
+wait 17
+90 2c 63 
+wait 15
+80 2c 63 
+wait 1
+90 54 63 
+wait 15
+80 54 63 
+wait 1
+90 3c 63 
+wait 15
+80 3c 63 
+wait 17
+90 3b 63 
+wait 15
+80 3b 63 
+wait 17
+90 3c 63 
+wait 15
+80 3c 63 
+wait 17
+90 3b 63 
+wait 15
+80 3b 63 
+wait 17
+90 38 63 
+wait 15
+80 38 63 
+wait 17
+90 31 63 
+wait 15
+80 31 63 
+wait 1
+90 53 63 
+wait 15
+80 53 63 
+wait 1
+90 52 63 
+wait 15
+80 52 63 
+wait 17
+90 50 63 
+wait 15
+80 50 63 
+wait 17
+90 52 63 
+wait 15
+80 52 63 
+wait 17
+90 53 63 
+wait 15
+80 53 63 
+wait 17
+90 52 63 
+wait 15
+80 52 63 
+wait 17
+90 50 63 
+wait 15
+80 50 63 
+wait 17
+90 4e 63 
+wait 15
+80 4e 63 
+wait 17
+90 4b 63 
+wait 15
+80 4b 63 
+wait 17
+90 4a 63 
+wait 15
+80 4a 63 
+wait 17
+90 49 63 
+wait 15
+80 49 63 
+wait 17
+90 47 63 
+wait 15
+80 47 63 
+wait 17
+90 49 63 
+wait 15
+80 49 63 
+wait 17
+90 2e 63 
+wait 15
+80 2e 63 
+wait 1
+90 4b 63 
+wait 15
+80 4b 63 
+wait 1
+90 4c 63 
+wait 15
+80 4c 63 
+wait 17
+90 30 63 
+wait 15
+80 30 63 
+wait 17
+90 50 63 
+wait 15
+80 50 63 
+wait 17
+90 2e 63 
+wait 15
+80 2e 63 
+wait 1
+90 52 63 
+wait 15
+80 52 63 
+wait 1
+90 54 63 
+wait 15
+80 54 63 
+wait 17
+90 2c 63 
+wait 15
+80 2c 63 
+wait 17
+90 38 63 
+wait 15
+80 38 63 
+wait 17
+90 38 63 
+wait 15
+80 38 63 
+wait 17
+90 38 63 
+wait 15
+80 38 63 
+wait 17
+90 38 63 
+wait 15
+80 38 63 
+wait 17
+90 31 63 
+wait 15
+80 31 63 
+wait 1
+90 58 63 
+wait 15
+80 58 63 
+wait 1
+90 59 63 
+wait 15
+80 59 63 
+wait 17
+90 5c 63 
+wait 15
+80 5c 63 
+wait 17
+90 31 63 
+wait 15
+80 31 63 
+wait 1
+90 58 63 
+wait 15
+80 58 63 
+wait 1
+90 59 63 
+wait 15
+80 59 63 
+wait 17
+90 5c 63 
+wait 15
+80 5c 63 
+wait 17
+90 30 63 
+wait 15
+80 30 63 
+wait 1
+90 57 63 
+wait 15
+80 57 63 
+wait 1
+90 5c 63 
+wait 15
+80 5c 63 
+wait 17
+90 5a 63 
+wait 15
+80 5a 63 
+wait 17
+90 57 63 
+wait 15
+80 57 63 
+wait 17
+90 56 63 
+wait 15
+80 56 63 
+wait 17
+90 50 63 
+wait 15
+80 50 63 
+wait 17
+90 53 63 
+wait 15
+80 53 63 
+wait 17
+90 52 63 
+wait 15
+80 52 63 
+wait 17
+90 50 63 
+wait 15
+80 50 63 
+wait 17
+90 2e 63 
+wait 15
+80 2e 63 
+wait 1
+90 4e 63 
+wait 15
+80 4e 63 
+wait 1
+90 4a 63 
+wait 15
+80 4a 63 
+wait 17
+90 49 63 
+wait 15
+80 49 63 
+wait 17
+90 2c 63 
+wait 15
+80 2c 63 
+wait 1
+90 48 63 
+wait 15
+80 48 63 
+wait 1
+90 2c 63 
+wait 15
+80 2c 63 
+wait 1
+90 38 63 
+wait 15
+80 38 63 
+wait 1
+90 2f 63 
+wait 15
+80 2f 63 
+wait 1
+90 3b 63 
+wait 15
+80 3b 63 
+wait 1
+90 2c 63 
+wait 15
+80 2c 63 
+wait 1
+90 38 63 
+wait 15
+80 38 63 
+wait 1
+90 2f 63 
+wait 15
+80 2f 63 
+wait 1
+90 3b 63 
+wait 15
+80 3b 63 
+wait 1
+90 30 63 
+wait 15
+80 30 63 
+wait 1
+90 3c 63 
+wait 15
+80 3c 63 
+wait 1
+90 31 63 
+wait 15
+80 31 63 
+wait 1
+90 3d 63 
+wait 15
+80 3d 63 
+wait 1
+90 35 63 
+wait 15
+80 35 63 
+wait 1
+90 41 63 
+wait 15
+80 41 63 
+wait 1
+90 38 63 
+wait 15
+80 38 63 
+wait 1
+90 44 63 
+wait 15
+80 44 63 
+wait 1
+90 41 63 
+wait 15
+80 41 63 
+wait 17
+90 44 63 
+wait 15
+80 44 63 
+wait 1
+90 50 63 
+wait 15
+80 50 63 
+wait 1
+90 48 63 
+wait 15
+80 48 63 
+wait 1
+90 54 63 
+wait 15
+80 54 63 
+wait 1
+90 30 63 
+wait 15
+80 30 63 
+wait 1
+90 3c 63 
+wait 15
+80 3c 63 
+wait 1
+90 33 63 
+wait 15
+80 33 63 
+wait 1
+90 3f 63 
+wait 15
+80 3f 63 
+wait 1
+90 37 63 
+wait 15
+80 37 63 
+wait 1
+90 43 63 
+wait 15
+80 43 63 
+wait 1
+90 3f 63 
+wait 15
+80 3f 63 
+wait 1
+90 4b 63 
+wait 15
+80 4b 63 
+wait 1
+90 43 63 
+wait 15
+80 43 63 
+wait 1
+90 4f 63 
+wait 15
+80 4f 63 
+wait 1
+90 46 63 
+wait 15
+80 46 63 
+wait 1
+90 52 63 
+wait 15
+80 52 63 
+wait 1
+90 2e 63 
+wait 15
+80 2e 63 
+wait 1
+90 3a 63 
+wait 15
+80 3a 63 
+wait 1
+90 32 63 
+wait 15
+80 32 63 
+wait 1
+90 3e 63 
+wait 15
+80 3e 63 
+wait 1
+90 35 63 
+wait 15
+80 35 63 
+wait 1
+90 41 63 
+wait 15
+80 41 63 
+wait 1
+90 2c 63 
+wait 15
+80 2c 63 
+wait 1
+90 30 63 
+wait 15
+80 30 63 
+wait 1
+90 33 63 
+wait 15
+80 33 63 
+wait 1
+90 36 63 
+wait 15
+80 36 63 
+wait 1
+90 38 63 
+wait 15
+80 38 63 
+wait 1
+90 3c 63 
+wait 15
+80 3c 63 
+wait 1
+90 3f 63 
+wait 15
+80 3f 63 
+wait 1
+90 42 63 
+wait 15
+80 42 63 
+wait 1
+90 44 63 
+wait 15
+80 44 63 
+wait 1
+90 48 63 
+wait 15
+80 48 63 
+wait 1
+90 4b 63 
+wait 15
+80 4b 63 
+wait 1
+90 4e 63 
+wait 15
+80 4e 63 
+wait 1
+90 50 63 
+wait 15
+80 50 63 
+wait 1
+90 54 63 
+wait 15
+80 54 63 
+wait 1
+90 57 63 
+wait 15
+80 57 63 
+wait 1
+90 5a 63 
+wait 15
+80 5a 63 
+wait 1
+90 5c 63 
+wait 15
+80 5c 63 
+wait 1
+90 5b 63 
+wait 15
+80 5b 63 
+wait 1
+90 5c 63 
+wait 15
+80 5c 63 
+wait 1
+90 5b 63 
+wait 15
+80 5b 63 
+wait 1
+90 5c 63 
+wait 15
+80 5c 63 
+wait 1
+90 5b 63 
+wait 15
+80 5b 63 
+wait 1
+90 5c 63 
+wait 15
+80 5c 63 
+wait 1
+90 5b 63 
+wait 15
+80 5b 63 
+wait 1
+90 5c 63 
+wait 15
+80 5c 63 
+wait 1
+90 5b 63 
+wait 15
+80 5b 63 
+wait 1
+90 5c 63 
+wait 15
+80 5c 63 
+wait 1
+90 5b 63 
+wait 15
+80 5b 63 
+wait 1
+90 5c 63 
+wait 15
+80 5c 63 
+wait 193
+90 2c 63 
+wait 15
+80 2c 63 
+wait 1089
+b0 65 00 
+b0 64 00 
+b0 06 0c 
+c0 01 
+
+
+

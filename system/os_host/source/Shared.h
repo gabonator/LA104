@@ -79,10 +79,14 @@ uint32_t GetProcAddress(char* symbol)
     return (uint32_t)static_cast<BIOS::FAT::EResult(*)(BIOS::FAT::TFindFile*)>(BIOS::FAT::FindNext);
   if (strcmp(symbol, "KEY6GetKeyEv") == 0)
     return (uint32_t)static_cast<BIOS::KEY::EKey(*)()>(BIOS::KEY::GetKey);
-  if (strcmp(symbol, "LCD10BufferPushEt") == 0)
-    return (uint32_t)static_cast<void(*)(unsigned short)>(BIOS::LCD::BufferPush);
-  if (strcmp(symbol, "LCD11BufferBeginERK5CRecth") == 0)
-    return (uint32_t)static_cast<void(*)(CRect const&, unsigned char)>(BIOS::LCD::BufferBegin);
+
+  if (strcmp(symbol, "LCD10BufferReadEv") == 0)
+    return (uint32_t)static_cast<uint16_t(*)()>(BIOS::LCD::BufferRead);
+  if (strcmp(symbol, "LCD11BufferBeginERK5CRect") == 0)
+    return (uint32_t)static_cast<void(*)(CRect const&)>(BIOS::LCD::BufferBegin);
+  if (strcmp(symbol, "LCD11BufferWriteEt") == 0)
+    return (uint32_t)static_cast<void(*)(unsigned short)>(BIOS::LCD::BufferWrite);
+
   if (strcmp(symbol, "LCD3BarERK5CRectt") == 0)
     return (uint32_t)static_cast<void(*)(CRect const&, unsigned short)>(BIOS::LCD::Bar);
   if (strcmp(symbol, "LCD3BarEiiiit") == 0)
