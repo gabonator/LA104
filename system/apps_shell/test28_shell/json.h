@@ -131,7 +131,10 @@ public:
 public:
     void ToString(char* str, int maxLen) const
     {
-        mString.ToString(str, maxLen);
+        if (mString)
+            mString.ToString(str, maxLen);
+        else
+            strcpy(str, "");
     }
 
     CJson()

@@ -56,8 +56,6 @@ arm-none-eabi-gcc -Wall -Os -Werror -fno-common -mcpu=cortex-m3 -mthumb -msoft-f
 
 arm-none-eabi-g++ -Wall -Os -Werror -fno-common -mcpu=cortex-m3 -mthumb -msoft-float -MD -fno-exceptions -fno-rtti -fno-threadsafe-statics -Wno-psabi -c -Wall -Werror -D USE_STDPERIPH_DRIVER -D STM32F10X_HD ${INCLUDES} -c \
   ../main.cpp \
-  ../source/Manager.cpp \
-  ../source/framework/Wnd.cpp \
   ../source/bios/sys.cpp \
   ../source/bios/lcd.cpp \
   ../source/bios/memory.cpp \
@@ -65,36 +63,35 @@ arm-none-eabi-g++ -Wall -Os -Werror -fno-common -mcpu=cortex-m3 -mthumb -msoft-f
   ../source/bios/key.cpp \
   ../source/bios/os.cpp \
   ../source/bios/usb.cpp \
-  ../source/framework/Utils.cpp \
   ../source/bios/dbg.cpp \
   ../source/bios/gpio.cpp \
   ../source/library/spf.c \
   ../source/Execute.cpp \
-  ../source/Framework/Serialize.cpp \
   ../source/gui/Gui.cpp \
+  ../source/Framework/Serialize.cpp \
+
+#  ../source/framework/Wnd.cpp \
+#  ../source/framework/Utils.cpp \
+#  ../source/Manager.cpp \
 
 arm-none-eabi-gcc -mcpu=cortex-m3 -mthumb -o output.elf -nostartfiles -T ../app.ld \
   ./main.o \
   ./startup.o \
   ./interrupt.o \
   ./sys.o \
-  ./Wnd.o \
   ./lcd.o \
   ./memory.o \
   ./fat.o \
   ./key.o \
-  ./Utils.o \
   ./dbg.o \
   ./os.o \
   ./usb.o \
   ./spf.o \
   ./Execute.o \
-  ./Serialize.o \
   ./imports.o \
   ./stm32f10x_flash.o \
   ./stm32f10x_spi.o \
   ./stm32f10x_rcc.o \
-  ./Manager.o \
   ./usb_init.o \
   ./usb_mem.o \
   ./usb_regs.o \
@@ -103,7 +100,6 @@ arm-none-eabi-gcc -mcpu=cortex-m3 -mthumb -o output.elf -nostartfiles -T ../app.
   ./usb_sil.o \
   ./system_stm32f10x.o \
   ./Ext_Flash.o \
-  ./Gui.o \
   ./stm32f10x_gpio.o \
   ./stm32f10x_tim.o \
   ./gpio.o \
@@ -123,7 +119,12 @@ arm-none-eabi-gcc -mcpu=cortex-m3 -mthumb -o output.elf -nostartfiles -T ../app.
   ./commonusb_pwr.o \
   ./commonusb_istr.o \
   ./commonusb_app.o \
+  ./Gui.o \
+  ./Serialize.o \
 
+#  ./Wnd.o \
+#  ./Utils.o \
+#  ./Manager.o \
 #  ./msdusb_istr.o \
 #  ./msdusb_pwr.o \
 

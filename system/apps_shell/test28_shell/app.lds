@@ -29,8 +29,9 @@ MEMORY
   ram (rwx) : ORIGIN = 0x20005000, LENGTH = 6K
   null (rwx): ORIGIN = 0x00001000, LENGTH = 4K
 */
-  rom (rx) :   ORIGIN = 0x08020000, LENGTH = 64K
-  ram (rwx) :  ORIGIN = 0x20005000, LENGTH = 10K
+  persistent (rwx) :   ORIGIN = 0x20004f00, LENGTH = 64K
+  rom (rx) :   ORIGIN = 0x0801f000, LENGTH = 20K
+  ram (rwx) :  ORIGIN = 0x20005000, LENGTH = 12K
   null (rwx) : ORIGIN = 0xf0000000, LENGTH = 10K
 
 }
@@ -49,6 +50,9 @@ SECTIONS
     } >ram
   .bss : {
     *(.bss*)         /* Zero-filled run time allocate data memory */
+    } >ram
+    .persistent : {
+      *(.persistent*)        /* Data memory */
     } >ram
 
   .rel.plt : { *(.rel.plt)  } > rom

@@ -20,8 +20,8 @@ extern "C"
   DRESULT disk_read(BYTE drv, BYTE *buff, DWORD sector, BYTE count)
   {
       if (drv != 0 || count == 0) return RES_PARERR;
-      // TODO: check for usb conflict??
-      ExtFlashDataRd(buff, sector * BIOS::FAT::SectorSize, count * BIOS::FAT::SectorSize);
+      // Operation could be interrupted by USB isr calling the same function
+      while (!ExtFlashDataRd(buff, sector * BIOS::FAT::SectorSize, count * BIOS::FAT::SectorSize));
       return RES_OK;
   }
 
@@ -31,7 +31,8 @@ extern "C"
       // TODO: check for usb conflict??
 
       _ASSERT(count == 1);
-      ExtFlashSecWr((BYTE*)buff, sector * BIOS::FAT::SectorSize);
+      // Operation could be interrupted by USB isr calling the same function
+      while (!ExtFlashSecWr((BYTE*)buff, sector * BIOS::FAT::SectorSize));
       return RES_OK;
     return RES_PARERR;
   }

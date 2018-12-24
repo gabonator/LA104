@@ -1,1 +1,1 @@
-{"description":"File manager","icon":"manager.bmp"}
+{"description":"File manager","icon":"manager.bmp","execute":"../../fileman.elf"}

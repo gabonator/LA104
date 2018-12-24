@@ -6,7 +6,7 @@ namespace BIOS
 {
   namespace OS
   {
-    char strGlobalArgument[32];
+    char strGlobalArgument[64];
 
     void SetArgument(char* argument)
     {

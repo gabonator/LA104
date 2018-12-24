@@ -32,7 +32,8 @@ void BIOS::OS::SetArgument(char* argument)
 
 char* BIOS::OS::GetArgument()
 {
-    static char* arg = (char*)"/Users/gabrielvalky/Documents/git/LA104/system/apps_experiments/test21_midiplay/laisla.mid";
+    static char* arg = (char*)"";
+    //"/Users/gabrielvalky/Documents/git/LA104/system/apps_experiments/test21_midiplay/laisla.mid";
     return (char*)arg;
 }
 

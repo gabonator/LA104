@@ -4,10 +4,7 @@
  * Author      : SNAKE 
  * History     :
 *******************************************************************************/
-#include <string.h>
-//#include <stdio.h>
-//#include "Disk.h"
-//#include "Bios.h"
+#include <stdbool.h>
 #include "Ext_Flash.h"
 #include "stm32f10x_spi.h"
 #include "stm32f10x_flash.h"
@@ -30,7 +27,7 @@ u8   ExtFlashSendByte(u8 byte);
 void ExtFlashWrCtrl(u8 Cmd);
 void ExtFlashWaitForWrEnd(void);
 void ExtFlashSectorErase(u32 SecAddr);
-void ExtFlashPageProg(u8 *pBuf, u32 WrAddr, u8 CMD);
+bool ExtFlashPageProg(u8 *pBuf, u32 WrAddr, u8 CMD);
 
 /*******************************************************************************
  * FunctionName : FLASH_Prog
@@ -86,15 +83,17 @@ void ExtFlashSectorErase(u32 SecAddr)
  * Param        : u8* pBuf 
  * Param        : u32 WrAddr 
 *******************************************************************************/
-void ExtFlashSecWr(u8 *pBuf, u32 WrAddr)
+bool ExtFlashSecWr(u8 *pBuf, u32 WrAddr)
 {
     u16 SecSize = SEC_SIZE;
     u32 i, Addr = WrAddr &  (~(SecSize - 1));
     ExtFlashSectorErase(Addr);
     for (i = 0; i < SecSize; i += PAGE_SIZE)
     {
-        ExtFlashPageProg(&pBuf[i], Addr + i, PP);
+        if (!ExtFlashPageProg(&pBuf[i], Addr + i, PP))
+            return false;
     }
+    return true;
 }
 
 /*******************************************************************************
@@ -104,9 +103,12 @@ void ExtFlashSecWr(u8 *pBuf, u32 WrAddr)
  * Param        : u32 WrAddr 
  * Param        : u8 WrCmd 
 *******************************************************************************/
-void ExtFlashPageProg(u8 *pBuf, u32 WrAddr, u8 WrCmd)
+bool ExtFlashPageProg(u8 *pBuf, u32 WrAddr, u8 WrCmd)
 {
-//  NVIC_DisableIRQ(USB_LP_IRQn);
+    static volatile bool mutex = false;
+    mutex = true;
+
+//  NVIC_DisableIRQ(USB_LP_CAN1_RX0_IRQn);
     ExtFlashWaitForWrEnd();
     ExtFlashWrCtrl(ENABLE);
     ExtFlash_CS_LOW();
@@ -117,7 +119,11 @@ void ExtFlashPageProg(u8 *pBuf, u32 WrAddr, u8 WrCmd)
     for (u16 i = 0; i < PAGE_SIZE; i++) ExtFlashSendByte(~pBuf[i]);
     ExtFlash_CS_HIGH();
     ExtFlashWrCtrl(DISABLE);
-//  NVIC_EnableIRQ(USB_LP_IRQn);
+//  NVIC_EnableIRQ(USB_LP_CAN1_RX0_IRQn);
+
+    bool aux = mutex; // was this function interrupted?
+    mutex = false;
+    return aux;
 }
 
 /*******************************************************************************
@@ -127,9 +133,13 @@ void ExtFlashPageProg(u8 *pBuf, u32 WrAddr, u8 WrCmd)
  * Param        : u32 RdAddr 
  * Param        : u16 Lenght 
 *******************************************************************************/
-void ExtFlashDataRd(u8 *pBuf, u32 RdAddr, u16 Lenght)
+bool ExtFlashDataRd(u8 *pBuf, u32 RdAddr, u16 Lenght)
 {
-//  NVIC_DisableIRQ(USB_LP_IRQn);
+    static volatile bool mutex = false;
+    mutex = true;
+
+// disabling isr disconnects usb
+//  NVIC_DisableIRQ(USB_LP_CAN1_RX0_IRQn);
     ExtFlashWaitForWrEnd();
     ExtFlash_CS_LOW();
     ExtFlashSendByte(READ);
@@ -138,7 +148,11 @@ void ExtFlashDataRd(u8 *pBuf, u32 RdAddr, u16 Lenght)
     ExtFlashSendByte(RdAddr & 0xFF);
     for (u16 i = 0; i < Lenght; i++) pBuf[i] = ~ExtFlashReadByte();
     ExtFlash_CS_HIGH();
-//  NVIC_EnableIRQ(USB_LP_IRQn);
+//  NVIC_EnableIRQ(USB_LP_CAN1_RX0_IRQn);
+
+    bool aux = mutex; // was this function interrupted?
+    mutex = false;
+    return aux;
 }
 
 /*******************************************************************************

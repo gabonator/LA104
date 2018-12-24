@@ -1,4 +1,4 @@
-#include "Manager.h"
+#include "Execute.h"
 #include "library/elf.h"
 #include "framework/BufferedIo.h"
 #include "gui/Gui.h"
@@ -8,36 +8,54 @@
 //enum {DISABLE=0, ENABLE=1};
 //extern "C" void USB_Connect(uint8_t Status);
 
-bool CWndUserManager::ElfGetInterpreter( char* strName, char* strInterpreter )
+void Show(char* msg)
 {
-	CBufferedReader2 fw;
-	if ( !fw.Open( strName ) )
-		return false;
+  static int x = 0;
+  static bool flush = true;
 
-	Elf32_Ehdr elfHeader;
-	Elf32_Phdr elfProgram;
-
-	fw >> CStream(&elfHeader, sizeof(Elf32_Ehdr));
-
-	_ASSERT( sizeof(Elf32_Phdr) == elfHeader.phentsize );
-
-	fw.Seek( elfHeader.phoff );
-	for (int i=0; i<elfHeader.phnum; i++)
-	{
-		fw >> CStream(&elfProgram, sizeof(Elf32_Phdr));
-		if ( elfProgram.type == Elf32_PTypeInterpreter )
-		{
-			fw.Seek( elfProgram.offset );
-			_ASSERT( elfProgram.filesz < 31 );
-			fw >> CStream( strInterpreter, elfProgram.filesz );
-			strInterpreter[elfProgram.filesz] = 0;
-			fw.Close();
-			return true;
-		}
-	}
-	fw.Close();
-	return false;
+  while (*msg)
+  {
+    char ch = *msg++;
+    if (flush)
+    {
+      flush = false;
+      x = 0;
+      BIOS::LCD::Bar(0, BIOS::LCD::Height-16, BIOS::LCD::Width, BIOS::LCD::Height, RGB565(4040b0));
+    }
+    if (ch == '\n')
+    {
+      flush = true;
+      continue;
+    }          
+    char show[2] = {ch, 0};
+    x += BIOS::LCD::Print(x, BIOS::LCD::Height-16, RGB565(ffffff), RGB565(4040b0), show);
+    if (x >= BIOS::LCD::Width)
+    {
+      x = 0;
+      flush = true;
+    }
+  }
 }
+
+void Show(const char* msg)
+{
+  Show((char*)msg);
+}
+
+class CInterruptGuard
+{
+  uint32_t m_mask;
+
+public:
+  CInterruptGuard()
+  {
+    m_mask = BIOS::OS::DisableInterrupts();
+  }
+  ~CInterruptGuard()
+  {
+    BIOS::OS::EnableInterrupts(m_mask);
+  }
+};
 
 bool Verify( CBufferedReader2& f, Elf32_Shdr& elfSection )
 {
@@ -135,12 +153,17 @@ void ZeroRom( CBufferedReader2& f, Elf32_Shdr& elfSection )
 //LINKERSECTION(".gbios")
 void /*CWndUserManager::*/FlashData( CBufferedReader2& f, Elf32_Shdr& elfSection )
 {
+      	char message[64];
+
 	if ( Verify( f, elfSection ) )
 	{
-		BIOS::DBG::Print("Ignoring %d bytes at %08x.", elfSection.size, elfSection.addr );
+		sprintf(message, "Ignoring %d bytes at %08x.", elfSection.size, elfSection.addr);
+		Show(message);
 		return;
 	}
-	BIOS::DBG::Print("Flashing %d bytes at %08x.", elfSection.size, elfSection.addr );
+
+      	sprintf(message, "Flashing %d bytes at %08x.", elfSection.size, elfSection.addr);
+      	Show(message);
 
 #ifndef _WIN32
 	if ( (elfSection.addr >> 24) == 0x20 )
@@ -158,12 +181,16 @@ void /*CWndUserManager::*/FlashData( CBufferedReader2& f, Elf32_Shdr& elfSection
 //LINKERSECTION(".gbios")
 void /*CWndUserManager::*/FlashBss( CBufferedReader2& f, Elf32_Shdr& elfSection )
 {
+      	char message[64];
+
 	if ( VerifyZero( f, elfSection ) )
 	{
-		BIOS::DBG::Print("Ignoring %d bytes at %08x.", elfSection.size, elfSection.addr );
+	      	sprintf(message, "Ignoring %d bytes at %08x.", elfSection.size, elfSection.addr);
+	      	Show(message);
 		return;
 	}
-	BIOS::DBG::Print("Filling %d bytes at %08x.", elfSection.size, elfSection.addr );
+	sprintf(message, "Filling %d bytes at %08x.", elfSection.size, elfSection.addr);
+     	Show(message);
 #ifndef _WIN32
 	if ( (elfSection.addr >> 24) == 0x20 )
 	{
@@ -178,7 +205,7 @@ void /*CWndUserManager::*/FlashBss( CBufferedReader2& f, Elf32_Shdr& elfSection 
 }
 
 //LINKERSECTION(".gbios")
-uint32_t CWndUserManager::ElfExecute( char* strName )
+uint32_t ElfExecute( char* strName )
 {
 	/*
 		all variables used in this routine + (used by BIOS functions) must be placed 
@@ -186,12 +213,18 @@ uint32_t CWndUserManager::ElfExecute( char* strName )
 		code area in flash occupied by this function!
 	*/
 //	USB_Connect(DISABLE);
+        CInterruptGuard guard;
 
-	BIOS::LCD::Clear(RGB565(0000b0));
-	BIOS::DBG::Print("$Executing ELF image\n");
+//	BIOS::LCD::Clear(RGB565(0000b0));
+        char message[64];
+        sprintf(message, "Executing ELF image '%s'\n", strName);
+        Show(message);
 	CBufferedReader2 fw;
 	if ( !fw.Open( strName ) )
-		return 0;
+        {
+		sprintf(message, "Image not found!\n", strName);
+		Show(message);
+        }
 
 	Elf32_Ehdr elfHeader;
 	Elf32_Shdr elfSection;
@@ -262,37 +295,41 @@ uint32_t CWndUserManager::ElfExecute( char* strName )
 
 		if ( strncmp( strSectionName, ".text", 5 ) == 0 )
 		{
-			BIOS::DBG::Print("%s>", strSectionName);
+			sprintf(message, "%s>", strSectionName);
+			Show(message);
 			// flash code
 			FlashData( fw, elfSection );
-			BIOS::DBG::Print("\n");
+			Show("\n");
 			continue;
 		}
 
 		if ( strncmp( strSectionName, ".data", 5 ) == 0 )
 		{
-			BIOS::DBG::Print("%s>", strSectionName);
+			sprintf(message, "%s>", strSectionName);
+			Show(message);
 			// flash data
 			FlashData( fw, elfSection );
-			BIOS::DBG::Print("\n");
+			Show("\n");
 			continue;
 		}
 
 		if ( strncmp( strSectionName, ".rodata", 7 ) == 0 )
 		{
-			BIOS::DBG::Print("%s>", strSectionName);
+			sprintf(message, "%s>", strSectionName);
+			Show(message);
 			// flash data
 			FlashData( fw, elfSection );
-			BIOS::DBG::Print("\n");
+			Show("\n");
 			continue;
 		}
 
 		if ( strncmp( strSectionName, ".bss", 4 ) == 0 )
 		{
-			BIOS::DBG::Print("%s>", strSectionName);
+			sprintf(message, "%s>", strSectionName);
+			Show(message);
 			// flash bss
 			FlashBss( fw, elfSection );
-			BIOS::DBG::Print("\n");
+			Show("\n");
 			continue;
 		}
 
@@ -304,15 +341,17 @@ uint32_t CWndUserManager::ElfExecute( char* strName )
 				break;
 			}
 
-		_ASSERT( sectionType > 0 );
+//		_ASSERT( sectionType > 0 );
 		if ( sectionType > 0 )
 		{
 			arrSectionIndex[sectionType] = i;	
 			arrSectionOffset[sectionType] = elfSection.offset;
 		} else
 		{
-			BIOS::DBG::Print("UNKNOWN SECTION NAME: '%s'\n", strSectionName );
-			BIOS::SYS::DelayMs(4000);
+			sprintf(message, "%s> Unknown section name!", strSectionName);
+			Show(message);
+			_ASSERT( sectionType > 0 );
+			return 0;
 		}
 		/*
 		BIOS::DBG::Print("Section%d '%s' ofs=%d addr=%08x len=%d\n", i, 
@@ -329,7 +368,9 @@ uint32_t CWndUserManager::ElfExecute( char* strName )
 		fw.Seek( elfHeader.shoff + arrSectionIndex[i] * sizeof(Elf32_Shdr) );
 		fw >> CStream(&elfSection, sizeof(Elf32_Shdr));
 
-		BIOS::DBG::Print("%s>", arrSecNames[i]);
+		sprintf(message, "%s>", arrSecNames[i]);
+		Show(message);
+
 		switch ( i )
 		{
 			case SecText:
@@ -362,7 +403,8 @@ uint32_t CWndUserManager::ElfExecute( char* strName )
 			}
 			case SecRelPlt:
 			{
-				BIOS::DBG::Print("Matching imports...");
+				Show("Matching imports...");
+
 				_ASSERT( arrSectionOffset[SecDynSym] != -1 );
 				_ASSERT( arrSectionOffset[SecDynStr] != -1 );
 
@@ -418,8 +460,7 @@ BIOS::LCD::Print(0,80+16, RGB565(ffffff), RGB565(ff0000), temp);
 			}
 			case SecInit:
 			{
-
-					BIOS::DBG::Print("InitArray:");
+				Show("InitArray");
 				// last processed section before jumping to entry
 				int nCount = elfSection.size/sizeof(ui32);
 				fw.Seek( elfSection.offset );
@@ -427,15 +468,15 @@ BIOS::LCD::Print(0,80+16, RGB565(ffffff), RGB565(ff0000), temp);
 				{
 					ui32 dwInitPtr;
 					fw >> dwInitPtr;
-					BIOS::DBG::Print("0x%08x", dwInitPtr);
+///					BIOS::DBG::Print("0x%08x", dwInitPtr);
 #ifndef _WIN32
 					typedef void (*TInitFunc)();
 					TInitFunc InitFunc = (TInitFunc)dwInitPtr;
 					InitFunc();
 #endif
-					BIOS::DBG::Print(", ");
+					Show(".");
 				}			
-				BIOS::DBG::Print("Done.");
+				Show("\n");
 				break;
 			}
 			case SecStrTab:
@@ -459,10 +500,11 @@ BIOS::LCD::Print(0,80+16, RGB565(ffffff), RGB565(ff0000), temp);
 //				}
 			}
 		}
-		BIOS::DBG::Print("\n");
+		Show("\n");
 	}
 
-	BIOS::DBG::Print("Load ok. Jumping to entry %08x.\n", elfHeader.entry);
+	sprintf(message, "Image loaded at 0x%08x\n", elfHeader.entry);
+	Show(message);
 //	USB_Connect(ENABLE);
 	return elfHeader.entry;
 }

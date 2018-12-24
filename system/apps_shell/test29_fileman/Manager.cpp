@@ -1,13 +1,14 @@
 #include "Manager.h"
 
-#include "gui/Gui.h"
-#include "framework/Utils.h"
-#include "framework/BufferedIo.h"
-#include "framework/Serialize.h"
-#include "library/ihex.h"
-#include "library/elf.h"
+#include "../../os_host/source/gui/Gui.h"
+#include "../../os_host/source/framework/Utils.h"
+#include "../../os_host/source/framework/BufferedIo.h"
+#include "../../os_host/source/framework/Serialize.h"
 
 #define MaxLines 14
+
+int nSelected = 0;
+int nScroll = 0;
 
 const char CShapes_sel_left[] =
 "\x0e"
@@ -52,82 +53,15 @@ int stricmp(const char* s1, const char* s2) {
     (int) tolower((unsigned char) *s2);
 }
 
-int nSelected = 0;
-int nScroll = 0;
-
-const int commonBufferSize = 1024*2;
-uint8_t commonBuffer[commonBufferSize];
-
 void CWndUserManager::InitFileList()
 {
-	ui8* pCommonBuffer = commonBuffer;
-	BIOS::FAT::TFindFile* arrFiles = (BIOS::FAT::TFindFile*)pCommonBuffer;
-	int nDataLength = commonBufferSize;
-	int nMaxFiles = nDataLength / 2 / sizeof(BIOS::FAT::TFindFile);
-	m_arrFiles.Init( arrFiles, nMaxFiles );
-
-	TLoadedModule* arrModules = (TLoadedModule*)(pCommonBuffer+nDataLength/2);
-	int nMaxModules = nDataLength / 2 / sizeof(TLoadedModule);
-	m_arrLoaded.Init( arrModules, nMaxModules );
-}
-
-void CWndUserManager::LoadModuleList()
-{
-/*
-	CBufferedReader2 fMods;
-	if ( fMods.Open((char*)"modules.dat") )
-	{
-		ui32 dwCheck;
-		fMods >> dwCheck;
-		if ( dwCheck != ToDword('M', 'L', 'S', '1') )
-		{
-			fMods.Close();
-			return;
-		}
-		int nCount = 0;
-		fMods >> nCount;
-		if ( nCount < 0 || nCount > m_arrLoaded.GetMaxSize() )
-		{
-			fMods.Close();
-			return;
-		}
-		for ( int i=0; i<nCount; i++ )
-		{
-			TLoadedModule mod;
-			fMods >> CStream( &mod, sizeof(TLoadedModule) );
-			_ASSERT( !(mod.dwBegin & 0x80000000) );
-			m_arrLoaded.Add( mod );
-		}
-		fMods.Close();
-	}
-*/
-}
-
-void CWndUserManager::SaveModuleList()
-{
-/*
-	CBufferedWriter2 fMods;
-	if ( fMods.Open((char*)"modules.dat") )
-	{
-		ui32 dwCheck = ToDword('M', 'L', 'S', '1');
-		fMods << dwCheck;
-		int nCount = m_arrLoaded.GetSize();
-		fMods << nCount;
-		for ( int i=0; i<nCount; i++ )
-		{
-			_ASSERT( !(m_arrLoaded[i].dwBegin & 0x80000000) );
-			fMods << CStream( &m_arrLoaded[i], sizeof(TLoadedModule) );
-		}
-		fMods.Close();
-	}
-*/
+	m_arrFiles.Init( m_arrFilesData, COUNT(m_arrFilesData) );
 }
 
 bool CWndUserManager::LoadFileList(char* strPath)
 {
 	if ( BIOS::FAT::OpenDir(strPath) != BIOS::FAT::EOk )
 	{
-//		BIOS::DBG::Print("error open\n");
 		return false;
 	}
 
@@ -448,13 +382,13 @@ void CWndUserManager::OnKey(ui16 nKey)
 			}
 		}
 	}
-
+/*
 	if ( nKey == BIOS::KEY::F4 )
         {
           BIOS::OS::SetArgument(m_arrFiles[nSelected].strName);
 	  m_wndMessage.Show(this, "Manager", "File selected as argument", RGB565(00FF00));
         }
-
+*/
 	if ( nKey == BIOS::KEY::Enter )
 	{
 		if ( m_arrFiles[nSelected].nAtrib & BIOS::FAT::EDirectory )
@@ -528,54 +462,15 @@ void CWndUserManager::OnMessage(CWnd* pSender, ui16 code, ui32 data)
 
 	if (code == ToWord('L', 'E') )
 	{
-		//Settings.Trig.Sync = CSettings::Trigger::_None; // disable sampling
-		//BIOS::ADC::Enable( false );
-
-		//test: CCookies::SetCookie( "gui.manager.last", "pmos129/appl2.elf" ); 
-/*
-		char* pLastFile = CCookies::GetCookie( (char*)"gui.manager.last" ); 
-		char strLastFile[32];
-		if ( pLastFile )
-		{
-			char* pEnd = strstr(pLastFile, ";");
-			_ASSERT( pEnd );
-			int nLen = pEnd - pLastFile;
-			_ASSERT( nLen < 32 );
-			memcpy( strLastFile, pLastFile, nLen );
-			strLastFile[nLen] = 0;
-
-			CCookies::SetCookie( (char*)"gui.manager.last", (char*)"" ); 
-
-			char* pPathEnd = strrchr( strLastFile, '/' );
-			if ( pPathEnd == NULL )
-			{
-				pLastFile = strLastFile;
-				strcpy(m_strCurrentPath, "");
-			}
-			else
-			{
-				memcpy(m_strCurrentPath, strLastFile, pPathEnd - strLastFile);
-				m_strCurrentPath[pPathEnd - strLastFile] = 0;
-				pLastFile = pPathEnd+1;
-			}
-		}*/
 		LoadFileList(m_strCurrentPath);
 		SortFileList();
-		LoadModuleList();
-/*
-		if ( pLastFile )
-		{
-			SelectFile( (char*)pLastFile );
-			SetFocus();
-		}
-
-*/		return;
+		return;
 	}
 }
 
 void CWndUserManager::Exec(char* strPath, char* strFile, int nLength)
 {
-	char strFullName[64];
+	char strFullName[128];
 	if ( strPath[0] == 0 )
 	{
 		strcpy(strFullName, "");
@@ -616,12 +511,16 @@ void CWndUserManager::Exec(char* strPath, char* strFile, int nLength)
 		else if ( stricmp( strSuffix, "exe" ) == 0 )
 			eType = EExe;
 	}
-	if ( eType == ENone )
+
+	if ( eType != EElf )
 	{
 		m_wndMessage.Show(this, "Manager", "Unknown file suffix", RGB565(FF0000));
 		return;
 	}
 
+        BIOS::OS::SetArgument(strFullName);
+
+/*
 	if ( eType == EElf )
 	{
 		m_dwExecuteAddress = ElfExecute( strFullName );
@@ -692,471 +591,5 @@ BIOS::DBG::Print("Entry=%08x\n", dwEntry);
 		m_wndMessage.Show(this, "Manager", "Cannot execute Win32 app", RGB565(FF0000));
 #endif
 	}
-}
-
-
-// duplicate code from Execute.cpp
-void FlashRam(uint32_t addr, uint8_t* data, uint32_t len)
-{
-	ui8* pWriteTo = (ui8*)addr;
-	while (len--)
-		*pWriteTo++ = *data++;
-}
-
-void FlashRom(uint32_t addr, uint8_t* data, uint32_t len)
-{
-	BIOS::MEMORY::LinearProgram(addr, data, len);
-}
-
-bool FlashData(uint32_t addr, uint8_t* data, uint32_t len)
-{
-	if ( (addr >> 24) == 0x20 )
-	{
-		FlashRam( addr, data, len );
-	} else
-	if ( (addr >> 24) == 0x08 )
-	{
-		FlashRom( addr, data, len );
-	} else
-		_ASSERT(!!!"Unrecognized memory location");
-
-	return true;
-}
-
-bool CWndUserManager::HexLoad(char* strFile)
-{
-	CBufferedReader2 fw;
-	if ( !fw.Open( strFile ) )
-		return false;
-	IHexRecord irec;	
-	uint16_t addressOffset = 0x00;
-	uint32_t address = 0x0;
-	int ihexError;
-	int err;
-	BIOS::MEMORY::LinearStart();
-
-	while ((ihexError = Read_IHexRecord(&irec, fw)) == IHEX_OK) 
-	{
-		switch(irec.type)
-		{
-			case IHEX_TYPE_00:    /**< Data Record */
-				address = (((uint32_t) addressOffset) << 16 )+ irec.address;
-				err = !FlashData(address, irec.data, irec.dataLen); //!BIOS::MEMORY::LinearProgram( address, irec.data, irec.dataLen );
-
-				if(err)
-				{
-					fw.Close();
-					return false;
-				}
-			break;
-
-			case IHEX_TYPE_04:    /**< Extended Linear Address Record */
-				addressOffset = (((uint16_t) irec.data[0]) << 8 ) + irec.data[1];		
-			break;
-
-			case IHEX_TYPE_01:    /**< End of File Record */
-			case IHEX_TYPE_05:    /**< Start Linear Address Record */
-			break;
-
-			case IHEX_TYPE_02:    /**< Extended Segment Address Record */
-			case IHEX_TYPE_03:    /**< Start Segment Address Record */
-				fw.Close();
-			return false;
-		}
-
-		if ( irec.type == IHEX_TYPE_01 )
-			break;
-	}
-
-	BIOS::MEMORY::LinearFinish();
-
-	fw.Close();
-	return true;
-}
-
-bool CWndUserManager::HexGetInfo(char* strFile, ui32& dwEntry, ui32& dwBegin, ui32& dwEnd )
-{
-	CBufferedReader2 fw;
-	if ( !fw.Open( strFile ) )
-{
-//		BIOS::DBG::Print("open '%s' failed\n", strFile);
-		return false;
-}
-
-	IHexRecord irec;	
-	uint16_t addressOffset = 0x00;
-	uint32_t address = 0x0;
-	int ihexError;
-	ui32 dwAddrLow = (ui32)-1, dwAddrHigh = -1;
-
-	while ((ihexError = Read_IHexRecord(&irec, fw)) == IHEX_OK) 
-	{
-		switch(irec.type)
-		{
-			case IHEX_TYPE_00:    /**< Data Record */
-				address = (((uint32_t) addressOffset) << 16 )+ irec.address;
-
-				if ( dwAddrLow == (ui32)-1 )
-					dwAddrLow = dwAddrHigh = address;
-				else
-				{
-					if ( address < dwAddrLow )
-						dwAddrLow = address;
-					if ( address > dwAddrHigh )
-						dwAddrHigh = address;
-				}
-			break;
-
-			case IHEX_TYPE_04:    /**< Extended Linear Address Record */
-				addressOffset = (((uint16_t) irec.data[0]) << 8 ) + irec.data[1];		
-			break;
-
-			case IHEX_TYPE_01:    /**< End of File Record */
-			case IHEX_TYPE_05:    /**< Start Linear Address Record */
-			break;
-
-			case IHEX_TYPE_02:    /**< Extended Segment Address Record */
-			case IHEX_TYPE_03:    /**< Start Segment Address Record */
-				fw.Close();
-			return false;
-		}
-
-		if ( irec.type == IHEX_TYPE_01 )
-			break;
-	}
-
-	fw.Close();
-	dwEntry = dwAddrLow;
-	dwBegin = dwAddrLow;
-	dwEnd = dwAddrHigh;
-
-	return true;
-}
-
-bool CWndUserManager::ElfLoad(char* strFile)
-{
-	CBufferedReader2 fw;
-	if ( !fw.Open( strFile ) )
-		return false;
-
-	Elf32_Ehdr elfHeader;
-	Elf32_Phdr elfProgram[4];
-
-	fw >> CStream(&elfHeader, sizeof(Elf32_Ehdr));
-
-	_ASSERT( sizeof(Elf32_Phdr) == elfHeader.phentsize );
-	_ASSERT( elfHeader.phnum <= (int) COUNT(elfProgram) );
-
-	for ( int i = 0; i < elfHeader.phnum; i++ )
-		fw >> CStream(&elfProgram[i], sizeof(Elf32_Phdr));
-
-	int nFileOffset = sizeof(Elf32_Ehdr) + elfHeader.phnum * sizeof(Elf32_Phdr);
-
-	for ( int i = 0; i < elfHeader.phnum; i++ )
-	{
-		if ( elfProgram[i].offset == 0 )
-		{
-			// first program in regular file has offset set to 0, don't know why..
-			continue;
-		}
-		BIOS::MEMORY::LinearStart();
-		ui8 buffer[32];
-		while ( nFileOffset < (int)elfProgram[i].offset )
-		{
-			int nToRead = elfProgram[i].offset - nFileOffset;
-			if ( nToRead > 32 )
-				nToRead = 32;
-			fw >> CStream( buffer, nToRead );
-			nFileOffset += nToRead;
-		}
-		_ASSERT( nFileOffset == (int)elfProgram[i].offset );
-
-		int nOfs = 0;
-		int nAddress = elfProgram[i].paddr;
-		for ( nOfs = 0; nOfs < (int)elfProgram[i].filesz; )
-		{
-			int nToRead = 32;
-			if ( nOfs + nToRead > (int)elfProgram[i].filesz )
-				nToRead = elfProgram[i].filesz - nOfs;
-			fw >> CStream( buffer, nToRead );
-			nFileOffset += nToRead;
-			nOfs += nToRead;
-			//BIOS::DBG::Print("load( 0x%08x ) ", nAddress);
-
-			if ( !BIOS::MEMORY::LinearProgram( nAddress, buffer, nToRead ) )
-			{
-				fw.Close();
-				return false;
-			}
-			nAddress += nToRead;
-		}
-
-		memset( buffer, 0, sizeof(buffer) );
-
-		for ( ; nOfs < (int)elfProgram[i].memsz; )
-		{
-			int nToRead = 32;
-			if ( nOfs + nToRead > (int)elfProgram[i].memsz )
-				nToRead = elfProgram[i].memsz - nOfs;
-			nOfs += nToRead;
-			if ( !BIOS::MEMORY::LinearProgram( nAddress, buffer, nToRead ) )
-			{
-				fw.Close();
-				return false;
-			}
-		}
-		BIOS::MEMORY::LinearFinish();
-	}
-	fw.Close();
-	return true;
-}
-
-
-bool CWndUserManager::FpgaLoad(char* strFile)
-{
-	char* pExt = strrchr( strFile, '.');
-	if ( !pExt )
-		return false;
-	strcpy(pExt, ".adr");
-
-	CBufferedReader2 fw;
-	if ( !fw.Open( strFile ) )
-		return false;
-	char strLine[32];
-	fw >> CStream(strLine, 10);
-	fw.Close();
-	strLine[10] = 0;
-	if ( strLine[0] != '0' || strLine[1] != 'x' )
-		return false;
-	
-	ui32 dwAddr = CUtils::htoi( strLine+2 );
-	
-	pExt = strrchr( strFile, '.');
-	if ( !pExt )
-		return false;
-	strcpy(pExt, ".bin");
-
-	if ( !fw.Open( strFile ) )
-		return false;
-	int nLength = fw.GetFileSize();
-	ui8 buffer[64];
-	BIOS::MEMORY::LinearStart();
-	for ( int i=0; i<nLength; )
-	{
-		int nToLoad = nLength-i;
-		if ( nToLoad > 64 )
-			nToLoad = 64;
-		fw >> CStream(buffer, nToLoad);
-		if ( !BIOS::MEMORY::LinearProgram( dwAddr, buffer, nToLoad) )
-		{
-			fw.Close();
-			return false;
-		}
-		i += nToLoad;
-		dwAddr += nToLoad;
-	}
-	BIOS::MEMORY::LinearFinish();
-	fw.Close();
-	return true;
-}
-
-bool CWndUserManager::FpgaGetInfo(char* strFile, ui32& dwBegin, ui32& dwEnd)
-{
-	char* pExt = strrchr( strFile, '.');
-	if ( !pExt )
-		return false;
-	strcpy(pExt, ".adr");
-
-	CBufferedReader2 fw;
-	if ( !fw.Open( strFile ) )
-	{
-		BIOS::DBG::Print("Cannot open '%s' !", strFile);
-		return false;
-	}
-	char strLine[32];
-	fw >> CStream(strLine, 10);
-	fw.Close();
-	strLine[10] = 0;
-	if ( strLine[0] != '0' || strLine[1] != 'x' )
-		return false;
-	
-	dwBegin = CUtils::htoi( strLine+2 );
-	
-	pExt = strrchr( strFile, '.');
-	if ( !pExt )
-		return false;
-	strcpy(pExt, ".bin");
-
-	if ( !fw.Open( strFile ) )
-	{
-		BIOS::DBG::Print("Cannot open '%s' !", strFile);
-		return false;
-	}
-	int nLength = fw.GetFileSize();
-	fw.Close();
-
-	dwEnd = dwBegin + nLength;
-	return true;
-}
-
-bool CWndUserManager::ElfGetInfo(char* strFile, ui32& dwEntry, ui32& dwBegin, ui32& dwEnd )
-{
-	CBufferedReader2 fw;
-	if ( !fw.Open( strFile ) )
-		return false;
-
-	Elf32_Ehdr elfHeader;
-	Elf32_Phdr elfProgram;
-
-	fw >> CStream(&elfHeader, sizeof(Elf32_Ehdr));
-
-	_ASSERT( sizeof(Elf32_Phdr) == elfHeader.phentsize );
-
-	dwEntry = elfHeader.entry;
-	dwBegin = (ui32)-1;
-
-	for ( int i = 0; i < elfHeader.phnum; i++ )
-	{
-		fw >> CStream(&elfProgram, sizeof(Elf32_Phdr));
-		if ( elfProgram.offset == 0 )
-			continue;
-		if ( dwBegin == (ui32)-1 )
-		{
-			dwBegin = elfProgram.paddr;
-			dwEnd = dwBegin + elfProgram.memsz;
-		} else
-		{
-			if ( elfProgram.paddr < dwBegin )
-				dwBegin = elfProgram.paddr;
-			if ( elfProgram.paddr + elfProgram.memsz > dwEnd )
-				dwEnd = elfProgram.paddr + elfProgram.memsz;
-		}
-	}
-	dwEntry = dwBegin; // ignore entry
-	fw.Close();
-	return true;
-}
-
-bool CWndUserManager::CheckModule( char* strName, int nLength, char* strLoaded )
-{
-/*
-	strcpy( strLoaded, "" );
-	for ( int i=0; i < m_arrLoaded.GetSize(); i++)
-	{
-		TLoadedModule& mod = m_arrLoaded[i]; 
-		if ( strcmp( strName, mod.strFileName ) != 0 )
-			continue;
-		if ( (int)mod.dwFileLength != nLength )
-			continue;
-
-		if ( mod.dwEntry == (ui32)-1 )
-		{
-			char* strExt = strrchr(strName, '.');
-			if ( strExt && stricmp(strExt+1, "adr") == 0 )
-			{
-				strcpy(strLoaded, "Fpga");
-			}
-			return true;
-		}
-		if ( mod.dwBegin == 0x08004000 )
-		{
-			strcpy(strLoaded, "System");
-			return true;
-		}
-		char chSlotBegin = '?';
-		char chSlotEnd = '0';
-		if ( mod.dwBegin == 0x0800C000 )
-			chSlotBegin = '1';
-		else if ( mod.dwBegin == 0x08014000 )
-			chSlotBegin = '2';
-		else if ( mod.dwBegin == 0x0801C000 )
-			chSlotBegin = '3';
-		else if ( mod.dwBegin == 0x08024000 )
-			chSlotBegin = '4';
-		
-		if ( mod.dwEnd >= 0x0802C000 )
-			chSlotEnd = 'X';
-		else if ( mod.dwEnd >= 0x08024000 )
-			chSlotEnd = '4';
-		else if ( mod.dwEnd >= 0x0801C000 )
-			chSlotEnd = '3';
-		else if ( mod.dwEnd >= 0x08014000 )
-			chSlotEnd = '2';
-		else if ( mod.dwEnd >= 0x0800C000 )
-			chSlotEnd = '1';
-
-		if ( chSlotBegin == chSlotEnd )
-			sprintf( strLoaded, "Slot %c", chSlotBegin );
-		else if ( chSlotBegin == '?' )
-			strcpy( strLoaded, "Loaded" );
-		else 
-			sprintf( strLoaded, "Slot %c-%c", chSlotBegin, chSlotEnd );
-		break;
-	}
-	return strLoaded[0] != 0;
 */
-  return false;
-}
-
-void CWndUserManager::AddModule( char* strName, int nLength, ui32 dwEntry, ui32 dwBegin, ui32 dwEnd )
-{
-/*
-	for ( int i=0; i < m_arrLoaded.GetSize(); i++)
-		_ASSERT( stricmp(strName, m_arrLoaded[i].strFileName) != 0 );
-
-	TLoadedModule mod;
-	memset( mod.strFileName, 0, sizeof(mod.strFileName) );
-	strcpy( mod.strFileName, strName );
-	mod.dwFileLength = nLength;
-	mod.dwBegin = dwBegin;
-	mod.dwEnd = dwEnd;
-	mod.dwEntry = dwEntry;
-	m_arrLoaded.Add( mod );
-*/
-}
-
-bool CWndUserManager::IsModuleLoaded( char* strName, int nLength, ui32 dwEntry, ui32 dwBegin, ui32 dwEnd )
-{
-return false;
-/*
-	for ( int i=0; i < m_arrLoaded.GetSize(); i++)
-	{
-		TLoadedModule& mod = m_arrLoaded[i]; 
-		if ( strcmp(mod.strFileName, strName) == 0 && (int)mod.dwFileLength == nLength &&
-			mod.dwBegin == dwBegin && mod.dwEnd == dwEnd && mod.dwEntry == dwEntry )
-		{
-			return true;
-		}
-	}
-	return false;
-*/
-}
-
-bool CWndUserManager::CheckModuleConflict( ui32 dwBegin, ui32 dwEnd )
-{
-return true;
-/*
-	// check whether not loading into slot1!
-	if (!( dwBegin < 0x0800C000 || dwEnd >= 0x08014000 ))
-		return false;
-
-	for ( int i=0; i < m_arrLoaded.GetSize(); i++)
-	{
-		TLoadedModule& mod = m_arrLoaded[i]; 
-		if (!( mod.dwEnd < dwBegin || mod.dwBegin > dwEnd ))
-		{
-			// conflicting record
-			// we should ask the user whether he/she is sure to overwrite existing module
-			m_arrLoaded.RemoveAt(i--);
-		}
-	}
-	return true; // true means ready for flashing
-*/
-}
-
-uint32_t CWndUserManager::GetExecutionEntry()
-{
-	uint32_t temp = m_dwExecuteAddress;
-	m_dwExecuteAddress = 0;
-	return temp;
 }
