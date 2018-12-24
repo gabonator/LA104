@@ -63,6 +63,9 @@ cleanApp () {
   )
 }
 
+for d in apps_shell/*/ ; do
+    buildApp "$d"
+done
 for d in apps_experiments/*/ ; do
     buildApp "$d"
 done
@@ -78,11 +81,14 @@ done
 
 # copy fresh builds
 cp os_host/build/manager.hex bin/manager.hex
-for d in apps/*/ ; do
-    cp $d/build/*.elf bin/
-done
+#for d in apps/*/ ; do
+#    cp $d/build/*.elf bin/
+#done
 
 # cleanup
+for d in apps_shell/*/ ; do
+    cleanApp "$d"
+done
 for d in apps_experiments/*/ ; do
     cleanApp "$d"
 done
