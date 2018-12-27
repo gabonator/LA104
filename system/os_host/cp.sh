@@ -1,1 +1,1 @@
-sudo ../../tools/dfuload/dfuload /dev/disk2 cp ./build/manager.hex
+sudo ../../tools/dfuload/dfuload /dev/disk2 cp ./build/system.hex

@@ -110,19 +110,21 @@ https://www.youtube.com/watch?v=-MRcrPu_1kQ
   - midi player app (95%, 21mplay.elf)
   - USB toolkit - serial port, midi device, HID keyboard and mouse emulator, joystick (95%)
   - hybrid app using cmake (hybrid = app is running on desktop in synthetic environment)
+  - Graphical shell with icons (90%)
+  - separate file manager from host app (100%)
+  - fix execution failures due to corrupted reads (100% caused by conflicting eeprom reads from usb&fat)
 
 #### In progress
-  - finish conversion of original firmware into ELF (80%)
-  - Graphical shell with icons
-  - separate file manager from host app
   - solve problem how to pass file as argument to app run through gui shell
   - Fast USB streamer through CDC into web based PC app & some simple analysis 
   - use external logical analyser app (sigrok / pulseview) emulating SUMP protocol
   - move attribute section entry directive to library.h
   - universal IR remote control app (70% done)
-  - fix execution failures due to corrupted reads
+  - usb apps & screenshotter do not work reliably after last changes
 
 #### TODO list
+  - add screenshots of gui & some video showing how it performs
+  - finish conversion of original firmware into ELF (80%)
   - optimize memory usage, switch to 500 byte clusters instead of 4k (2 buffers required => 8kb wasted)
   - advanced IR remote control (record & play)
   - CC1101 RF waveform recorder / player (10%, not enough IO pins)
@@ -136,6 +138,13 @@ https://www.youtube.com/watch?v=-MRcrPu_1kQ
   - add desc: toolchain, building, ld script?
   - CNC g code decoder and player
   - swiss army knife for hardware engineers - package of applications that can talk to any electronic device and monitor any digital bus
+  - faster pixel operations and custom lcd initialization (not available, since Bios function is not open sourced)
+  - automated generation of app root & including icons
+  - add blank states for gui shell/file manager, add error message to system.elf when shell was not found
+
+#### Ideas
+  - floppy disk drive over USB 
+  - connect old graphic card with ISA interface through USB
 
 #### Abandoned ideas
   - remote control using ESP or BLE - possible to attach to UART0? (not possible, use USB CDC instead)

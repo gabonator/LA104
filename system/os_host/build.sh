@@ -130,10 +130,13 @@ arm-none-eabi-gcc -mcpu=cortex-m3 -mthumb -o output.elf -nostartfiles -T ../app.
 
 
 arm-none-eabi-objcopy -O binary ./output.elf ./output.bin
-arm-none-eabi-objcopy -O ihex ./output.elf ./manager.hex
+arm-none-eabi-objcopy -O ihex ./output.elf ./system.hex
 
 arm-none-eabi-readelf -all output.elf > output.txt
 arm-none-eabi-objdump -d -S output.elf > output.asm
 
 find . -type f -name '*.o' -delete
 find . -type f -name '*.d' -delete
+
+nm --print-size --size-sort -gC output.elf | grep " B " > symbols_ram.txt
+nm --print-size --size-sort -gC output.elf | grep " T " > symbols_rom.txt

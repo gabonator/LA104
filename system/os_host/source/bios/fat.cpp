@@ -90,6 +90,7 @@ namespace BIOS
 {
   namespace FAT 
   {
+    // could be possibly replaced by g_fatfs->win to save 4kB
     uint8_t gSharedBuffer[SectorSize];
 
     FIL g_file;

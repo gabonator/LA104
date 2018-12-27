@@ -80,7 +80,7 @@ for d in apps_usb/*/ ; do
 done
 
 # copy fresh builds
-cp os_host/build/manager.hex bin/manager.hex
+cp os_host/build/system.hex bin/system.hex
 #for d in apps/*/ ; do
 #    cp $d/build/*.elf bin/
 #done

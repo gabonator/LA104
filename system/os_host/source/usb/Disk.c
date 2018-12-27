@@ -44,6 +44,7 @@ void Disk_SecWr(u8 *pBuf, u32 DiskAddr);
 void Disk_SecRd(u8 *pBuf, u32 DiskAddr);
 u8   Char2Nib(u8 x);
 u8   *SecBuf, *Var, *Data;   u32 *V32; // 
+// Join with BIOS::FAT::gSharedBuffer to save 4kB
 u8   DiskBuf[SECTOR_SIZE+32+28];       // USB 
 
 
