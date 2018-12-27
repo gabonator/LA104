@@ -12,7 +12,7 @@ When I was developing alternative firmware for DS203, I was trying to design som
 
 #### Installation
 
-Download [manager.hex](system/bin/manager.hex) by clicking on "Raw" button, be carefull not to download the HTML page instead. Power on the LA104 while holding first button. Connect the device using USB cable with your computer. New disk drive should appear, copy the manager.hex file there. The disk should disconnect and reconnect shortly after finishing uploading. If you are lucky, you will see *manager.rdy* on the disk. Turn the unit off and on and copy remaining files from [system/bin](system/bin/) folder to the LA104.
+Go to release section on top of this page, download *system.hex*. Power on the LA104 while holding first button. Connect the device using USB cable with your computer. New disk drive should appear, copy the *system.hex* file there. The disk should disconnect and reconnect shortly after the upload was finished. If you are lucky, you will see *manager.rdy* on the disk. Turn the unit off and on and copy remaining files from zip archive *approot.zip* to your device. After power cycle a gui should appear.
 
 
 #### News
@@ -33,7 +33,6 @@ Connect your midi keyboard with two wires (3V and P1 through 100-330 ohm resisto
 
 [![Midi player video](https://img.youtube.com/vi/-MRcrPu_1kQ/0.jpg)](https://www.youtube.com/watch?v=-MRcrPu_1kQ "LA104 midi player")
 
-https://www.youtube.com/watch?v=-MRcrPu_1kQ
 ![Logic sequencer 1](resources/imgMidi1.png)
 
 ![Logic sequencer 2](resources/imgMidi2.png)
