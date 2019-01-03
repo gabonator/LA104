@@ -22,6 +22,7 @@ namespace BIOS
 
     int Print (int x, int y, unsigned short clrf, unsigned short clrb, char* str);
     int Print (int x, int y, unsigned short clrf, unsigned short clrb, const char* str);
+    int Printf (int x, int y, unsigned short clrf, unsigned short clrb, const char* format, ...);
 
     void PutPixel(int x, int y, unsigned short clr);
     void PutPixel(const CPoint& cp, unsigned short clr);

@@ -99,6 +99,8 @@ uint32_t GetProcAddress(char* symbol)
     return (uint32_t)static_cast<int(*)(int, int, unsigned short, unsigned short, char const*)>(BIOS::LCD::Print);
   if (strcmp(symbol, "LCD5PrintEiittPc") == 0)
     return (uint32_t)static_cast<int(*)(int, int, unsigned short, unsigned short, char*)>(BIOS::LCD::Print);
+  if (strcmp(symbol, "LCD6PrintfEiittPKcz") == 0)
+    return (uint32_t)static_cast<int(*)(int, int, unsigned short, unsigned short, char const*, ...)>(BIOS::LCD::Printf);
   if (strcmp(symbol, "LCD6ShadowEiiiij") == 0)
     return (uint32_t)static_cast<void(*)(int, int, int, int, unsigned int)>(BIOS::LCD::Shadow);
   if (strcmp(symbol, "LCD7PatternEiiiiPKti") == 0)

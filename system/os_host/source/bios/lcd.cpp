@@ -78,6 +78,20 @@ int BIOS::LCD::Print (int x, int y, unsigned short clrf, unsigned short clrb, ch
 	return BIOS::LCD::Print (x, y, clrf, clrb, (const char*)str);
 }
 
+int BIOS::LCD::Printf (int x, int y, unsigned short clrf, unsigned short clrb, const char *format, ...)
+{
+        va_list args;
+        
+        va_start( args, format );
+
+	char buffer[64];
+	char* _buffer = buffer;
+        sfp_print( &_buffer, format, args );
+        va_end(args);
+
+	return Print(x, y, clrf, clrb, buffer);
+}
+
 int _DrawChar(int x, int y, unsigned short clrf, unsigned short clrb, char ch)
 {
 	const unsigned char *pFont = GetFont(ch);
