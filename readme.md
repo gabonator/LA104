@@ -121,7 +121,9 @@ Connect your midi keyboard with two wires (3V and P1 through 100-330 ohm resisto
   - universal IR remote control app (70% done)
   - usb apps & screenshotter do not work reliably after last changes
 
-#### TODO list
+#### TODO list                                              
+  - when switching USB profiles, disconnection is required. Some sort of software disconnection should be enough
+  - swapping UART/PWM/GPIO modes could cause troubles and short circuit by improper configuration of peripherals
   - add screenshots of gui & some video showing how it performs
   - finish conversion of original firmware into ELF (80%)
   - optimize memory usage, switch to 500 byte clusters instead of 4k (2 buffers required => 8kb wasted)
@@ -140,6 +142,7 @@ Connect your midi keyboard with two wires (3V and P1 through 100-330 ohm resisto
   - faster pixel operations and custom lcd initialization (not available, since Bios function is not open sourced)
   - automated generation of app root & including icons
   - add blank states for gui shell/file manager, add error message to system.elf when shell was not found
+  - working directory & relative paths
 
 #### Ideas
   - floppy disk drive over USB 

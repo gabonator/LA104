@@ -89,18 +89,30 @@ int main()
   return 0;
 }
 
-void _HandleAssertion(const char* file, int line, const char* cond)
+extern "C" 
 {
-  BIOS::DBG::Print("Assertion failed in %s [%d]: %s\n", file, line, cond);
+
+void Halt()
+{
+  BIOS::DBG::Print("Application halted");
   while(1);
 }
 
-extern "C" 
+void _HandleAssertion(const char* file, int line, const char* cond)
 {
+  // prevent sprintf buffer overflow
+  BIOS::DBG::Print("\n\nAssertion failed in ");
+  BIOS::DBG::Print(file);
+  BIOS::DBG::Print(" [%d]: ", line);
+  BIOS::DBG::Print(cond);
+  BIOS::DBG::Print("\n");
+  Halt();
+}
+
 void NMIException(void)
 {
-   BIOS::DBG::Print("NMIException");    
-   while(1);
+  BIOS::DBG::Print("NMIException");    
+  Halt();
 }
 /*
 void HardFaultException(void)
@@ -111,19 +123,19 @@ void HardFaultException(void)
 */
 void MemManageException(void)
 {
-   BIOS::DBG::Print("MemManageException");    
-   while(1);
+  BIOS::DBG::Print("MemManageException\n");    
+  Halt();
 }
 void BusFaultException(void)
 {
-   BIOS::DBG::Print("BusFaultException");    
-   while(1);
+  BIOS::DBG::Print("BusFaultException\n");    
+  Halt();
 }
 
 void UsageFaultException(void)
 {
-   BIOS::DBG::Print("UsageFaultException");    
-   while(1);
+  BIOS::DBG::Print("UsageFaultException\n");    
+  Halt();
 }
 
 #include "crash.h"

@@ -39,7 +39,7 @@ public:
 
 class CMidiReader
 {
-    CBufferedReader2 mReader;
+    CBufferedReader mReader;
     
 public:
     int mDivision{20};

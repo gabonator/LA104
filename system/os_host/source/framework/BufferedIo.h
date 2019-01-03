@@ -1,7 +1,7 @@
 #pragma once
 #include "Serialize.h"
 
-class CBufferedReader2 : public CSerialize
+class CBufferedReader : public CSerialize
 {
 	ui8* m_pData;
 	int m_nOffset;
@@ -21,7 +21,7 @@ public:
 	{
 		return BIOS::FAT::GetFileSize();
 	}
-	CBufferedReader2& operator >>( PSTR str )
+	CBufferedReader& operator >>( PSTR str )
 	{
 		// unsafe!
 		int i;
@@ -44,32 +44,32 @@ public:
 		return *this;
 	}
 	
-	CBufferedReader2& operator >>( ui32 &i )
+	CBufferedReader& operator >>( ui32 &i )
 	{
 		CStream stream(i);
 		return *this >> stream;
 	}
 
-	CBufferedReader2& operator >>( ui8 &i )
+	CBufferedReader& operator >>( ui8 &i )
 	{
 		CStream stream(i);
 		return *this >> stream;
 	}
 
-	CBufferedReader2& operator >>( int &i )
+	CBufferedReader& operator >>( int &i )
 	{
 		CStream stream(i);
 		return *this >> stream;
 	}
 
-	CBufferedReader2& operator >>( const ui8 &i )
+	CBufferedReader& operator >>( const ui8 &i )
 	{
 		// ugly! but MSVC requires const...
 		CStream stream(*(ui8*)&i);
 		return *this >> stream;
 	}
 
-	virtual CBufferedReader2& operator >>( const CStream& stream_ )
+	virtual CBufferedReader& operator >>( const CStream& stream_ )
 	{
 		// ugly conversion, GCC requires const
 		CStream& stream = *(CStream*)&stream_;
@@ -102,7 +102,7 @@ public:
 	}
 };
 
-class CBufferedWriter2 : public CSerialize
+class CBufferedWriter : public CSerialize
 {
 	ui8* m_pData;
 	int m_nOffset;
@@ -127,45 +127,45 @@ public:
 		return true;
 	}
 
-	virtual CBufferedWriter2& operator <<( PSTR str )
+	virtual CBufferedWriter& operator <<( PSTR str )
 	{
 		CStream stream(str);
 		*this << stream;
 		return *this;
 	}
 
-	virtual CBufferedWriter2& operator <<( PCSTR str )
+	virtual CBufferedWriter& operator <<( PCSTR str )
 	{
 		CStream stream((char*)str);
 		*this << stream;
 		return *this;
 	}
 
-	virtual CBufferedWriter2& operator <<( ui32 dwData )
+	virtual CBufferedWriter& operator <<( ui32 dwData )
 	{
 		*this << CStream(dwData);
 		return *this;
 	}
 
-	virtual CBufferedWriter2& operator <<( int dwData )
+	virtual CBufferedWriter& operator <<( int dwData )
 	{
 		*this << CStream(dwData);
 		return *this;
 	}
 
-	virtual CBufferedWriter2& operator <<( ui16 wData )
+	virtual CBufferedWriter& operator <<( ui16 wData )
 	{
 		*this << CStream(wData);
 		return *this;
 	}
 
-	virtual CBufferedWriter2& operator <<( ui8 dwData )
+	virtual CBufferedWriter& operator <<( ui8 dwData )
 	{
 		*this << CStream(dwData);
 		return *this;
 	}
 
-	virtual CBufferedWriter2& operator <<( const CStream& stream_ )
+	virtual CBufferedWriter& operator <<( const CStream& stream_ )
 	{
 		// ugly conversion, GCC requires const
 		CStream& stream = *(CStream*)&stream_;

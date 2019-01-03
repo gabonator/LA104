@@ -99,7 +99,10 @@ public:
             for (int i=mItem+1; true; i++)
             {
                 if (GetItem(i).eState == TItem::None)
+                {
+                    nKey = BIOS::KEY::Down; // jump to next window
                     break;
+                }
                 if (GetItem(i).eState == TItem::Default)
                 {
                     mItem = i;

@@ -21,7 +21,8 @@ void Screenshot()
 {
   char strFilename[16];
   sprintf(strFilename, "scr%03d.bmp", nLastImage++);
-  SaveScreenshot16(strFilename);
+  if (!SaveScreenshot16(strFilename))
+    BIOS::DBG::Print("$Failed to create '%s'.", strFilename);
 }
 
 void SysTick()

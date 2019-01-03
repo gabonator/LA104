@@ -1,0 +1,1 @@
+sudo newfs_msdos -F 12 -v la104 -O "MSDOS5.0" -S 4096 /dev/disk2

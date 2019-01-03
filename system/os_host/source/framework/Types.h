@@ -9,7 +9,11 @@
 #include "../library/spf.h"
 #include "Rgb.h"
 
+#ifdef __cplusplus
+extern "C" 
+#endif
 void _HandleAssertion(const char*, int, const char*);
+
 #define _STR(x) #x
 #ifndef _ASSERT
 #define _ASSERT(e) {if(!(e)) _HandleAssertion(__FILE__, __LINE__, _STR(e)); }

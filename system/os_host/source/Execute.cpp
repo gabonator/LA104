@@ -57,7 +57,7 @@ public:
   }
 };
 
-bool Verify( CBufferedReader2& f, Elf32_Shdr& elfSection )
+bool Verify( CBufferedReader& f, Elf32_Shdr& elfSection )
 {
 	f.Seek( elfSection.offset );
 
@@ -72,7 +72,7 @@ bool Verify( CBufferedReader2& f, Elf32_Shdr& elfSection )
 	return true;
 }
 
-bool VerifyZero( CBufferedReader2& f, Elf32_Shdr& elfSection )
+bool VerifyZero( CBufferedReader& f, Elf32_Shdr& elfSection )
 {
 	ui8* pMem = (ui8*)elfSection.addr;
 	for (int i=0; i<(int)elfSection.size; i++, pMem++)
@@ -83,7 +83,7 @@ bool VerifyZero( CBufferedReader2& f, Elf32_Shdr& elfSection )
 	return true;
 }
 
-void FlashRam( CBufferedReader2& f, Elf32_Shdr& elfSection )
+void FlashRam( CBufferedReader& f, Elf32_Shdr& elfSection )
 {
 	f.Seek( elfSection.offset );
 	ui8* pWriteTo = (ui8*)elfSection.addr;
@@ -95,7 +95,7 @@ void FlashRam( CBufferedReader2& f, Elf32_Shdr& elfSection )
 	}
 }
 
-void ZeroRam( CBufferedReader2& f, Elf32_Shdr& elfSection )
+void ZeroRam( CBufferedReader& f, Elf32_Shdr& elfSection )
 {
 	// section length should be aligned to 32bits!?
 	ui8* pWriteTo = (ui8*)elfSection.addr;
@@ -103,7 +103,7 @@ void ZeroRam( CBufferedReader2& f, Elf32_Shdr& elfSection )
 		*pWriteTo++ = 0;
 }
 
-void FlashRom( CBufferedReader2& f, Elf32_Shdr& elfSection )
+void FlashRom( CBufferedReader& f, Elf32_Shdr& elfSection )
 {
 	int nLength = (int)elfSection.size;
 	ui32 dwAddr = elfSection.addr;
@@ -127,7 +127,7 @@ void FlashRom( CBufferedReader2& f, Elf32_Shdr& elfSection )
 	BIOS::MEMORY::LinearFinish();
 }
 
-void ZeroRom( CBufferedReader2& f, Elf32_Shdr& elfSection )
+void ZeroRom( CBufferedReader& f, Elf32_Shdr& elfSection )
 {
 	int nLength = (int)elfSection.size;
 	ui32 dwAddr = elfSection.addr;
@@ -151,7 +151,7 @@ void ZeroRom( CBufferedReader2& f, Elf32_Shdr& elfSection )
 }
 
 //LINKERSECTION(".gbios")
-void /*CWndUserManager::*/FlashData( CBufferedReader2& f, Elf32_Shdr& elfSection )
+void /*CWndUserManager::*/FlashData( CBufferedReader& f, Elf32_Shdr& elfSection )
 {
       	char message[64];
 
@@ -179,7 +179,7 @@ void /*CWndUserManager::*/FlashData( CBufferedReader2& f, Elf32_Shdr& elfSection
 }
 
 //LINKERSECTION(".gbios")
-void /*CWndUserManager::*/FlashBss( CBufferedReader2& f, Elf32_Shdr& elfSection )
+void /*CWndUserManager::*/FlashBss( CBufferedReader& f, Elf32_Shdr& elfSection )
 {
       	char message[64];
 
@@ -219,11 +219,12 @@ uint32_t ElfExecute( char* strName )
         char message[64];
         sprintf(message, "Executing ELF image '%s'\n", strName);
         Show(message);
-	CBufferedReader2 fw;
+	CBufferedReader fw;
 	if ( !fw.Open( strName ) )
         {
 		sprintf(message, "Image not found!\n", strName);
 		Show(message);
+		return 0;
         }
 
 	Elf32_Ehdr elfHeader;

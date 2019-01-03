@@ -285,8 +285,8 @@ void CWndUserManager::DrawLine( BIOS::FAT::TFindFile& fileInfo, int y, bool bSel
 	ui16 clr = bSelected ? RGB565(000000) : RGB565(00ffff);
 	if ( bDir )
 		clr = RGB565(ffffff);
-	if ( fileInfo.nAtrib & BIOS::FAT::EHidden )
-		clr = RGB565(00b0b0);
+	if ( fileInfo.nAtrib & BIOS::FAT::EHidden || stricmp( strExt, "tmp" ) == 0)
+		clr = RGB565(008080);
 	ui16 clrBack = bSelected ? RGB565(00b0b0) : RGB565(0000b0);
 
         CRect rcBack( 0, y, /*320*/BIOS::LCD::Width-8, y+14);
@@ -490,7 +490,8 @@ void CWndUserManager::Exec(char* strPath, char* strFile, int nLength)
 		EWav,
 		EAdr,
 		ETxt,
-		EExe
+		EExe,
+		ETmp
 	} eType = ENone;
 
 	if ( strSuffix )
@@ -510,6 +511,8 @@ void CWndUserManager::Exec(char* strPath, char* strFile, int nLength)
 			eType = ETxt;
 		else if ( stricmp( strSuffix, "exe" ) == 0 )
 			eType = EExe;
+		else if ( stricmp( strSuffix, "tmp" ) == 0 )
+			eType = ETmp;
 	}
 
 	if ( eType != EElf )

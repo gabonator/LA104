@@ -66,7 +66,7 @@ public:
         strcpy(mFileName, name);
         
         bool hasIndex = false;
-        CBufferedReader2 reader;
+        CBufferedReader reader;
         {
             strcpy(fullPath, path);
             strcat(fullPath, "/");
@@ -81,6 +81,11 @@ public:
             if (json.Verify())
             {
                 json["icon"].ToString(mIconName, 16);
+                if (strlen(mIconName) == 0)
+                {
+                    strcpy(mIconName, name);
+                    strcat(mIconName, ".bmp");
+                }
                 json["execute"].ToString(mExecName, 32);
                 CJson jsonDesc = json["description"];
                 if (jsonDesc)
@@ -100,11 +105,13 @@ public:
             }
         } else
         {
-            strcpy(mIconName, name);
-            strcat(mIconName, ".bmp");
             strcpy(mShortName, name);
         }
-
+        if (strlen(mIconName) == 0)
+        {
+            strcpy(mIconName, name);
+            strcat(mIconName, ".bmp");
+        }
     }
     
     char* GetRoot()

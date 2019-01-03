@@ -41,7 +41,7 @@ uint_fast16_t InterpolateColor( uint_fast16_t clrA, uint_fast16_t clrB, uint_fas
 
 void DrawImage(char* path, int bx, int by)
 {
-    CBufferedReader2 reader;
+    CBufferedReader reader;
     if (!reader.Open(path))
         return;
     
@@ -74,7 +74,7 @@ void SaveImage(char* path, CRect rc)
     return;
 #endif
 
-    CBufferedWriter2 writer;
+    CBufferedWriter writer;
     //LCD::BufferBegin(rc); // TODO: not working
     
     writer.Open(path);
@@ -95,7 +95,7 @@ bool LoadImage(char* path, CRect rc)
 #ifdef __APPLE__
     return false;
 #endif
-    CBufferedReader2 reader;
+    CBufferedReader reader;
     if (!reader.Open(path))
         return false;
     

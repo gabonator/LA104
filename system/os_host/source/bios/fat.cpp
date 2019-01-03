@@ -119,6 +119,8 @@ namespace BIOS
     EResult Init()
     {
       FRESULT r = f_mount(0, &g_fatfs);  
+      if (r != 0)
+        BIOS::DBG::Print("FAT:INIT RESULT=%d\n", r);
       return Result(r);
     }
 

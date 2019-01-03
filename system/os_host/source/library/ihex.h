@@ -131,7 +131,7 @@ int New_IHexRecord(int type, uint16_t address, const uint8_t *data, int dataLen,
  * \retval IHEX_ERROR_FILE if a FIL reading error has occured.
  * \retval IHEX_INVALID_RECORD if the record read is invalid (record did not match specifications or record checksum was invalid).
 */
-int Read_IHexRecord(IHexRecord *ihexRecord, CBufferedReader2 &in)
+int Read_IHexRecord(IHexRecord *ihexRecord, CBufferedReader &in)
 {
   char recordBuff[IHEX_RECORD_BUFF_SIZE];
   /* A temporary buffer to hold ASCII hex encoded data, set to the maximum length we would ever need */

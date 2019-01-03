@@ -23,11 +23,12 @@
 	};
 #pragma pack(pop)
 
-void SaveScreenshot16(char* strName)
+bool SaveScreenshot16(char* strName)
 {
 //	char strNameUnique[] = "IMG000  BMP";
-	CBufferedWriter2 writer;
-	writer.Open( strName );
+	CBufferedWriter writer;
+	if (!writer.Open( strName ))
+		return false;
 
 	BmpHdr hdr;
 	BmpHdr* pHdr = &hdr;
@@ -81,4 +82,6 @@ void SaveScreenshot16(char* strName)
 				// ...11 ...111 ...11
 			}
 		}
+
+	return true;
 }

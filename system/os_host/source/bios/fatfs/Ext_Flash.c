@@ -8,6 +8,7 @@
 #include "Ext_Flash.h"
 #include "stm32f10x_spi.h"
 #include "stm32f10x_flash.h"
+#include "../../framework/Types.h"
 
 #define WREN       0x06     /* Write enable instruction */
 #define WRDI       0x04     /* Write disable instruction */
@@ -21,6 +22,7 @@
 
 extern void ExtFlash_CS_LOW(void);
 extern void ExtFlash_CS_HIGH(void);
+volatile bool eepromAccessMutex = false;
 
 u8   ExtFlashReadByte(void);
 u8   ExtFlashSendByte(u8 byte);
@@ -105,8 +107,7 @@ bool ExtFlashSecWr(u8 *pBuf, u32 WrAddr)
 *******************************************************************************/
 bool ExtFlashPageProg(u8 *pBuf, u32 WrAddr, u8 WrCmd)
 {
-    static volatile bool mutex = false;
-    mutex = true;
+    eepromAccessMutex = true;
 
 //  NVIC_DisableIRQ(USB_LP_CAN1_RX0_IRQn);
     ExtFlashWaitForWrEnd();
@@ -121,8 +122,8 @@ bool ExtFlashPageProg(u8 *pBuf, u32 WrAddr, u8 WrCmd)
     ExtFlashWrCtrl(DISABLE);
 //  NVIC_EnableIRQ(USB_LP_CAN1_RX0_IRQn);
 
-    bool aux = mutex; // was this function interrupted?
-    mutex = false;
+    bool aux = eepromAccessMutex; // was this function interrupted? Needs atomic operation
+    eepromAccessMutex = false;
     return aux;
 }
 
@@ -135,8 +136,7 @@ bool ExtFlashPageProg(u8 *pBuf, u32 WrAddr, u8 WrCmd)
 *******************************************************************************/
 bool ExtFlashDataRd(u8 *pBuf, u32 RdAddr, u16 Lenght)
 {
-    static volatile bool mutex = false;
-    mutex = true;
+    eepromAccessMutex = true;
 
 // disabling isr disconnects usb
 //  NVIC_DisableIRQ(USB_LP_CAN1_RX0_IRQn);
@@ -150,8 +150,8 @@ bool ExtFlashDataRd(u8 *pBuf, u32 RdAddr, u16 Lenght)
     ExtFlash_CS_HIGH();
 //  NVIC_EnableIRQ(USB_LP_CAN1_RX0_IRQn);
 
-    bool aux = mutex; // was this function interrupted?
-    mutex = false;
+    bool aux = eepromAccessMutex; // was this function interrupted? Needs atomic operation
+    eepromAccessMutex = false;
     return aux;
 }
 
@@ -212,7 +212,11 @@ void ExtFlashWaitForWrEnd(void)
     ExtFlashSendByte(RDSR);
     while ((WIP_Flag & ExtFlashReadByte()) == SET)
     {
-        if (Tout++ > TMAX) return;
+        if (Tout++ > TMAX) 
+        {
+            _ASSERT(0);
+            break;
+        }
     }
     ExtFlash_CS_HIGH();
 }

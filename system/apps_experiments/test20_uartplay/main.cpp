@@ -39,12 +39,12 @@ int main(void)
   BIOS::LCD::Clear(RGB565(101010));
   BIOS::DBG::Print("Built " __DATE__ " " __TIME__ "\n");
 
-  CBufferedReader2 reader;
+  CBufferedReader reader;
 //  if (!reader.Open((char*)"ALLEY.TXT"))
 //  if (!reader.Open((char*)"37gabo.txt"))
 //  if (!reader.Open((char*)"test.txt"))
 //  if (!reader.Open((char*)"gabosong.txt"))
-  if (!reader.Open((char*)"coco.txt"))
+  if (!reader.Open((char*)"alley.txt")) // TODO: opening local file
   {
     BIOS::DBG::Print("Unable to open source file, exiting\n"); 
     BIOS::SYS::DelayMs(1500);

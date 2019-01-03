@@ -16,7 +16,7 @@
 // TODO: var init problem
 
 //GifDecoder<11> decoder;
-//CBufferedReader2 reader;
+//CBufferedReader reader;
 
 MD_YX5300 mp3;  // = nullptr
 
