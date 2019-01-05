@@ -1,34 +1,41 @@
-#define RB_ATOMIC_START
-#define RB_ATOMIC_END
+struct AtomicNone
+{
+  static void Lock() 
+  {
+  }
+  static void Unlock()
+  {
+  }
+};
 
-template <typename Type, size_t MaxElements>
+template <typename Type, size_t MaxElements, typename AtomicPolicy = AtomicNone>
 class RingBuffer
 {
 public:
   RingBuffer()
   {
-       RB_ATOMIC_START
+       AtomicPolicy::Lock();
        {
            _numElements = 0;
            _head = 0;
        }
-       RB_ATOMIC_END
+       AtomicPolicy::Unlock();
   }
 
   void empty()
   {
-       RB_ATOMIC_START
+       AtomicPolicy::Lock();
        {
            _numElements = 0;
            _head = 0;
        }
-       RB_ATOMIC_END
+       AtomicPolicy::Unlock();
   }
 
   bool push(Type obj)
   {
       bool ret = false;
-      RB_ATOMIC_START
+      AtomicPolicy::Lock();
       {
           if (!isFull()) 
           {
@@ -39,7 +46,7 @@ public:
               ret = true;
           }
       }
-      RB_ATOMIC_END
+      AtomicPolicy::Unlock();
 
       return ret;
   }
@@ -48,7 +55,7 @@ public:
   {
       size_t tail;
 
-      RB_ATOMIC_START
+      AtomicPolicy::Lock();
       {
           if (size() > 0) {
               tail = getTail();
@@ -57,7 +64,7 @@ public:
               return dest; // TODO: ATOMIC?
           }
       }
-      RB_ATOMIC_END
+      AtomicPolicy::Unlock();
 
       return -1;
   }
@@ -66,14 +73,14 @@ public:
   {
       size_t tail;
 
-      RB_ATOMIC_START
+      AtomicPolicy::Lock();
       {
           if (size() > 0) {
               tail = getTail();
               return _buf[tail]; // TODO: ATOMIC?
           }
       }
-      RB_ATOMIC_END
+      AtomicPolicy::Unlock();
 
       return -1;
   }
@@ -82,11 +89,11 @@ public:
   {
       bool ret;
 
-      RB_ATOMIC_START
+      AtomicPolicy::Lock();
       {
           ret = _numElements >= MaxElements;
       }
-      RB_ATOMIC_END
+      AtomicPolicy::Unlock();
 
       return ret;
   }
@@ -95,11 +102,24 @@ public:
   {
       size_t ret;
 
-      RB_ATOMIC_START
+      AtomicPolicy::Lock();
       {
           ret = _numElements;
       }
-      RB_ATOMIC_END
+      AtomicPolicy::Unlock();
+
+      return ret;
+  }
+
+  size_t available()
+  {
+      size_t ret;
+
+      AtomicPolicy::Lock();
+      {
+          ret = MaxElements-_numElements;
+      }
+      AtomicPolicy::Unlock();
 
       return ret;
   }

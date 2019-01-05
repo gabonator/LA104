@@ -1,7 +1,6 @@
 #include <library.h>
 #include <stm32f10x.h>
 
-// Based on incredible MIOS project by Thorsten Klose: https://github.com/polluxsynth/mios32.git
 // TODO: cleanup code
 
 typedef void (*THandler)(void);

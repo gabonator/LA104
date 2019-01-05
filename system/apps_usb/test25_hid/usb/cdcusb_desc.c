@@ -484,6 +484,6 @@ uint8_t ARC_string_serial[ARC_SIZE_STRING_SERIAL] =
   {
     ARC_SIZE_STRING_SERIAL,           /* bLength */
     USB_STRING_DESCRIPTOR_TYPE,        /* bDescriptorType */
-    'p', 0, 'e', 0, 'l', 0, 'l', 0, 'X', 0
+    'p', 0, 'e', 0, 'l', 0, 'l', 0, 'e', 0
   };
 

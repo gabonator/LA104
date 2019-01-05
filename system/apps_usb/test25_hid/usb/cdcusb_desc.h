@@ -35,7 +35,7 @@
 #define ARC_SIZE_STRING_LANGID              4
 #define ARC_SIZE_STRING_VENDOR              30
 #define ARC_SIZE_STRING_PRODUCT             31
-#define ARC_SIZE_STRING_SERIAL              26
+#define ARC_SIZE_STRING_SERIAL              12
 
 #define STANDARD_ENDPOINT_DESC_SIZE             0x09
 

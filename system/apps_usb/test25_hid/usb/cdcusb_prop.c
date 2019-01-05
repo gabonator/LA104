@@ -218,7 +218,7 @@ void ARC_Reset(void)
 *******************************************************************************/
 void ARC_SetConfiguration(void)
 {
-dbgPrint("setcon,");
+//dbgPrint("setcon,");
   DEVICE_INFO *pInfo = &Device_Info;
 
   if (pInfo->Current_Configuration != 0)
@@ -236,7 +236,7 @@ dbgPrint("setcon,");
 *******************************************************************************/
 void ARC_SetDeviceAddress (void)
 {
-dbgPrint("setda,");
+//dbgPrint("setda,");
 
   bDeviceState = ADDRESSED;
 }
@@ -248,7 +248,7 @@ dbgPrint("setda,");
 *******************************************************************************/
 void ARC_Status_In(void)
 {
-dbgPrint("stain,");
+//dbgPrint("stain,");
 
   static uint8_t old_led_state = 0;
   if (old_led_state != kb_led_state) {
@@ -272,12 +272,12 @@ dbgPrint("stain,");
 *******************************************************************************/
 void ARC_Status_Out (void)
 {
-dbgPrint("staout,");
+//dbgPrint("staout,");
 }
 
 uint8_t *ARC_set_configuration(uint16_t Length)
 {
-dbgPrint("setc,");
+//dbgPrint("setc,");
 
   pDeviceInfo->Ctrl_Info.Usb_wLength = 1;
   return &kb_led_state;
@@ -328,7 +328,7 @@ uint8_t *ARC_VCP_SetLineCoding(uint16_t Length)
 *******************************************************************************/
 RESULT ARC_Data_Setup(uint8_t RequestNo)
 {
-dbgPrint("data,");
+//dbgPrint("data,");
 
   uint8_t *(*CopyRoutine)(uint16_t);
   CopyRoutine = NULL;
@@ -390,8 +390,7 @@ dbgPrint("data,");
 
   if (CopyRoutine == NULL)
   {
-
-dbgPrint("!notsupported,");
+//dbgPrint("!notsupported,");
     return USB_UNSUPPORT;
   }
   pDeviceInfo->Ctrl_Info.CopyData = CopyRoutine;
@@ -409,7 +408,7 @@ dbgPrint("!notsupported,");
 *******************************************************************************/
 RESULT ARC_NoData_Setup(uint8_t RequestNo)
 {
-dbgPrint("nodata,");
+//dbgPrint("nodata,");
 
   if (Type_Recipient == (CLASS_REQUEST | INTERFACE_RECIPIENT)) {
     if (RequestNo == SET_PROTOCOL)
@@ -483,18 +482,17 @@ uint8_t *ARC_GetStringDescriptor(uint16_t Length)
 *******************************************************************************/
 uint8_t *ARC_GetKBReportDescriptor(uint16_t Length)
 {
-dbgPrint("getkbd,");
+//dbgPrint("getkbd,");
   return Standard_GetDescriptorData(Length, &ARC_KB_Report_Descriptor);
 }
 uint8_t *ARC_GetMouseReportDescriptor(uint16_t Length)
 {
-dbgPrint("getmsd,");
+//dbgPrint("getmsd,");
   return Standard_GetDescriptorData(Length, &ARC_MOUSE_Report_Descriptor);
 }
 uint8_t *ARC_GetJoystickReportDescriptor(uint16_t Length)
 {
-dbgPrint("getjod,");
-
+//dbgPrint("getjod,");
   return Standard_GetDescriptorData(Length, &ARC_JOYSTICK_Report_Descriptor);
 }
 
@@ -507,8 +505,7 @@ dbgPrint("getjod,");
 *******************************************************************************/
 uint8_t *ARC_GetHIDDescriptor(uint16_t Length)
 {
-dbgPrint("gethidd,");
-
+//dbgPrint("gethidd,");
   return Standard_GetDescriptorData(Length, &ARC_Hid_Descriptor);
 }
 
@@ -523,7 +520,7 @@ dbgPrint("gethidd,");
 *******************************************************************************/
 RESULT ARC_Get_Interface_Setting(uint8_t Interface, uint8_t AlternateSetting)
 {
-dbgPrint("getis,");
+//dbgPrint("getis,");
 
   if (AlternateSetting > 0)
   {
@@ -549,7 +546,7 @@ dbgPrint("getis,");
 *******************************************************************************/
 RESULT ARC_SetProtocol(void)
 {
-dbgPrint("setpro,");
+//dbgPrint("setpro,");
 
   uint8_t wValue0 = pDeviceInfo->USBwValue0;
   ProtocolValue = wValue0;
@@ -565,7 +562,7 @@ dbgPrint("setpro,");
 *******************************************************************************/
 uint8_t *ARC_GetProtocolValue(uint16_t Length)
 {
-dbgPrint("getpro,");
+//dbgPrint("getpro,");
 
   if (Length == 0)
   {

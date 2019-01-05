@@ -24,6 +24,10 @@ typedef struct {
 #define USB_BASE ((uint32_t)0x40005C00)
 volatile USB_TypeDef *USB = (USB_TypeDef *)USB_BASE;
 
+void DummyFunction()
+{
+}
+/*
 void EnableUsb()
 {
     // TODO: CHECK 44!!!!
@@ -31,14 +35,14 @@ void EnableUsb()
     GPIOA->CRH &= 0xFFFBB44F;
     NVIC_DisableIRQ(USB_LP_CAN1_RX0_IRQn);
     RCC->APB1ENR |= RCC_APB1ENR_USBEN;
-    USB->CNTR   = USB_CNTR_FRES; /* Force USB Reset */
+    USB->CNTR   = USB_CNTR_FRES; // Force USB Reset
     USB->BTABLE = 0;
     USB->DADDR  = 0;
     USB->ISTR   = 0;
     USB->CNTR   = USB_CNTR_RESETM;
     NVIC_EnableIRQ(USB_LP_CAN1_RX0_IRQn);
 }
-
+*/
 extern "C" {
   void USB_Init(void);
   void Disk_Init(void);
@@ -92,7 +96,13 @@ namespace BIOS
       {
         pEpInt_IN[i] = arrHandlerIn[i];
         pEpInt_OUT[i] = arrHandlerOut[i];
+
+        if (!pEpInt_IN[i])
+          pEpInt_IN[i] = DummyFunction;
+        if (!pEpInt_OUT[i])
+          pEpInt_OUT[i] = DummyFunction;
       }
+      // endpoint routines must point to a valid function
 
       Device_Table = *(DEVICE*)pDevice;
       pInformation = (DEVICE_INFO*)pDeviceInfo;//&Device_Info;
@@ -124,6 +134,7 @@ namespace BIOS
     void Disable()
     {
       EnableUsb(false);
+      BIOS::SYS::DelayMs(500);
     }
 
     void InitializeFinish(int imr_msk)

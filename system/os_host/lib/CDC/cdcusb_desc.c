@@ -152,5 +152,5 @@ const uint8_t CDC_StringProduct [VIRTUAL_COM_PORT_SIZ_STRING_PRODUCT] = {
 uint8_t CDC_StringSerial [VIRTUAL_COM_PORT_SIZ_STRING_SERIAL] = {
 	VIRTUAL_COM_PORT_SIZ_STRING_SERIAL,	/* bLength */
 	USB_STRING_DESCRIPTOR_TYPE,			/* bDescriptorType */
-	'S', 0, 'T', 0, 'M', 0, '3', 0, '2', 0
+	'L', 0, 'A', 0, '1', 0, '0', 0, '4', 0
 };

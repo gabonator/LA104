@@ -4,7 +4,7 @@
   rm -rf build
 #  rm build/manager.hex 2> /dev/null
   ./build.sh
-  if [ ! -f build/manager.hex ]; then
+  if [ ! -f build/system.hex ]; then
     echo Unable to build operating system firmware
   fi
 )
@@ -80,10 +80,13 @@ for d in apps_usb/*/ ; do
 done
 
 # copy fresh builds
-cp os_host/build/system.hex bin/system.hex
-#for d in apps/*/ ; do
-#    cp $d/build/*.elf bin/
-#done
+cp os_host/build/system.hex release/system.hex
+mkdir release
+mkdir release/bin
+for d in apps*/*/ ; do
+    cp $d/build/*.elf release/bin/
+done
+rm release/bin/output.elf
 
 # cleanup
 for d in apps_shell/*/ ; do

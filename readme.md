@@ -17,6 +17,22 @@ Go to release section on top of this page, download *system.hex*. Power on the L
 
 #### News
 
+##### Pulseview compatibility
+
+Added USB application which emulates SUMP protocol. By choosing "Openbench logic sniffer (ols)" in Pulse view configuration, LA104 can transfer measured signals to pulse view for deep analysis. Pulseview support wide range of protocols and offers intuitive user interface. Currently only 50kHz sampling is supported on P1..P4 pins, samplerate is sufficient for decoding of 9600 baud serial link.
+
+![Pulse view](resources/imgPulseview.png)
+
+##### Graphical application chooser
+
+![Shell](resources/imgShell1.png)
+
+![Shell](resources/imgShell2.png)
+
+##### Stock logic analyser integration
+
+![Logic analyser](resources/imgAnalyser.png)
+
 ##### Logic sequencer app
 
 16 channel logic analyser and sequencer. Generator of 4 bit pattern attached to CD4543 BCD to seven segment decoder. PCF8574 used as 16 bit expander
@@ -78,6 +94,7 @@ Connect your midi keyboard with two wires (3V and P1 through 100-330 ohm resisto
       - test13_mp3 - mp3 player gui application, works with MD_YX5300 module
       - test15_charmap - shows ASCII character table used by OS
     - hybrid - run any application as OSX native app for debugging and designing layouts
+  - this list wasn't updated for longer time
 
 ![Hybrid app on mac OSX](resources/hybridmp3.png)
 
@@ -112,11 +129,13 @@ Connect your midi keyboard with two wires (3V and P1 through 100-330 ohm resisto
   - Graphical shell with icons (90%)
   - separate file manager from host app (100%)
   - fix execution failures due to corrupted reads (100% caused by conflicting eeprom reads from usb&fat)
+  - Fast USB streamer through CDC into web based PC app & some simple analysis (pulseview compatible protocol)
+  - use external logical analyser app (sigrok / pulseview) emulating SUMP protocol (50%, for now just fixed sampling speed, consider attaching to stock logic analyser application)
+  - USB CDC - USB to TTL interface (80%, only baudrate is supported, no flow control, no parity check)
+  - automated generation of app root & including icons (50%, icons tbd)
 
 #### In progress
   - solve problem how to pass file as argument to app run through gui shell
-  - Fast USB streamer through CDC into web based PC app & some simple analysis 
-  - use external logical analyser app (sigrok / pulseview) emulating SUMP protocol
   - move attribute section entry directive to library.h
   - universal IR remote control app (70% done)
   - usb apps & screenshotter do not work reliably after last changes
@@ -140,7 +159,6 @@ Connect your midi keyboard with two wires (3V and P1 through 100-330 ohm resisto
   - CNC g code decoder and player
   - swiss army knife for hardware engineers - package of applications that can talk to any electronic device and monitor any digital bus
   - faster pixel operations and custom lcd initialization (not available, since Bios function is not open sourced)
-  - automated generation of app root & including icons
   - add blank states for gui shell/file manager, add error message to system.elf when shell was not found
   - working directory & relative paths
 

@@ -1,3 +1,5 @@
+Based on incredible MIOS project by Thorsten Klose: https://github.com/polluxsynth/mios32.git
+
 connections:
 
 MidiOut p4   -> LA104.3V (inverse logic)

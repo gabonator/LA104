@@ -44,97 +44,76 @@ int _main(void)
   static usb_kb_report kb_report{0};
   static usb_mouse_report mouse_report{0};
 
-//  r.modifiers = mod;
-//  r.keymap[0] = code;
-//  USB_ARC_KB_tx(&r);
+  USB_ARC_set_kb_callback([](){});
+  USB_ARC_set_mouse_callback([](){});
+  USB_ARC_set_joystick_callback([](usb_joystick joy){});
 
-  USB_ARC_set_kb_callback([]()
+  USB::Enable();
+  InitUsb();
+
+  BIOS::DBG::Print("USB HID ready,\nuse encoders to control cursor.\n");
+
+  KEY::EKey key;
+  while ((key = KEY::GetKey()) != KEY::Escape)
   {
-//BIOS::DBG::Print("kbc%d,", kb_report.keymap[0]);
-//    USB_ARC_KB_tx(&kb_report);
-  });
-
-  USB_ARC_set_mouse_callback([]()
-  {
-//BIOS::DBG::Print("msc,");
-//    USB_ARC_MOUSE_tx(&mouse_report);
-  });
-
-  USB_ARC_set_joystick_callback([](usb_joystick joy)
-  {
-//BIOS::DBG::Print("joc,");
-//    usb_joystick_report report{0};
-//    USB_ARC_JOYSTICK_tx(joy, &report);
-  });
-
-
-    USB::Enable();
-    InitUsb();
-
-    KEY::EKey key;
-    while ((key = KEY::GetKey()) != KEY::Escape)
+    if (strlen(dbgPushBuf) > 0)
     {
-  if (strlen(dbgPushBuf) > 0)
-  {
-    BIOS::DBG::Print(dbgPushBuf);
-    strcpy(dbgPushBuf, "");
-  }
-
-      if (key == KEY::Left)
-      {
-        mouse_report.dx = -10;
-        USB_ARC_MOUSE_tx(&mouse_report);
-      }
-      else if (key == KEY::Right)
-      {
-        mouse_report.dx = +10;
-        USB_ARC_MOUSE_tx(&mouse_report);
-      }
-      else if (key == KEY::Up)
-      {
-        mouse_report.dy = -10;
-        USB_ARC_MOUSE_tx(&mouse_report);
-      }
-      else if (key == KEY::Down)
-      {
-        mouse_report.dy = +10;
-        USB_ARC_MOUSE_tx(&mouse_report);
-      }
-      else
-      {
-        mouse_report.dx = 0;
-        mouse_report.dy = 0;
-      }
-
-      if (key == KEY::F1)
-      {
-        kb_report.modifiers = 0;
-        kb_report.keymap[0] = MOD_LCTRL;
-        USB_ARC_KB_tx(&kb_report);
-        kb_report.modifiers = KB_MOD_NONE;
-        kb_report.keymap[0] = 0;
-        USB_ARC_KB_tx(&kb_report);
-      } else
-      if (key == KEY::F3)
-      {
-        kb_report.modifiers = KB_MOD_NONE;
-        kb_report.keymap[0] = KC_G;
-        USB_ARC_KB_tx(&kb_report);
-        kb_report.keymap[0] = KC_A;
-        USB_ARC_KB_tx(&kb_report);
-        kb_report.keymap[0] = KC_B;
-        USB_ARC_KB_tx(&kb_report);
-        kb_report.keymap[0] = KC_O;
-        USB_ARC_KB_tx(&kb_report);
-        kb_report.keymap[0] = 0;
-        USB_ARC_KB_tx(&kb_report);
-      } else
-      {
-        kb_report.modifiers = KB_MOD_NONE;
-        kb_report.keymap[0] = 0;
-      }
+      BIOS::DBG::Print(dbgPushBuf);
+      strcpy(dbgPushBuf, "");
     }
 
-    BIOS::USB::InitializeMass();
-    return 0;
+    if (key == KEY::Left)
+    {
+      mouse_report.dx = -10;
+      USB_ARC_MOUSE_tx(&mouse_report);
+    }
+    else if (key == KEY::Right)
+    {
+      mouse_report.dx = +10;
+      USB_ARC_MOUSE_tx(&mouse_report);
+    }
+    else if (key == KEY::Up)
+    {
+      mouse_report.dy = -10;
+      USB_ARC_MOUSE_tx(&mouse_report);
+    }
+    else if (key == KEY::Down)
+    {
+      mouse_report.dy = +10;
+      USB_ARC_MOUSE_tx(&mouse_report);
+    }
+    else if (key == KEY::F1)
+    {
+      mouse_report.modifiers = 1<<0;
+      USB_ARC_MOUSE_tx(&mouse_report);
+    }
+    else
+    {
+      mouse_report.modifiers = 0;
+      mouse_report.dx = 0;
+      mouse_report.dy = 0;
+    }
+
+    if (key == KEY::F3)
+    {
+      kb_report.modifiers = KB_MOD_NONE;
+      kb_report.keymap[0] = KC_G;
+      USB_ARC_KB_tx(&kb_report);
+      kb_report.keymap[0] = KC_A;
+      USB_ARC_KB_tx(&kb_report);
+      kb_report.keymap[0] = KC_B;
+      USB_ARC_KB_tx(&kb_report);
+      kb_report.keymap[0] = KC_O;
+      USB_ARC_KB_tx(&kb_report);
+      kb_report.keymap[0] = 0;
+      USB_ARC_KB_tx(&kb_report);
+    } else
+    {
+      kb_report.modifiers = KB_MOD_NONE;
+      kb_report.keymap[0] = 0;
+    }
+  }
+
+  BIOS::USB::InitializeMass();
+  return 0;
 }

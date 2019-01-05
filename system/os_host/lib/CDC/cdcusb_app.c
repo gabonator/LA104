@@ -40,12 +40,14 @@ void USB_Config()
 
 void USB_Cable_Config (FunctionalState NewState)
 {
-dbgPushPrint("cable %d ", NewState);
+//dbgPushPrint("cable %d ", NewState);
 }
 
+// TODO: these functions are used as common by USB driver. Altering the DeviceState value !!! FIXIT!!!
 void Enter_LowPowerMode(void)
 {	/* Set the device state to suspend */
-dbgPushPrint("enter_lp");
+//TODO: check, called by mass storage or custom usb driver
+//dbgPushPrint("enter_lp");
 	cdcbDeviceState = SUSPENDED;
 }
 
@@ -59,7 +61,7 @@ void Leave_LowPowerMode(void)
 	else
 		cdcbDeviceState = ATTACHED;
 
-dbgPushPrint("leave_lp %d ", cdcbDeviceState);
+//dbgPushPrint("leave_lp %d ", cdcbDeviceState);
 }
 
 
