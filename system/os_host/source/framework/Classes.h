@@ -165,8 +165,8 @@ public:
 		return m_arrElements[m_nCount-1];
 	}
     
-    // returns pointer to existing element
-    TYPE& RemoveLast()
+	// returns pointer to existing element
+	TYPE& RemoveLast()
 	{
 		_ASSERT( m_nCount > 0 );
 		return m_arrElements[--m_nCount];
@@ -235,5 +235,10 @@ public:
 					m_arrElements[i] = m_arrElements[j];
 					m_arrElements[j] = tTemp;
 				}
+	}
+
+	TYPE* GetData()
+	{
+		return m_arrElements;
 	}
 };

@@ -133,14 +133,15 @@ Connect your midi keyboard with two wires (3V and P1 through 100-330 ohm resisto
   - use external logical analyser app (sigrok / pulseview) emulating SUMP protocol (50%, for now just fixed sampling speed, consider attaching to stock logic analyser application)
   - USB CDC - USB to TTL interface (80%, only baudrate is supported, no flow control, no parity check)
   - automated generation of app root & including icons (50%, icons tbd)
+  - universal IR remote control app (80% done, samsung compatible)
 
 #### In progress
+  - working directory & relative paths
   - solve problem how to pass file as argument to app run through gui shell
-  - move attribute section entry directive to library.h
-  - universal IR remote control app (70% done)
-  - usb apps & screenshotter do not work reliably after last changes
+  - usb apps & screenshotter do not work reliably after last changes (partially fixed, needs more testing)
 
 #### TODO list                                              
+  - move attribute section entry directive to library.h
   - when switching USB profiles, disconnection is required. Some sort of software disconnection should be enough
   - swapping UART/PWM/GPIO modes could cause troubles and short circuit by improper configuration of peripherals
   - add screenshots of gui & some video showing how it performs
@@ -160,7 +161,6 @@ Connect your midi keyboard with two wires (3V and P1 through 100-330 ohm resisto
   - swiss army knife for hardware engineers - package of applications that can talk to any electronic device and monitor any digital bus
   - faster pixel operations and custom lcd initialization (not available, since Bios function is not open sourced)
   - add blank states for gui shell/file manager, add error message to system.elf when shell was not found
-  - working directory & relative paths
 
 #### Ideas
   - floppy disk drive over USB 
@@ -168,3 +168,9 @@ Connect your midi keyboard with two wires (3V and P1 through 100-330 ohm resisto
 
 #### Abandoned ideas
   - remote control using ESP or BLE - possible to attach to UART0? (not possible, use USB CDC instead)
+
+#### Hardware improvement suggestions
+  - add test pads for UART0 on PCB, this would allow various hardware mods
+  - direction control pins of buffer 1DIR, 2DIR connected to FPGA, so we can synthesize fast signals - e.g. modify packets on the fly, mitm attacks, canbus slave device, etc///
+  - larger eeprom
+  - open sourced FPGA code

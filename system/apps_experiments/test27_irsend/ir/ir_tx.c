@@ -5,6 +5,7 @@
 
 #include "ir_tx.h"
 #include "platform_config.h"
+#include "gpio.h"
 
 #define IR_TX_CARRIER_FREQ       38000
 #define IR_TX_CARRIER_PWM_PERIOD         (SystemCoreClock / IR_TX_CARRIER_FREQ)
@@ -69,6 +70,8 @@ void ir_tx_setup()
   nvicInit.NVIC_IRQChannelSubPriority = 0;
   nvicInit.NVIC_IRQChannelCmd = ENABLE;
   NVIC_Init(&nvicInit);
+
+  _ir_tx_off();
 }
 
 void ir_tx_start()
@@ -90,8 +93,6 @@ void ir_tx_send(IrCode* code)
 
   TIM_SetCounter(IR_TX_DELAY_TIMER, 1);
   TIM_SetAutoreload(IR_TX_DELAY_TIMER, g_tx_code->code[g_tx_bufferIndex++]);
-  _ir_tx_on();
-
   TIM_Cmd(IR_TX_DELAY_TIMER, ENABLE);
 }
 
@@ -102,15 +103,21 @@ void ir_irq()
     if (g_tx_code)
     {
       if((g_tx_bufferIndex % 2) == 0)
-        _ir_tx_on();
-      else
         _ir_tx_off();
+      else
+        _ir_tx_on();
 
-      if(g_tx_bufferIndex < g_tx_code->codeLength - 1) 
+      if(g_tx_bufferIndex < g_tx_code->codeLength) 
       {
         TIM_SetCounter(IR_TX_DELAY_TIMER, 1);
         TIM_SetAutoreload(IR_TX_DELAY_TIMER, g_tx_code->code[g_tx_bufferIndex++]);
       } else 
+      if(g_tx_bufferIndex == g_tx_code->codeLength) 
+      {
+        g_tx_bufferIndex++;
+        TIM_SetCounter(IR_TX_DELAY_TIMER, 1);
+        TIM_SetAutoreload(IR_TX_DELAY_TIMER, 1);
+      } else
       {
         g_tx_repeatCount--;
         _ir_tx_off();
@@ -130,30 +137,16 @@ void ir_irq()
   }
 }
 
-template<uint32_t nPortBase, int nPin, int nState>
-void SetGpioState()
-{
-  constexpr int nPinPos = nPin & 7;
-  constexpr uint32_t dwMask = ~(0xf << (nPinPos*4));
-  constexpr uint32_t dwBits = nState << (nPinPos*4);
-
-  if (nPin < 8)
-  {
-    uint32_t* pCRL = (uint32_t*)nPortBase;
-    *pCRL = (*pCRL & dwMask) | dwBits;
-  } else
-  {
-    uint32_t* pCRH = (uint32_t*)(nPortBase + 4);
-    *pCRH = (*pCRH & dwMask) | dwBits;
-  }
-}
-
 void _ir_tx_on() 
 {
+//    SetGpioState<GPIOB_BASE, 9, GPIO_Speed_50MHz | GPIO_Mode_Out_PP>();
+//    SetGpioLevel<GPIOB_BASE, 9, true>();
   SetGpioState<GPIOB_BASE, 9, GPIO_Speed_50MHz | GPIO_Mode_AF_PP>();
 }
 
 void _ir_tx_off() 
 {
+//    SetGpioState<GPIOB_BASE, 9, GPIO_Speed_50MHz | GPIO_Mode_Out_PP>();
+//    SetGpioLevel<GPIOB_BASE, 9, false>();
   SetGpioState<GPIOB_BASE, 9, GPIO_Speed_50MHz | GPIO_Mode_Out_PP>();
 }
