@@ -141,6 +141,7 @@ Connect your midi keyboard with two wires (3V and P1 through 100-330 ohm resisto
   - usb apps & screenshotter do not work reliably after last changes (partially fixed, needs more testing)
 
 #### TODO list                                              
+  - itegrate SUMP protocol to stock logic analyser application, including sampling speed and trigger
   - move attribute section entry directive to library.h
   - when switching USB profiles, disconnection is required. Some sort of software disconnection should be enough
   - swapping UART/PWM/GPIO modes could cause troubles and short circuit by improper configuration of peripherals
