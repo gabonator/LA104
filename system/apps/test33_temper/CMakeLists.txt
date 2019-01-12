@@ -1,3 +1,5 @@
+# for use in LA104/system/hybrid folder
+
 cmake_minimum_required(VERSION 2.8)
 cmake_policy(SET CMP0054 NEW)
 cmake_policy(SET CMP0025 NEW)
@@ -44,23 +46,23 @@ file(GLOB main_src
 )
 
 file(GLOB linker_script
-    "../apps/test33_temper/app.lds"
+    "../apps_experiments/test33_temper/app.lds"
 )
 endif()
 
 file(GLOB application_src
-    "../apps/test33_temper/*.cpp"
-    "../apps/test33_temper/*.h"
+    "../apps_experiments/test33_temper/*.cpp"
+    "../apps_experiments/test33_temper/*.h"
 )
 
 file(GLOB application_graph_src
-    "../apps/test33_temper/graph/*.cpp"
-    "../apps/test33_temper/graph/*.h"
+    "../apps_experiments/test33_temper/graph/*.cpp"
+    "../apps_experiments/test33_temper/graph/*.h"
 )
 
 file(GLOB application_sensor_src
-    "../apps/test33_temper/sensor/*.cpp"
-    "../apps/test33_temper/sensor/*.h"
+    "../apps_experiments/test33_temper/sensor/*.cpp"
+    "../apps_experiments/test33_temper/sensor/*.h"
 )
 
 if (DESKTOP)           	

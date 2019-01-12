@@ -310,7 +310,7 @@ public:
         mItems.RemoveAll();
         
 #ifdef __APPLE__
-        static char* rootPath = (char*)"/Users/gabrielvalky/Documents/git/LA104/system/bin/apps";
+        static char* rootPath = (char*)"/Users/gabrielvalky/Documents/git/LA104/system/release/apps";
 #else
         static char* rootPath = (char*)"APPS";
 #endif

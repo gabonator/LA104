@@ -4,8 +4,7 @@
 
 class CPoint {
 public:
-	// RAM optimization int->short
-	short x, y;
+	int x, y; // TODO: !!!
 	CPoint()
 	{
 	}
@@ -17,6 +16,10 @@ public:
 	{
 		return CPoint( x + cp.x, y + cp.y );
 	}
+    bool operator !=(const CPoint& cp)
+    {
+        return cp.x != x || cp.y != y;
+    }
 };
 
 class CRect {
@@ -236,6 +239,14 @@ public:
 					m_arrElements[j] = tTemp;
 				}
 	}
+    
+    int Find(TYPE& value)
+    {
+        for (int i=0; i<m_nCount; i++)
+            if (m_arrElements[i] == value)
+                return i;
+        return -1;
+    }
 
 	TYPE* GetData()
 	{

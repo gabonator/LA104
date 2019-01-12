@@ -70,12 +70,15 @@ void CWnd::Destroy()
 		pChild = pChild->m_pNext;
 	}
 	
-	// odstran zo zoznamu
-	if (m_pParent->m_pFirst == this)
-		m_pParent->m_pFirst = this->m_pNext; 
-	else
-		GetPrev()->m_pNext = this->m_pNext;
-
+    if (m_pParent)
+    {
+        // odstran zo zoznamu
+        if (m_pParent->m_pFirst == this)
+            m_pParent->m_pFirst = this->m_pNext;
+        else
+            GetPrev()->m_pNext = this->m_pNext;
+    }
+    
 	// a teraz mozes seba
 	m_pParent = NULL;
 	m_dwFlags = WsHidden;

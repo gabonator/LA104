@@ -134,41 +134,52 @@ Connect your midi keyboard with two wires (3V and P1 through 100-330 ohm resisto
   - USB CDC - USB to TTL interface (80%, only baudrate is supported, no flow control, no parity check)
   - automated generation of app root & including icons (50%, icons tbd)
   - universal IR remote control app (80% done, samsung compatible)
+  - One wire temperature sensor grapher (90% done, drawing temperature chart of up to 8 sensors)
+  - Test signal generator running in background for testing of logic analyser app (80% done)
+  - swiss army knife for hardware engineers - package of applications that can talk to popular electronic devices (some samples are already there) and monitor any digital buses (logic analyser)
+  - DCF77 decoding application with visualization
 
 #### In progress
   - working directory & relative paths
   - solve problem how to pass file as argument to app run through gui shell
   - usb apps & screenshotter do not work reliably after last changes (partially fixed, needs more testing)
+  - advanced IR remote control (record & play)
+  - manual & text reader app
 
-#### TODO list                                              
+#### TODO list              
+  - SIMCOM test app
+  - demonstration of hybrid app - SIMCOM test app running on PC/MAC and communicatiog through USB to UART
+  - sometimes loading of elf crashes when it was recently rewritten (invalidating cached buffer should help)
+  - soft USB disconnection, so we do not need to disconnect cable to switch USB profiles
+  - create CMakeLists for new applications
+  - original firmware freezes when test signal generator is running
   - itegrate SUMP protocol to stock logic analyser application, including sampling speed and trigger
   - move attribute section entry directive to library.h
   - when switching USB profiles, disconnection is required. Some sort of software disconnection should be enough
   - swapping UART/PWM/GPIO modes could cause troubles and short circuit by improper configuration of peripherals
+  - combining of GPIO and UART at the same time is not possible now
   - add screenshots of gui & some video showing how it performs
   - finish conversion of original firmware into ELF (80%)
   - optimize memory usage, switch to 500 byte clusters instead of 4k (2 buffers required => 8kb wasted)
-  - advanced IR remote control (record & play)
   - CC1101 RF waveform recorder / player (10%, not enough IO pins)
-  - relative paths in app arguments
-  - finish GIF loading, or consider other image formats (PCX, LBM, BMP?)
   - beeper
   - hybrid app use relative paths
   - obtain FPGA code from manufacturer 
   - setup FPGA build environment
-  - tutorials: what toolchain to use, how to install...
+  - tutorials: what toolchain to use, how to build
   - add desc: toolchain, building, ld script?
-  - CNC g code decoder and player
-  - swiss army knife for hardware engineers - package of applications that can talk to any electronic device and monitor any digital bus
-  - faster pixel operations and custom lcd initialization (not available, since Bios function is not open sourced)
+  - faster pixel operations and custom lcd initialization (not available, since Bios functions are not open sourced)
   - add blank states for gui shell/file manager, add error message to system.elf when shell was not found
+  - simple application for testing addressable RGB leds
 
 #### Ideas
   - floppy disk drive over USB 
   - connect old graphic card with ISA interface through USB
+  - CNC g code decoder and player
 
 #### Abandoned ideas
   - remote control using ESP or BLE - possible to attach to UART0? (not possible, use USB CDC instead)
+  - finish GIF loading, or consider other image formats (PCX, LBM, BMP?) - BMP won
 
 #### Hardware improvement suggestions
   - add test pads for UART0 on PCB, this would allow various hardware mods
