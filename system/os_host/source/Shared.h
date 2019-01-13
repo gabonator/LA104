@@ -35,6 +35,8 @@ uint32_t GetProcAddress(char* symbol)
     return (uint32_t)static_cast<char*(*)()>(BIOS::OS::GetArgument); 
   if (strcmp(symbol, "OS11SetArgumentEPc") == 0)
     return (uint32_t)static_cast<void(*)(char*)>(BIOS::OS::SetArgument); 
+  if (strcmp(symbol, "OS11HasArgumentEv") == 0)
+    return (uint32_t)static_cast<bool(*)()>(BIOS::OS::HasArgument);
   if (strcmp(symbol, "OS18GetInterruptVectorENS0_16EInterruptVectorE") == 0)
     return (uint32_t)BIOS::OS::GetInterruptVector;
   if (strcmp(symbol, "OS18SetInterruptVectorENS0_16EInterruptVectorEPFvvE") == 0)
@@ -86,6 +88,11 @@ uint32_t GetProcAddress(char* symbol)
     return (uint32_t)static_cast<void(*)(CRect const&)>(BIOS::LCD::BufferBegin);
   if (strcmp(symbol, "LCD11BufferWriteEt") == 0)
     return (uint32_t)static_cast<void(*)(unsigned short)>(BIOS::LCD::BufferWrite);
+
+  if (strcmp(symbol, "LCD10BufferReadEPti") == 0)
+    return (uint32_t)static_cast<void(*)(unsigned short*, int)>(BIOS::LCD::BufferRead);
+  if (strcmp(symbol, "LCD11BufferWriteEPti") == 0)
+    return (uint32_t)static_cast<void(*)(unsigned short*, int)>(BIOS::LCD::BufferWrite);
 
   if (strcmp(symbol, "LCD3BarERK5CRectt") == 0)
     return (uint32_t)static_cast<void(*)(CRect const&, unsigned short)>(BIOS::LCD::Bar);

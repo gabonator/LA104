@@ -4,11 +4,12 @@
 
 class CWndUserManager : public CWnd
 {
-	char m_strCurrentPath[40];
-	BIOS::FAT::TFindFile m_arrFilesData[40];
+	char m_strCurrentPath[80];
+	BIOS::FAT::TFindFile m_arrFilesData[80];
 	CArray<BIOS::FAT::TFindFile> m_arrFiles;
 	CWndMessageBox		m_wndMessage;	
 	uint32_t		m_dwExecuteAddress;
+	char mExtraArgument[64];
 
 public:
 	CWndUserManager();

@@ -81,10 +81,16 @@ int main()
       continue;
     }
 
-    BIOS::OS::SetArgument((char*)"");
+    // keep argument - for file viewer
+    //BIOS::OS::SetArgument((char*)""); 
+    BIOS::OS::HasArgument();
     BIOS::SYS::Execute(address);
-    if (strlen(BIOS::OS::GetArgument()) > 0)
+
+//    if (strlen(BIOS::OS::GetArgument()) > 0)
+    if (BIOS::OS::HasArgument())
       strcpy(shell, filename);
+    else
+      BIOS::OS::SetArgument((char*)"");
   }
   return 0;
 }

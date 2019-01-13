@@ -38,7 +38,9 @@ namespace BIOS
 
     void BufferBegin(const CRect& rc);
     void BufferWrite(uint16_t clr);
+    void BufferWrite(uint16_t* buffer, int length);
     uint16_t BufferRead();
+    void BufferRead(uint16_t* buffer, int length);
     void BufferEnd();
 
     // TODO: duplicity?
@@ -176,6 +178,7 @@ namespace BIOS
 
     void SetArgument(char* argument);
     char* GetArgument();
+    bool HasArgument();
     TInterruptHandler GetInterruptVector(EInterruptVector);
     void SetInterruptVector(EInterruptVector, TInterruptHandler);
     uint32_t DisableInterrupts();

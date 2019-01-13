@@ -117,15 +117,16 @@ int _DrawChar(int x, int y, unsigned short clrf, unsigned short clrb, char ch)
 		}
 	} else
 	{
+        CRect rcChar(x, y, x+8, y+14);
+        BIOS::LCD::BufferBegin(rcChar);
+        uint16_t buf[14];
+
+			for (ui8 _x=0; _x<8; _x++)
+{
 		for (ui8 _y=0; _y<14; _y++)
-		{
-			ui8 col = *pFont++;
-	
-			for (ui8 _x=0; _x<8; _x++, col <<= 1)
-				if ( col & 128 )
-					BIOS::LCD::PutPixel(x+_x, y+_y, clrb);
-				else
-					BIOS::LCD::PutPixel(x+_x, y+_y, clrf);
+                buf[_y] = (pFont[13-_y] & (128 >> _x)) ? clrb : clrf;
+            
+            BIOS::LCD::BufferWrite(buf, 14);
 		}
 	}
 	return 8;
@@ -178,9 +179,21 @@ void BIOS::LCD::BufferWrite(uint16_t clr)
   Set_Pixel(clr);
 }
 
+void BIOS::LCD::BufferWrite(uint16_t* buffer, int length)
+{
+  while (length--)
+    Set_Pixel(*buffer++);
+}
+
 uint16_t BIOS::LCD::BufferRead()
 {
   return Get_Pixel();
+}
+
+void BIOS::LCD::BufferRead(uint16_t* buffer, int length)
+{
+  while (length--)
+    *buffer++ = Get_Pixel();
 }
 
 void BIOS::LCD::BufferEnd()

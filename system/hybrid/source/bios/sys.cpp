@@ -1,5 +1,7 @@
 #include "Bios.h"
 
+char gArgument[128] = "";
+
 void BIOS::SYS::DelayUs(int intervalUs)
 {
   assert(0);
@@ -27,14 +29,13 @@ void BIOS::SYS::Beep(int intervalMs)
 
 void BIOS::OS::SetArgument(char* argument)
 {
-    
+    _ASSERT(strlen(argument) < COUNT(gArgument)-1);
+    strcpy(gArgument, argument);
 }
 
 char* BIOS::OS::GetArgument()
 {
-    static char* arg = (char*)"";
-    //"/Users/gabrielvalky/Documents/git/LA104/system/apps_experiments/test21_midiplay/laisla.mid";
-    return (char*)arg;
+    return gArgument;
 }
 
 

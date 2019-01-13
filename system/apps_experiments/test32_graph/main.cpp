@@ -231,9 +231,6 @@ int _main(void)
         if (key != BIOS::KEY::None)
             app.WindowMessage(CWnd::WmKey, key);
         app.WindowMessage(CWnd::WmTick);
-        
-        if (BIOS::OS::GetArgument()[0])
-            break;
     }
     
     app.Destroy();

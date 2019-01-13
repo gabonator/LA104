@@ -99,15 +99,29 @@ bool LoadImage(char* path, CRect rc)
     if (!reader.Open(path))
         return false;
     
-    int offset = 0;
+//    int offset = 0;
     int fileOffset = 0;
     int pixelCount = BIOS::FAT::SectorSize/2;
     uint16_t* pixelData = (uint16_t*)BIOS::FAT::GetSharedBuffer();
 
     LCD::BufferBegin(rc);
+    int remaining = rc.Width()*rc.Height();
+    while (remaining > 0)
+    {
+        int process = min(remaining, pixelCount);
+        LCD::BufferWrite(pixelData, process);
+        remaining -= process;
+        if (process > 0)
+        {
+            fileOffset += BIOS::FAT::SectorSize;
+            reader.Seek(fileOffset);
+        }
+    }
+/*
     for (int y=rc.top; y<rc.bottom; y++)
         for (int x=rc.left; x<rc.right; x++)
         {
+            int nCount = pixelCount - offset;
             LCD::BufferWrite(pixelData[offset++]);
             if (offset >= pixelCount)
             {
@@ -116,6 +130,6 @@ bool LoadImage(char* path, CRect rc)
                 offset = 0;
             }
         }
-
+*/
     return true;
 }

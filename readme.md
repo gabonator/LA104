@@ -12,7 +12,7 @@ When I was developing alternative firmware for DS203, I was trying to design som
 
 #### Installation
 
-Go to release section on top of this page, download *system.hex*. Power on the LA104 while holding first button. Connect the device using USB cable with your computer. New disk drive should appear, copy the *system.hex* file there. The disk should disconnect and reconnect shortly after the upload was finished. If you are lucky, you will see *manager.rdy* on the disk. Turn the unit off and on and copy remaining files from zip archive *approot.zip* to your device. After power cycle a gui should appear.
+Go to release section on top of this page, download *system.hex*. Power on the LA104 while holding first button. Connect the device using USB cable with your computer. New disk drive should appear, copy the *system.hex* file there. The disk should disconnect and reconnect shortly after the upload was finished. If you are lucky, you will see *manager.rdy* on the disk. Turn the unit off and on and copy remaining files from zip archive *approot.zip* to your device. After power cycle a gui should appear. If the file system does not appear stable, you can format it using [tools/dfuload](tools/dfuload/format.sh) script.
 
 
 #### News
@@ -135,16 +135,18 @@ Connect your midi keyboard with two wires (3V and P1 through 100-330 ohm resisto
   - automated generation of app root & including icons (50%, icons tbd)
   - universal IR remote control app (80% done, samsung compatible)
   - One wire temperature sensor grapher (90% done, drawing temperature chart of up to 8 sensors)
+  - Analog oscilloscope using PCF8591 (90% done)
   - Test signal generator running in background for testing of logic analyser app (80% done)
   - swiss army knife for hardware engineers - package of applications that can talk to popular electronic devices (some samples are already there) and monitor any digital buses (logic analyser)
   - DCF77 decoding application with visualization
+  - manual & text reader app (100%)
+  - solve problem how to pass file as argument to app run through gui shell (100% only using file manager)
 
 #### In progress
-  - working directory & relative paths
-  - solve problem how to pass file as argument to app run through gui shell
   - usb apps & screenshotter do not work reliably after last changes (partially fixed, needs more testing)
   - advanced IR remote control (record & play)
-  - manual & text reader app
+  - add manuals to all folders with brief description what which program does
+  - ESP8266 AP webserver using AT commands
 
 #### TODO list              
   - SIMCOM test app
@@ -180,6 +182,7 @@ Connect your midi keyboard with two wires (3V and P1 through 100-330 ohm resisto
 #### Abandoned ideas
   - remote control using ESP or BLE - possible to attach to UART0? (not possible, use USB CDC instead)
   - finish GIF loading, or consider other image formats (PCX, LBM, BMP?) - BMP won
+  - working directory & relative paths (not important now)
 
 #### Hardware improvement suggestions
   - add test pads for UART0 on PCB, this would allow various hardware mods

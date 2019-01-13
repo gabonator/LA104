@@ -18,7 +18,7 @@ int _main(void)
   manager.OnMessage(nullptr, ToWord('L', 'E'), 0);
   manager.WindowMessage( CWnd::WmPaint );
 
-  BIOS::OS::SetArgument((char*)"");    
+//  BIOS::OS::SetArgument((char*)"");    
   BIOS::KEY::EKey key;
   while ((key = BIOS::KEY::GetKey()) != BIOS::KEY::Escape)
   {
@@ -27,8 +27,12 @@ int _main(void)
 
     manager.WindowMessage(CWnd::WmTick);
 
-    if (BIOS::OS::GetArgument()[0])
+//    if (BIOS::OS::GetArgument()[0])
+    if (BIOS::OS::HasArgument()) // was internally set
+    {
+      BIOS::OS::SetArgument(BIOS::OS::GetArgument()); // hack, keep flag set
       break;
+    }
   }
 //  BIOS::DBG::Print("executing='%s'\n", BIOS::OS::GetArgument());
 //  BIOS::SYS::DelayMs(2000);

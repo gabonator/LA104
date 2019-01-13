@@ -7,11 +7,13 @@ namespace BIOS
   namespace OS
   {
     char strGlobalArgument[64];
+    bool bArgumentChanged{false};
 
     void SetArgument(char* argument)
     {
       _ASSERT(strlen(argument) < sizeof(strGlobalArgument)-1);
       strcpy(strGlobalArgument, argument);
+      bArgumentChanged = true;
     }
 
     char* GetArgument()
@@ -19,6 +21,14 @@ namespace BIOS
       return strGlobalArgument;
     }
 
+    bool HasArgument()
+    {
+      if (!bArgumentChanged)
+        return false;
+
+      bArgumentChanged = false;     
+      return true;
+    }
 
     extern "C" void (*g_pfnVectors[])(void);
     extern "C" TInterruptHandler g_pfnRamVectorTable[];

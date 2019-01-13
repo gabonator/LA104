@@ -431,6 +431,12 @@ uint32_t ElfExecute( char* strName )
 					fw >> CStream(&strSymbolName, sizeof(strSymbolName)); 
 
 					ui32 dwProcAddr = GetProcAddress( strSymbolName );
+					if (!dwProcAddr)
+					{
+                                          BIOS::DBG::Print("Symbol '");
+                                          BIOS::DBG::Print(strSymbolName);
+                                          BIOS::DBG::Print("' not found!\n");
+                                        }
 /*
 char temp[64];
 sprintf(temp, "S:'%s'     ", strSymbolName);

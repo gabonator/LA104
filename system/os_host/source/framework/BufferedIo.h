@@ -17,31 +17,46 @@ public:
 
 		return BIOS::FAT::Read( m_pData ) == BIOS::FAT::EOk;
 	}
-	ui32 GetFileSize()
+    
+	int GetFileSize()
 	{
 		return BIOS::FAT::GetFileSize();
 	}
-	CBufferedReader& operator >>( PSTR str )
+
+    void ReadLine(char* str, int maxLength, bool* pwrap = nullptr)
+    {
+        int i;
+        if (pwrap)
+            *pwrap = true;
+        
+        for ( i = 0; i < maxLength-1; )
+        {
+            str[i] = m_pData[m_nOffset++];
+            if ( m_nOffset == BIOS::FAT::SectorSize )
+            {
+                m_nOffset = 0;
+                BIOS::FAT::EResult eResult = BIOS::FAT::Read( m_pData );
+                _ASSERT( eResult == BIOS::FAT::EOk );
+            }
+            if ( str[i] == '\n' ) // \r \n
+            {
+                if (i > 0 && str[i-1] == '\r')
+                    i--;
+                if (pwrap)
+                    *pwrap = false;
+                break;
+            }
+            i++;
+        }
+        _ASSERT(i < maxLength);
+        str[i] = 0;
+    }
+    
+    CBufferedReader& operator >>( PSTR str )
 	{
-		// unsafe!
-		int i;
-        int nLimit = 128;
-		for ( i = 0; i < nLimit-1; i++ )
-		{
-			str[i] = m_pData[m_nOffset++];
-			if ( m_nOffset == BIOS::FAT::SectorSize )
-			{
-				m_nOffset = 0;
-				BIOS::FAT::EResult eResult = BIOS::FAT::Read( m_pData );
-				_ASSERT( eResult == BIOS::FAT::EOk );
-			}
-			if ( str[i] == '\n' )
-				break;
-		}
-		if ( str[i] == '\r' )
-			i--;
-		str[i] = 0;
-		return *this;
+        // unsafe
+        ReadLine(str, 128);
+        return *this;
 	}
 	
 	CBufferedReader& operator >>( ui32 &i )
@@ -96,6 +111,11 @@ public:
 		_ASSERT( eResult == BIOS::FAT::EOk );
 	}
 
+    int GetFileOffset()
+    {
+        return m_nOffset;        
+    }
+    
 	void Close()
 	{
 		BIOS::FAT::Close();

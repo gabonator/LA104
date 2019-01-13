@@ -1,4 +1,5 @@
 #include "Bios.h"
+//#define EVERY(ms) static long dwTick##__LINE__ = 0; bool bDo##__LINE__ = BIOS::SYS::GetTick() - dwTick##__LINE__ > ms; //if (bDo##__LINE__) dwTick##__LINE__ = BIOS::SYS::GetTick(); if (bDo##__LINE__)
 
 bool sdl_running();
 void sdl_loop();
@@ -8,7 +9,10 @@ namespace BIOS {
   namespace KEY {
     EKey GetKey() 
     {
-      sdl_loop();
+        //EVERY(10)
+        {
+            sdl_loop();
+        }
         
         char c = 0;
         switch (sdl_lastKey())

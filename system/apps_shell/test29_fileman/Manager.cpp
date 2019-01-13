@@ -104,6 +104,7 @@ void CWndUserManager::Create(CWnd *pParent, ui16 dwFlags)
 	CWnd::Create("CWndManager", dwFlags, CRect(0, 16, BIOS::LCD::Width, BIOS::LCD::Height), pParent);
 	InitFileList();
 	m_dwExecuteAddress = 0;
+	strcpy(mExtraArgument, "");
 }
 
 /*static*/ int CWndUserManager::CompareFile( BIOS::FAT::TFindFile& fA, BIOS::FAT::TFindFile& fB )
@@ -382,13 +383,16 @@ void CWndUserManager::OnKey(ui16 nKey)
 			}
 		}
 	}
-/*
+
 	if ( nKey == BIOS::KEY::F4 )
         {
-          BIOS::OS::SetArgument(m_arrFiles[nSelected].strName);
+          strcpy(mExtraArgument, m_strCurrentPath);
+          strcat(mExtraArgument, "/");
+          strcat(mExtraArgument, m_arrFiles[nSelected].strName);
+//          BIOS::OS::SetArgument(m_arrFiles[nSelected].strName);
 	  m_wndMessage.Show(this, "Manager", "File selected as argument", RGB565(00FF00));
         }
-*/
+
 	if ( nKey == BIOS::KEY::Enter )
 	{
 		if ( m_arrFiles[nSelected].nAtrib & BIOS::FAT::EDirectory )
@@ -521,6 +525,11 @@ void CWndUserManager::Exec(char* strPath, char* strFile, int nLength)
 		return;
 	}
 
+	if (strlen(mExtraArgument) > 0)
+	{
+	  strcat(strFullName, " ");
+	  strcat(strFullName, mExtraArgument);
+	}
         BIOS::OS::SetArgument(strFullName);
 
 /*

@@ -86,7 +86,11 @@ namespace BIOS
 
     ui32 GetFileSize()
     {
-    	return 0;
+        int prev = ftell(f);
+        fseek(f, 0, SEEK_END);
+        int len = ftell(f);
+        fseek(f, prev, SEEK_SET);
+    	return len;
     }
 
     EResult Seek(ui32 lOffset)

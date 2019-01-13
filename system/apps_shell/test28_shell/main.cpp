@@ -44,7 +44,7 @@ class CDirInfo
     char mFileName[16];
     char mShortName[32];
     char mIconName[16];
-    char mExecName[40];
+    char mExecName[64];
     static char* mRoot;
 
 public:
@@ -86,7 +86,7 @@ public:
                     strcpy(mIconName, name);
                     strcat(mIconName, ".bmp");
                 }
-                json["execute"].ToString(mExecName, 32);
+                json["execute"].ToString(mExecName, 64);
                 CJson jsonDesc = json["description"];
                 if (jsonDesc)
                 {
@@ -346,7 +346,7 @@ public:
                 if (index < mItems.GetSize())
                 {
                     CDirInfo& item = mItems[index];
-                    DrawIcon(15+90*x, 30+100*y, item, HasFocus() && mCursor == index);
+                    DrawIcon(15+98*x, 30+104*y, item, HasFocus() && mCursor == index);
                 }
                 index++;
             }
@@ -361,7 +361,7 @@ public:
                 if (index < mItems.GetSize() && index == pos)
                 {
                     CDirInfo& item = mItems[index];
-                    DrawIcon(15+90*x, 30+100*y, item, select);
+                    DrawIcon(15+98*x, 30+104*y, item, select);
                 }
                 index++;
             }
@@ -621,8 +621,11 @@ int _main(void)
             app.WindowMessage(CWnd::WmKey, key);
         app.WindowMessage(CWnd::WmTick);
 
-        if (BIOS::OS::GetArgument()[0])
+        if (BIOS::OS::HasArgument()) // was internally set
+        {
+            BIOS::OS::SetArgument(BIOS::OS::GetArgument()); // hack, keep flag set
             break;
+        }
     }
     
     app.Destroy();

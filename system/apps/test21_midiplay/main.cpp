@@ -1025,7 +1025,12 @@ int _main(void)
     bool loaded{false};
 
     char* fileName = BIOS::OS::GetArgument();
-    if (strlen(fileName) == 0)
+
+    fileName = strstr(fileName, " ");
+    if (fileName)
+        fileName++;
+
+    if (!fileName || strlen(fileName) == 0)
     {
         strcpy(strDisplay, "No midi loaded, use F4 in manager");
     } else

@@ -44,24 +44,24 @@ file(GLOB main_src
 )
 
 file(GLOB linker_script
-    "../apps/test33_temper/app.lds"
+    "../apps/test35_view/app.lds"
 )
 endif()
 
 file(GLOB application_src
-    "../apps/test33_temper/*.cpp"
-    "../apps/test33_temper/*.h"
+    "../apps/test35_view/*.cpp"
+    "../apps/test35_view/*.h"
 )
 
-file(GLOB application_graph_src
-    "../apps/test33_temper/graph/*.cpp"
-    "../apps/test33_temper/graph/*.h"
-)
+#file(GLOB application_graph_src
+#    "../apps/test34_scope/graph/*.cpp"
+#    "../apps/test34_scope/graph/*.h"
+#)
 
-file(GLOB application_sensor_src
-    "../apps/test33_temper/sensor/*.cpp"
-    "../apps/test33_temper/sensor/*.h"
-)
+#file(GLOB application_sensor_src
+#    "../apps/test34_scope/sensor/*.cpp"
+#    "../apps/test34_scope/sensor/*.h"
+#)
 
 if (DESKTOP)           	
 source_group("source\\main" FILES "source/sdlmain.cpp")
