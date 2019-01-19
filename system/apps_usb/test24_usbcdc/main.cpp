@@ -2,8 +2,8 @@
 
 typedef void (*THandler)(void);
 
-RingBuffer<uint8_t, 128> bufferReceive;
-RingBuffer<uint8_t, 128> bufferTransmit;
+RingBuffer<uint8_t, 1024> bufferReceive;
+RingBuffer<uint8_t, 1024> bufferTransmit;
 
 extern "C" 
 {
@@ -94,12 +94,14 @@ int _main(void)
         while (bufferReceive.size())
         {
           int data = bufferReceive.pull();
+//          DBG::Print("%c", data);
           GPIO::UART::Write(data);
 	}
 
         while (GPIO::UART::Available() && bufferTransmit.available())
         {
           int data = GPIO::UART::Read();
+//          DBG::Print("<%c>", data);
           bufferTransmit.push(data);
         }
 

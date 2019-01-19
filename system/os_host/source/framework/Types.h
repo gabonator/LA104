@@ -44,3 +44,5 @@ typedef const char * PCSTR;
 typedef char * PSTR;
 typedef char CHAR;
 typedef ui32 UINT;
+
+#define EVERY(ms) static long dwTick##__LINE__ = 0; bool bDo##__LINE__ = BIOS::SYS::GetTick() - dwTick##__LINE__ > ms; if (bDo##__LINE__) dwTick##__LINE__ = BIOS::SYS::GetTick(); if (bDo##__LINE__)

@@ -44,13 +44,13 @@ file(GLOB main_src
 )
 
 file(GLOB linker_script
-    "../apps/test35_view/app.lds"
+    "../apps/test36_esp_server/app.lds"
 )
 endif()
 
 file(GLOB application_src
-    "../apps/test35_view/*.cpp"
-    "../apps/test35_view/*.h"
+    "../apps/test36_esp_server/*.cpp"
+    "../apps/test36_esp_server/*.h"
 )
 
 #file(GLOB application_graph_src

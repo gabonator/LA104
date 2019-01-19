@@ -17,6 +17,8 @@ void BIOS::DBG::Print(const char * format, ...)
     sfp_print( bbuf, format, args );
     va_end(args);
     
+    //fprintf(stdout, buf);
+    
 	for ( bbuf = buf; *bbuf; bbuf++ )
 	{
 		if ( *bbuf == '\n' || px >= BIOS::LCD::Width-4 )

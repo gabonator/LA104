@@ -28,7 +28,7 @@ void Show(char* msg)
       continue;
     }          
     char show[2] = {ch, 0};
-    x += BIOS::LCD::Print(x, BIOS::LCD::Height-16, RGB565(ffffff), RGB565(4040b0), show);
+    x += BIOS::LCD::Print(x, BIOS::LCD::Height-16+1, RGB565(ffffff), RGB565(4040b0), show);
     if (x >= BIOS::LCD::Width)
     {
       x = 0;
@@ -222,7 +222,7 @@ uint32_t ElfExecute( char* strName )
 	CBufferedReader fw;
 	if ( !fw.Open( strName ) )
         {
-		sprintf(message, "Image not found!\n", strName);
+		sprintf(message, "Image '%s' not found!\n", strName);
 		Show(message);
 		return 0;
         }

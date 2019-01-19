@@ -63,7 +63,18 @@ namespace BIOS
 
     EResult OpenDir(char* strPath)
     {
-        dirp = opendir(strPath);
+        char fullPath[512];
+#ifdef __APPLE__
+        static char* rootPath = (char*)"/Users/gabrielvalky/Documents/git/LA104/system/release/";
+        strcpy(fullPath, rootPath);
+        for (int i=0; i<strlen(strPath); i++)
+            strPath[i] = tolower(strPath[i]);
+        strcat(fullPath, strPath);
+#else
+        strcpy(fullPath, strPath);
+#endif
+        
+        dirp = opendir(fullPath);
         return dirp ? BIOS::FAT::EOk : BIOS::FAT::EIntError;
     }
 

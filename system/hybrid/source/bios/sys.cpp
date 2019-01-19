@@ -9,6 +9,7 @@ void BIOS::SYS::DelayUs(int intervalUs)
 
 void BIOS::SYS::DelayMs(int intervalMs)
 {
+    SDL_Delay(intervalMs);
   //assert(0);
 }
 

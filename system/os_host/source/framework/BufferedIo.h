@@ -5,12 +5,14 @@ class CBufferedReader : public CSerialize
 {
 	ui8* m_pData;
 	int m_nOffset;
+	int m_nSectorOffset;
 
 public:
 	bool Open( PSTR strName )
 	{
 		m_pData = (ui8*)BIOS::FAT::GetSharedBuffer();
 		m_nOffset = 0;
+		m_nSectorOffset = 0;
 
 		if ( BIOS::FAT::Open( strName, BIOS::FAT::IoRead ) != BIOS::FAT::EOk )
 			return false;
@@ -34,7 +36,8 @@ public:
             str[i] = m_pData[m_nOffset++];
             if ( m_nOffset == BIOS::FAT::SectorSize )
             {
-                m_nOffset = 0;
+		m_nSectorOffset += BIOS::FAT::SectorSize;
+                m_nOffset = 0; // TODO: nemame skutocny offset
                 BIOS::FAT::EResult eResult = BIOS::FAT::Read( m_pData );
                 _ASSERT( eResult == BIOS::FAT::EOk );
             }
@@ -94,6 +97,7 @@ public:
 			if ( m_nOffset == BIOS::FAT::SectorSize )
 			{
 				m_nOffset = 0;
+				m_nSectorOffset += BIOS::FAT::SectorSize;
 				BIOS::FAT::EResult eResult = BIOS::FAT::Read( m_pData );
 				_ASSERT( eResult == BIOS::FAT::EOk );
 			}
@@ -103,12 +107,16 @@ public:
 
 	void Seek(ui32 lOffset)
 	{
-		m_nOffset = lOffset % BIOS::FAT::SectorSize;
+	        m_nOffset = lOffset % BIOS::FAT::SectorSize;
 		lOffset -= m_nOffset;
-        // TODO: multiple reads when seeking in the same block!
-		BIOS::FAT::Seek( lOffset );
-		BIOS::FAT::EResult eResult = BIOS::FAT::Read( m_pData );
-		_ASSERT( eResult == BIOS::FAT::EOk );
+
+	        if ((int)lOffset != m_nSectorOffset)
+	        {
+	            m_nSectorOffset = lOffset;
+		    BIOS::FAT::Seek( lOffset );
+	            BIOS::FAT::EResult eResult = BIOS::FAT::Read( m_pData );
+	            _ASSERT( eResult == BIOS::FAT::EOk );
+	        }
 	}
 
     int GetFileOffset()

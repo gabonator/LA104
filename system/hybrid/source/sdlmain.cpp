@@ -115,12 +115,12 @@ void sdl_loop()
     SDL_RenderCopy( renderer, texture, NULL, NULL );
     SDL_RenderPresent( renderer );
     
-    const Uint64 end = SDL_GetPerformanceCounter();
-    const static Uint64 freq = SDL_GetPerformanceFrequency();
-    const double seconds = ( end - start ) / static_cast< double >( freq );
-    std::cout << "Frame time: " << seconds * 1000.0 << "ms" << std::endl;
+    //const Uint64 end = SDL_GetPerformanceCounter();
+    //const static Uint64 freq = SDL_GetPerformanceFrequency();
+    //const double seconds = ( end - start ) / static_cast< double >( freq );
+    //std::cout << "Frame time: " << seconds * 1000.0 << "ms" << std::endl;
     if (running)
-        SDL_Delay(10);
+        SDL_Delay(20);
 }
 
 void sdl_deinit()
