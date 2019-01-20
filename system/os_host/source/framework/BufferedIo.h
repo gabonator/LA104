@@ -121,13 +121,18 @@ public:
 
     int GetFileOffset()
     {
-        return m_nOffset;        
+        return m_nSectorOffset + m_nOffset;
     }
     
 	void Close()
 	{
 		BIOS::FAT::Close();
 	}
+    
+    bool Eof()
+    {
+        return GetFileOffset() >= GetFileSize();
+    }
 };
 
 class CBufferedWriter : public CSerialize

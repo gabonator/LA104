@@ -6,7 +6,7 @@ using namespace BIOS;
 #include "promise.h"
 #include "stream.h"
 #include "atdevice.h"
-#include "tokenizer.h" // TODO: remove?
+//#include "tokenizer.h" // TODO: remove?
 #include "esp8266.h"
 
 class CServerApp

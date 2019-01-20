@@ -61,7 +61,8 @@ public:
     bool mIgnoreGarbage{false};
     bool mProcessAll{false};
     int mIgnoreBytes{0};
-    
+
+bool mShowAll{false}; void ShowAll(bool b) {mShowAll = b;}
     void IgnoreBytes(int n)
     {
         // Could freeze!
@@ -94,6 +95,8 @@ public:
 
     void operator << (char c)
     {
+if (mShowAll)
+BIOS::DBG::Print("%c", c);
         fprintf(stdout, "%c", c);
         if (!mIgnoreGarbage && !mIgnoreBytes)
         {

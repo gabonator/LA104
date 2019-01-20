@@ -279,12 +279,13 @@ namespace I2C
       GPIO_Init(I2C_GPIO, &GPIO_InitStruct);
   }
    
-  void i2c_start()
+  bool i2c_start()
   {
       // Wait until I2Cx is not busy anymore
-      SetTimeout(2000);
+      SetTimeout(50);
       while (I2C_GetFlagStatus(I2Cx, I2C_FLAG_BUSY))
-        if (Timeout()) {er("b1"); return;}
+        if (Timeout()) 
+          return false;
       
    
       // Generate start condition
@@ -294,52 +295,64 @@ namespace I2C
       // It means that the start condition has been correctly released 
       // on the I2C bus (the bus is free, no other devices is communicating))
       while (!I2C_CheckEvent(I2Cx, I2C_EVENT_MASTER_MODE_SELECT))
-        if (Timeout()) {er("b2"); return;}
+        if (Timeout())
+          return false;
+
+      return true;
   }
    
-  void i2c_stop()
+  bool i2c_stop()
   {
       // Generate I2C stop condition
       I2C_GenerateSTOP(I2Cx, ENABLE);
       // Wait until I2C stop condition is finished
-      SetTimeout(100);
+      SetTimeout(50);
       while (I2C_GetFlagStatus(I2Cx, I2C_FLAG_STOPF))
-        if (Timeout()) {er("e1"); return;};
+        if (Timeout()) return false;
+      return true;
   }
    
-  void i2c_address_direction(uint8_t address, uint8_t direction)
+  bool i2c_address_direction(uint8_t address, uint8_t direction)
   {
       // Send slave address
       I2C_Send7bitAddress(I2Cx, address, direction);
    
       // Wait for I2C EV6
       // It means that a slave acknowledges his address
-      SetTimeout(1000);
+      SetTimeout(50);
       if (direction == I2C_Direction_Transmitter)
       {
           while (!I2C_CheckEvent(I2Cx,
               I2C_EVENT_MASTER_TRANSMITTER_MODE_SELECTED))
-            if (Timeout()) {er("a1"); return;};
-
+          {
+            if (Timeout())
+                return false;
+          }
       }
       else if (direction == I2C_Direction_Receiver)
       { 
           while (!I2C_CheckEvent(I2Cx,
               I2C_EVENT_MASTER_RECEIVER_MODE_SELECTED))
-            if (Timeout()) {er("a2"); return;};
+          {
+            if (Timeout())
+                return false;
+          }
       }
+      return true;
   }
    
-  void i2c_transmit(uint8_t byte)
+  bool i2c_transmit(uint8_t byte)
   {
       // Send data byte
       I2C_SendData(I2Cx, byte);
       // Wait for I2C EV8_2.
       // It means that the data has been physically shifted out and 
       // output on the bus)
-      SetTimeout(500);
+      SetTimeout(50);
       while (!I2C_CheckEvent(I2Cx, I2C_EVENT_MASTER_BYTE_TRANSMITTED))
-            if (Timeout()) {er("t1"); return;};
+            if (Timeout())
+              return false;
+      return true;
   }
    
   uint8_t i2c_receive_ack()
@@ -348,7 +361,7 @@ namespace I2C
       I2C_AcknowledgeConfig(I2Cx, ENABLE);
       // Wait for I2C EV7
       // It means that the data has been received in I2C data register
-      SetTimeout(500);
+      SetTimeout(50);
       while (!I2C_CheckEvent(I2Cx, I2C_EVENT_MASTER_BYTE_RECEIVED))
             if (Timeout()) {er("r1"); return 0x00;};
    
@@ -362,7 +375,7 @@ namespace I2C
       I2C_AcknowledgeConfig(I2Cx, DISABLE);
       // Wait for I2C EV7
       // It means that the data has been received in I2C data register
-      SetTimeout(500);
+      SetTimeout(50);
       while (!I2C_CheckEvent(I2Cx, I2C_EVENT_MASTER_BYTE_RECEIVED))
             if (Timeout()) {er("r2"); return 0x00;};
    
@@ -602,29 +615,40 @@ namespace BIOS
 
       bool BeginTransmission(uint8_t address)
       {
+          if (!::I2C::i2c_start())
+              return false;
+          if (!::I2C::i2c_address_direction(address << 1, I2C_Direction_Transmitter))
+              return false;
+
         mAddress = address;
-        mTransmitting = false;
+//        mTransmitting = false;
         return true;
       }
 
       bool RequestFrom(uint8_t address, uint8_t bytes)
       {
-        ::I2C::i2c_start();
-        ::I2C::i2c_address_direction(address << 1, I2C_Direction_Receiver);
+        if (!::I2C::i2c_start())
+          return false;
+        if (!::I2C::i2c_address_direction(address << 1, I2C_Direction_Receiver))
+          return false;
+
         mCount = bytes;
         return true;
       }
 
       bool Write(uint8_t data)
       {
+/*
         if (!mTransmitting)
         {
+          if (::I2C::i2c_start())
+            return false;
+          if (::I2C::i2c_address_direction(mAddress << 1, I2C_Direction_Transmitter))
+            return false;
           mTransmitting = true;
-          ::I2C::i2c_start();
-          ::I2C::i2c_address_direction(mAddress << 1, I2C_Direction_Transmitter); 
         }
-        ::I2C::i2c_transmit(data);
-        return true;
+*/
+        return ::I2C::i2c_transmit(data);
       }
 
       uint8_t Read()
@@ -639,8 +663,7 @@ namespace BIOS
 
       bool EndTransmission()
       {
-        ::I2C::i2c_stop();
-        return true;
+        return ::I2C::i2c_stop();
       }
     }
 
@@ -679,6 +702,8 @@ extern "C"
 {
   void UartPushByte(uint8_t data)
   {
+     if (BIOS::GPIO::UART::mUartBuffer.isFull())
+       BIOS::DBG::Print("uart buffer overflow");
      BIOS::GPIO::UART::mUartBuffer.push(data);
   }
 }

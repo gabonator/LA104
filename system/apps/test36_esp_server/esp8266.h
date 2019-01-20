@@ -59,7 +59,6 @@ public:
             }
         });
     }
-    
     CPromise WaitOnlyFor(const char* msg, int nTimeout)
     {
         static int _nTimeout;
@@ -197,7 +196,7 @@ public:
             int _length = atoi(p);
             
             Instance().IgnoreBytes(_length - strlen(payload) - 2 - 4); // TODO: not correcly calculated
-            
+//            DBG::Print("skipp %d b> ", _length);
             
             p = payload;
 
@@ -276,15 +275,15 @@ public:
         CStreamCounter counter;
         generator(counter);
         sprintf(cipsend, "AT+CIPSEND=%d,%d\r\n", id, counter.Count());
-        
         Send(cipsend);
-        
-        return CPromise::Resolve() //SendAtCommand(cipsend)
-        .Then([](){ Instance().ProcessAll(true); return Instance().WaitOnlyFor(">", 2000); })
+        // returns "\r\ntoo long\r\n\ERROR" when buffer is too big        
+
+        return CPromise::Resolve()
+        .Then([](){ Instance().ProcessAll(true); return Instance().WaitFor(">", 2000); })
         .Then([](){
             Instance().ProcessAll(false);
             _generator(Instance().Stream());
-            return Instance().WaitOnlyFor("SEND OK\r\n", 3000); }) // missing CRLF??
+            return Instance().WaitFor("SEND OK\r\n", 3000); }) // missing CRLF??
         .Then([](){
             char msg[16];
             sprintf(msg, "AT+CIPCLOSE=%d\r\n", _id);
@@ -342,36 +341,53 @@ public:
                 fprintf(stdout, "Invalid CWLAP response: '%s''n", payload);
                 return;
             }
+            
+            // skip parentheses
             payload++;
             payload[strlen(payload)-1] = 0;
-            CTokenizer tok(payload);
 
-            char token[32];
-            if (!tok.GetToken(token, ',', 31))
+            static char* _tokens;
+            _tokens = payload;
+            
+            auto getToken = []() -> char* {
+                char* p = strstr(_tokens, ",");
+                if (!p)
+                    return nullptr;
+                
+                char* aux = _tokens;
+                *p = 0;
+                _tokens = p+1;
+                return aux;
+            };
+            
+            char* strEcn = getToken();
+            if (strlen(strEcn) < 1)
             {
                 fprintf(stdout, "Invalid CWLAP response: '%s''n", payload);
                 return;
             }
             
-            int ecn = atoi(payload);
+            int ecn = atoi(strEcn);
 
-            if (!tok.GetToken(token, ',', 31) || token[0] != '"' || token[strlen(token)-1] != '"' || strlen(token) < 3 || strlen(token) - 2 > 31)
+            char* ssid = getToken();
+            if (!ssid || strlen(ssid) < 3 || ssid[0] != '"' || ssid[strlen(ssid)-1] != '"')
             {
                 fprintf(stdout, "Invalid CWLAP response: '%s''n", payload);
                 return;
             }
             
-            char ssid[32];
-            memcpy(ssid, token+1, strlen(token)-2);
-            ssid[strlen(token)-2] = 0;
-
-            if (!tok.GetToken(token, ',', 31))
+            // remove quotes
+            ssid++;
+            ssid[strlen(ssid)-1] = 0;
+            
+            char* strRssi = getToken();
+            if (!strRssi || strlen(strRssi) < 1)
             {
                 fprintf(stdout, "Invalid CWLAP response: '%s''n", payload);
                 return;
             }
 
-            int rssi = atoi(token);
+            int rssi = atoi(strRssi);
 
             _handler(ssid, rssi, ecn == 0);
         };
