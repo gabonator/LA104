@@ -2,19 +2,19 @@
 #include "../../os_host/source/framework/BufferedIo.h"
 using namespace BIOS;
 
-void Draw(int i, int color)
+void Draw(int i, int colorBack, int colorText)
 {
     int x = i&15;
     int y = i/16;
-    CRect rc(x*18+18, 20+16*y+16, x*18+16+19, 20+16*y+16+14);
-    LCD::Bar(rc, color);
-    LCD::Printf(rc.left, rc.top, RGB565(404040), color, "%02X", i);
+    CRect rc(x*18+18, 20+16*y+16-4, x*18+16+19, 20+16*y+16+14-4);
+    LCD::Bar(rc, colorBack);
+    LCD::Printf(rc.left, rc.top, colorText, colorBack, "%02X", i);
 }
 
 void DrawAll()
 {
     for (int i=0; i<128; i++)
-        Draw(i, RGB565(b0b0b0));
+        Draw(i, RGB565(b0b0b0), RGB565(404040));
 }
 
 void InitIo()
@@ -27,7 +27,7 @@ bool Test(int address)
 {
 #ifdef __APPLE__
     SYS::DelayMs(30);
-    if (address == 0x1d)
+    if (address == 0x19 || address == 0x1e || address == 0x69) // 9 DOF module
         return true;
     return false;
 #endif
@@ -38,23 +38,80 @@ bool Test(int address)
       return ok;
 }
 
-CBufferedReader f;
-char strLine[128];
-char strCheck[8];
+class CTokenizer
+{
+    char* mStr{nullptr};
+    
+public:
+    CTokenizer(char* str) : mStr(str)
+    {
+    }
+
+    bool IsEmpty()
+    {
+        return !mStr || !mStr[0];
+    }
+    
+    char* Get()
+    {
+        char* delim = strstr(mStr, " ");
+        if (delim)
+        {
+            char* aux = mStr;
+            mStr = delim+1;
+            *delim = 0;
+            return aux;
+        }
+        char* aux = mStr;
+        mStr = nullptr;
+        return aux;
+    }
+};
 
 static int x, y;
-bool match;
-void xPrint(char* desc)
+
+void xClear()
 {
-    if (x + strlen(desc) > 40)
+    x = y = 0;
+}
+
+void xPush(char* msg, int c)
+{
+    LCD::Print(20+x*8, 168+y*14, c, RGBTRANS, msg);
+    x += strlen(msg);
+}
+
+void xPrint(char* desc, bool highlight = false)
+{
+    constexpr int countX = 35;
+    constexpr int countY = 5;
+    constexpr int colorText = RGB565(d0d0d0);
+    constexpr int colorHigh = RGB565RGB(39, 101, 217);
+    
+    CTokenizer tok(desc);
+    bool first = true;
+    while (!tok.IsEmpty())
     {
-        x = 0;
-        y ++;
-    }
-    if (y < 5)
-    {
-        LCD::Print(20+x*8, 168+y*14, RGB565(d0d0d0), RGBTRANS, desc);
-        x += strlen(desc);
+        if (first)
+            first = false;
+        else
+            x++;
+
+        char* token = tok.Get();
+        int len = strlen(token);
+        if (x + len < countX)
+        {
+            xPush(token, highlight ? colorHigh : colorText);
+        } else
+        {
+            y++;
+            if (y >= countY)
+                return;
+            x = 0;
+            xPush(token, highlight ? colorHigh : colorText);
+        }
+        if (highlight)
+            highlight = false;
     }
 };
 
@@ -78,51 +135,48 @@ int strncmp( const char * s1, const char * s2, size_t n )
 
 void GetDescription(int address)
 {
+#ifdef __APPLE__
+    char databasePath[512];
+    strcpy(databasePath, "/Users/gabrielvalky/Documents/git/LA104/system/apps/test37_i2cscan/devices.txt");
+    
+#else
+    char databasePath[64];
+    
+    // Get current process path
+    strcpy(databasePath, OS::GetArgument());
+    char* last = strrchr(databasePath, '/');
+    if (last)
+        *last = 0;
+    strcat(databasePath, "/devices.txt");
+#endif
+    
+    CBufferedReader f;
+    char strLine[128];
+    char strCheck[8];
+    bool match;
 
     sprintf(strCheck, "0x%02X", address);
-    CRect rcDesc(20, 168, LCD::Width-20, 168+14*5);
+    CRect rcDesc(0, 168, LCD::Width, 168+14*5);
 
-    x = y = 0;
+    xClear();
     match = false;
-    /*
-    static int lines;
-    static int x, y;
-    lines = 0;
-    x = 0;
-    y = 0;
-    bool match = false;
-    
 
-    auto xPrint = [](char* desc)
+    if (!f.Open((char*)databasePath))
     {
-        if (x + strlen(desc) > 40)
-        {
-            x = 0;
-            y ++;
-        }
-        if (y < 5)
-        {
-            LCD::Print(20+x*8, 168+y*14, RGB565(d0d0d0), RGBTRANS, desc);
-            x += strlen(desc);
-        }
-    };
-     CBufferedReader f;
-    */
+        DBG::Print("Unable to open database file '%s'!\n", databasePath);
+        return;
+    }
 
-#ifdef __APPLE__
-    if (!f.Open((char*)"/Users/gabrielvalky/Documents/git/LA104/system/apps/test37_i2cscan/devices.txt"))
-        return;
-#else
-    if (!f.Open((char*)"devices.txt"))
-        return;
-#endif
     while (!f.Eof())
     {
         f >> strLine;
         if (match)
         {
             if (strncmp(strLine, "     ", 5) == 0)
-                xPrint(strLine+5);
+            {
+                xPush((char*)", ", RGB565(d0d0d0));
+                xPrint(strLine+5, true);
+            }
             else
                 break;
         }
@@ -131,9 +185,9 @@ void GetDescription(int address)
             GUI::Background(rcDesc, RGB565(404040), RGB565(101010));
 
             match = true;
-            xPrint(strCheck);
-            xPrint((char*)": ");
-            xPrint(strLine+5);
+            xPush(strCheck, RGB565(ffffff));
+            xPush((char*)": ", RGB565(ffffff));
+            xPrint(strLine+5, true);
         }
     }
 }
@@ -157,28 +211,68 @@ int _main(void)
     BIOS::KEY::EKey key;
     int nAddress = 0;
     int nLast = -1;
+    int lastDesc = -1;
     DrawAll();
     InitIo();
     memset(devices, 0, sizeof(devices));
     
+    bool running = true;
     while ((key = KEY::GetKey()) != KEY::EKey::Escape)
     {
+        if (key == KEY::EKey::F1)
+            running = !running;
+        
         if (Test(nAddress))
         {
-            Draw(nAddress, RGB565(00ff00));
+            Draw(nAddress, RGB565RGB(39, 101, 217), RGB565(ffffff));
             devices[nAddress] = 1;
-            GetDescription(nAddress);
+            if (nAddress != lastDesc)
+            {
+                lastDesc = nAddress;
+                GetDescription(nAddress);
+            }
         } else
         {
-            Draw(nAddress, RGB565(00b000));
+            Draw(nAddress, RGB565(404040), RGB565(ffffff));
         }
-        if (nLast != -1)
-            Draw(nLast, devices[nLast] ? RGB565(00b0b0) : RGB565(b0b0b0));
+        
+        if (nLast != -1 && nLast != nAddress)
+            Draw(nLast, devices[nLast] ? RGB565RGB(39, 101, 217) : RGB565(b0b0b0), RGB565(404040));
         nLast = nAddress;
         
-        nAddress++;
+        if (key == KEY::EKey::Left)
+        {
+            running = false;
+            nAddress--;
+        }
+        
+        if (key == KEY::EKey::Right)
+        {
+            running = false;
+            nAddress++;
+        }
+
+        if (key == KEY::EKey::Up)
+        {
+            running = false;
+            nAddress -= 16;
+        }
+        
+        if (key == KEY::EKey::Down)
+        {
+            running = false;
+            nAddress += 16;
+        }
+
+        if (running)
+        {
+            nAddress++;
+        }
+
+        if (nAddress < 0)
+            nAddress += 128;
         if (nAddress >= 128)
-            nAddress = 0;
+            nAddress -= 128;
         devices[nAddress] = 0;
     }
     

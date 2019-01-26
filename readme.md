@@ -17,6 +17,12 @@ Go to release section on top of this page, download *system.hex*. Power on the L
 
 #### News
 
+##### I2C Scanner application
+
+I2C Scanner including database of 245 I2C devices, automatically shows description of identified device.
+
+![I2C scanner](resources/imgScanner.png)
+
 ##### Pulseview compatibility
 
 Added USB application which emulates SUMP protocol. By choosing "Openbench logic sniffer (ols)" in Pulse view configuration, LA104 can transfer measured signals to pulse view for deep analysis. Pulseview support wide range of protocols and offers intuitive user interface. Currently only 50kHz sampling is supported on P1..P4 pins, samplerate is sufficient for decoding of 9600 baud serial link.

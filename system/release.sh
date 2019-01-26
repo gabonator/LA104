@@ -31,6 +31,8 @@ cp release/bin/34scope.elf release/apps/measure/oscillo/oscillo.elf
 cp release/bin/31testg.elf release/apps/experime/testsig/testsig.elf
 cp release/bin/32graph.elf release/apps/experime/graph/graph.elf
 cp release/bin/27irsend.elf release/apps/synth/samsung/samsung.elf
+cp release/bin/37icscan.elf release/apps/measure/i2cscan/i2cscan.elf
+cp apps/test37_i2cscan/devices.txt release/apps/measure/i2cscan/devices.txt
 
 #10i2c.elf       14apds1.elf     17analys.elf    20uplay.elf     24ncdc.elf      27irsend.elf    30dcf77.elf     7pwm.elf
 #11i2c.elf       14apds2.elf     18onew.elf      21mplay.elf     25hid.elf       28shell.elf     32sump.elf      8ds.elf
