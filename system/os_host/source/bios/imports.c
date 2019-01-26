@@ -92,19 +92,18 @@ enum
 #define ENBL 1
 #define DSBL            0
 
-void Set_Posi(uint_fast16_t x, uint_fast16_t y)
-{
-    __Bios(PIXEL_X, x);
-    __Bios(PIXEL_Y, y);
-}
+//https://gist.github.com/iwalpola/6c36c9573fd322a268ce890a118571ca
 
 void Set_Pixel(uint_fast16_t Color)
 {
-    __Bios(WrPIXEL, Color);
+  GPIOE->ODR = (u16)Color; // LCD_PORT - GPIOE->ODR
+  GPIOD->BRR = GPIO_Pin_9; // Wr - D9 
+  GPIOD->BSRR = GPIO_Pin_9; // Wr - D9
 }
 
 uint16_t Get_Pixel()
 {
+  // TODO:
     return __Bios(RdPIXEL, 0);
 }
 
@@ -122,9 +121,11 @@ void ExtFlash_CS_HIGH(void)
 
 void Set_Block(int x1, int y1, int x2, int y2)
 {
+  // TODO:
   __Bios(BLOCK_X, (x2-1) | (x1 << 16));
   __Bios(BLOCK_Y, (y2-1) | (y1 << 16));
 }
+
 
 void Beep(bool b)
 {
@@ -138,10 +139,11 @@ void Beep(bool b)
   }
 }
 
-void Set_Area(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2)
+void Set_Posi(uint_fast16_t x, uint_fast16_t y)
 {
-  __Bios(BLOCK_X, (x2-1) | (x1 << 16));
-  __Bios(BLOCK_Y, (y2-1) | (y1 << 16));
+    // TODO:
+    __Bios(PIXEL_X, x);
+    __Bios(PIXEL_Y, y);
 }
 
 void EnableUsb(bool enable)

@@ -228,7 +228,7 @@ void BIOS::LCD::Pattern(int x1, int y1, int x2, int y2, const ui16 *pat, int l)
 {
 //  if (x2 > 320)
 //    return;
-  Set_Area(x1, y1, x2, y2);
+  Set_Block(x1, y1, x2, y2);
 
   const ui16* patb = pat;
   const ui16* pate = patb + l;

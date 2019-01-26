@@ -12,3 +12,6 @@ arm-none-eabi-gcc -fPIC -nostartfiles -mcpu=cortex-m3 -mthumb -march=armv7 -mfix
 #arm-none-eabi-nm --demangle ./libbios.so
 find . -type f -name '*.o' -delete
 find . -type f -name '*.d' -delete
+
+cd ..
+node exports.js > ../os_host/source/Shared.h

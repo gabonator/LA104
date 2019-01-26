@@ -109,8 +109,8 @@ namespace BIOS
     void SetArgument(char* argument) {}
     char* GetArgument() {return nullptr;}
     bool HasArgument() { return false; }
-    TInterruptHandler GetInterruptVector(EInterruptVector) {return nullptr;}
-    void SetInterruptVector(EInterruptVector, TInterruptHandler) {}
+    BIOS::OS::TInterruptHandler GetInterruptVector(BIOS::OS::EInterruptVector) {return nullptr;}
+    void SetInterruptVector(BIOS::OS::EInterruptVector, BIOS::OS::TInterruptHandler) {}
   }
 
   namespace PRIVATE

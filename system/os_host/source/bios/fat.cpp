@@ -22,19 +22,19 @@ extern "C"
       if (drv != 0 || count == 0) return RES_PARERR;
       // Operation could be interrupted by USB isr calling the same function
       while (!ExtFlashDataRd(buff, sector * BIOS::FAT::SectorSize, count * BIOS::FAT::SectorSize));
+
       return RES_OK;
   }
 
   DRESULT disk_write(BYTE drv, const BYTE *buff, DWORD sector, BYTE count)
   {
       if (drv != 0 || count == 0) return RES_PARERR;
-      // TODO: check for usb conflict??
 
       _ASSERT(count == 1);
       // Operation could be interrupted by USB isr calling the same function
       while (!ExtFlashSecWr((BYTE*)buff, sector * BIOS::FAT::SectorSize));
+
       return RES_OK;
-    return RES_PARERR;
   }
 
 /*
@@ -84,6 +84,19 @@ Number of hidden sectors: 0
                           | ((DWORD)0 >> 1);
   }
 
+  void InvalidateFat()
+  {
+    f_flush(0);
+  }
+
+  extern bool gUsbDidWriteToDisk;
+
+  bool NeedInvalidateFat()
+  {
+    bool aux = gUsbDidWriteToDisk;
+    gUsbDidWriteToDisk = false;
+    return aux;
+  }
 }
 
 namespace BIOS
@@ -141,6 +154,10 @@ namespace BIOS
 
     EResult Read(ui8* pSectorData)
     {
+      // TODO: Buffered reader should invalidate its buffer as well?
+      if (NeedInvalidateFat())
+        InvalidateFat();
+
       ui32 rcount;
       FRESULT r = f_read(&g_file, pSectorData, BIOS::FAT::SectorSize, &rcount);
       if (r != 0)
