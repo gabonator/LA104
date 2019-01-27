@@ -178,3 +178,55 @@ uint32_t GetKeys()
   return ~__Bios(KEYnDEV, BITMAP);
 }
 
+// FPGA
+typedef struct
+{
+    uint16_t  n;
+    uint8_t  *pBuf;
+} TFpgaRequest;
+
+uint32_t FPGA32(uint8_t Cmd, uint16_t Cnt, uint32_t Data)
+{
+  uint8_t   Buffer[10];
+  uint8_t  *SpiCmd  = (uint8_t *)&Buffer[0];
+  uint8_t  *SpiInfo = (uint8_t *)&Buffer[0];
+  uint32_t *SpiRecord = (uint32_t *)&Buffer[1]; // WTF? ALIASING?
+
+  TFpgaRequest Param;
+  uint32_t Temp = 0;
+
+  Param.pBuf = SpiCmd;
+  Param.n = Cnt;
+  *SpiCmd = Cmd;
+  *SpiRecord = Data;
+
+  __Bios(FPGADEV, (uint32_t)&Param);
+
+  Temp  = *SpiInfo;
+  Temp |= *SpiRecord << 8;
+
+  return Temp;
+}
+
+uint16_t FPGA16(uint8_t Cmd, uint16_t Cnt, uint16_t Data)
+{
+  uint8_t   Buffer[10];
+  uint8_t  *SpiCmd  = (uint8_t *)&Buffer[0];
+  uint8_t  *SpiInfo = (uint8_t *)&Buffer[0];
+  uint8_t  *SpiByte = (uint8_t *)&Buffer[1];
+  uint16_t *SpiData = (uint16_t *)&Buffer[1]; // WTF? ALIASING?
+
+  TFpgaRequest Param;
+
+  uint16_t Temp = 0;
+
+  Param.pBuf = SpiCmd;
+  Param.n = Cnt;
+  *SpiCmd = Cmd;
+  *SpiData = Data;
+  __Bios(FPGADEV, (uint32_t)&Param);
+  Temp |= (*SpiInfo) << 8;
+  Temp |= *SpiByte;
+
+  return Temp;
+}

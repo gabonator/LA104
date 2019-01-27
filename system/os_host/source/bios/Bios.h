@@ -123,7 +123,7 @@ namespace BIOS
 
   namespace GPIO
   {
-    enum EPin {P1, P2, P3, P4};                 
+    enum EPin {P1, P2, P3, P4, CH1, CH2, CH3, CH4};
     enum EMode {Input = 1, Output = 2, Pwm = 4, PullUp = 8, PullDown = 16, I2c = 32, Uart = 64};
     const int AnalogRange = 1024;
 
@@ -133,7 +133,7 @@ namespace BIOS
     int AnalogRead(EPin pin);
     void PinMode(EPin pin, EMode mode);
 
-    namespace I2C
+    namespace I2C          
     {
       bool BeginTransmission(uint8_t address);
       bool RequestFrom(uint8_t address, uint8_t bytes);

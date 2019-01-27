@@ -21,6 +21,8 @@ extern "C"
   void HardwareInit();
   uint32_t GetKeys();
 
+  uint32_t FPGA32(uint8_t Cmd, uint16_t Cnt, uint32_t Data);
+  uint16_t FPGA16(uint8_t Cmd, uint16_t Cnt, uint16_t Data);
 #ifdef __cplusplus
 }
 #endif

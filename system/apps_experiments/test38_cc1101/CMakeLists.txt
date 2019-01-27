@@ -44,13 +44,13 @@ file(GLOB main_src
 )
 
 file(GLOB linker_script
-    "../apps/test37_i2cscan/app.lds"
+    "../apps_experiments/test38_cc1101/app.lds"
 )
 endif()
 
 file(GLOB application_src
-    "../apps/test37_i2cscan/*.cpp"
-    "../apps/test37_i2cscan/*.h"
+    "../apps_experiments/test38_cc1101/*.cpp"
+    "../apps_experiments/test38_cc1101/*.h"
 )
 
 #file(GLOB application_graph_src

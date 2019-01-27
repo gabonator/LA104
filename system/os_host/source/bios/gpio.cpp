@@ -5,6 +5,8 @@
 #include <stm32f10x_gpio.h>
 #include <stm32f10x_usart.h>
 
+#include "imports.h"
+
 namespace PIN
 {
   enum {
@@ -487,6 +489,26 @@ namespace UART
   }
 }
 
+namespace FPGA
+{
+  void Init()
+  {
+    // init trigger
+  }
+
+  void Restart()
+  {
+    constexpr int SMPL_CLR = 0x02;
+    FPGA16(SMPL_CLR, 1, 0);
+  }
+
+  int Direct()
+  {       
+    constexpr int MEM_READ = 0x32;
+    return FPGA32(MEM_READ, 3, 0) >> 28;
+  }
+}
+
 namespace BIOS
 {
   namespace GPIO
@@ -506,16 +528,23 @@ namespace BIOS
 
     void DigitalWrite(EPin pin, bool value)
     {
+      _ASSERT(pin < 4);
       PIN::SetPin(arrPinAdrBPort[pin], arrPinAdrBPin[pin], value);
     }
 
     bool DigitalRead(EPin pin)
     {
+      if (pin >= CH1)
+      {
+        FPGA::Restart();
+        return FPGA::Direct() & (1<<((int)pin-4));
+      }
       return PIN::GetPin(arrPinAdrBPort[pin], arrPinAdrBPin[pin]);
     }
 
     void AnalogWrite(EPin pin, int value)
     {
+      // check if pwm is running
       value = max(0, min(value, AnalogRange));
 
       switch (pin)
@@ -524,16 +553,25 @@ namespace BIOS
         case P2: TIM_SetCompare4 (TIM2, value); break;
         case P3: TIM_SetCompare3 (TIM4, value); break;
         case P4: TIM_SetCompare4 (TIM4, value); break;
+        default: _ASSERT(0);
       }
     }
 
     int AnalogRead(EPin pin)
     {
+      _ASSERT(0);
       return 0;
     }
 
     void PinMode(EPin pin, EMode mode)
     {
+      if (pin >= CH1)
+      {
+        _ASSERT(mode == Input);
+        FPGA::Init();
+        return;
+      }
+
       if ((mode == Pwm || mode == I2c || mode == Uart) && specialMode != mode)
       {
         switch (specialMode)
