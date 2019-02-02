@@ -25,7 +25,7 @@ I2C Scanner including database of 245 I2C devices, automatically shows descripti
 
 ##### Pulseview compatibility
 
-Added USB application which emulates SUMP protocol. By choosing "Openbench logic sniffer (ols)" in Pulse view configuration, LA104 can transfer measured signals to pulse view for deep analysis. Pulseview support wide range of protocols and offers intuitive user interface. Currently only 50kHz sampling is supported on P1..P4 pins, samplerate is sufficient for decoding of 9600 baud serial link.
+Added USB application which emulates sigrok SUMP protocol. By choosing "Openbench logic sniffer (ols)" in Pulse view configuration, LA104 can transfer measured signals to pulse view for deep analysis. Pulseview support wide range of protocols and offers intuitive user interface. Currently only 50kHz sampling is supported on P1..P4 pins, samplerate is sufficient for decoding of 9600 baud serial link.
 
 ![Pulse view](resources/imgPulseview.png)
 
@@ -147,14 +147,17 @@ Connect your midi keyboard with two wires (3V and P1 through 100-330 ohm resisto
   - DCF77 decoding application with visualization
   - manual & text reader app (100%)
   - solve problem how to pass file as argument to app run through gui shell (100% only using file manager)
+  - ESP8266 AP webserver using AT commands (100% simple webserver with file system listing, using promises)
 
 #### In progress
   - usb apps & screenshotter do not work reliably after last changes (partially fixed, needs more testing)
   - advanced IR remote control (record & play)
   - add manuals to all folders with brief description what which program does
-  - ESP8266 AP webserver using AT commands
+  - CC1101 RF waveform recorder / player (15% 41alchemy, stability problems with larger codebase)
+  - Setup debugging environment to determine the reason why app crashes at start when reaches some specific codebase size
 
 #### TODO list              
+  - ESP8266 AP scanner & password guesser (integration with UPC automatic password generator) 
   - SIMCOM test app
   - demonstration of hybrid app - SIMCOM test app running on PC/MAC and communicatiog through USB to UART
   - sometimes loading of elf crashes when it was recently rewritten (invalidating cached buffer should help)
@@ -169,7 +172,6 @@ Connect your midi keyboard with two wires (3V and P1 through 100-330 ohm resisto
   - add screenshots of gui & some video showing how it performs
   - finish conversion of original firmware into ELF (80%)
   - optimize memory usage, switch to 500 byte clusters instead of 4k (2 buffers required => 8kb wasted)
-  - CC1101 RF waveform recorder / player (10%, not enough IO pins)
   - beeper
   - hybrid app use relative paths
   - obtain FPGA code from manufacturer 

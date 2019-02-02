@@ -496,10 +496,19 @@ namespace FPGA
     // init trigger
   }
 
+  void delayMicroseconds(int us)
+  {
+    us = us*12;
+    while (us--)
+      __asm__("");
+  }
+
   void Restart()
   {
+    // We should reset trigger!
     constexpr int SMPL_CLR = 0x02;
     FPGA16(SMPL_CLR, 1, 0);
+    delayMicroseconds(20);
   }
 
   int Direct()
