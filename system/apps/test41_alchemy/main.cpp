@@ -125,16 +125,16 @@ public:
     
     bool Load(char* filename)
     {
-        static CCc1101Config* _this;
+//        static CCc1101Config* _this;
         static long _lTimeout;
         static bool _check;
         _lTimeout = BIOS::SYS::GetTick() + 1500;
         _check = true;
-        _this = this;
+//        _this = this;
         
         BIOS::DBG::Print("CONFIG START");
         mDeviceModem.Reset();
-        
+  /*      
         CJson(mConfig).ForEach([](const CSubstring& key, const CSubstring& value)
         {
             char strKey[32];
@@ -151,8 +151,34 @@ public:
                 }
             }
             while ((int)mDeviceModem.Read(reg) != val);
-        });
-        
+        });*/
+
+  char str[512];
+  strcpy(str, mConfig+1);
+  str[strlen(str)-1] = 0;
+  char* pch = strtok (str,":,");
+  while (pch != NULL)
+  {
+    int reg = GetRegister(pch);
+    pch = strtok (NULL, ":,");
+    int val = CConversion(pch).ToInt();
+    pch = strtok (NULL, ":,");
+//    BIOS::DBG::Print("%02x->%02x,", reg, val);
+
+            mRegisters[reg] = val;
+            do {
+                mDeviceModem.Write(reg, val);
+                if ((long)BIOS::SYS::GetTick() > _lTimeout)
+                {
+                    _check = false;
+                    break;
+                }
+            }
+            while ((int)mDeviceModem.Read(reg) != val);
+
+  }
+        BIOS::DBG::Print("CONFIG DONE=%d", _check);
+
         if (!_check)
             return false;
         
@@ -237,26 +263,22 @@ public:
 
     void DeltaGain(int d)
     {
-        /*
         int MAX_LNA_GAIN = (mRegisters[AGCCTRL2]>>3) & 7;
         MAX_LNA_GAIN += d;
-        //MAX_LNA_GAIN = min(max(0, MAX_LNA_GAIN), 7);
+        MAX_LNA_GAIN = min(max(0, MAX_LNA_GAIN), 7);
         mRegisters[AGCCTRL2] &= ~0b00111000;
         mRegisters[AGCCTRL2] |= MAX_LNA_GAIN << 3;
         mDeviceModem.Write(AGCCTRL2, mRegisters[AGCCTRL2]);
-         */
     }
    
     void DeltaBandwidth(int d)
     {
-        /*
         int CHANBW = mRegisters[MDMCFG4] >> 4;
         CHANBW += d;
         CHANBW = min(max(0, CHANBW), 15);
         mRegisters[MDMCFG4] &= 0x0f;
         mRegisters[MDMCFG4] |= CHANBW << 4;
         mDeviceModem.Write(MDMCFG4, mRegisters[MDMCFG4]);
-         */
     }
 };
 
@@ -337,13 +359,13 @@ class CLayoutPageCc1101 : public CWnd
         }
         _y += 16; x = _x; y = _y;
         x += BIOS::LCD::Print(x, y, RGB565(b0b0b0), RGBTRANS, "Bandwidth: ");
-        /*if (HasFocus() && mRow == 2)
+        if (HasFocus() && mRow == 2)
         {
             x -= 8;
             x += BIOS::LCD::Draw(x, y, RGB565(ffffff), RGBTRANS, CShapes_sel_left);
             x += BIOS::LCD::Printf(x, y, RGB565(000000), RGB565(ffffff), "%d kHz", mStorage.mModemConfig.GetBandwidth() / 1000);
             x += BIOS::LCD::Draw(x, y, RGB565(ffffff), RGBTRANS, CShapes_sel_right);
-        } else*/
+        } else
         {
             x += BIOS::LCD::Printf(x, y, RGB565(ffffff), RGBTRANS, "%d kHz", mStorage.mModemConfig.GetBandwidth() / 1000);
         }
@@ -430,7 +452,7 @@ class CLayoutPageCc1101 : public CWnd
             {
                 case 0: break;
                 case 1: mStorage.mModemConfig.DeltaFreq(-40); break;
-                //case 2: mStorage.mModemConfig.DeltaBandwidth(+1); break;
+                case 2: mStorage.mModemConfig.DeltaBandwidth(+1); break;
                 case 3: mStorage.mModemConfig.DeltaGain(+1); break;
             }
             DrawStatusPage(mRcContent);
@@ -443,7 +465,7 @@ class CLayoutPageCc1101 : public CWnd
             {
                 case 0: break;
                 case 1: mStorage.mModemConfig.DeltaFreq(+40); break;
-                //case 2: mStorage.mModemConfig.DeltaBandwidth(-1); break;
+                case 2: mStorage.mModemConfig.DeltaBandwidth(-1); break;
                 case 3: mStorage.mModemConfig.DeltaGain(-1); break;
             }
             DrawStatusPage(mRcContent);
@@ -500,14 +522,10 @@ class CLayoutModem : public CWnd
 public:
     void Create( const char* pszId, ui16 dwFlags, const CRect& rc, CWnd* pParent )
     {
-//        SetScrollArea(20, 40);
-//        Lcd_Control(0x36);
-//        Lcd_Data(16);
         mDeviceModem.Init();
         mStorage.mModemConfig.Load((char*)"");
 
         BIOS::GPIO::PinMode(BIOS::GPIO::P4, BIOS::GPIO::Input);
-        
         CWnd::Create(pszId, dwFlags, rc, pParent);
         
         CRect rcMenu(rc);

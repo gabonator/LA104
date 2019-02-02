@@ -1,0 +1,19 @@
+0x08000000 to 0x0803FFFF TOTAL FLASH 256 kB
+
+00000..07FFF BIOS 32 kB
+08000..2FFFF USER AREA 160 kB
+
+  08000..13000 OS   44 kB
+  ...               60 kB (unused reserved for bios extensions/tsrs/important apps)
+
+  1A000..2FFFF      88 kB (larger space or)
+  20000..2ffff      64 kB (nice aligned area)
+
+30000..3D7FF 54kB FPGA IMAGE
+3D800..3ffff 10kB (logo BMP, till 3F875)
+
+
+0x20000000 to 0x2000BFFF TOTAL RAM 48 kB
+0x20000000 to 0x20004200 OS 17 kB (will be reduced
+0x20004200 to 0x2000A000 USER 23 kB
+0x2000A000 to 0x2000BFFF BIOS 8 kB
