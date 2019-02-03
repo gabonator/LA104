@@ -53,14 +53,19 @@ file(GLOB application_src
     "../apps/test41_alchemy/*.h"
 )
 
-file(GLOB application_graph_src
-    "../apps/test41_alchemy/graph/*.cpp"
-    "../apps/test41_alchemy/graph/*.h"
+file(GLOB application_devices_src
+    "../apps/test41_alchemy/devices/*.cpp"
+    "../apps/test41_alchemy/devices/*.h"
 )
 
-file(GLOB application_sensor_src
-    "../apps/test41_alchemy/sensor/*.cpp"
-    "../apps/test41_alchemy/sensor/*.h"
+file(GLOB application_layouts_src
+    "../apps/test41_alchemy/layouts/*.cpp"
+    "../apps/test41_alchemy/layouts/*.h"
+)
+
+file(GLOB application_utils_src
+    "../apps/test41_alchemy/utils/*.cpp"
+    "../apps/test41_alchemy/utils/*.h"
 )
 
 if (DESKTOP)           	
@@ -71,11 +76,12 @@ source_group("source\\gui" FILES ${gui_src})
 endif()
 
 source_group("application" FILES ${application_src})
-source_group("application\\graph" FILES ${application_graph_src})
-source_group("application\\sensor" FILES ${application_sensor_src})
+source_group("application\\devices" FILES ${application_devices_src})
+source_group("application\\layouts" FILES ${application_layouts_src})
+source_group("application\\utils" FILES ${application_utils_src})
 source_group("include" FILES "include/library.h")
 
-add_executable(application ${main_src} ${bios_src} ${framework_src} ${gui_src} ${application_src} ${application_graph_src} ${application_sensor_src})
+add_executable(application ${main_src} ${bios_src} ${framework_src} ${gui_src} ${application_src} ${application_devices_src} ${application_layouts_src} ${application_utils_src})
 
 if (ARM)
 target_link_libraries(application m)

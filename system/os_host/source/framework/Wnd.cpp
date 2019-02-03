@@ -215,7 +215,7 @@ void CWnd::Create( const char* pszId, ui16 dwFlags, const CRect& rc, CWnd* pPare
 			if ( m_pParent == NULL )
 				_UpdateTimers();
 
-			if ( m_dwFlags & WsTick )
+			if ( (m_dwFlags & WsTick) && (m_dwFlags & WsVisible))
 				SendMessage( this, ToWord('t', 'i'), 0 );
 
 			CWnd *pChild = m_pFirst;

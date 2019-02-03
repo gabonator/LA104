@@ -148,6 +148,14 @@ void BIOS::LCD::RoundRect(int x1, int y1, int x2, int y2, unsigned short clr)
 	}
 }
 
+void BIOS::LCD::Rectangle(const CRect& rc, unsigned short clr)
+{
+    Bar(rc.left, rc.top, rc.right, rc.top+1, clr);
+    Bar(rc.left, rc.bottom-1, rc.right, rc.bottom, clr);
+    Bar(rc.left, rc.top, rc.left+1, rc.bottom, clr);
+    Bar(rc.right-1, rc.top, rc.right, rc.bottom, clr);
+}
+
 void BIOS::LCD::RoundRect(const CRect& rc, unsigned short clr)
 {
 	RoundRect(rc.left, rc.top, rc.right, rc.bottom, clr);

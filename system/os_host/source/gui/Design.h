@@ -1,6 +1,12 @@
 #pragma once
 #include "../framework/Types.h"
 
+class CDesignPalette
+{
+public:
+    constexpr static int gray = RGB565(505050);
+};
+
 // TODO: Remove and merge with Gui!
 class CDesignNice
 {
@@ -13,7 +19,7 @@ public:
 	static void MenuItemDisabled(const CRect& rcRect, ui16 clr)
 	{
 		BIOS::LCD::RoundRect( rcRect.left, rcRect.top, rcRect.left+12, rcRect.bottom, clr);
-		BIOS::LCD::Bar( rcRect.left+8, rcRect.top, rcRect.right, rcRect.bottom, RGB565(b0b0b0));
+        BIOS::LCD::Bar( rcRect.left+8, rcRect.top, rcRect.right, rcRect.bottom, CDesignPalette::gray);
 	}
 
 	static void MenuItemEnabled(const CRect& rcRect, ui16 clr)
@@ -41,8 +47,8 @@ public:
 
 		// inside
 		BIOS::LCD::RoundRect( rcRect.left, rcRect.top, rcRect.left+12, rcRect.bottom, clr);
-		BIOS::LCD::Bar( rcRect.left+8, rcRect.top, rcRect.right-4, rcRect.bottom, RGB565(b0b0b0));
-		BIOS::LCD::RoundRect( rcRect.right-8, rcRect.top, rcRect.right, rcRect.bottom, RGB565(b0b0b0));
+		BIOS::LCD::Bar( rcRect.left+8, rcRect.top, rcRect.right-4, rcRect.bottom, CDesignPalette::gray);
+		BIOS::LCD::RoundRect( rcRect.right-8, rcRect.top, rcRect.right, rcRect.bottom, CDesignPalette::gray);
 	}
 
 	static void MenuBlockEnabled(const CRect& rcRect, ui16 clr)
@@ -150,18 +156,18 @@ public:
 	static void Window(const CRect& rcRect, ui16 clr)
 	{
 		BIOS::LCD::Bar( rcRect.left, rcRect.top, rcRect.right, rcRect.top+16, clr );
-		BIOS::LCD::Bar( rcRect.left, rcRect.top+16, rcRect.right, rcRect.bottom, RGB565(b0b0b0) );
+		BIOS::LCD::Bar( rcRect.left, rcRect.top+16, rcRect.right, rcRect.bottom, CDesignPalette::gray );
 	}
 
 	static void WindowSelector(const CRect& rcRect, ui16 clr)
 	{
 		BIOS::LCD::Bar( rcRect.left, rcRect.top, rcRect.right, rcRect.top+16, clr );
-		BIOS::LCD::Bar( rcRect.left, rcRect.top+16, rcRect.right, rcRect.bottom, RGB565(b0b0b0) );
+		BIOS::LCD::Bar( rcRect.left, rcRect.top+16, rcRect.right, rcRect.bottom, CDesignPalette::gray );
 	}
 
 	static void ListItemDisabled(const CRect& rcRect)
 	{
-		BIOS::LCD::Bar(rcRect, RGB565(b0b0b0));
+		BIOS::LCD::Bar(rcRect, CDesignPalette::gray);
 	}
 
 	static void ListItemEnabled(const CRect& rcRect)

@@ -561,13 +561,13 @@ public:
 		{
 			(*m_pProvider)--;
 			Invalidate();
-			SendMessage(m_pParent, ToWord('i', 'u'), NULL);
+			SendMessage(m_pParent, ToWord('i', 'u'), 0);
 		}
 		if ( nKey & BIOS::KEY::Right && *m_pProvider + 1 == CValueProvider::Yes )
 		{
 			(*m_pProvider)++;
 			Invalidate();
-			SendMessage(m_pParent, ToWord('i', 'u'), NULL);
+			SendMessage(m_pParent, ToWord('i', 'u'), 0);
 		}
 		CWnd::OnKey( nKey );
 	}
@@ -701,7 +701,8 @@ public:
 		_ASSERT( m_pNumber );
 		ui16 clr = bFocus ? RGB565(ffffff) : RGB565(000000);
 		int nDigit = ((*m_pNumber) / m_nStep) % 10;
-		char strDigit[2] = { '0'+nDigit, 0 };
+        char strDigit[2] = {0, 0};
+        strDigit[0] = '0'+nDigit;
 
 		BIOS::LCD::Print( rcRect.left, rcRect.top, clr, RGBTRANS, strDigit);
 	}	

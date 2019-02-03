@@ -58,9 +58,17 @@ public:
                         x += BIOS::LCD::Draw( x, y, RGB565(ffffff), RGBTRANS, CShapes_tab_right);
                     } else
                     {
-                        x += BIOS::LCD::Draw( x, y, RGB565(b0b0b0), RGBTRANS, CShapes_tab_left);
-                        x += BIOS::LCD::Print(x, y, RGB565(000000), RGB565(b0b0b0), item.strName);
-                        x += BIOS::LCD::Draw( x, y, RGB565(b0b0b0), RGBTRANS, CShapes_tab_right);
+                        if (i>=2)
+                        {
+                            x += BIOS::LCD::Draw( x, y, RGB565(404040), RGBTRANS, CShapes_tab_left);
+                            x += BIOS::LCD::Print(x, y, RGB565(b0b0b0), RGB565(404040), item.strName);
+                            x += BIOS::LCD::Draw( x, y, RGB565(404040), RGBTRANS, CShapes_tab_right);
+                        } else
+                        {
+                            x += BIOS::LCD::Draw( x, y, RGB565(b0b0b0), RGBTRANS, CShapes_tab_left);
+                            x += BIOS::LCD::Print(x, y, RGB565(000000), RGB565(b0b0b0), item.strName);
+                            x += BIOS::LCD::Draw( x, y, RGB565(b0b0b0), RGBTRANS, CShapes_tab_right);
+                        }
                     }
                     break;
                 default:
@@ -78,6 +86,9 @@ public:
                 {
                     mItem = i;
                     Invalidate();
+
+                    mSelected = mItem;
+                    SendMessage(m_pParent, ToWord('M', 'S'), mItem);
                     break;
                 }
         }
@@ -92,17 +103,20 @@ public:
                 {
                     mItem = i;
                     Invalidate();
+
+                    mSelected = mItem;
+                    SendMessage(m_pParent, ToWord('M', 'S'), mItem);
                     break;
                 }
             }
         }
-                
+        /*
         if (nKey == BIOS::KEY::Enter)
         {
             mSelected = mItem;
             SendMessage(m_pParent, ToWord('M', 'S'), mItem);
             //OnItem(mItem);
-        }
+        }*/
         CWnd::OnKey(nKey);
     }
 };
