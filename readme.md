@@ -19,7 +19,7 @@ Go to release section on top of this page, download *system.hex*. Power on the L
 
 ##### Wave alchemy
 
-Currently in development stage. App sniffs for wireless transmission using CC1101 transceiver, automatically decodes the protocol (wireless weather station, KEELOQ keyfob packets, fixed code remote controls, rolling code remote controls). To aid the decoding process, app displays the sniffed signal in form of histogram for easy identification of protocol and its timing. Recorded signal can be stored in flash or transferred to PC for further analysis. Stored signals can be replayed to perform replay attack in case of fixed code sequence. Besides support of CC1101 chip, this app can be used in conjunction with infrared receiver and infrared diode to record and replay IR control codes for TV set or another consumer electronics.
+Currently in development stage. App sniffs for wireless transmission using CC1101 transceiver, automatically decodes the protocol (wireless weather station, KEELOQ keyfob packets, fixed code remote controls, rolling code remote controls). To aid the decoding process, app displays the sniffed signal in form of histogram for easy identification of protocol (manchester encoding, pause length encoding) and its timing. Recorded signal can be stored in flash or transferred to PC for further analysis. Stored signals can be replayed to perform replay attack in case of fixed code sequence. Besides support of CC1101 chip, this app can be used in conjunction with infrared receiver and infrared diode to record and replay IR control codes for TV set or another consumer electronics.
 
 ![Wave alchemy settings](resources/waveAlchemy1.jpeg)
 

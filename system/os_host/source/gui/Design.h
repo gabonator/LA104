@@ -30,13 +30,15 @@ public:
 
 	static void MenuItemClearDisabled(const CRect& rcRect)
 	{
-		BIOS::LCD::Bar(rcRect.left, rcRect.top, rcRect.left + MenuItemIndent + 4, rcRect.bottom, RGB565(000000));
+        GUI::Background(rcRect, RGB565(404040), RGB565(101010));
+//		BIOS::LCD::Bar(rcRect.left, rcRect.top, rcRect.left + MenuItemIndent + 4, rcRect.bottom, RGB565(000000));
 	}
 
 	static void MenuItemClearEnabled(const CRect& rcRect)
 	{
-		BIOS::LCD::Bar(rcRect.left, rcRect.top, rcRect.left + MenuItemIndent + 4, rcRect.bottom, RGB565(000000));
-		BIOS::LCD::Bar(rcRect.right-4, rcRect.top, rcRect.right, rcRect.bottom, RGB565(000000));
+        GUI::Background(rcRect, RGB565(404040), RGB565(101010));
+		//BIOS::LCD::Bar(rcRect.left, rcRect.top, rcRect.left + MenuItemIndent + 4, rcRect.bottom, RGB565(000000));
+		//BIOS::LCD::Bar(rcRect.right-4, rcRect.top, rcRect.right, rcRect.bottom, RGB565(000000));
 	}
 
 	static void MenuBlockDisabled(const CRect& rcRect, ui16 clr)

@@ -129,7 +129,7 @@ void CWnd::Create( const char* pszId, ui16 dwFlags, const CRect& rc, CWnd* pPare
 		if (pFocus)
 		{
 			// find first visible window wich can be focused
-			if (pFocus->m_pFirst)
+            if (pFocus->m_pFirst && !(pFocus->m_pFirst->m_dwFlags & CWnd::WsNoActivate))
 				pFocus = pFocus->m_pFirst;
 
 			pFocus->SetFocus();
@@ -286,7 +286,7 @@ void CWnd::ShowWindow(bool b)
 	if (b)
 	{
 		if ( !(m_dwFlags & WsVisible) )
-		m_dwFlags |= WsVisible;
+            m_dwFlags |= WsVisible;
 	}
 	else
 	{

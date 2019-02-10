@@ -49,23 +49,43 @@ file(GLOB linker_script
 endif()
 
 file(GLOB application_src
-    "../apps/test41_alchemy/*.cpp"
-    "../apps/test41_alchemy/*.h"
+    "../apps/test41_alchemy/source/*.cpp"
+    "../apps/test41_alchemy/source/*.h"
 )
 
 file(GLOB application_devices_src
-    "../apps/test41_alchemy/devices/*.cpp"
-    "../apps/test41_alchemy/devices/*.h"
+    "../apps/test41_alchemy/source/devices/*.cpp"
+    "../apps/test41_alchemy/source/devices/*.h"
 )
 
 file(GLOB application_layouts_src
-    "../apps/test41_alchemy/layouts/*.cpp"
-    "../apps/test41_alchemy/layouts/*.h"
+    "../apps/test41_alchemy/source/layouts/*.cpp"
+    "../apps/test41_alchemy/source/layouts/*.h"
+)
+
+file(GLOB application_layouts_file_src
+    "../apps/test41_alchemy/source/layouts/file/*.cpp"
+    "../apps/test41_alchemy/source/layouts/file/*.h"
+)
+
+file(GLOB application_layouts_meas_src
+    "../apps/test41_alchemy/source/layouts/meas/*.cpp"
+    "../apps/test41_alchemy/source/layouts/meas/*.h"
+)
+
+file(GLOB application_layouts_modem_src
+    "../apps/test41_alchemy/source/layouts/modem/*.cpp"
+    "../apps/test41_alchemy/source/layouts/modem/*.h"
 )
 
 file(GLOB application_utils_src
-    "../apps/test41_alchemy/utils/*.cpp"
-    "../apps/test41_alchemy/utils/*.h"
+    "../apps/test41_alchemy/source/utils/*.cpp"
+    "../apps/test41_alchemy/source/utils/*.h"
+)
+
+file(GLOB application_controls_src
+    "../apps/test41_alchemy/source/controls/*.cpp"
+    "../apps/test41_alchemy/source/controls/*.h"
 )
 
 if (DESKTOP)           	
@@ -78,10 +98,14 @@ endif()
 source_group("application" FILES ${application_src})
 source_group("application\\devices" FILES ${application_devices_src})
 source_group("application\\layouts" FILES ${application_layouts_src})
+source_group("application\\layouts\\file" FILES ${application_layouts_file_src})
+source_group("application\\layouts\\meas" FILES ${application_layouts_meas_src})
+source_group("application\\layouts\\modem" FILES ${application_layouts_modem_src})
 source_group("application\\utils" FILES ${application_utils_src})
+source_group("application\\controls" FILES ${application_controls_src})
 source_group("include" FILES "include/library.h")
 
-add_executable(application ${main_src} ${bios_src} ${framework_src} ${gui_src} ${application_src} ${application_devices_src} ${application_layouts_src} ${application_utils_src})
+add_executable(application ${main_src} ${bios_src} ${framework_src} ${gui_src} ${application_src} ${application_devices_src} ${application_layouts_src} ${application_utils_src} ${application_controls_src} ${application_layouts_file_src} ${application_layouts_meas_src} ${application_layouts_modem_src})
 
 if (ARM)
 target_link_libraries(application m)

@@ -519,7 +519,7 @@ class CItemProvider : public CWndMenuItem
 	CValueProvider*	m_pProvider;
 
 public:
-	virtual void Create(CValueProvider*	pProvider, const char* pszId, ui16 clr, CWnd *pParent) 
+	virtual void Create(CValueProvider*	pProvider, const char* pszId, ui16 clr, CWnd *pParent)
 	{
 		_ASSERT( pProvider );
 		m_pProvider = pProvider;

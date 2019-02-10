@@ -46,7 +46,7 @@ void __irq__ print_hardfault()
 {    
 //    BIOS::LCD::Clear(0);
     _fprintf(stderr, "\n\n   HARDFAULT   \n");
-/*
+
     _fprintf(stderr, "SP:%08x PC:%08x LR:%08x\n",
             (uint32_t)SP, *(SP + 6), *(SP + 5));
     _fprintf(stderr, "SCB HFSR:%08x CFSR:%08x\nBFAR:%08x\n",
@@ -59,7 +59,7 @@ void __irq__ print_hardfault()
     _fprintf(stderr, "R8:%08x\nR9:%08x ",
             R8, R9);
     _fprintf(stderr, "R10:%08x R11:%08x\nR12:%08x\n", R10, R11, *(SP + 4));
-*/    
+    
     
     print_callers(SP);
     while(1);
@@ -67,31 +67,24 @@ void __irq__ print_hardfault()
 
 void print_callers(uint32_t *sp)
 {
-//    uint32_t callers[6] = {0};
-//    int i = 0;
-    uint32_t *p = sp;
-/*
+    uint32_t callers[6] = {0};
+    int i = 0;
+    uint32_t *p = sp+6;
     while (i < 6 && p < &_estack)
     {
-//        if (*p >= (uint32_t)&_stext && *p <= (uint32_t)&_etext)
         if ((*p >> 24) == 0x08)
-            callers[i++] = *p;
-        
+            callers[i++] = *p;        
         p++;
     }
-    _fprintf(stderr, "Callers: %08x %08x %08x\n%08x %08x %08x\n",
+    _fprintf(stderr, "Stack: %08x %08x %08x\n%08x %08x %08x\n",
             callers[0], callers[1], callers[2], callers[3], callers[4], callers[5]);
+/*
+//    _fprintf(stderr, "Callers: (SP=%08x)  ", (uint32_t)sp);
+    _fprintf(stderr, "Callers:\n");
+    _fprintf(stderr, "%08x %08x %08x %08x  \n", p[0], p[1], p[2], p[3]); p+=4;
+    _fprintf(stderr, "%08x %08x %08x %08x  \n", p[0], p[1], p[2], p[3]); p+=4;
+//    _fprintf(stderr, "%08x %08x %08x %08x  \n", p[0], p[1], p[2], p[3]); p+=4;
+//    _fprintf(stderr, "%08x %08x %08x %08x  \n", p[0], p[1], p[2], p[3]); p+=4;
 */
-    _fprintf(stderr, "Callers: (SP=%08x)  ", (uint32_t)sp);
-    _fprintf(stderr, "%08x %08x %08x %08x  \n", p[0], p[1], p[2], p[3]); p+=4;
-    _fprintf(stderr, "%08x %08x %08x %08x  \n", p[0], p[1], p[2], p[3]); p+=4;
-    _fprintf(stderr, "%08x %08x %08x %08x  \n", p[0], p[1], p[2], p[3]); p+=4;
-    _fprintf(stderr, "%08x %08x %08x %08x  \n", p[0], p[1], p[2], p[3]); p+=4;
-    _fprintf(stderr, "%08x %08x %08x %08x  \n", p[0], p[1], p[2], p[3]); p+=4;
-    _fprintf(stderr, "%08x %08x %08x %08x  \n", p[0], p[1], p[2], p[3]); p+=4;
-    _fprintf(stderr, "%08x %08x %08x %08x  \n", p[0], p[1], p[2], p[3]); p+=4;
-    _fprintf(stderr, "%08x %08x %08x %08x  \n", p[0], p[1], p[2], p[3]); p+=4;
-    _fprintf(stderr, "%08x %08x %08x %08x  \n", p[0], p[1], p[2], p[3]); p+=4;
-    _fprintf(stderr, "%08x %08x %08x %08x  \n", p[0], p[1], p[2], p[3]); p+=4;
 }
 
