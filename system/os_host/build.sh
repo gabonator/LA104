@@ -16,7 +16,10 @@ INCLUDES="\
   -I ../lib/CMSIS/Device/STM32F10x/Include \
   -I ../lib"
 
-arm-none-eabi-gcc -Wall -Os -Werror -fno-common -mcpu=cortex-m3 -mthumb -msoft-float -MD -D USE_STDPERIPH_DRIVER -D STM32F10X_HD ${INCLUDES} -c \
+arm-none-eabi-gcc -Wall -Os -Werror -fno-common -mcpu=cortex-m3 -mthumb -msoft-float -MD \
+  -D USE_STDPERIPH_DRIVER \
+  -D STM32F10X_HD \
+  ${INCLUDES} -c \
   ../startup.c \
   ../interrupt.c \
   ../lib/STM32F10x_StdPeriph_Driver/src/stm32f10x_flash.c \
@@ -54,7 +57,10 @@ arm-none-eabi-gcc -Wall -Os -Werror -fno-common -mcpu=cortex-m3 -mthumb -msoft-f
 #  ../lib/MSD/msdusb_istr.c \
 #  ../lib/MSD/msdusb_pwr.c \
 
-arm-none-eabi-g++ -Wall -Os -Werror -fno-common -mcpu=cortex-m3 -mthumb -msoft-float -MD -fno-exceptions -fno-rtti -fno-threadsafe-statics -Wno-psabi -c -Wall -Werror -D USE_STDPERIPH_DRIVER -D STM32F10X_HD ${INCLUDES} -c \
+arm-none-eabi-g++ -Wall -Os -Werror -fno-common -mcpu=cortex-m3 -mthumb -msoft-float -MD -fno-exceptions -fno-rtti -fno-threadsafe-statics -Wno-psabi -c -Wall -Werror \
+  -D USE_STDPERIPH_DRIVER \
+  -D STM32F10X_HD \
+  ${INCLUDES} -c \
   ../main.cpp \
   ../source/bios/sys.cpp \
   ../source/bios/lcd.cpp \

@@ -7,6 +7,11 @@ int sdl_lastKey();
 
 namespace BIOS {
   namespace KEY {
+    bool KeyPressed()
+      {
+          return false;
+      }
+      
     EKey GetKey() 
     {
         //EVERY(10)

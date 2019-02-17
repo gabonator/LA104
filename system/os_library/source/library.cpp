@@ -45,6 +45,7 @@ namespace BIOS
   namespace KEY
   {
     EKey GetKey() { return None; }
+    bool KeyPressed() { return false; }
   }
 
   namespace DBG
@@ -136,3 +137,4 @@ namespace GUI
 }
 
 int sprintf(char *out, const char *format, ...) { return 0; }
+int vsprintf(char *out, const char *format, va_list args) { return 0; }

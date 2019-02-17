@@ -86,7 +86,7 @@ int BIOS::LCD::Printf (int x, int y, unsigned short clrf, unsigned short clrb, c
 
 	char buffer[64];
 	char* _buffer = buffer;
-        sfp_print( &_buffer, format, args );
+        vsprintf( _buffer, format, args );
         va_end(args);
 
 	return Print(x, y, clrf, clrb, buffer);

@@ -156,11 +156,12 @@ int sfp_printi(char **out, int i, int b, int sg, int width, int pad, int letbase
 	return pc + sfp_prints (out, s, width, pad);
 }
 
-int sfp_print(char **out, const char *format, va_list args )
+int vsprintf(char *out_, const char *format, va_list args )
 {
 	register int width, pad;
 	register int pc = 0;
 	char scr[2];
+	char** out = &out_;
 
 	for (; *format != 0; ++format) {
 		if (*format == '%') {
@@ -241,7 +242,7 @@ int sprintf(char *out, const char *format, ...)
         va_list args;
         
         va_start( args, format );
-        return sfp_print( &out, format, args );
+        return vsprintf( out, format, args );
 }
 
 #ifdef TEST_PRINTF

@@ -22,5 +22,11 @@ namespace BIOS {
         default: return None;
       }
     }
+
+    bool KeyPressed()
+    {
+      char c = PeekLastChar();
+      return !!c;
+    }
   }
 }

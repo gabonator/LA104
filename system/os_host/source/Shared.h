@@ -11,6 +11,7 @@ uint32_t GetProcAddress(char* symbol)
   switch (hash)
   {
     case 0x0e0071e6: return (uint32_t)sprintf;
+    case 0x2d1891f3: return (uint32_t)vsprintf;
     case 0x1c2745a7: return (uint32_t)static_cast<void(*)(CRect const&, unsigned long, unsigned long)>(GUI::Background); 
     case 0xcf4f6e0e: return (uint32_t)static_cast<void(*)(CRect const&, unsigned short)>(GUI::Window); 
     case 0x517a3861: return (uint32_t)static_cast<char*(*)()>(BIOS::OS::GetArgument); 
@@ -30,6 +31,7 @@ uint32_t GetProcAddress(char* symbol)
     case 0x77b6d7f8: return (uint32_t)static_cast<BIOS::FAT::EResult(*)(unsigned char*)>(BIOS::FAT::Write); 
     case 0x78f7457b: return (uint32_t)static_cast<BIOS::FAT::EResult(*)(char*)>(BIOS::FAT::OpenDir); 
     case 0xa57b178b: return (uint32_t)static_cast<BIOS::FAT::EResult(*)(BIOS::FAT::TFindFile*)>(BIOS::FAT::FindNext); 
+    case 0xb1aa1f24: return (uint32_t)static_cast<bool(*)()>(BIOS::KEY::KeyPressed); 
     case 0x748d10c3: return (uint32_t)static_cast<BIOS::KEY::EKey(*)()>(BIOS::KEY::GetKey); 
     case 0x445aacdc: return (uint32_t)static_cast<void(*)(unsigned short*, int)>(BIOS::LCD::BufferRead); 
     case 0xb5c731e5: return (uint32_t)static_cast<uint16_t(*)()>(BIOS::LCD::BufferRead); 

@@ -127,12 +127,12 @@ void Set_Block(int x1, int y1, int x2, int y2)
 }
 
 
-void Beep(bool b)
+void xBeep(bool b)
 {
   if (b)
   {
     __Bios(BUZZDEV, ENBL);
-    __Bios(BUZZDEV, 100);
+    __Bios(BUZZDEV, 50);
   } else
   {
     __Bios(BUZZDEV, DSBL);

@@ -16,7 +16,7 @@ void dbgPrint(const char* msg, ...)
   va_list args;
 
   va_start( args, msg );
-  sfp_print( &bbuf, msg, args );
+  vsprintf( bbuf, msg, args );
 
   _ASSERT(strlen(buf) < sizeof(buf)-8);
   BIOS::DBG::Print(buf);
@@ -31,7 +31,7 @@ void dbgPushPrint(const char* msg, ...)
   va_list args;
 
   va_start( args, msg );
-  sfp_print( &bbuf, msg, args );
+  vsprintf( bbuf, msg, args );
   _ASSERT(strlen(buf) < sizeof(buf)-8);
 
   if (strlen(buf) + strlen(dbgPushBuf) + 2 > sizeof(dbgPushBuf))
@@ -69,7 +69,7 @@ void BIOS::DBG::Print(const char * format, ...)
         va_list args;
         
         va_start( args, format );
-        sfp_print( &bbuf, format, args );
+        vsprintf( bbuf, format, args );
 	for ( bbuf = buf; *bbuf; bbuf++ )
 	{
 		if ( *bbuf == '\n' || px > BIOS::LCD::Width-8 )

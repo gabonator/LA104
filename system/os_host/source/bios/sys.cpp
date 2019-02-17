@@ -45,8 +45,8 @@ int BIOS::SYS::Execute(uint32_t addr)
 
 void BIOS::SYS::Beep(int intervalMs)
 {
-//  Beep(true);
-//  gBeepCounter = intervalMs;
+  xBeep(true);
+  gBeepCounter = intervalMs;
 }
 
 

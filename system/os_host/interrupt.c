@@ -25,6 +25,11 @@ char GetLastChar()
   return t;
 }
 
+char PeekLastChar()
+{
+  return lastChar;
+}
+
 void SysTickHandler(void)
 {
 #ifdef _DEBUG_SP
@@ -44,7 +49,7 @@ void SysTickHandler(void)
   {
     if (!--gBeepCounter)
     {
-      Beep(false);
+      xBeep(false);
     }
   }
 

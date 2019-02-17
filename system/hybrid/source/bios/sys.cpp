@@ -39,4 +39,11 @@ char* BIOS::OS::GetArgument()
     return gArgument;
 }
 
+BIOS::OS::TInterruptHandler BIOS::OS::GetInterruptVector(BIOS::OS::EInterruptVector)
+{
+    return nullptr;
+}
 
+void BIOS::OS::SetInterruptVector(BIOS::OS::EInterruptVector, BIOS::OS::TInterruptHandler)
+{
+}
