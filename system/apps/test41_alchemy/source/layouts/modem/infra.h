@@ -21,7 +21,7 @@ public:
     
     bool IsActive()
     {
-        return mStorage.mDeviceCurrent == &mStorage.mDeviceInfra;
+        return mSettings.mDeviceCurrent == &mDeviceInfra;
     }
     
     void DrawStatusPage(const CRect& rcContent)
@@ -51,12 +51,12 @@ public:
         {
             x -= 8;
             x += BIOS::LCD::Draw(x, y, RGB565(ffffff), RGBTRANS, CShapes_sel_left);
-            x += BIOS::LCD::Printf(x, y, RGB565(000000), RGB565(ffffff), "[%c]", mStorage.mDeviceInfra.Configuration().mInvert ? 'X' : ' ');
+            x += BIOS::LCD::Printf(x, y, RGB565(000000), RGB565(ffffff), "[%c]", mDeviceInfra.Configuration().mInvert ? 'X' : ' ');
             x += BIOS::LCD::Draw(x, y, RGB565(ffffff), RGBTRANS, CShapes_sel_right);
             x -= 8;
         } else
         {
-            x += BIOS::LCD::Printf(x, y, RGB565(ffffff), RGBTRANS, "[%c]", mStorage.mDeviceInfra.Configuration().mInvert ? 'X' : ' ');
+            x += BIOS::LCD::Printf(x, y, RGB565(ffffff), RGBTRANS, "[%c]", mDeviceInfra.Configuration().mInvert ? 'X' : ' ');
         }
         
         x += BIOS::LCD::Print(x, y, RGB565(b0b0b0), RGBTRANS, " Invert");
@@ -74,9 +74,9 @@ public:
         _y = 40;
         
         GUI::Background(rcPins, RGB565(505050), RGB565(202020));
-        BIOS::LCD::Print(_x, _y, RGB565(b0b0b0), RGBTRANS, "P3: Output");
+        BIOS::LCD::Print(_x, _y, RGB565(b0b0b0), RGBTRANS, "P2: Input");
         _y += 16;
-        BIOS::LCD::Print(_x, _y, RGB565(b0b0b0), RGBTRANS, "P4: Input");
+        BIOS::LCD::Print(_x, _y, RGB565(b0b0b0), RGBTRANS, "P4: Output");
     }
     
     virtual void OnPaint() override
@@ -95,20 +95,20 @@ public:
                 case 0:
                     if (IsActive())
                     {
-                        mStorage.mDeviceCurrent->Deinit();
-                        mStorage.mDeviceCurrent = nullptr;
+                        mSettings.mDeviceCurrent->Deinit();
+                        mSettings.mDeviceCurrent = nullptr;
                     } else
                     {
-                        if (mStorage.mDeviceCurrent)
-                            mStorage.mDeviceCurrent->Deinit();
-                        mStorage.mDeviceCurrent = &mStorage.mDeviceInfra;
-                        if (!mStorage.mDeviceCurrent->Init())
-                            mStorage.mDeviceCurrent = nullptr;
+                        if (mSettings.mDeviceCurrent)
+                            mSettings.mDeviceCurrent->Deinit();
+                        mSettings.mDeviceCurrent = &mDeviceInfra;
+                        if (!mSettings.mDeviceCurrent->Init())
+                            mSettings.mDeviceCurrent = nullptr;
                     }
                     Invalidate();
                     break;
                     
-                case 1: mStorage.mDeviceInfra.Configuration().mInvert = !mStorage.mDeviceInfra.Configuration().mInvert; break;
+                case 1: mDeviceInfra.Configuration().mInvert = !mDeviceInfra.Configuration().mInvert; break;
             }
             DrawStatusPage(mRcContent);
         }

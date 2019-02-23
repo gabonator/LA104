@@ -17,6 +17,8 @@ uint32_t GetProcAddress(char* symbol)
     case 0x517a3861: return (uint32_t)static_cast<char*(*)()>(BIOS::OS::GetArgument); 
     case 0x57af171d: return (uint32_t)static_cast<bool(*)()>(BIOS::OS::HasArgument); 
     case 0x47c3f38a: return (uint32_t)static_cast<void(*)(char*)>(BIOS::OS::SetArgument); 
+    case 0xa9bd8661: return (uint32_t)static_cast<void(*)(unsigned long)>(BIOS::OS::EnableInterrupts); 
+    case 0xcd2d85b8: return (uint32_t)static_cast<uint32_t(*)()>(BIOS::OS::DisableInterrupts); 
     case 0x3d2d2490: return (uint32_t)BIOS::OS::GetInterruptVector;
     case 0x7a04e3e3: return (uint32_t)static_cast<void(*)(BIOS::OS::EInterruptVector, void (*)())>(BIOS::OS::SetInterruptVector); 
     case 0xd6251d2c: return (uint32_t)static_cast<void(*)(char const*, ...)>(BIOS::DBG::Print); 

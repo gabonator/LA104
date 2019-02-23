@@ -9,7 +9,7 @@ public:
         CWndMenuItem::Create( NULL, m_color, 2, pParent);
     }
     
-    virtual void OnPaint()
+    virtual void OnPaint() override
     {
         ui16 clr = HasFocus() ? RGB565(404040) : m_color;
         
@@ -22,12 +22,12 @@ public:
         y += 16;
         if ( !HasFocus() )
         {
-            x += BIOS::LCD::Print( x, y, clr, RGBTRANS, mStorage.mEnabled ? "auto" : "paused");
+            x += BIOS::LCD::Print( x, y, clr, RGBTRANS, mRuntime.mEnabled ? "auto" : "paused");
         } else
         {
             x -= 8;
             x += BIOS::LCD::Draw(x, y, clr, RGBTRANS, sel_left);
-            x += BIOS::LCD::Print(x, y, RGB565(ffffff), clr, mStorage.mEnabled ? "auto" : "paused");
+            x += BIOS::LCD::Print(x, y, RGB565(ffffff), clr, mRuntime.mEnabled ? "auto" : "paused");
             x += BIOS::LCD::Draw(x, y, clr, RGBTRANS, sel_right);
         }
     }
@@ -61,13 +61,13 @@ public:
         y += 16;
         if ( !HasFocus() )
         {
-            x += BIOS::LCD::Print( x, y, clr, RGBTRANS, ranges[mStorage.mHistogramScaleX]);
+            x += BIOS::LCD::Print( x, y, clr, RGBTRANS, ranges[mSettings.mHistogramScaleX]);
             x += BIOS::LCD::Print( x, y, clr, RGBTRANS, " ms");
         } else
         {
             x -= 8;
             x += BIOS::LCD::Draw(x, y, clr, RGBTRANS, sel_left);
-            x += BIOS::LCD::Print( x, y, RGB565(ffffff), clr, ranges[mStorage.mHistogramScaleX]);
+            x += BIOS::LCD::Print( x, y, RGB565(ffffff), clr, ranges[mSettings.mHistogramScaleX]);
             x += BIOS::LCD::Draw(x, y, clr, RGBTRANS, sel_right);
             x += BIOS::LCD::Print( x, y, clr, RGBTRANS, "ms");
         }
@@ -75,15 +75,15 @@ public:
     
     virtual void OnKey(ui16 nKey)
     {
-        if ( nKey == BIOS::KEY::Right && mStorage.mHistogramScaleX > 1 )
+        if ( nKey == BIOS::KEY::Right && mSettings.mHistogramScaleX > 1 )
         {
-            mStorage.mHistogramScaleX--;
+            mSettings.mHistogramScaleX--;
             Invalidate();
             SendMessage(m_pParent, ToWord('i', 'u'), 0);
         }
-        if ( nKey == BIOS::KEY::Left && mStorage.mHistogramScaleX < 5 )
+        if ( nKey == BIOS::KEY::Left && mSettings.mHistogramScaleX < 5 )
         {
-            mStorage.mHistogramScaleX++;
+            mSettings.mHistogramScaleX++;
             Invalidate();
             SendMessage(m_pParent, ToWord('i', 'u'), 0);
         }
@@ -116,13 +116,19 @@ public:
         y += 16;
         if ( !HasFocus() )
         {
-            x += BIOS::LCD::Printf( x, y, clr, RGBTRANS, "%d", mStorage.mHistogramScaleY);
+            if (mSettings.mHistogramScaleY == 1)
+                x += BIOS::LCD::Printf( x, y, clr, RGBTRANS, ".5");
+            else
+                x += BIOS::LCD::Printf( x, y, clr, RGBTRANS, "%d", mSettings.mHistogramScaleY/2);
             x += BIOS::LCD::Print( x, y, clr, RGBTRANS, " px");
         } else
         {
             x -= 8;
             x += BIOS::LCD::Draw(x, y, clr, RGBTRANS, sel_left);
-            x += BIOS::LCD::Printf( x, y, RGB565(ffffff), clr, "%d", mStorage.mHistogramScaleY);
+            if (mSettings.mHistogramScaleY == 1)
+                x += BIOS::LCD::Printf( x, y, RGB565(ffffff), clr, ".5");
+            else
+                x += BIOS::LCD::Printf( x, y, RGB565(ffffff), clr, "%d", mSettings.mHistogramScaleY/2);
             x += BIOS::LCD::Draw(x, y, clr, RGBTRANS, sel_right);
             x += BIOS::LCD::Print( x, y, clr, RGBTRANS, "px");
         }
@@ -130,15 +136,15 @@ public:
     
     virtual void OnKey(ui16 nKey)
     {
-        if ( nKey == BIOS::KEY::Left && mStorage.mHistogramScaleY > 1 )
+        if ( nKey == BIOS::KEY::Left && mSettings.mHistogramScaleY > 1 )
         {
-            mStorage.mHistogramScaleY--;
+            mSettings.mHistogramScaleY--;
             Invalidate();
             SendMessage(m_pParent, ToWord('i', 'u'), 0);
         }
-        if ( nKey == BIOS::KEY::Right && mStorage.mHistogramScaleY < 5 )
+        if ( nKey == BIOS::KEY::Right && mSettings.mHistogramScaleY < 5 )
         {
-            mStorage.mHistogramScaleY++;
+            mSettings.mHistogramScaleY++;
             Invalidate();
             SendMessage(m_pParent, ToWord('i', 'u'), 0);
         }
@@ -170,7 +176,7 @@ public:
         x += 8;
         x = m_rcClient.left + 12 + MarginLeft;
         y += 16;
-        int range = 228 * mStorage.mSignalScaleX / 100;
+        int range = 228 * mSettings.mSignalScaleX / 100;
         if ( !HasFocus() )
         {
             x += BIOS::LCD::Printf( x, y, clr, RGBTRANS, "%d.%d", range/10, range%10);
@@ -187,26 +193,26 @@ public:
     
     virtual void OnKey(ui16 nKey)
     {
-        if ( nKey == BIOS::KEY::Left && mStorage.mSignalScaleX > 1 )
+        if ( nKey == BIOS::KEY::Left && mSettings.mSignalScaleX > 1 )
         {
-            if (mStorage.mSignalScaleX > 50)
-                mStorage.mSignalScaleX -= 4;
-            else if (mStorage.mSignalScaleX > 20)
-                mStorage.mSignalScaleX -= 2;
+            if (mSettings.mSignalScaleX > 50)
+                mSettings.mSignalScaleX -= 4;
+            else if (mSettings.mSignalScaleX > 20)
+                mSettings.mSignalScaleX -= 2;
             else
-                mStorage.mSignalScaleX --;
+                mSettings.mSignalScaleX --;
             
             Invalidate();
             SendMessage(m_pParent, ToWord('i', 'u'), 0);
         }
-        if ( nKey == BIOS::KEY::Right && mStorage.mSignalScaleX < 200 )
+        if ( nKey == BIOS::KEY::Right && mSettings.mSignalScaleX < 200 )
         {
-            if (mStorage.mSignalScaleX > 50)
-                mStorage.mSignalScaleX += 4;
-            else if (mStorage.mSignalScaleX > 20)
-                mStorage.mSignalScaleX += 2;
+            if (mSettings.mSignalScaleX > 50)
+                mSettings.mSignalScaleX += 4;
+            else if (mSettings.mSignalScaleX > 20)
+                mSettings.mSignalScaleX += 2;
             else
-                mStorage.mSignalScaleX ++;
+                mSettings.mSignalScaleX ++;
             
             Invalidate();
             SendMessage(m_pParent, ToWord('i', 'u'), 0);
@@ -239,7 +245,7 @@ public:
         x += 8;
         x = m_rcClient.left + 12 + MarginLeft;
         y += 16;
-        int num = mStorage.mSignalOffset/100;
+        int num = mSettings.mSignalOffset/100;
         int numDecimals = num/10;
         int numFract = num%10;
         
@@ -268,28 +274,28 @@ public:
             long diff = now - last;
             
             if (diff < 50)
-                step = mStorage.mSignalScaleX*20;
+                step = mSettings.mSignalScaleX*20;
             else if (diff < 100)
-                step = mStorage.mSignalScaleX*10;
+                step = mSettings.mSignalScaleX*10;
             else if (diff < 200)
-                step = mStorage.mSignalScaleX*5;
+                step = mSettings.mSignalScaleX*5;
             else
-                step = mStorage.mSignalScaleX;
+                step = mSettings.mSignalScaleX;
             
             last = now;
         }
         
-        if ( nKey == BIOS::KEY::Left && mStorage.mSignalOffset >= 0 )
+        if ( nKey == BIOS::KEY::Left && mSettings.mSignalOffset >= 0 )
         {
-            mStorage.mSignalOffset -= step;
-            mStorage.mSignalOffset = max(0, mStorage.mSignalOffset);
+            mSettings.mSignalOffset -= step;
+            mSettings.mSignalOffset = max(0, mSettings.mSignalOffset);
             
             Invalidate();
             SendMessage(m_pParent, ToWord('i', 'u'), 0);
         }
         if ( nKey == BIOS::KEY::Right)
         {
-            mStorage.mSignalOffset += step;
+            mSettings.mSignalOffset += step;
 
             Invalidate();
             SendMessage(m_pParent, ToWord('i', 'u'), 0);

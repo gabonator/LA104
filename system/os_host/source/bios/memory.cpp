@@ -33,8 +33,8 @@ namespace BIOS {
 
     bool LinearProgram( ui32 nAddress, unsigned char* pData, int nLength )
     {
-    	linearFlashProgram((LinearFlashing*)gSharedBuffer, nAddress, (flashdata_t*)pData, nLength);
-    	return true;
+        int result = linearFlashProgram((LinearFlashing*)gSharedBuffer, nAddress, (flashdata_t*)pData, nLength);
+    	return result == 0;
     }
   }
 }

@@ -16,7 +16,7 @@ private:
     TConfig mConfig;
     
 public:
-    virtual bool InitModem() = 0;
+    virtual bool InitModem() { return false; }
     
     virtual bool Init() override
     {
@@ -58,6 +58,18 @@ public:
         return aux;
     }
     
+    uint_fast8_t Read2(uint_fast8_t reg)
+    {
+        enum {READ_BURST = 0xC0};
+        
+        mSpi.select();
+        mSpi.wait();
+        mSpi.transfer(reg | READ_BURST);
+        uint_fast8_t aux = mSpi.transfer(0);
+        mSpi.deselect();
+        return aux;
+    }
+
     void Reset()
     {
         mSpi.deselect();                    // Deselect CC1101
@@ -268,7 +280,7 @@ public:
 
     int GetOscFrequency()
     {
-        return 26e6; // 26 MHz;
+        return 26e6; // 26 MHz
     }
     
     int GetFrequency()
@@ -301,6 +313,15 @@ public:
         return -17*MAX_LNA_GAIN/7;
     }
     
+    int GetRssi()
+    {
+        constexpr int CC1101_RSSI = 0x34;
+        int rssi = CCc1101Spi::Read2(CC1101_RSSI);
+        if (rssi >= 128)
+            rssi = rssi - 256;
+        return (int)rssi+128; // 0..255
+    }
+    
     const char* GetModulation()
     {
         int MOD_FORMAT = (mRegisters[MDMCFG2]>>4) & 7;
@@ -329,6 +350,19 @@ public:
         CCc1101Spi::Write(FREQ0, mRegisters[FREQ0]);
     }
 
+    void SetFreq(int32_t freqHz)
+    {
+        uint32_t freqReg = (((uint64_t)freqHz) << 16) / GetOscFrequency();
+
+        mRegisters[FREQ2] = freqReg >> 16;
+        mRegisters[FREQ1] = freqReg >> 8;
+        mRegisters[FREQ0] = freqReg;
+        
+        CCc1101Spi::Write(FREQ2, mRegisters[FREQ2]);
+        CCc1101Spi::Write(FREQ1, mRegisters[FREQ1]);
+        CCc1101Spi::Write(FREQ0, mRegisters[FREQ0]);
+    }
+    
     void DeltaGain(int d)
     {
         int MAX_LNA_GAIN = (mRegisters[AGCCTRL2]>>3) & 7;

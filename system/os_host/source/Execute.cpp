@@ -93,6 +93,12 @@ void FlashRam( CBufferedReader& f, Elf32_Shdr& elfSection )
 		f >> bData;
 		*pWriteTo++ = bData;
 	}
+
+  if (!Verify(f, elfSection ))
+  {
+    BIOS::DBG::Print("Failed to verify %d bytes at %08x!", elfSection.size, elfSection.addr);
+    _ASSERT(0);
+  }
 }
 
 void ZeroRam( CBufferedReader& f, Elf32_Shdr& elfSection )
@@ -112,10 +118,10 @@ void FlashRom( CBufferedReader& f, Elf32_Shdr& elfSection )
 	BIOS::MEMORY::LinearStart();
 	for ( int i=0; i<nLength; )
 	{
-		ui8 buffer[64];
+		ui8 buffer[256];
 		int nToLoad = nLength-i;
-		if ( nToLoad > 64 )
-			nToLoad = 64;
+		if ( nToLoad > 256 )
+			nToLoad = 256;
 		f >> CStream(buffer, nToLoad);
 		if ( !BIOS::MEMORY::LinearProgram( dwAddr, buffer, nToLoad) )
 		{
@@ -125,6 +131,12 @@ void FlashRom( CBufferedReader& f, Elf32_Shdr& elfSection )
 		dwAddr += nToLoad;
 	}
 	BIOS::MEMORY::LinearFinish();
+
+  if (!Verify(f, elfSection ))
+  {
+    BIOS::DBG::Print("Failed to verify %d bytes at %08x!", elfSection.size, elfSection.addr);
+    _ASSERT(0)
+  }
 }
 
 void ZeroRom( CBufferedReader& f, Elf32_Shdr& elfSection )

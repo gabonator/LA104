@@ -27,8 +27,11 @@ public:
     {
         if (pSender == &mPlay)
         {
-            mStorage.mDeviceInfra.Send(mStorage.mSignalData, mStorage.mSignalLength);
-
+            if (mSettings.mDeviceCurrent == &mDeviceInfra)
+            {
+                mRuntime.mTransmitted = true;
+                mDeviceInfra.Send(mStorage.mSignalData, mStorage.mSignalLength); // TODO: virtual
+            }
         }
     }
 };

@@ -50,7 +50,7 @@ public:
         mDrawState.tog = 0;
         mDrawState.lastt = -1;
 
-        int toSkip = mStorage.mSignalOffset;
+        int toSkip = mSettings.mSignalOffset;
         while (toSkip > 0 && mDrawState.index < nCount)
         {
             int current = arrIntervals[mDrawState.index++];
@@ -81,7 +81,7 @@ public:
     {
         uint16_t* arrIntervals = mStorage.mSignalData;
         const int& nCount = mStorage.mSignalLength;
-        const int& nStep = mStorage.mSignalScaleX;
+        const int& nStep = mSettings.mSignalScaleX;
 
         CRect rcBlock(m_rcClient);
         rcBlock.top++;
@@ -91,7 +91,7 @@ public:
 
         for (; mDrawState.x<m_rcClient.right-1 && mDrawState.index < nCount; mDrawState.x++, mDrawState.remain -= nStep)
         {
-            if (mStorage.mEnabled && mStorage.mDeviceCurrent && mStorage.mDeviceCurrent->Read())
+            if (mRuntime.mEnabled && mSettings.mDeviceCurrent && mSettings.mDeviceCurrent->Read())
                 return;
 
             mDrawState.sum += nStep;

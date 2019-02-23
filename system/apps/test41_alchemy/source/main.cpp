@@ -4,73 +4,20 @@
 #include "../../os_host/source/framework/Serialize.h"
 #include "../../os_host/source/gui/Controls.h"
 
-int mStorage_mMinGapTime = 10000; // TODO: join
+//int mStorage_mMinGapTime = 10000; // TODO: join
 
 #include "utils/shapes.h"
 #include "utils/Menu.h"
 #include "utils/json.h"
+#include "settings.h"
 #include "devices/sampler.h"
 #include "devices/cc1101.h"
 #include "devices/raw.h"
 #include "devices/infra.h"
 
-/*
-  Chceme nahravat vsetko a appendovat
-*/
-
-class CStorage
-{
-public:
-    class CTrigger // filter
-    {
-    public:
-        // Primary
-        int nMaxGap{5000};
-        int nMaxGapOnce{9000}; // preamble len
-        int nMaxTransitions{-1};  // CHCEME BREAKNUT READING PRE ATTACK? alebo nacitat cely buffer   
-
-        // Secondary
-        int nMinTransitions{15}; //pozor! prepisuje buffer aj ked nematchuje!
-        int nMinFirstPulseDuration{-1};
-        int nMaxFirstPulseDuration{-1};
-        bool bPaused;//running?
-
-        // Tertiary
-        enum TMode
-        {
-            Single, All
-        } eMode;
-        enum TSkip
-        {
-            Every, Second, Third, Fourth, Fifth
-        } eSkip;
-        enum TSaveMode
-        {
-            Manual, Append, AutoAppend
-        } eSave;
-        bool bBeepOnMatch{true};
-    };
-
-public:
-    CSampler* mDeviceCurrent{nullptr};
-    
-    bool mConnected{true};
-    CDeviceCC1101 mDeviceRadio;
-    CDeviceRaw mDeviceRaw;
-    CDeviceInfra mDeviceInfra;
-    bool mTriggerSingle{true};
-
-    int mSignalLength{0};
-    uint16_t mSignalData[256];
-    int mHistogramScaleX{3};
-    int mHistogramScaleY{2};
-    int mSignalScaleX{20};
-    int mSignalOffset{0};
-    bool mEnabled{true};
-    bool mReceived{false};
-    //int mMinGapTime{5000};
-
-} mStorage;
+CDeviceCC1101 mDeviceRadio;
+CDeviceRaw mDeviceRaw;
+CDeviceInfra mDeviceInfra;
 
 #include "layouts/modem.h"
 #include "layouts/meas.h"
@@ -91,8 +38,8 @@ public:
             case 2: return TItem{"Meas", TItem::Default};
             case 3: return TItem{"Trig", TItem::Default};
             case 4: return TItem{"File", TItem::Default};
+            case 6: return TItem{"Anal", TItem::Default};
             case 5: return TItem{"Play", TItem::Default};
-            case 6: return TItem{"Analyse", TItem::Default};
             default: return TItem{nullptr, TItem::None};
         }
     }
@@ -109,11 +56,6 @@ class CApplication : public CWnd
     CLayoutAnalyse mLayoutAnalyse;
 
 public:
-    CApplication()
-    {
-        //mStorage.mDeviceCurrent = &mDeviceModem;
-    }
-    
     void Create( const char* pszId, ui16 dwFlags, const CRect& rc, CWnd* pParent )
     {
         CWnd::Create(pszId, dwFlags, rc, pParent);
@@ -134,6 +76,16 @@ public:
         
         mMenu.SetFocus();
         SetTimer(100);
+        
+#ifdef __APPLE__
+        BIOS::OS::SetArgument((char*)"/Users/gabrielvalky/Documents/git/LA104/system/apps/test41_alchemy/root/41alche.elf");
+#endif
+        strcat(mRuntime.mPath, BIOS::OS::GetArgument());
+        char* last = strrchr(mRuntime.mPath, '/');
+        if (last)
+            *last = 0;
+        else
+            strcpy(mRuntime.mPath, "");
     }
 
     virtual void OnMessage(CWnd* pSender, ui16 code, ui32 data) override
@@ -171,7 +123,7 @@ public:
             {
                 if (mLayoutMeas.IsVisible())
                 {
-                    mStorage.mEnabled = !mStorage.mEnabled;
+                    mRuntime.mEnabled = !mRuntime.mEnabled;
                     if (mLayoutMeas.IsVisible())
                         mLayoutMeas.Invalidate();
                     return;
@@ -208,20 +160,20 @@ public:
         }
         if (nMsg == CWnd::WmTick)
         {
-            if (!mLayoutModem.IsVisible() && mStorage.mDeviceCurrent && mStorage.mConnected && mStorage.mEnabled)
+            if (!mLayoutModem.IsVisible() && mSettings.mDeviceCurrent && mSettings.mConnected && mRuntime.mEnabled)
             {
-                if (mStorage.mDeviceCurrent->Read())
+                if (mSettings.mDeviceCurrent->Read())
                 {
-                    if (mStorage.mDeviceCurrent->Receive(mStorage.mSignalData, COUNT(mStorage.mSignalData), mStorage.mSignalLength))
+                    if (mSettings.mDeviceCurrent->Receive(mStorage.mSignalData, COUNT(mStorage.mSignalData), mStorage.mSignalLength))
                     {
-                        mStorage.mReceived = true;
+                        mRuntime.mReceived = true;
                         // new signal was received
                         if (mLayoutMeas.IsVisible())
                         {
                             SendMessage(&mLayoutMeas, ToWord('D', 'A'), 0);
-                            if ( mStorage.mTriggerSingle /*&& mStorage.mSignalLength >= 60*/ ) // condition to stop?
+                            if ( mSettings.mTriggerSingle /*&& mStorage.mSignalLength >= 60*/ ) // condition to stop?
                             {
-                                mStorage.mEnabled = false; // single!
+                                mRuntime.mEnabled = false; // single!
                             }
                         }
                     }
@@ -234,16 +186,21 @@ public:
     virtual void OnTimer() override
     {
         BIOS::LCD::Draw( 2, 0, RGB565(808080), RGBTRANS, CShapes_dotout);
-        if (!mStorage.mDeviceCurrent)
+        if (!mSettings.mDeviceCurrent)
         {
             BIOS::LCD::Draw( 2, 0, RGB565(000000), RGBTRANS, CShapes_dot);
             return;
         }
-        if (mStorage.mReceived)
+        if (mRuntime.mTransmitted)
         {
-            mStorage.mReceived = false;
+            mRuntime.mTransmitted = false;
+            BIOS::LCD::Draw( 2, 0, RGB565(4040ff), RGBTRANS, CShapes_dot);
+        }
+        else if (mRuntime.mReceived)
+        {
+            mRuntime.mReceived = false;
             BIOS::LCD::Draw( 2, 0, RGB565(ff4040), RGBTRANS, CShapes_dot);
-        } else if (mStorage.mEnabled)
+        } else if (mRuntime.mEnabled)
             BIOS::LCD::Draw( 2, 0, RGB565(00b000), RGBTRANS, CShapes_dot);
         else
             BIOS::LCD::Draw( 2, 0, RGB565(b0b0b0), RGBTRANS, CShapes_dot);
@@ -256,13 +213,17 @@ CApplication app;
 __attribute__((__section__(".entry")))
 #endif
 int _main(void)
-{ 
-    app.Create("", CWnd::WsVisible | CWnd::WsTick, CRect(0, 0, BIOS::LCD::Width, BIOS::LCD::Height), nullptr);
+{
+    app.Create("WaveAlchemy", CWnd::WsVisible | CWnd::WsTick, CRect(0, 0, BIOS::LCD::Width, BIOS::LCD::Height), nullptr);
     app.WindowMessage( CWnd::WmPaint );
     
     BIOS::KEY::EKey key;
-    while ((key = BIOS::KEY::GetKey()) != BIOS::KEY::Escape)
+    while (true)
     {
+        key = BIOS::KEY::GetKey();
+        if (key == BIOS::KEY::Escape && CWnd::m_arrModals.GetSize() == 0)
+            break;
+        
         if (key != BIOS::KEY::None)
             app.WindowMessage(CWnd::WmKey, key);
 

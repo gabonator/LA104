@@ -1,4 +1,7 @@
 /system/apps_unfinished/
 /system/os_host/build
 /system/hybrid/_build
+/system/apps/test41_alchemy/logs
+/system/apps/test41_alchemy/root
+/system/**/build
 /temp/

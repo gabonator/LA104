@@ -1,11 +1,13 @@
 class CLayoutSignal : public CWnd
 {
+//    CRect mRssiBar;
+    
     virtual void WindowMessage(int nMsg, int nParam = 0) override
     {
-        if (nMsg == CWnd::WmTick && mStorage.mDeviceCurrent)
+        if (nMsg == CWnd::WmTick && mSettings.mDeviceCurrent)
         {
             enum TLast {Z, L, H, LH};
-            int current = mStorage.mDeviceCurrent->Read();
+            int current = mSettings.mDeviceCurrent->Read();
             static int x = BIOS::LCD::Width-1;
             static enum TLast last = L;
             static int counter = 0;
@@ -65,7 +67,17 @@ class CLayoutSignal : public CWnd
         int y = rcSignalBar.top;
         x += BIOS::LCD::Print(x, y, RGB565(404040), RGB565(b0b0b0), " Received signal");
         x += BIOS::LCD::Draw( x, y, RGB565(b0b0b0), RGBTRANS, CShapes_tab_right);
-        
+    
+        CRect rcRssi = rcSignalBar;
+        rcRssi.left = rcRssi.right - 100;
+        rcRssi.bottom --;
+        GUI::Background(rcRssi, RGB565(505050), RGB565(202020));
+/*
+        rcRssi.Deflate(10, 4, 10, 4);
+        BIOS::LCD::Bar(rcRssi, RGB565(606060));
+        rcRssi.Deflate(1, 1, 1, 1);
+        mRssiBar = rcRssi;
         //BIOS::LCD::Bar(m_rcClient, RGB565(404040)); // TODO: OnEnter
+         */
     }
 };

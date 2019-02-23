@@ -6,37 +6,38 @@ class CInfrared
   BIOS::OS::TInterruptHandler pOldTimerHandler;
 
 public:
-  void Init()
-  {
-    ir_tx_setup();
-    pOldTimerHandler = BIOS::OS::GetInterruptVector(BIOS::OS::ITIM1_UP_IRQ);
-    BIOS::OS::SetInterruptVector(BIOS::OS::ITIM1_UP_IRQ, ir_irq);
-    ir_tx_start();
-  }
+    void Init(uint32_t modulationFrequency)
+    {
+        ir_tx_setup(modulationFrequency);
+        pOldTimerHandler = BIOS::OS::GetInterruptVector(BIOS::OS::ITIM1_UP_IRQ);
+        BIOS::OS::SetInterruptVector(BIOS::OS::ITIM1_UP_IRQ, ir_irq);
+        ir_tx_start();
+    }
 
-  void Deinit()
-  {
-    ir_tx_stop();
-    BIOS::OS::SetInterruptVector(BIOS::OS::ITIM1_UP_IRQ, pOldTimerHandler);
-  }
+    void Deinit()
+    {
+        ir_tx_stop();
+        BIOS::OS::SetInterruptVector(BIOS::OS::ITIM1_UP_IRQ, pOldTimerHandler);
+    }
 
-  void Send(uint16_t* pData, int nLength)
+    void Send(uint16_t* pData, int nLength)
     {
         irCode.repeatCount = 1;
         irCode.gap = 0;
         irCode.codeLength = nLength;
         irCode.code = pData;
         ir_tx_send(&irCode);
+//        while (!ir_tx_finished());
     }
-    
-  void Send(CArray<uint16_t>& sequence)
-  {
-    irCode.repeatCount = 1;
-    irCode.gap = 0;
-    irCode.codeLength = sequence.GetSize();
-    irCode.code = sequence.GetData();
-    ir_tx_send(&irCode);
-  }
+
+    void Send(CArray<uint16_t>& sequence)
+    {
+        irCode.repeatCount = 1;
+        irCode.gap = 0;
+        irCode.codeLength = sequence.GetSize();
+        irCode.code = sequence.GetData();
+        ir_tx_send(&irCode);
+    }
 };
 
 IrCode CInfrared::irCode;
@@ -92,7 +93,7 @@ public:
     
     virtual void Send(uint16_t* pData, int nLength)
     {
-        mDevice.Init();
+        mDevice.Init(38000);
         mDevice.Send(pData, nLength);
         BIOS::SYS::DelayMs(200);
         mDevice.Deinit();

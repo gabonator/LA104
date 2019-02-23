@@ -146,3 +146,5 @@ find . -type f -name '*.d' -delete
 
 nm --print-size --size-sort -gC output.elf | grep " B " > symbols_ram.txt
 nm --print-size --size-sort -gC output.elf | grep " T " > symbols_rom.txt
+nm --print-size --size-sort -gC output.elf > symbols_all.txt
+nm output.elf > symbols_all2.txt

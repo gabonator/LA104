@@ -7,8 +7,8 @@
 #include "platform_config.h"
 #include "gpio.h"
 
-#define IR_TX_CARRIER_FREQ       38000
-#define IR_TX_CARRIER_PWM_PERIOD         (SystemCoreClock / IR_TX_CARRIER_FREQ)
+//#define IR_TX_CARRIER_FREQ       38000
+//#define IR_TX_CARRIER_PWM_PERIOD         (SystemCoreClock / IR_TX_CARRIER_FREQ)
 #define IR_TX_DELAY_PRESCALER            (72 - 1)
 
 volatile uint16_t g_tx_bufferIndex;
@@ -18,8 +18,14 @@ volatile IrCode* g_tx_code = 0;
 void _ir_tx_on();
 void _ir_tx_off();
 
-void ir_tx_setup() 
+bool ir_tx_finished()
 {
+  return !g_tx_code;
+}
+
+void ir_tx_setup(int carrierFreq) 
+{
+  uint32_t IR_TX_CARRIER_PWM_PERIOD = SystemCoreClock / carrierFreq;
   TIM_TimeBaseInitTypeDef timeBaseInit;
   TIM_OCInitTypeDef ocInit;
   GPIO_InitTypeDef irTxGpioInit;

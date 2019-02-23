@@ -2,7 +2,7 @@ class CHistogramView : public CWnd
 {
     struct TDrawState
     {
-        static constexpr int bars = 56;
+        static constexpr int bars = 56+22;
         uint8_t histoDurationHigh[bars];
         uint8_t histoDurationLow[bars];
         int divide;
@@ -37,7 +37,7 @@ public:
         memset(mDrawState.histoDurationHigh, 0, sizeof(mDrawState.histoDurationHigh));
         memset(mDrawState.histoDurationLow, 0, sizeof(mDrawState.histoDurationLow));
                 
-        switch (mStorage.mHistogramScaleX)
+        switch (mSettings.mHistogramScaleX)
         {
             case 5: mDrawState.divide = 200; mDrawState.highlight = 5; break; // 11 ms
             case 4: mDrawState.divide = 125; mDrawState.highlight = 8; break; // 7 ms
@@ -69,13 +69,13 @@ public:
 
     void DrawAsync()
     {
-        const int& magnify = mStorage.mHistogramScaleY;
+        const int& magnify = mSettings.mHistogramScaleY;
 
         // 228px
-        _ASSERT(m_rcClient.Width() == 228);
+        //_ASSERT(m_rcClient.Width() == 228);
         for (; mDrawState.x<m_rcClient.right-5; mDrawState.i++, mDrawState.x += 4)
         {
-            if (mStorage.mEnabled && mStorage.mDeviceCurrent && mStorage.mDeviceCurrent->Read())
+            if (mRuntime.mEnabled && mSettings.mDeviceCurrent && mSettings.mDeviceCurrent->Read())
                 return;
             
             CRect rc(mDrawState.x, m_rcClient.top+1, mDrawState.x+3, m_rcClient.bottom-1);
@@ -84,14 +84,22 @@ public:
             rcOverflow.bottom = rcOverflow.top + 4;
             BIOS::LCD::Bar(rcOverflow, RGB565(ff0000));
             
-            rcCurrent.top = rcCurrent.bottom - mDrawState.histoDurationLow[mDrawState.i]*magnify;
+            rcCurrent.top = rcCurrent.bottom - mDrawState.histoDurationLow[mDrawState.i]*magnify/2;
             if (rcCurrent.top < rc.top)
+            {
+                rcCurrent.top = rc.top+4;
+                BIOS::LCD::Bar(rcCurrent, RGB565(00ff00));
                 continue;
+            }
             BIOS::LCD::Bar(rcCurrent, RGB565(00ff00));
             rcCurrent.bottom = rcCurrent.top;
-            rcCurrent.top = rcCurrent.bottom - mDrawState.histoDurationHigh[mDrawState.i]*magnify;
+            rcCurrent.top = rcCurrent.bottom - mDrawState.histoDurationHigh[mDrawState.i]*magnify/2;
             if (rcCurrent.top < rc.top)
+            {
+                rcCurrent.top = rc.top+4;
+                BIOS::LCD::Bar(rcCurrent, RGB565(0080ff));
                 continue;
+            }
             BIOS::LCD::Bar(rcCurrent, RGB565(0080ff));
 
             rcCurrent.bottom = rcCurrent.top;
@@ -99,7 +107,7 @@ public:
             //if (rcCurrent.top < rc.top)
             //    continue;
             if (mDrawState.i % mDrawState.highlight == 0)
-                BIOS::LCD::Bar(rcCurrent, RGB565(383838));
+                BIOS::LCD::Bar(rcCurrent, RGB565(3b3b3b));
             else
                 BIOS::LCD::Bar(rcCurrent, RGB565(303030));
         }

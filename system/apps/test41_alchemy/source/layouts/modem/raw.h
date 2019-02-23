@@ -21,7 +21,7 @@ public:
     
     bool IsActive()
     {
-        return mStorage.mDeviceCurrent == &mStorage.mDeviceRaw;
+        return mSettings.mDeviceCurrent == &mDeviceRaw;
     }
     
     void DrawStatusPage(const CRect& rcContent)
@@ -51,31 +51,15 @@ public:
         {
             x -= 8;
             x += BIOS::LCD::Draw(x, y, RGB565(ffffff), RGBTRANS, CShapes_sel_left);
-            x += BIOS::LCD::Printf(x, y, RGB565(000000), RGB565(ffffff), "[%c]", mStorage.mDeviceRaw.Configuration().mInvert ? 'X' : ' ');
+            x += BIOS::LCD::Printf(x, y, RGB565(000000), RGB565(ffffff), "[%c]", mDeviceRaw.Configuration().mInvert ? 'X' : ' ');
             x += BIOS::LCD::Draw(x, y, RGB565(ffffff), RGBTRANS, CShapes_sel_right);
             x -= 8;
         } else
         {
-            x += BIOS::LCD::Printf(x, y, RGB565(ffffff), RGBTRANS, "[%c]", mStorage.mDeviceRaw.Configuration().mInvert ? 'X' : ' ');
+            x += BIOS::LCD::Printf(x, y, RGB565(ffffff), RGBTRANS, "[%c]", mDeviceRaw.Configuration().mInvert ? 'X' : ' ');
         }
         
         x += BIOS::LCD::Print(x, y, RGB565(b0b0b0), RGBTRANS, " Invert");
-
-        _y += 16; x = _x; y = _y;
-        
-        if (HasFocus() && mRow == 2)
-        {
-            x -= 8;
-            x += BIOS::LCD::Draw(x, y, RGB565(ffffff), RGBTRANS, CShapes_sel_left);
-            x += BIOS::LCD::Printf(x, y, RGB565(000000), RGB565(ffffff), "[%c]", mStorage.mTriggerSingle ? 'X' : ' ');
-            x += BIOS::LCD::Draw(x, y, RGB565(ffffff), RGBTRANS, CShapes_sel_right);
-            x -= 8;
-        } else
-        {
-            x += BIOS::LCD::Printf(x, y, RGB565(ffffff), RGBTRANS, "[%c]", mStorage.mTriggerSingle ? 'X' : ' ');
-        }
-        
-        x += BIOS::LCD::Print(x, y, RGB565(b0b0b0), RGBTRANS, " Trigger single");
     }
     
     void DrawPinsPage(const CRect& rcPins)
@@ -85,9 +69,9 @@ public:
         _y = 40;
         
         GUI::Background(rcPins, RGB565(505050), RGB565(202020));
-        BIOS::LCD::Print(_x, _y, RGB565(b0b0b0), RGBTRANS, "P3: Output");
+        BIOS::LCD::Print(_x, _y, RGB565(b0b0b0), RGBTRANS, "P2: Input");
         _y += 16;
-        BIOS::LCD::Print(_x, _y, RGB565(b0b0b0), RGBTRANS, "P4: Input");
+        //BIOS::LCD::Print(_x, _y, RGB565(b0b0b0), RGBTRANS, "P4: Output");
     }
 
     virtual void OnPaint() override
@@ -106,47 +90,23 @@ public:
                 case 0:
                     if (IsActive())
                     {
-                        mStorage.mDeviceCurrent->Deinit();
-                        mStorage.mDeviceCurrent = nullptr;
+                        mSettings.mDeviceCurrent->Deinit();
+                        mSettings.mDeviceCurrent = nullptr;
                     } else
                     {
-                        if (mStorage.mDeviceCurrent)
-                            mStorage.mDeviceCurrent->Deinit();
-                        mStorage.mDeviceCurrent = &mStorage.mDeviceRaw;
-                        if (!mStorage.mDeviceCurrent->Init())
-                            mStorage.mDeviceCurrent = nullptr;
+                        if (mSettings.mDeviceCurrent)
+                            mSettings.mDeviceCurrent->Deinit();
+                        mSettings.mDeviceCurrent = &mDeviceRaw;
+                        if (!mSettings.mDeviceCurrent->Init())
+                            mSettings.mDeviceCurrent = nullptr;
                     }
                     Invalidate();
                     break;
 
-                case 1: mStorage.mDeviceRaw.Configuration().mInvert = !mStorage.mDeviceRaw.Configuration().mInvert; break;
-                case 2: mStorage.mTriggerSingle = !mStorage.mTriggerSingle; break;
+                case 1: mDeviceRaw.Configuration().mInvert = !mDeviceRaw.Configuration().mInvert; break;
             }
             DrawStatusPage(mRcContent);
         }
-        /*
-        if (nKey == BIOS::KEY::Left)
-        {
-            switch (mRow)
-            {
-                case 1: mStorage.mModemInvert = false; break;
-                case 2: mStorage.mTriggerSingle = false; break;
-            }
-            DrawStatusPage(mRcContent);
-            return;
-        }
-        
-        if (nKey == BIOS::KEY::Right)
-        {
-            switch (mRow)
-            {
-                case 1: mStorage.mModemInvert = true; break;
-                case 2: mStorage.mTriggerSingle = true; break;
-            }
-            DrawStatusPage(mRcContent);
-            return;
-        }
-        */
         if (nKey == BIOS::KEY::Up)
         {
             if (mRow > 0)
@@ -158,7 +118,7 @@ public:
         }
         if (nKey == BIOS::KEY::Down)
         {
-            if (mRow < 2)
+            if (mRow < 1)
             {
                 mRow++;
                 DrawStatusPage(mRcContent);

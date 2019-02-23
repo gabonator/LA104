@@ -379,7 +379,7 @@ void CWnd::_UpdateTimers()
 		{
 			// enable resident timers ?
 			//_ASSERT( timer.m_pWnd->m_dwFlags & CWnd::WsVisible );
-            if (!(timer.m_pWnd->m_dwFlags & CWnd::WsVisible))
+            if (!timer.m_pWnd->IsVisible())
                 continue;
             
 			timer.m_pWnd->OnTimer();

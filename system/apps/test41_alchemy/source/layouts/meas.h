@@ -75,6 +75,9 @@ public:
         x += 20;
         x += BIOS::LCD::Print(x, y, RGB565(0080ff), RGBTRANS, "Low ");
 
+        x = 8+140;
+        x += BIOS::LCD::Print(x, y, RGB565(b00000), RGBTRANS, "\xfe Overflow ");
+
         x = 4;
         y = mHistogram.m_rcClient.top - 14;
         x += BIOS::LCD::Print(x, y, RGB565(404040), RGB565(b0b0b0), " Histogram ");

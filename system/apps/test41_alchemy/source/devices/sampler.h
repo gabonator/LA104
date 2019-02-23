@@ -1,4 +1,4 @@
-class CSampler // CSampler?
+class CSampler
 {
 public:
     virtual bool Read() = 0;
@@ -10,7 +10,7 @@ private: // TODO: remove
     int tempReceived{0};
 
 private:
-    constexpr static int ticks20us = 126; // ked ukazuje viac, treba mensie cislo
+    constexpr static int ticks20us = 137; // ked ukazuje viac, treba mensie cislo
     // 130           960.. 980
     // 126           980..1000  ... ok
     // 125          1000..1020
@@ -22,6 +22,12 @@ private:
     // 127          240..280
     //              500..560
     //              1000..1120
+    
+    
+    // 500us -> 540    126
+    // 500us -> 515    132
+    // 500us -> 488    138
+    // 500us -> 464    145
     int On()
     {
         int i;
@@ -64,7 +70,7 @@ public:
     bool Receive(uint16_t* pBuffer, int nBufferSize, int& nReceived)
     {
 #ifdef __APPLE__
-        int sample[] = {520, 500, 420, 520, 400, 520, 440, 520, 400, 520, 400, 540, 400, 520, 440, 500, 440, 480, 440, 500, 440, 500, 460, 440, 460, 500, 420, 500, 440, 520, 420, 520, 420, 500, 460, 460, 480, 440, 480, 440, 500, 460, 480, 460, 460, 460, 480, 920, 980, 940, 960, 460, 500, 440, 500, 440, 480, 460, 480, 920, 500, 460, 500, 420, 980, 920, 980, 940, 480, 440, 500, 460, 460, 460, 960, 940, 980, 920, 500, 460, 480, 440, 480, 440, 960, 460, 520, 920, 960, 480, 480, 420, 500, 460, 480, 440, 500, 920, 480, 440, 500, 440, 500, 420, 500, 440, 500, 440, 980, 960, 440, 460, 480, 460, 500, 420, 520, 440, 480, 460, 480, 420, 500, 460, 480, 440, 500, 440, 500, 440, 480, 440, 480, 460, 980, 440, 480, 960, 960, 440, 500, 460, 460, 960, 460, 460, 500, 420, 980, 440, 500, 440, 500, 920, 960, 960, 960, 940, 980, 920, 960, 460, 500, 940, 960, 960, 460, 460, 960, 460, 480};
+        uint16_t sample[] = {520, 500, 420, 520, 400, 520, 440, 520, 400, 520, 400, 540, 400, 520, 440, 500, 440, 480, 440, 500, 440, 500, 460, 440, 460, 500, 420, 500, 440, 520, 420, 520, 420, 500, 460, 460, 480, 440, 480, 440, 500, 460, 480, 460, 460, 460, 480, 920, 980, 940, 960, 460, 500, 440, 500, 440, 480, 460, 480, 920, 500, 460, 500, 420, 980, 920, 980, 940, 480, 440, 500, 460, 460, 460, 960, 940, 980, 920, 500, 460, 480, 440, 480, 440, 960, 460, 520, 920, 960, 480, 480, 420, 500, 460, 480, 440, 500, 920, 480, 440, 500, 440, 500, 420, 500, 440, 500, 440, 980, 960, 440, 460, 480, 460, 500, 420, 520, 440, 480, 460, 480, 420, 500, 460, 480, 440, 500, 440, 500, 440, 480, 440, 480, 460, 980, 440, 480, 960, 960, 440, 500, 460, 460, 960, 460, 460, 500, 420, 980, 440, 500, 440, 500, 920, 960, 960, 960, 940, 980, 920, 960, 460, 500, 940, 960, 960, 460, 460, 960, 460, 480};
         memcpy(pBuffer, sample, sizeof(sample));
         nReceived = COUNT(sample);
         return true;
@@ -80,11 +86,12 @@ public:
 #endif
         nReceived = 0;
         
+        uint32_t ints = BIOS::OS::DisableInterrupts();
         while (1)
         {
             int nOn = On();
             
-            if (nOn >= mStorage_mMinGapTime)
+            if (nOn >= mSettings.mMinGapTime)
                 break;
 
             pBuffer[nReceived++] = nOn;
@@ -93,7 +100,7 @@ public:
             
             int nOff = Off();
             
-            if (nOff >= mStorage_mMinGapTime)
+            if (nOff >= mSettings.mMinGapTime)
                 break;
             
             pBuffer[nReceived++] = nOff;
@@ -105,11 +112,20 @@ public:
         {
             memcpy(pBuffer, tempBuffer, sizeof(tempBuffer));
             nReceived = tempReceived; // TODO: when switching btwn different modems invalidate temp buf
+            BIOS::OS::EnableInterrupts(ints);
             return false;
         }
         
+        // TODO: infra compensation
+        pBuffer[0] += 1000;
+for (int i=0; i<nReceived; i+=2)
+{
+  pBuffer[i] += 100;
+  pBuffer[i+1] -= 100;
+}
         memcpy(tempBuffer, pBuffer, sizeof(tempBuffer));
         tempReceived = nBufferSize;
+        BIOS::OS::EnableInterrupts(ints);
         return true;
     }
 };

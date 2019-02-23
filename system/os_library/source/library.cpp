@@ -112,6 +112,8 @@ namespace BIOS
     bool HasArgument() { return false; }
     BIOS::OS::TInterruptHandler GetInterruptVector(BIOS::OS::EInterruptVector) {return nullptr;}
     void SetInterruptVector(BIOS::OS::EInterruptVector, BIOS::OS::TInterruptHandler) {}
+    uint32_t DisableInterrupts() { return 0; }
+    void EnableInterrupts(uint32_t) {}
   }
 
   namespace PRIVATE
