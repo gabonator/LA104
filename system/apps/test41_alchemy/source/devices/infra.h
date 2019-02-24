@@ -98,5 +98,21 @@ public:
         BIOS::SYS::DelayMs(200);
         mDevice.Deinit();
     }
+    
+    virtual bool Receive(uint16_t* pBuffer, int nBufferSize, int& nReceived) override
+    {
+        if (!CSampler::Receive(pBuffer, nBufferSize, nReceived))
+            return false;
+        
+        // Sensor delay compensation
+        //pBuffer[0] += 1000;
+        for (int i=0; i<nReceived; i+=2)
+        {
+            pBuffer[i] += 100;
+            pBuffer[i+1] -= 100;
+        }
+        return true;
+    }
+
 };
 

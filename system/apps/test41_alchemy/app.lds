@@ -1,10 +1,17 @@
 MEMORY
 {
-  rom (rx)  : ORIGIN = 0x08015500, LENGTH = 63K
+  rom (rx)  : ORIGIN = 0x0801f600, LENGTH = 63K
   ram (rwx) : ORIGIN = 0x20004400, LENGTH = 10K
-  null (rwx): ORIGIN = 0x00001000, LENGTH = 2K
+  null (rwx): ORIGIN = 0x00001000, LENGTH = 4K
 }
 
+/*
+failed 648 bytes at 0801f648
+                    0801f7f4
+                    0802af30
+                    08029f30
+                    0801f050
+*/
 SECTIONS
   {
     .text : {

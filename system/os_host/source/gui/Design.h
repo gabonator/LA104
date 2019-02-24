@@ -1,5 +1,6 @@
 #pragma once
 #include "../framework/Types.h"
+#include "Gui.h"
 
 class CDesignPalette
 {

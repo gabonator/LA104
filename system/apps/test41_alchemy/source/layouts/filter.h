@@ -106,7 +106,7 @@ public:
     void NewLine(int& x, int& y, int& _x)
     {
         x = _x;
-        y += 16;
+        y += 15;
         mNewLine = true;
     }
     
@@ -192,8 +192,8 @@ public:
         
         NewLine(x, y, _x);
         Static(x, y, "Gap duration > ");
-        OnChange([](int i){ mSettings.mGapTime += i * 1000; });
-        Field(x, y, format(field, "%d", mSettings.mGapTime / 1000));
+        OnChange([](int i){ mSettings.mMinGapTime += i * 1000; });
+        Field(x, y, format(field, "%d", mSettings.mMinGapTime / 1000));
         Static(x, y, " ms");
         
         NewLine(x, y, _x);
@@ -253,6 +253,16 @@ public:
         Static(x, y, "..");
         Field(x, y, format(field, "%d", 150));
         Static(x, y, " ms");
+        
+        NewLine(x, y, _x);
+        Static(x, y, "Inhibit ");
+        OnChange([](int i){
+            int& t = mSettings.mInhibit;
+            t = min(max(0, t+i), 20);
+        });
+        Field(x, y, format(field, "%d", mSettings.mInhibit));
+        Static(x, y, " ms");
+
         End();
         
         if (WasInterrupted())

@@ -86,20 +86,21 @@ public:
         x = 4; y = mSignal.m_rcClient.top - 14;
         x += BIOS::LCD::Print(x, y, RGB565(404040), RGB565(b0b0b0), " Signal ");
         x += BIOS::LCD::Draw( x, y, RGB565(b0b0b0), RGBTRANS, CShapes_tab_right);
+        
+        DrawSignalStats();
+        Analyse();
     }
     
-    void DrawSignalStats(uint16_t* p, int n)
+    void DrawSignalStats()
     {
         int total = 0;
-        for (int i=0; i<n; i++)
-            total += p[i];
+        for (int i=0; i<mStorage.mSignalLength; i++)
+            total += mStorage.mSignalData[i];
 
-        CRect rcStatus(m_rcClient);
-        rcStatus.top = rcStatus.bottom - 16;
+        CRect rcStatus(mSignal.m_rcClient.left+100, mSignal.m_rcClient.top - 14, mSignal.m_rcClient.right, mSignal.m_rcClient.top);
         GUI::Background(rcStatus, RGB565(404040), RGB565(101010));
-        BIOS::LCD::Printf(8, m_rcClient.bottom-16, RGB565(ffffff), RGBTRANS, "%3d    %3d  ", total/1000, n);
-        BIOS::LCD::Printf(8, m_rcClient.bottom-16, RGB565(b0b0b0), RGBTRANS, "    ms     t");
-
+        BIOS::LCD::Printf(rcStatus.left, rcStatus.top, RGB565(b0b0b0), RGBTRANS, "%3d    %3d  ", total/1000, mStorage.mSignalLength);
+        BIOS::LCD::Printf(rcStatus.left, rcStatus.top, RGB565(808080), RGBTRANS, "    ms     t");
     }
     
     virtual void OnMessage(CWnd* pSender, ui16 code, ui32 data) override
@@ -108,13 +109,8 @@ public:
         {
             mHistogram.Redraw();
             mSignal.Redraw();
-            DrawSignalStats(mStorage.mSignalData, mStorage.mSignalLength);
-
-            if (mStorage.mSignalLength > 10)
-            {
-                if (!AnalyseManchester())
-                    AnalysePulse();
-            }
+            DrawSignalStats();
+            Analyse();
         }
 
         if (pSender == &mMenu.mWndHistogramX || pSender == &mMenu.mWndHistogramY)
@@ -127,6 +123,23 @@ public:
         }
     }
     
+    void Analyse()
+    {
+        CRect rcInfo(8, BIOS::LCD::Height-16*2, BIOS::LCD::Width, BIOS::LCD::Height);
+        for (int i=0; mCodecs[i]; i++)
+        {
+            CCodec* pCodec = mCodecs[i];
+            if (pCodec->Decode(mStorage.mSignalData, mStorage.mSignalLength))
+            {
+                GUI::Background(rcInfo, RGB565(404040), RGB565(101010));
+                BIOS::LCD::Print(rcInfo.left, rcInfo.top, RGB565(ffffff), RGBTRANS, pCodec->Id());
+                rcInfo.top += 16;
+                pCodec->DisplayShortInfo(rcInfo);
+                return;
+            }
+        }
+    }
+#if 0
     
     bool AnalyseManchester()
     {
@@ -320,5 +333,6 @@ public:
          */
         return false;
     }
+#endif
 
 };

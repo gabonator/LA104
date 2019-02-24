@@ -19,6 +19,7 @@ CDeviceCC1101 mDeviceRadio;
 CDeviceRaw mDeviceRaw;
 CDeviceInfra mDeviceInfra;
 
+#include "codecs/codecs.h"
 #include "layouts/modem.h"
 #include "layouts/meas.h"
 #include "layouts/filter.h"
@@ -54,6 +55,7 @@ class CApplication : public CWnd
     CLayoutFile mLayoutFile;
     CLayoutPlay mLayoutPlay;
     CLayoutAnalyse mLayoutAnalyse;
+    bool mIdle{false};
 
 public:
     void Create( const char* pszId, ui16 dwFlags, const CRect& rc, CWnd* pParent )
@@ -162,20 +164,30 @@ public:
         {
             if (!mLayoutModem.IsVisible() && mSettings.mDeviceCurrent && mSettings.mConnected && mRuntime.mEnabled)
             {
-                if (mSettings.mDeviceCurrent->Read())
+                int read = mSettings.mDeviceCurrent->Read();
+                if (!mIdle)
                 {
-                    if (mSettings.mDeviceCurrent->Receive(mStorage.mSignalData, COUNT(mStorage.mSignalData), mStorage.mSignalLength))
+                    if (!read)
+                        mIdle = true;
+                } else
+                {
+                    if (read)
                     {
-                        mRuntime.mReceived = true;
-                        // new signal was received
-                        if (mLayoutMeas.IsVisible())
+                        if (mSettings.mDeviceCurrent->Receive(mStorage.mSignalData, COUNT(mStorage.mSignalData), mStorage.mSignalLength))
                         {
-                            SendMessage(&mLayoutMeas, ToWord('D', 'A'), 0);
-                            if ( mSettings.mTriggerSingle /*&& mStorage.mSignalLength >= 60*/ ) // condition to stop?
+                            mRuntime.mReceived = true;
+                            // new signal was received
+                            if (mLayoutMeas.IsVisible())
                             {
-                                mRuntime.mEnabled = false; // single!
+                                SendMessage(&mLayoutMeas, ToWord('D', 'A'), 0);
+                                if ( mSettings.mTriggerSingle /*&& mStorage.mSignalLength >= 60*/ ) // condition to stop?
+                                {
+                                    mRuntime.mEnabled = false; // single!
+                                }
                             }
                         }
+                        
+                        mIdle = false; // wait for signal fall
                     }
                 }
             }

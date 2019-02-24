@@ -48,12 +48,13 @@ public:
         
     bool mBeepCapture{true};
     bool mBeepDiscard{true};
-    int mGapTime{5000};
+    //int mGapTime{5000};
     int mSampleMax{200};
     int mTriggerTransitionsMin{15};
     int mTriggerTransitionsMax{-1};
     bool mTriggerFirstGap{false};
     bool mTriggerFirstPulse{false};
+    int mInhibit{0};
 } mSettings;
 
 class CRuntime

@@ -91,7 +91,10 @@ public:
                 BIOS::LCD::Bar(rcCurrent, RGB565(00ff00));
                 continue;
             }
-            BIOS::LCD::Bar(rcCurrent, RGB565(00ff00));
+
+            if (rcCurrent.Height() > 0)
+                BIOS::LCD::Bar(rcCurrent, RGB565(00ff00));
+            
             rcCurrent.bottom = rcCurrent.top;
             rcCurrent.top = rcCurrent.bottom - mDrawState.histoDurationHigh[mDrawState.i]*magnify/2;
             if (rcCurrent.top < rc.top)
@@ -100,7 +103,9 @@ public:
                 BIOS::LCD::Bar(rcCurrent, RGB565(0080ff));
                 continue;
             }
-            BIOS::LCD::Bar(rcCurrent, RGB565(0080ff));
+            
+            if (rcCurrent.Height() > 0)
+                BIOS::LCD::Bar(rcCurrent, RGB565(0080ff));
 
             rcCurrent.bottom = rcCurrent.top;
             rcCurrent.top = rc.top;

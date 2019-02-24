@@ -31,7 +31,7 @@ private:
     int On()
     {
         int i;
-        for (i=0; i<10000; i+=20)
+        for (i=0; i<15000; i+=20)
         {
             volatile int j=ticks20us;
             while (j--);
@@ -45,7 +45,7 @@ private:
     int Off()
     {
         int i;
-        for (i=0; i<10000; i+=20)
+        for (i=0; i<15000; i+=20)
         {
             volatile int j=ticks20us;
             while (j--);
@@ -67,7 +67,7 @@ protected:
     }
     
 public:
-    bool Receive(uint16_t* pBuffer, int nBufferSize, int& nReceived)
+    virtual bool Receive(uint16_t* pBuffer, int nBufferSize, int& nReceived)
     {
 #ifdef __APPLE__
         uint16_t sample[] = {520, 500, 420, 520, 400, 520, 440, 520, 400, 520, 400, 540, 400, 520, 440, 500, 440, 480, 440, 500, 440, 500, 460, 440, 460, 500, 420, 500, 440, 520, 420, 520, 420, 500, 460, 460, 480, 440, 480, 440, 500, 460, 480, 460, 460, 460, 480, 920, 980, 940, 960, 460, 500, 440, 500, 440, 480, 460, 480, 920, 500, 460, 500, 420, 980, 920, 980, 940, 480, 440, 500, 460, 460, 460, 960, 940, 980, 920, 500, 460, 480, 440, 480, 440, 960, 460, 520, 920, 960, 480, 480, 420, 500, 460, 480, 440, 500, 920, 480, 440, 500, 440, 500, 420, 500, 440, 500, 440, 980, 960, 440, 460, 480, 460, 500, 420, 520, 440, 480, 460, 480, 420, 500, 460, 480, 440, 500, 440, 500, 440, 480, 440, 480, 460, 980, 440, 480, 960, 960, 440, 500, 460, 460, 960, 460, 460, 500, 420, 980, 440, 500, 440, 500, 920, 960, 960, 960, 940, 980, 920, 960, 460, 500, 940, 960, 960, 460, 460, 960, 460, 480};
@@ -116,13 +116,6 @@ public:
             return false;
         }
         
-        // TODO: infra compensation
-        pBuffer[0] += 1000;
-for (int i=0; i<nReceived; i+=2)
-{
-  pBuffer[i] += 100;
-  pBuffer[i+1] -= 100;
-}
         memcpy(tempBuffer, pBuffer, sizeof(tempBuffer));
         tempReceived = nBufferSize;
         BIOS::OS::EnableInterrupts(ints);
