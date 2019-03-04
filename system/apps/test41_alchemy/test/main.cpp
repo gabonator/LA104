@@ -57,5 +57,21 @@ int main()
   Decode();
   Load("../logs/ir_volumeup.sig");
   Decode();
+  Load("../logs/rf_unk_ba1.sig");
+  Decode();
+  Load("../logs/rf_unk_ba2.sig");
+  Decode();
+  Load("../logs/rf_unk_ba3.sig");
+  Decode();
+  Load("../logs/rf_unk_ba4.sig");
+  Decode();
+  Load("../logs/rf_unk_ba5.sig");
+  Decode();
+  Load("../logs/rf_unk_sd1.sig");
+  Decode();
+  Load("../logs/rf_unk_sd2.sig");
+  Decode();
+  Load("../logs/rf_unk_sd3.sig");
+  Decode();
   return 0;
 }

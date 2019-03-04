@@ -1,3 +1,5 @@
+#pragma once
+
 class CSampler;
 
 class CSettings
@@ -63,16 +65,18 @@ public:
     bool mEnabled{true};
     bool mReceived{false};
     bool mTransmitted{false};
-#ifdef __APPLE__
+#ifdef EMULATED
     char mPath[512];
 #else
     char mPath[128];
 #endif
+    bool mRecording{false};  
+    int mSeconds{0};
 } mRuntime;
 
 class CStorage
 {
 public:
     int mSignalLength{0};
-    uint16_t mSignalData[320];
+    uint16_t mSignalData[450];
 } mStorage;

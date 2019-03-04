@@ -11,7 +11,7 @@ public:
     int mSelected{-1};
 
 public:
-    virtual TItem GetItem(int i) = 0;
+    virtual TItem GetItem(int i) = 0; 
     
     virtual void OnPaint()
     {

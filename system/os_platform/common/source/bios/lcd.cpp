@@ -82,7 +82,7 @@ int BIOS::LCD::Printf(int x, int y, unsigned short clrf, unsigned short clrb, co
     va_list args;
     
     va_start( args, format );
-    sfp_print( bbuf, format, args );
+    vsprintf( bbuf, format, args );
     va_end(args);
 
     return BIOS::LCD::Print(x, y, clrf, clrb, buf);
@@ -250,8 +250,6 @@ void BIOS::LCD::Shadow(int x1, int y1, int x2, int y2, unsigned int nColor)
 
 // SDL
 
-void setPixel(int x, int y, int c);
-
 int lcdX = 0;
 int lcdY = 0;
 int lcdX1 = 0;
@@ -267,7 +265,7 @@ void Set_Posi(uint16_t x, uint16_t y)
 
 void Set_Pixel(uint16_t Color)
 {
-    setPixel(lcdX, lcdY, Color);
+    gHal->SetPixel(lcdX, lcdY, Color);
     lcdX++;
     if (lcdX >= lcdX2)
     {
@@ -279,10 +277,10 @@ void Set_Pixel(uint16_t Color)
         }
     }
 }
-int getPixel(int, int);
+
 int Get_Pixel()
 {
-    int c = getPixel(lcdX, lcdY);
+    int c = gHal->GetPixel(lcdX, lcdY);
     lcdX++;
     if (lcdX >= lcdX2)
     {

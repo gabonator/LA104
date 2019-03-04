@@ -1,9 +1,10 @@
-
 #include <SDL.h>
 #include <SDL_render.h>
 #include <iostream>
 #include <vector>
-#include <library.h>
+#include "sdlhal.h"
+
+CHal* gHal{nullptr};
 
 void _main(void);
 
@@ -68,6 +69,8 @@ void sdl_init()
      SDL_TEXTUREACCESS_STREAMING,
      BIOS::LCD::Width, BIOS::LCD::Height
      );
+
+     gHal = new CSdlHal;
 }
 
 bool sdl_running()
@@ -86,7 +89,7 @@ void sdl_loop()
 {
     SDL_Event event;
     
-    const Uint64 start = SDL_GetPerformanceCounter();
+    //const Uint64 start = SDL_GetPerformanceCounter();
     
     SDL_SetRenderDrawColor( renderer, 0, 0, 0, SDL_ALPHA_OPAQUE );
     SDL_RenderClear( renderer );
@@ -128,6 +131,8 @@ void sdl_deinit()
     SDL_DestroyRenderer( renderer );
     SDL_DestroyWindow( window );
     SDL_Quit();
+
+    delete gHal;
 }
 
 int main( int argc, char** argv )

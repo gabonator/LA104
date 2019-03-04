@@ -9,13 +9,13 @@ void BIOS::SYS::DelayUs(int intervalUs)
 
 void BIOS::SYS::DelayMs(int intervalMs)
 {
-    SDL_Delay(intervalMs);
+  gHal->Delay(intervalMs);
   //assert(0);
 }
 
 uint32_t BIOS::SYS::GetTick()
 {
-  return SDL_GetTicks();
+  return gHal->GetTick();
 }
 
 int BIOS::SYS::Execute(uint32_t addr)

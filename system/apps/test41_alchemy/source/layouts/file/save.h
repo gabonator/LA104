@@ -4,6 +4,8 @@ class CLayoutFileSave : public CWnd
     
     CButton mSave;
     CButton mLoad;
+    CButton mStartRecord;
+    CButton mStopRecord;
 
 public:
     void Create( const char* pszId, ui16 dwFlags, const CRect& rc, CWnd* pParent )
@@ -14,6 +16,8 @@ public:
         mSave.Create("Save", CWnd::WsVisible, CRect(8, 40, 8+(5+1)*8, 40+16), this);
         mLoad.Create("Load", CWnd::WsVisible, CRect(8, 40+20, 8+(5+1)*8, 40+16+20), this);
 
+        mStartRecord.Create("Start recording", CWnd::WsVisible, CRect(8, 40+40, 8+(30)*8, 40+40+16), this);
+        mStopRecord.Create("Stop recording", CWnd::WsVisible, CRect(8, 40+60, 8+(30)*8, 40+60+16), this);
         // Save, autosave, append? Folder?
     }
 
@@ -38,6 +42,14 @@ public:
         if (pSender == &mLoad)
         {
             Load();
+        }
+        if (pSender == &mStartRecord)
+        {
+            StartRecording();
+        }
+        if (pSender == &mStopRecord)
+        {
+            StopRecording();
         }
     }
     
@@ -108,4 +120,15 @@ public:
         }
     }
 
+    void StartRecording()
+    {
+        mWriter.Open((char*)"alchelog.txt");
+        mRuntime.mRecording = true;
+    }
+
+    void StopRecording()
+    {
+        mRuntime.mRecording = false;
+        mWriter.Close();
+    }
 };

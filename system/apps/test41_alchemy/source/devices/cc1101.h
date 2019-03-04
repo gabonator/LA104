@@ -89,7 +89,7 @@ public:
 
     virtual bool Read() override
     {
-#ifdef __APPLE__
+#ifdef EMULATED
         int nTick = BIOS::SYS::GetTick();
         int nSecond = nTick / 2000;
         static int nLastSecond = 0;

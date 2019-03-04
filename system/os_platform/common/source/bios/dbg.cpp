@@ -14,7 +14,7 @@ void BIOS::DBG::Print(const char * format, ...)
     va_list args;
         
     va_start( args, format );
-    sfp_print( bbuf, format, args );
+    vsprintf( bbuf, format, args );
     va_end(args);
     
     //fprintf(stdout, buf);

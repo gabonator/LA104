@@ -1,9 +1,8 @@
 #pragma once
-#include <SDL.h>
+//#include <SDL.h>
 #include <library.h>
-//#include "../../../os_host/source/bios/Bios.h"
-//#include "../../../os_host/source/framework/Wnd.h"
-#define sfp_print vsprintf
+#include "hal.h"
+//#define sfp_print vsprintf
 
 void Set_Posi(uint16_t x, uint16_t y);
 void Set_Pixel(uint16_t Color);

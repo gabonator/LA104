@@ -1,0 +1,44 @@
+<canvas id="canvas" width="320" height="240"></canvas>
+
+<script>
+var canvas = document.getElementById('canvas');
+  var ctx = canvas.getContext('2d');
+  var imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+
+calls = 0;
+
+function putpixel(x, y, c)
+{
+  calls++;
+/*
+  imageData[(y*200+x)*4] = c;
+  imageData[(y*200+x)*4+1] = c>>4;
+  imageData[(y*200+x)*4+2] = c>>8;
+  imageData[(y*200+x)*4+3] = 255;
+*/
+}
+/*
+var Module = {
+_js_setPixel: (x, y, c) => console.log("put " + x + ", " + y + " = " + c),
+_js_getPixel: (x, y) => 0,
+_js_running: () => true,
+_js_lastKey: () => 0,
+_js_loop: function(){},
+js_ticks: () => 1,
+}
+*/                 
+function _js_getPixel(k)
+{
+  calls++;
+}
+
+setTimeout(() =>
+{
+
+  Module._appInit();
+  //Module._appLoop();
+  ctx.putImageData(imageData, 0, 0);
+console.log(calls);
+}, 300)
+</script>
+<script src="app.js"></script>

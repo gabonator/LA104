@@ -42,6 +42,10 @@ void sfp_printchar(char **str, int c)
 #define PAD_RIGHT 1
 #define PAD_ZERO 2
 
+#ifdef EMULATED 
+#define register
+#endif
+
 int sfp_prints(char **out, const char *string, int width, int pad)
 {
 	register int pc = 0, padchar = ' ';

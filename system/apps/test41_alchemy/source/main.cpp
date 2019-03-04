@@ -1,10 +1,8 @@
 #include <library.h>
 
-#include "../../os_host/source/framework/BufferedIo.h"
-#include "../../os_host/source/framework/Serialize.h"
-#include "../../os_host/source/gui/Controls.h"
-
-//int mStorage_mMinGapTime = 10000; // TODO: join
+#include "../../../os_host/source/framework/BufferedIo.h"
+#include "../../../os_host/source/framework/Serialize.h"
+#include "../../../os_host/source/gui/Controls.h"
 
 #include "utils/shapes.h"
 #include "utils/Menu.h"
@@ -19,6 +17,8 @@ CDeviceCC1101 mDeviceRadio;
 CDeviceRaw mDeviceRaw;
 CDeviceInfra mDeviceInfra;
 
+CBufferedWriter mWriter;
+
 #include "codecs/codecs.h"
 #include "layouts/modem.h"
 #include "layouts/meas.h"
@@ -26,6 +26,7 @@ CDeviceInfra mDeviceInfra;
 #include "layouts/file.h"
 #include "layouts/play.h"
 #include "layouts/analyse.h"
+
 
 class CMenuMain : public CTopMenu
 {
@@ -79,7 +80,7 @@ public:
         mMenu.SetFocus();
         SetTimer(100);
         
-#ifdef __APPLE__
+#ifdef EMULATED
         BIOS::OS::SetArgument((char*)"/Users/gabrielvalky/Documents/git/LA104/system/apps/test41_alchemy/root/41alche.elf");
 #endif
         strcat(mRuntime.mPath, BIOS::OS::GetArgument());
@@ -173,6 +174,9 @@ public:
                 {
                     if (read)
                     {
+                        if (mSettings.mBeepCapture)
+                            BIOS::SYS::Beep(10);
+                        
                         if (mSettings.mDeviceCurrent->Receive(mStorage.mSignalData, COUNT(mStorage.mSignalData), mStorage.mSignalLength))
                         {
                             mRuntime.mReceived = true;
@@ -197,6 +201,12 @@ public:
 
     virtual void OnTimer() override
     {
+        static int sub = 0;
+        if (++sub >= 10)
+        {
+          mRuntime.mSeconds++;
+          sub = 0;
+        }
         BIOS::LCD::Draw( 2, 0, RGB565(808080), RGBTRANS, CShapes_dotout);
         if (!mSettings.mDeviceCurrent)
         {
@@ -221,9 +231,35 @@ public:
 
 CApplication app;
 
-#ifndef __APPLE__
+#ifndef EMULATED
 __attribute__((__section__(".entry")))
 #endif
+
+#ifdef EMSCRIPTEN
+void mainInit()
+{
+    app.Create("WaveAlchemy", CWnd::WsVisible | CWnd::WsTick, CRect(0, 0, BIOS::LCD::Width, BIOS::LCD::Height), nullptr);
+    app.WindowMessage( CWnd::WmPaint );
+}
+bool mainLoop()
+{
+    BIOS::KEY::EKey key;
+
+    key = BIOS::KEY::GetKey();
+    if (key == BIOS::KEY::Escape && CWnd::m_arrModals.GetSize() == 0)
+        return false;
+    
+    if (key != BIOS::KEY::None)
+        app.WindowMessage(CWnd::WmKey, key);
+
+    app.WindowMessage(CWnd::WmTick);
+    return true;
+}
+void mainFinish()
+{
+    app.Destroy();
+}
+#else
 int _main(void)
 {
     app.Create("WaveAlchemy", CWnd::WsVisible | CWnd::WsTick, CRect(0, 0, BIOS::LCD::Width, BIOS::LCD::Height), nullptr);
@@ -245,6 +281,7 @@ int _main(void)
     app.Destroy();
     return 0;
 }
+#endif
 
 void _HandleAssertion(const char* file, int line, const char* cond)
 {

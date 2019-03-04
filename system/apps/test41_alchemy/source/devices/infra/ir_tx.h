@@ -11,7 +11,7 @@ void ir_tx_send(IrCode* code);
 bool ir_tx_finished();
 void ir_irq();
 
-#ifdef __APPLE__
+#ifdef EMULATED
 void ir_tx_setup(int carrierFreq) {}
 void ir_tx_start() {}
 void ir_tx_stop() {}

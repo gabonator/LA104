@@ -38,23 +38,31 @@ class CCodecOregon : public CCodec
             
             if (bufferi >= COUNT(buffer))
             {
-                //_ASSERT(!"Buffer too small");
+                _ASSERT(!"Buffer too small");
                 return false;
             }
             
             last = -1;
             return true;
         };
+
+        int compensation = (data[3] - data[2])/2;
         
         for (int i=0, b=1; i<count; i++, b=1-b)
         {
             int v = data[i];
+
+            if ((i & 1) == 0)
+                v += compensation;
+            else 
+                v -= compensation;
+
             if (v >= 300 && v < 700)
             {
                 if (!PushManchester(b))
                     return false;
             }
-            if (v >= 900 && v < 1100)
+            if (v >= 800 && v < 1100)
             {
                 if (!PushManchester(b))
                     return false;
@@ -105,11 +113,22 @@ class CCodecOregon : public CCodec
             sprintf(info, "Total rain: %dmm, Rain rate: %dmm/hr", rainTotal, rainRate);
             return;
         }
+        if (mNibbleCount == 22 && mNibbles[0] == 0xA && mNibbles[1] == 0x1) // A1
+        {
+            // Wind sensor
+    	    int windspeed = int( ((mNibbles[16]*10)+ mNibbles[15])*3.6/10 );
+    	    int gusts = int( ((mNibbles[13]*10)+ mNibbles[12])*3.6/10 );
+   	    int heading = mNibbles[9];
+            sprintf(info, "Wind: %d kmh (%d), Heading: %d", windspeed, gusts, heading);
+            return;
+        }
+      
       
       char* p = info;
       p += sprintf(p, "Raw: ");
       for (int i=0; i<mNibbleCount; i++)
           p += sprintf(p, "%x", mNibbles[i]);
+      p += sprintf(p, " (%d bits)", mBits);
   }
 
   virtual void DisplayShortInfo(const CRect& rcRect) 
