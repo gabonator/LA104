@@ -5,7 +5,7 @@ extern "C"
 extern void js_setPixel(int x, int y, int c);
 extern int js_getPixel(int x, int y);
 extern bool js_running();
-extern int js_lastKey();
+extern int js_getKey();
 extern void js_loop();
 extern int js_ticks();
 }
@@ -27,7 +27,7 @@ class CWasmHal : public CHal
   }
   virtual char GetKey() override
   {
-    return 0;
+    return js_getKey();
   }
 
     virtual void UartSetup(int baudrate, BIOS::GPIO::UART::EConfig config) override

@@ -1,44 +1,102 @@
-<canvas id="canvas" width="320" height="240"></canvas>
+<canvas id="canvas" width="320" height="240" style="border: 1px solid #d0d0d0; transform:translate(160px, 120px) scale(2);"></canvas>
 
 <script>
 var canvas = document.getElementById('canvas');
-  var ctx = canvas.getContext('2d');
-  var imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+var ctx = canvas.getContext('2d');
+var imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
 
-calls = 0;
+var lastKey = 0;
 
-function putpixel(x, y, c)
+function _js_getKey() 
 {
-  calls++;
+  var aux = lastKey;
+  lastKey = 0;
+  return aux;
+}
+
+document.onkeydown = function(evt) {
+    evt = evt || window.event;
+    switch (evt.keyCode)
+    {
+      case 37: lastKey = "-".charCodeAt(0); break;
+      case 39: lastKey = "+".charCodeAt(0); break;
+      case 38: lastKey = "<".charCodeAt(0); break;
+      case 40: lastKey = ">".charCodeAt(0); break;
+      case 13: lastKey = "1".charCodeAt(0); break;
+    }
+};
+
+function _js_getPixel() 
+{
+  return 0;
+}
+
+_y = 0;
+function _js_loop() 
+{                        
 /*
-  imageData[(y*200+x)*4] = c;
-  imageData[(y*200+x)*4+1] = c>>4;
-  imageData[(y*200+x)*4+2] = c>>8;
-  imageData[(y*200+x)*4+3] = 255;
+  for (var q=0; q<50; q++)
+  {
+    var ptr = (_y*320)*4+3;
+    for (var x=0; x<320; x++, ptr+=4)
+      imageData.data[ptr]-=10;
+
+    if (++_y >= 240) 
+      _y = 0;
+  }
 */
 }
-/*
-var Module = {
-_js_setPixel: (x, y, c) => console.log("put " + x + ", " + y + " = " + c),
-_js_getPixel: (x, y) => 0,
-_js_running: () => true,
-_js_lastKey: () => 0,
-_js_loop: function(){},
-js_ticks: () => 1,
-}
-*/                 
-function _js_getPixel(k)
+
+function _js_running() 
 {
-  calls++;
+  return 1;
 }
 
-setTimeout(() =>
+function _js_setPixel(x, y, rgb) 
 {
+  y = 240-y;
+  imageData.data[(y*320+x)*4] = (((rgb)&0x1f)<<3);
+  imageData.data[(y*320+x)*4+1] = ((((rgb)>>5)&0x3f)<<2);
+  imageData.data[(y*320+x)*4+2] = ((((rgb)>>11)&0x1f)<<3);
+  imageData.data[(y*320+x)*4+3] = 255;
+}
 
-  Module._appInit();
-  //Module._appLoop();
-  ctx.putImageData(imageData, 0, 0);
-console.log(calls);
-}, 300)
+function _js_ticks() 
+{
+  return new Date().getTime();
+}
 </script>
+
 <script src="app.js"></script>
+<script>
+
+//var Module = require("./app.js")
+Module['onRuntimeInitialized'] = () =>
+{
+  console.log("start");
+  Module._appInit();
+  setInterval(() =>
+  {
+    Module._appLoop();
+    ctx.putImageData(imageData, 0, 0);
+  }, 50);
+  console.log("done");
+
+/*
+  var data = [4760, 4600, 640, 1660, 640, 1660, 640, 1660, 620, 500, 640, 480, 640, 500, 640, 480, 640, 500, 
+  620, 1660, 640, 1660, 640, 1660, 640, 480, 640, 500, 640, 480, 640, 480, 640, 500, 640, 1640, 660, 1660, 640, 
+  1640, 640, 500, 640, 480, 640, 500, 620, 500, 640, 480, 640, 480, 660, 480, 640, 480, 640, 1660, 640, 1660, 
+  640, 1660, 640, 1660, 640, 1660, 640];
+
+  var ptr = Module._appGetDataPtr();
+  for (var i=0; i<data.length; i++) 
+    Module.HEAP16[ptr/2+i] = data[i];
+
+  Module._appSetDataCount(data.length);
+  Module._appAnalyse();
+  console.log(Module.AsciiToString(Module._appAnalyseResultPtr()));
+*/
+}
+
+</script>
+

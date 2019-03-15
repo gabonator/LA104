@@ -14,4 +14,4 @@ SOURCE="\
   ../common/source/bios/memory.cpp \
   ../common/source/bios/sys.cpp"
 
-emcc ${INCLUDES} ${SOURCE} -s WASM=1 -s EXTRA_EXPORTED_RUNTIME_METHODS="['AsciiToString']" -s EXPORTED_FUNCTIONS="['AsciiToString', '_appLoop', '_appInit', '_appFinish', '_appAnalyse', '_appAnalyseResultPtr', '_appSetDataCount', '_appGetDataPtr']" -o app.js -DEMULATED -DEMSCRIPTEN --std=c++11 -s ERROR_ON_UNDEFINED_SYMBOLS=0
+emcc ${INCLUDES} ${SOURCE} -g4 -s WASM=1 -s EXTRA_EXPORTED_RUNTIME_METHODS="['AsciiToString']" -s EXPORTED_FUNCTIONS="['AsciiToString', '_appLoop', '_appInit', '_appFinish', '_appAnalyse', '_appAnalyseResultPtr', '_appSetDataCount', '_appGetDataPtr']" -o app.js -DEMULATED -DEMSCRIPTEN --std=c++11 -s ERROR_ON_UNDEFINED_SYMBOLS=0
