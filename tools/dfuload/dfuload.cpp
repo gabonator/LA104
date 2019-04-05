@@ -9,7 +9,7 @@
 #include <cassert>
 #include <ctype.h>
 #include <strings.h>
-
+#include <stdint.h>
 #include "fat12.h"
 
 //#define dprintf(...)
@@ -188,7 +188,6 @@ int main(int argc, const char * argv[])
     }
 
     int fd = open(argv[1], O_RDWR);
-    fcntl(fd, F_NOCACHE, 1);
 
     if (fd<0)
     {

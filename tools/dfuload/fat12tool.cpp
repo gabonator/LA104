@@ -9,7 +9,7 @@
 #include <cassert>
 #include <ctype.h>
 #include <strings.h>
-
+#include <stdint.h>
 #include "fat12.h"
 
 //#define dprintf(...)
@@ -370,7 +370,7 @@ void listfiles(uint16_t cluster, int fd, struct bpb33* bpb)
 
 	    if (dirent.deName[0] == SLOT_EMPTY) {
 		/* we failed to find the file */
-		return NULL;
+		return 0;
 	    }
 	    if (dirent.deName[0] == SLOT_DELETED) {
 		/* skip over a deleted file */
@@ -685,8 +685,6 @@ int main(int argc, const char * argv[])
     }
 
     int fd = open(argv[1], O_RDWR);
-    fcntl(fd, F_NOCACHE, 1);
-//    setvbuf(fileno(fd), NULL, _IONBF, 0);
 
     if (fd<0)
     {
@@ -751,7 +749,7 @@ int main(int argc, const char * argv[])
       if (read(fd, sector, 512) != 512 || errno != 0)
       {
           fprintf(stderr, "Read error!\n");
-          return NULL;
+          return 0;
       }
 
       for (int i=0; i<512; i++)
