@@ -14,6 +14,7 @@ namespace BIOS
   {
     void Clear(unsigned short clr) {}
 
+    int Print (int x, int y, unsigned short clrf, unsigned short clrb, char c) { return 0; }
     int Print (int x, int y, unsigned short clrf, unsigned short clrb, char* str) { return 0; }
     int Print (int x, int y, unsigned short clrf, unsigned short clrb, const char* str) { return 0; }
     int Printf (int x, int y, unsigned short clrf, unsigned short clrb, const char *format, ...) { return 0; }

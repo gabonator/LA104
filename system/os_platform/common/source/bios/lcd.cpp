@@ -51,6 +51,11 @@ unsigned short BIOS::LCD::GetPixel(int x, int y)
     return Get_Pixel();
 }
 
+int BIOS::LCD::Print (int x, int y, unsigned short clrf, unsigned short clrb, char c)
+{
+    return _DrawChar(x, y, clrf, clrb, c);
+}
+
 int BIOS::LCD::Print (int x, int y, unsigned short clrf, unsigned short clrb, const char *str)
 {
 	if (!str || !*str)
@@ -190,6 +195,12 @@ void BIOS::LCD::BufferWrite(uint16_t* buf, int n)
 {
     while (n--)
         Set_Pixel(*buf++);
+}
+
+void BIOS::LCD::BufferRead(uint16_t* buf, int n)
+{
+    while (n--)
+        *buf++ = BufferRead();
 }
 
 uint16_t BIOS::LCD::BufferRead()

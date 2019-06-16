@@ -94,6 +94,14 @@ enum
 
 //https://gist.github.com/iwalpola/6c36c9573fd322a268ce890a118571ca
 
+/*
+PD9 - \WR
+PD10 - \RD
+PD8 - D/C
+PA2 - \CS
+PA3 - \RST
+*/
+
 void Set_Pixel(uint_fast16_t Color)
 {
   GPIOE->ODR = (u16)Color; // LCD_PORT - GPIOE->ODR
@@ -103,8 +111,17 @@ void Set_Pixel(uint_fast16_t Color)
 
 uint16_t Get_Pixel()
 {
-  // TODO:
     return __Bios(RdPIXEL, 0);
+/*
+  GPIOD->BRR = GPIO_Pin_10;
+  _delay();
+  _delay();
+  int res = GPIOE->IDR;
+  GPIOD->BSRR = GPIO_Pin_10;
+  _delay();
+  _delay();
+*/
+//  return res;
 }
 
 void ExtFlash_CS_LOW(void)
@@ -121,7 +138,6 @@ void ExtFlash_CS_HIGH(void)
 
 void Set_Block(int x1, int y1, int x2, int y2)
 {
-  // TODO:
   __Bios(BLOCK_X, (x2-1) | (x1 << 16));
   __Bios(BLOCK_Y, (y2-1) | (y1 << 16));
 }

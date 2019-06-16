@@ -73,6 +73,11 @@ int BIOS::LCD::Print (int x, int y, unsigned short clrf, unsigned short clrb, co
 	return x - _x;
 }
 
+int BIOS::LCD::Print (int x, int y, unsigned short clrf, unsigned short clrb, char c)
+{
+  return _DrawChar(x, y, clrf, clrb, c);
+}
+
 int BIOS::LCD::Print (int x, int y, unsigned short clrf, unsigned short clrb, char *str)
 {
 	return BIOS::LCD::Print (x, y, clrf, clrb, (const char*)str);
@@ -169,8 +174,14 @@ uint8_t _Round(int x, int y)
 	return 0;
 }
 
+// TODO: inefficient reading!!!
+CRect bufferRect;
+CPoint bufferPoint;
+
 void BIOS::LCD::BufferBegin(const CRect& rc)
 {
+  bufferRect = rc;
+  bufferPoint = CPoint(rc.left, rc.top);
   Set_Block(rc.left, FLIP(rc.bottom)+1, rc.right, FLIP(rc.top)+1);
 }
 
@@ -192,8 +203,16 @@ uint16_t BIOS::LCD::BufferRead()
 
 void BIOS::LCD::BufferRead(uint16_t* buffer, int length)
 {
+  // TODO: too slow
   while (length--)
-    *buffer++ = Get_Pixel();
+  {
+    *buffer++ = GetPixel(bufferPoint.x, bufferPoint.y);
+    if (++bufferPoint.x >= bufferRect.right)
+    {
+      bufferPoint.x = bufferRect.left;
+      bufferPoint.y++;
+    }
+  }
 }
 
 void BIOS::LCD::BufferEnd()
