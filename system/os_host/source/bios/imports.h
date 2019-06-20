@@ -10,7 +10,11 @@ extern "C"
 
   void Set_Posi(uint_fast16_t x, uint_fast16_t y);
   void Set_Pixel(uint_fast16_t Color);
-  uint16_t Get_Pixel();
+
+  void ReadStart(void);
+  void ReadFinish(void);
+  uint32_t ReadPixel(void);
+
   void ExtFlash_CS_LOW(void);
   void ExtFlash_CS_HIGH(void);
   void Set_Block(int x1, int y1, int x2, int y2);

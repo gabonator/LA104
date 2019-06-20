@@ -101,10 +101,10 @@ int _main(void)
     BIOS::KEY::EKey key;
     while ((key = KEY::GetKey()) != KEY::EKey::Escape)
     {
-      EVERY(300)
+      EVERY(50)
       {
         static int n = 0;
-        CONSOLE::Color(n&1 ? RGB565(ffffff) : RGB565(d0d0d0));
+        CONSOLE::Color(n&1 ? RGB565(ffffff) : RGB565(b0b0b0));
         CONSOLE::Print("This is line %d!\n", n++);
       }
     }
