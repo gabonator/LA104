@@ -1,5 +1,7 @@
 #https://developer.arm.com/open-source/gnu-toolchain/gnu-rm/downloads
 
+GITREVISION=`git log --pretty=format:'%h' -n 1`
+
 export PATH="/Users/gabrielvalky/Downloads/gcc-arm-none-eabi-7-2018-q2-update/bin/":"$PATH"
 mkdir -p build
 cd build
@@ -58,6 +60,9 @@ arm-none-eabi-gcc -Wall -Os -Werror -fno-common -mcpu=cortex-m3 -mthumb -msoft-f
 #  ../lib/MSD/msdusb_pwr.c \
 
 arm-none-eabi-g++ -Wall -Os -Werror -fno-common -mcpu=cortex-m3 -mthumb -msoft-float -MD -fno-exceptions -fno-rtti -fno-threadsafe-statics -Wno-psabi -c -Wall -Werror \
+  -D __USER__=\"$USER\" \
+  -D __OSTYPE__=\"$OSTYPE\" \
+  -D __GITREVISION__=\"$GITREVISION\" \
   -D USE_STDPERIPH_DRIVER \
   -D STM32F10X_HD \
   ${INCLUDES} -c \

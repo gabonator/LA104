@@ -125,6 +125,8 @@ namespace PWM
   {
     TIM_TimeBaseInitTypeDef timerInitStructure;
 
+    // http://www.micromouseonline.com/2016/02/06/pwm-basics-on-the-stm32-general-purpose-timers/
+
     // TIM2
     timerInitStructure.TIM_Prescaler = 72;
     timerInitStructure.TIM_CounterMode = TIM_CounterMode_Up;
@@ -146,7 +148,7 @@ namespace PWM
       GPIO_InitTypeDef gpioStructure; 
       gpioStructure.GPIO_Pin = GPIO_Pin_10 | GPIO_Pin_11;
       gpioStructure.GPIO_Mode = GPIO_Mode_AF_PP; 
-      gpioStructure.GPIO_Speed = GPIO_Speed_50MHz ; 
+      gpioStructure.GPIO_Speed = GPIO_Speed_50MHz; 
       GPIO_Init(GPIOB, &gpioStructure); 
     }
     // TIM4
@@ -194,7 +196,7 @@ namespace PWM
 
   void DisablePwm(void)
   {
-    RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOB, DISABLE);
+//    RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOB, DISABLE);
     RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM2, DISABLE);
     RCC_APB2PeriphClockCmd(RCC_APB2Periph_AFIO, DISABLE);
     RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM4, DISABLE);
@@ -581,16 +583,16 @@ namespace BIOS
         return;
       }
 
-      if ((mode == Pwm || mode == I2c || mode == Uart) && specialMode != mode)
+      EMode testMode = mode;
+      if ((testMode & Input) || (testMode & Output))
+        testMode = Input;
+
+      if (specialMode != testMode)
       {
         switch (specialMode)
         {
           case Pwm: 
             PWM::DisablePwm(); 
-            PIN::SetState(arrPinAdrAPort[P1], arrPinAdrAPin[P1], PIN::StateSimpleInput);
-            PIN::SetState(arrPinAdrAPort[P2], arrPinAdrAPin[P2], PIN::StateSimpleInput);
-            PIN::SetState(arrPinAdrAPort[P3], arrPinAdrAPin[P3], PIN::StateSimpleInput);
-            PIN::SetState(arrPinAdrAPort[P4], arrPinAdrAPin[P4], PIN::StateSimpleInput);
           break;
           case I2c: 
             ::I2C::i2c_deinit(); 
@@ -606,11 +608,19 @@ namespace BIOS
           break;
         }
 
-        specialMode = mode;
+        specialMode = testMode;
 
         switch (specialMode)
         {
           case Pwm:
+            PIN::SetState(arrPinAdrAPort[P1], arrPinAdrAPin[P1], PIN::StateSimpleInput);
+            PIN::SetState(arrPinAdrAPort[P2], arrPinAdrAPin[P2], PIN::StateSimpleInput);
+            PIN::SetState(arrPinAdrAPort[P3], arrPinAdrAPin[P3], PIN::StateSimpleInput);
+            PIN::SetState(arrPinAdrAPort[P4], arrPinAdrAPin[P4], PIN::StateSimpleInput);
+            PIN::SetState(arrPinAdrBPort[P1], arrPinAdrBPin[P1], PIN::StateSimpleInput);
+            PIN::SetState(arrPinAdrBPort[P2], arrPinAdrBPin[P2], PIN::StateSimpleInput);
+            PIN::SetState(arrPinAdrBPort[P3], arrPinAdrBPin[P3], PIN::StateSimpleInput);
+            PIN::SetState(arrPinAdrBPort[P4], arrPinAdrBPin[P4], PIN::StateSimpleInput);
             ::PWM::EnablePwm(); 
           break;
           case I2c:
