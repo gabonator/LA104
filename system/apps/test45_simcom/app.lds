@@ -1,8 +1,8 @@
 MEMORY
 {
-  rom (rx) : ORIGIN = 0x0801a000, LENGTH = 16K
+  rom (rx)  : ORIGIN = 0x0801ed00, LENGTH = 60K
   ram (rwx) : ORIGIN = 0x20004800, LENGTH = 16K
-  null (rwx): ORIGIN = 0x00001000, LENGTH = 1K
+  null (rwx): ORIGIN = 0x00001000, LENGTH = 4K
 }
 
 /* _estack = ORIGIN(ram)+LENGTH(ram)-0x100; */

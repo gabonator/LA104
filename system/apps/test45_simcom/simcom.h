@@ -9,90 +9,46 @@
 
 #include "assert.h"
 
-#define millis() BIOS::SYS::GetTick()
-
-/*
- //#define GPRS_VERBOSE
- //#define GPRS_QUIET
-#ifdef GPRS_QUIET
-#define Error_print(x) void()
-#define Error_printnocrlf(x) void()
-#define Debug_print(x) void()
-#define Debug_printnocrlf(x) void()
-#elseif defined(GPRS_VERBOSE)
- */
-
-#ifdef __APPLE__
-void Serial_print(char c)
-{
-    fprintf(stderr, "%c", c);
-}
-void Serial_print(long l)
-{
-    fprintf(stderr, "%ld", l);
-}
-void Serial_print(int n)
-{
-    fprintf(stderr, "%d", n);
-}
-void Serial_print(char* p)
-{
-    fprintf(stderr, "%s", p);
-}
-void Serial_print(const char* p)
-{
-    fprintf(stderr, "%s", p);
-}
-
-#define Error_print Serial_print
-#define Error_printnocrlf(msg) _gprs_printnocrlf(msg)
-#define Debug_print Serial_print
-#define Debug_printnocrlf Error_printnocrlf
-
-#else
+#define millis() ((long)BIOS::SYS::GetTick())
 
 void Serial_print(char c)
 {
-    DBG::Print("%c", c);
+    CONSOLE::Print("%c", c);
 }
 void Serial_print(long l)
 {
-    DBG::Print("%d", (int)l);
+    CONSOLE::Print("%d", l);
 }
 void Serial_print(int n)
 {
-    DBG::Print("%d", n);
+    CONSOLE::Print("%d", n);
 }
 void Serial_print(char* p)
 {
-    DBG::Print("%s", p);
+    CONSOLE::Print("%s", p);
 }
 void Serial_print(const char* p)
 {
-    DBG::Print("%s", p);
+    CONSOLE::Print("%s", p);
 }
 
-#define Error_print Serial_print
+#define Error_print CONSOLE::Color(RGB565(ff0000)); Serial_print
 #define Error_printnocrlf(msg) _gprs_printnocrlf(msg)
+
+// Verbose output:
+//#define Debug_print CONSOLE::Color(RGB565(b0b0b0)); Serial_print
+//#define Debug_printnocrlf Error_printnocrlf
+
 #define Debug_print(x) void()
 #define Debug_printnocrlf(x) void()
 
-#endif
-/*
-#else
-#define Error_print Serial.print
-#define Error_printnocrlf(msg) _gprs_printnocrlf(msg)
-#define Debug_print(x) void()
-#define Debug_printnocrlf(x) void()
-#endif
-*/
+#define Info_print CONSOLE::Color(RGB565(00ff00)); Serial_print
+
 
 enum 
 {
     ResponseReaderBuffer = 64, // will fit whole line of header
-    //ResponseReaderBuffer = 16, // minimum - sufficient for testing HTTP response code
     RequestArgumentsLength = 128, // could be reduced to 1 when no arguments are sent    
-    //AtBufferLength = 24, // minimal AT parsing buffer (STATE: TCP CLOSED)
     AtBufferLength = 32, // optimal AT parsing buffer
 };
 
@@ -104,7 +60,7 @@ funcPower_t _gprs_power = [](bool){};
 
 void _gprs_printnocrlf(char c)
 {
-    Error_print((c != 0x0d && c != 0x0a) ? c : ' ');
+    Debug_print((c != 0x0d && c != 0x0a) ? c : ' ');
 }
 
 void _gprs_printnocrlf(const char* msg)
@@ -498,7 +454,7 @@ public:
       
         s << "POST " << mPath << " HTTP/1.0\r\n"
         << "Host: " << mHost << "\r\n"
-        << "User-Agent: sim900 on esp8266 by valky.eu\r\n"
+        << "User-Agent: sim800L on LA104 by valky.eu\r\n"
         << "content-type: application/x-www-form-urlencoded\r\n"
         << "content-length: " << counter.Count() << "\r\n"
         << "\r\n";
@@ -553,7 +509,7 @@ public:
       
         s << "POST " << mPath << " HTTP/1.0\r\n"
         << "Host: " << mHost << "\r\n"
-        << "User-Agent: iot-endpoint-valky-2018-1 (sim900 on esp8266 by valky.eu built " __DATE__ " " __TIME__ ")\r\n"
+        << "User-Agent: iot-endpoint-valky-2018-1 (sim800L on LA104 by valky.eu built " __DATE__ " " __TIME__ ")\r\n"
         << "content-type: application/json\r\n"
         << "content-length: " << counter.Count() << "\r\n"
         << "\r\n"; 
@@ -797,8 +753,10 @@ public:
             PrintLabel();
             Debug_print("Timeout ");
             Debug_print(mLastTimeout + n - now);
-            if (passed)
+            if (passed) // TODO:
+            {
                 Debug_print(" !!!TIMEOUT ERROR!!!");
+            }
             Debug_print("\n");
         }
         return passed;
@@ -830,8 +788,12 @@ public:
     }
     void Return(bool b)
     {
-        BIOS::DBG::Print("[%s=%d]", Name(), b);
-        
+        Info_print("[");
+        Info_print(Name());
+        Info_print("=");
+        Info_print(b);
+        Info_print("]\n");
+
         PrintLabel();
         Debug_print("Return ");
         Debug_print(b);
@@ -943,9 +905,10 @@ public:
         switch (Pc())
         {
             case 0: DigitalWrite(1); break;
-            case 1: Sleep(1000); break;
+            case 1: Sleep(2000); break;
             case 2: DigitalWrite(0); break;
-            case 3: Sleep(1000); break;
+            case 3: Flush();
+                    if (Timeout(5000)) Next(); break;
             default: Return(true);
         }
     }
@@ -977,7 +940,7 @@ public:
         switch (Pc())
         {
             case -3: Call(mProgToggleSwitch); break;
-            case -2: Sleep(mLongReboot ? 120 * 1000 : 0);
+            case -2: Sleep(mLongReboot ? 30 * 1000 : 0); // TODO: remove
                      mLongReboot = false; 
                      break;
             case -1: Call(mProgToggleSwitch); break;
@@ -1004,8 +967,8 @@ public:
                      if (Timeout(2000)) { Error("wrong PIN response"); Goto(0); } break;
             case 12: Expect("OK\r\n");
                      if (Timeout(2000)) Next(); break;
-            case 13: Sleep(5000);
-                     break; // mozno zbytocne
+//            case 13: Sleep(1000);
+//                     break; // mozno zbytocne
             default: Return(true); break;
         }
     }
@@ -1164,7 +1127,7 @@ public:
                     if (Timeout(5000)) Return(false); break;
             case 10: if (Expect("CONNECTED\r\n")) Goto(11);
                 if (Expect("TCP CLOSED\r\n")) Goto(13); // 7aug PROBLEM!!!! mame iba : ': TCP CLOSED  '
-                if (Timeout(5000)) Return(false); break;
+                if (Timeout(25000)) Return(false); break;
             case 11: Stream() << "AT+CIPCLOSE\r\n"; break;
             case 12: Expect("CLOSE OK\r\n");
                 if (Timeout(5000)) Return(false); break;
