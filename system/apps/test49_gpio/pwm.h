@@ -139,7 +139,32 @@ public:
 		
 		return step;
 	}
-	
+
+	int AnalogStep()
+        {
+          static long lastChange1 = 0;
+          static long lastChange2 = 0;
+          long now = BIOS::SYS::GetTick();
+          if (lastChange1 == 0)
+          {
+            lastChange1 = now;
+            lastChange2 = now;
+            return GPIO::AnalogRange/20;
+          }
+
+          int duration = now-lastChange2;
+          lastChange2 = lastChange1;
+          lastChange1 = now;
+
+          if (duration < 50)
+            return GPIO::AnalogRange/20;  // 50
+          if (duration < 100)
+            return GPIO::AnalogRange/50;  // 20
+          if (duration < 300)
+            return GPIO::AnalogRange/100; // 10
+          return 1;                       // 1
+        }
+
 	void Update(int n)
 	{
 		if (!mConfig[n].enabled)
@@ -190,7 +215,7 @@ public:
 				if (row.enabled && row.level > 0)
 				{
 					row.animate = false;
-					row.level -= GPIO::AnalogRange/20;
+					row.level -= AnalogStep();
 					if (row.level < 0)
 						row.level = 0;
 					
@@ -216,7 +241,7 @@ public:
 				if (row.enabled && row.level < GPIO::AnalogRange)
 				{
 					row.animate = false;
-					row.level += GPIO::AnalogRange/20;
+					row.level += AnalogStep();
 					if (row.level > GPIO::AnalogRange)
 						row.level = GPIO::AnalogRange;
 					

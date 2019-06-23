@@ -152,7 +152,7 @@ public:
         {
             mResponse.Reset();
             char request[128];
-            sprintf(request, "time=%d&counter=%d&reset=%d", BIOS::SYS::GetTick(), gReset, mCounter++);
+            sprintf(request, "time=%d&reset=%d&counter=%d", BIOS::SYS::GetTick(), gReset, mCounter++);
 
             mRequest.SetArguments(request);
             mGprs.request(mRequest);
