@@ -111,7 +111,14 @@ bool checkCompatibility(int fdi, bpb33* bpb)
     int offset = root_dir_addr(fdi, bpb);
     direntry dirent; 
     _readdi(fdi, dirent, offset, false);
-    return memcmp(dirent.deName, "DFU V", 5) == 0;
+
+    if (memcmp(dirent.deName, "DFU V", 5) == 0)
+      return true;
+    if (memcmp(dirent.deName, "DFU_V", 5) == 0)
+      return true;
+
+    fprintf(stderr, "Unsupported device label: %s\n", dirent.deName);
+    return false;
 }
 
 void fill_clusters(FILE*fd, int fdi, struct bpb33* bpb)

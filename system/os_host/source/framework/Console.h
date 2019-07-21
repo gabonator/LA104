@@ -1,3 +1,4 @@
+#pragma once
 #define CONSOLE_MODE_B
 
 namespace CONSOLE

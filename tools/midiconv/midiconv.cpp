@@ -87,10 +87,13 @@ void putDeltaTime(vector<uint8_t>& vct, int x)
     //vct.push_back(0);
 }
 
+
 #if 1
-constexpr char* input = "/Users/gabrielvalky/Downloads/LaIslaBonita.mid";
-constexpr char* output = "/Users/gabrielvalky/Downloads/laisla.txt";
-constexpr char* outputmidi = "/Users/gabrielvalky/Downloads/laisla.mid";
+//constexpr char* input = "/Users/gabrielvalky/Downloads/LaIslaBonita.mid";
+//constexpr char* output = "/Users/gabrielvalky/Downloads/laisla.txt";
+//constexpr char* outputmidi = "/Users/gabrielvalky/Downloads/laisla.mid";
+#define input argv[1]
+#define outputmidi argv[2]
 #else
 constexpr char* input = "/Users/gabrielvalky/Downloads/laisla.mid";
 constexpr char* output = "/Users/gabrielvalky/Downloads/laisla3.txt";
@@ -143,7 +146,7 @@ int main(int argc, const char * argv[])
     
     vector<uint8_t> metaTempo;
     vector<uint8_t> metaTimeSignature;
-    map<int, vector<vector<uint8_t>>, std::less<int>> midiEvents;
+    map<int, vector<vector<uint8_t> >, std::less<int> > midiEvents;
     
     for (int i=0; i<header.tracks; i++)
     {
@@ -278,10 +281,11 @@ int main(int argc, const char * argv[])
         }
     }
     
+    int lastTick = 0;
+/*
     ofstream ofs(output);
     
     ofs << "baud 31250\n";
-    int lastTick = 0;
     for (const auto& eventSet : midiEvents)
     {
         if (lastTick != eventSet.first)
@@ -302,7 +306,7 @@ int main(int argc, const char * argv[])
     }
     ofs << "\n\n\n";
     ofs.close();
-    
+*/    
     ofstream ofmidi(outputmidi, ios::binary);
     lastTick = 0;
     vector<uint8_t> midiBuffer;
