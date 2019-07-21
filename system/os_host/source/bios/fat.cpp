@@ -37,16 +37,6 @@ extern "C"
       return RES_OK;
   }
 
-/*
-Bytes per sector: 4096
-Sectors per cluster: 1
-Reserved sectors: 1
-Number of root dir entries: 512
-Total number of sectors: 2048
-Number of sectors per FAT: 1
-Number of hidden sectors: 0
-*/
-
   DRESULT disk_ioctl(BYTE drv, BYTE ctrl, void *buff)
   {
       if (drv != 0) return RES_PARERR;
@@ -57,8 +47,12 @@ Number of hidden sectors: 0
       }
       else if (ctrl == GET_SECTOR_COUNT)
       {
-//          *(DWORD*)buff = 4096;
+#ifdef DS213
+          *(DWORD*)buff = 2047;  // TODO: move to bios
+#endif
+#ifdef LA104
           *(DWORD*)buff = 2048;
+#endif
           return RES_OK;
       }
       else if (ctrl == GET_SECTOR_SIZE || ctrl == GET_BLOCK_SIZE)

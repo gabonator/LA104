@@ -15,7 +15,7 @@
 #include <usb_lib.h>
 #include "../../lib/COMMON/commonusb_pwr.h"
 #include "stm32f10x_flash.h"
-#include "../bios/fatfs/Ext_Flash.h"
+#include "../bios/imports.h"
 
 #define TXFR_IDLE      0
 #define TXFR_ONGOING   1

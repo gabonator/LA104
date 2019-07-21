@@ -8,6 +8,18 @@ extern "C"
 {
 #endif
 
+  enum EKeyMask 
+  {
+    KeyUp = 1<<8,
+    KeyDown = 1<<9,
+    KeyRight = 1<<10,
+    KeyLeft = 1<<11,
+    KeyF1 = 1<<0,
+    KeyF2 = 1<<1,
+    KeyF3 = 1<<2,
+    KeyF4 = 1<<3
+  };
+
   void Set_Posi(uint_fast16_t x, uint_fast16_t y);
   void Set_Pixel(uint_fast16_t Color);
 
@@ -15,8 +27,8 @@ extern "C"
   void ReadFinish(void);
   uint32_t ReadPixel(void);
 
-  void ExtFlash_CS_LOW(void);
-  void ExtFlash_CS_HIGH(void);
+  bool ExtFlashSecWr(uint8_t* pBuffer, uint32_t WriteAddr);
+  bool ExtFlashDataRd(uint8_t* pBuffer, uint32_t ReadAddr, uint16_t Lenght);
   void Set_Block(int x1, int y1, int x2, int y2);
   void xBeep(bool on);
   char GetLastChar();
@@ -28,6 +40,7 @@ extern "C"
 
   uint32_t FPGA32(uint8_t Cmd, uint16_t Cnt, uint32_t Data);
   uint16_t FPGA16(uint8_t Cmd, uint16_t Cnt, uint16_t Data);
+
 #ifdef __cplusplus
 }
 #endif

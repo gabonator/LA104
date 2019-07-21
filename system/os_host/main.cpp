@@ -52,9 +52,9 @@ int main()
 //  BIOS::USB::InitializeSerial();
   BIOS::USB::InitializeMass();
   BIOS::OS::SetArgument((char*)"");
-  BIOS::LCD::Print(0, BIOS::LCD::Height-16*4, RGB565(ffffff), RGB565(00000), "OS Revision: " __GITREVISION__);
-  BIOS::LCD::Print(0, BIOS::LCD::Height-16*3, RGB565(ffffff), RGB565(00000), "Build date: " __DATE__ " " __TIME__);
-  BIOS::LCD::Print(0, BIOS::LCD::Height-16*2, RGB565(ffffff), RGB565(00000), "Built by: " __USER__ " on " __OSTYPE__);
+  BIOS::LCD::Print(0, 0, RGB565(ffffff), RGB565(00000), "OS Revision: " __GITREVISION__);
+  BIOS::LCD::Print(0, 16, RGB565(ffffff), RGB565(00000), "Build date: " __DATE__ " " __TIME__);
+  BIOS::LCD::Print(0, 32, RGB565(ffffff), RGB565(00000), "Built by: " __USER__ " on " __OSTYPE__);
 
   char shell[64] = "shell.elf";
 

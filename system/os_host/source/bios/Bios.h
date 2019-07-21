@@ -15,8 +15,15 @@ namespace BIOS
 
   namespace LCD
   {
+#ifdef LA104
     const int Width = 320;
     const int Height = 240;
+#endif
+
+#ifdef DS213
+    const int Width = 400;
+    const int Height = 240;
+#endif
 
     void Clear(unsigned short clr);
 

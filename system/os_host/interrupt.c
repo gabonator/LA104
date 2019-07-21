@@ -54,60 +54,30 @@ void SysTickHandler(void)
   }
 
   // keyboard
-  uint16_t keysReg = GetKeys();
+  uint32_t keyMask = GetKeys();
 
-  // yYxX 1111  1111 DCBA 
-  uint8_t encX = (keysReg >> 12) & 3;
-  uint8_t encY = (keysReg >> 14) & 3;
-  uint8_t keys = keysReg & 0x0f;
+  static uint32_t keyMaskOld = 0;
 
-  static uint8_t encXold = -1, encYold = -1, keysOld = -1;
-  if (encXold == -1)
+  if (keyMaskOld != keyMask)
   {
-    encXold = encX;
-    encYold = encY;
-    keysOld = keys;
-  }
-  static int8_t encTable[16] = {
-//     [0b0001] = 1, // 11 -> 10
-     [0b0111] = 1, // 10 -> 00
-     [0b1100] = 1, // 00 -> 11
-     [0b0011] = -1, // 10 -> 11
-//     [0b1101] = -1, // 00 -> 10
-     [0b0100] = -1, // 11 -> 00
-  };
-
-  if (encX != encXold)
-  {
-    int8_t diff = encTable[(encXold << 2) | encX];
-    if (diff>0)
-      lastChar = '+'; 
-    else if (diff<0)
-      lastChar = '-'; 
-    encXold = encX;
-  }
-
-  if (encY != encYold)
-  {
-    int8_t diff = encTable[(encYold << 2) | encY];
-    if (diff>0)
-      lastChar = '>'; 
-    else if (diff<0)
-      lastChar = '<'; 
-    encYold = encY;
-  }
-
-  if (keysOld != keys)
-  {
-    if (keys & 0b0001)
+    if (keyMask & KeyUp)
+      lastChar = '>';
+    if (keyMask & KeyDown)
+      lastChar = '<';
+    if (keyMask & KeyRight)
+      lastChar = '+';
+    if (keyMask & KeyLeft)
+      lastChar = '-';
+    if (keyMask & KeyF1)
       lastChar = '1';
-    if (keys & 0b0010)
+    if (keyMask & KeyF2)
       lastChar = '2';
-    if (keys & 0b0100)
+    if (keyMask & KeyF3)
       lastChar = '3';
-    if (keys & 0b1000)
+    if (keyMask & KeyF4)
       lastChar = '4';
-    keysOld = keys;
+
+    keyMaskOld = keyMask;
   }
 }
 

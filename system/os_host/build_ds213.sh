@@ -21,6 +21,7 @@ INCLUDES="\
 arm-none-eabi-gcc -Wall -Os -Werror -fno-common -mcpu=cortex-m3 -mthumb -msoft-float -MD \
   -D USE_STDPERIPH_DRIVER \
   -D STM32F10X_HD \
+  -D DS213 \
   ${INCLUDES} -c \
   ../startup.c \
   ../interrupt.c \
@@ -34,7 +35,6 @@ arm-none-eabi-gcc -Wall -Os -Werror -fno-common -mcpu=cortex-m3 -mthumb -msoft-f
   ../lib/STM32_USB-FS-Device_Driver/src/usb_regs.c \
   ../lib/STM32_USB-FS-Device_Driver/src/usb_sil.c \
   ../lib/CMSIS/Device/STM32F10x/Source/system_stm32f10x.c \
-  ../source/bios/fatfs/Ext_Flash.c \
   ../source/bios/imports.c \
   ../lib/STM32F10x_StdPeriph_Driver/src/stm32f10x_gpio.c \
   ../lib/STM32F10x_StdPeriph_Driver/src/stm32f10x_tim.c \
@@ -65,6 +65,7 @@ arm-none-eabi-g++ -Wall -Os -Werror -fno-common -mcpu=cortex-m3 -mthumb -msoft-f
   -D __GITREVISION__=\"$GITREVISION\" \
   -D USE_STDPERIPH_DRIVER \
   -D STM32F10X_HD \
+  -D DS213 \
   ${INCLUDES} -c \
   ../main.cpp \
   ../source/bios/sys.cpp \
@@ -110,7 +111,6 @@ arm-none-eabi-gcc -mcpu=cortex-m3 -mthumb -o output.elf -nostartfiles -T ../app.
   ./usb_int.o \
   ./usb_sil.o \
   ./system_stm32f10x.o \
-  ./Ext_Flash.o \
   ./stm32f10x_gpio.o \
   ./stm32f10x_tim.o \
   ./gpio.o \

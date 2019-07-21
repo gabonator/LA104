@@ -8,8 +8,16 @@
 #define SECTOR_CNT       SEC_AMNT
 
 #define DISKSTR          "8MB Internal"
-#define SEC_SIZE         4096
-#define SEC_AMNT         2048
+#define SEC_SIZE         4096 // TODO: JOIN
+
+#ifdef DS213
+#define SEC_AMNT         2047 // TODO: bios
+#endif
+
+#ifdef LA104
+#define SEC_AMNT         2048 // TODO: bios
+#endif
+
 #define FLASH_PAGE       0x0800
 
 extern u8 DiskBuf[];
