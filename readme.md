@@ -25,7 +25,7 @@ LA104 playing midi on SAM2695 wavetable synthesizer through UART:
 
 ##### Simcom driver
 
-Simcom 800L driver with nice interface, sends 6 HTTP (get/post/json) requests in one minute. [test45_simcom](system/apps/test44_simcom)
+Simcom 800L driver with nice interface, sends 6 HTTP (get/post/json) requests in one minute. [test45_simcom](system/apps/test45_simcom)
 
 ##### GPIO Tool
 
