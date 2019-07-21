@@ -25,15 +25,15 @@ LA104 playing midi on SAM2695 wavetable synthesizer through UART:
 
 ##### Simcom driver
 
-Simcom 800L driver with nice interface, sends 6 HTTP (get/post/json) requests in one minute. [test45_simcom](system/apps/test41_simcom)
+Simcom 800L driver with nice interface, sends 6 HTTP (get/post/json) requests in one minute. [test45_simcom](system/apps/test44_simcom)
 
 ##### GPIO Tool
 
 Allows to monitor logic level on all 8 pins, the P1-P4 pins can be used as outputs. In PWM tab it is possible to set the PWM frequency and PWM levels for P1-P4 pins, including exponential compensation curve or automatic quasi-periodic animation of all outputs.
 
-![Wave alchemy settings](resources/imgGpio1.jpeg)
+![GPIO tool - logic](resources/imgGpio1.png)
 
-![Wave alchemy settings](resources/imgGpio2.jpeg)
+![GPIO tool - pwm](resources/imgGpio2.png)
 
 
 ##### Wave alchemy
