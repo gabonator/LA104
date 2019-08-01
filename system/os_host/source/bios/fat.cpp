@@ -3,7 +3,6 @@
 
 extern "C" 
 {
-  #include "fatfs/Ext_Flash.h"
   #include "fatfs/ff.c"
 
   DSTATUS disk_initialize(BYTE drv)

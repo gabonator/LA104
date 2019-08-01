@@ -58,7 +58,12 @@ int main()
 
   char shell[64] = "shell.elf";
 
+#ifdef LA104
   while (BIOS::KEY::GetKey() == BIOS::KEY::F3)
+#endif
+#ifdef DS213
+  while (BIOS::KEY::GetKey() == BIOS::KEY::F4)
+#endif
   {
       BIOS::DBG::Print("Safe mode, press F1 to continue.\n");
       while (BIOS::KEY::GetKey() != BIOS::KEY::F1);

@@ -222,6 +222,7 @@ int main(void)
   }
 
   //****************************************************************************   
+  BIOS::OS::SetInterruptVector(BIOS::OS::ISysTick, pCurrentSysTick);
   return 0;
 }
 

@@ -19,7 +19,7 @@ enum {DISABLE = 0, ENABLE = 1};
 #define COL_SIZE 400
 #define ROW_SIZE 240
 
-#define __IO
+#define __IO volatile
 
 typedef struct
 {

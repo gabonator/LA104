@@ -24,8 +24,11 @@ uint32_t ReadPixel(void)
   return *Hw.pLcd_Data_R;
 }
 
+int lastBlockX1, lastBlockY1, lastBlockX2, lastBlockY2;
+
 void ReadStart(void)
 {
+  Hw.pLCD_R_Block(lastBlockX1, lastBlockY1, lastBlockX2, lastBlockY2);
 }
 
 void ReadFinish(void)
@@ -46,7 +49,11 @@ void ExtFlash_CS_HIGH(void)
 }
 
 void Set_Block(int x1, int y1, int x2, int y2)
-{
+{ 
+  lastBlockX1 = x1;
+  lastBlockY1 = y1;
+  lastBlockX2 = x2-1;
+  lastBlockY2 = y2-1;
   Hw.pLCD_W_Block(x1, y1, x2-1, y2-1);
 // Hw.pLCD_R_Block(x1, y1, x2, y2);
 }
@@ -58,6 +65,10 @@ void xBeep(bool b)
 
 void Set_Posi(uint_fast16_t x, uint_fast16_t y)
 {
+  lastBlockX1 = x;
+  lastBlockY1 = y;
+  lastBlockX2 = x;
+  lastBlockY2 = y;
   Hw.pLCD_W_Block(x, y, Hw.MaxLcdCol, Hw.MaxLcdRow);
 }
 
@@ -182,11 +193,13 @@ void USB_DevInit(void)
 bool ExtFlashSecWr(uint8_t* pBuffer, uint32_t WriteAddr)
 {
   // TODO: Interruption not handled properly!
-  return Hw.pSpiFlashSecW((uint32_t)pBuffer, WriteAddr, _SEC_SIZE);
+  Hw.pSpiFlashSecW((uint32_t)pBuffer, WriteAddr, _SEC_SIZE);
+  return 1;
 }
 
 bool ExtFlashDataRd(uint8_t* pBuffer, uint32_t ReadAddr, uint16_t Length)
 {
   // TODO: Interruption not handled properly!
-  return Hw.pSpiFlashRead((uint32_t)pBuffer, ReadAddr, Length);
+  Hw.pSpiFlashRead((uint32_t)pBuffer, ReadAddr, _SEC_SIZE);
+  return 1;
 }

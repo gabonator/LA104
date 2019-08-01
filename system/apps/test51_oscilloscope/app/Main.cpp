@@ -84,7 +84,7 @@ int main(void)
 {
   pFunc1 __BiosInit = (pFunc1)0x08000101; // Point to DFU BiosInit
   __BiosInit((u32)&Hw);                   //
-
+/*
   Hw.pDevInit(PWRCTRL);
   Hw.pDevInit(KEYnDEV);
   Hw.pDevInit(DISPDEV);
@@ -96,7 +96,7 @@ int main(void)
   *Hw.pBuz_Vol = 50;
   Hw.pDevInit(FPGADEV);
   Hw.pDevInit(FPGACFG);
-
+*/
   static BIOS::OS::TInterruptHandler pCurrentSysTick = BIOS::OS::GetInterruptVector(BIOS::OS::ISysTick);
 //  BIOS::OS::SetInterruptVector(BIOS::OS::ISysTick, [](){ SysInt(); pCurrentSysTick(); });
   BIOS::OS::SetInterruptVector(BIOS::OS::ISysTick, SysInt);
