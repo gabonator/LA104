@@ -46,6 +46,9 @@ extern "C"
       }
       else if (ctrl == GET_SECTOR_COUNT)
       {
+#ifdef DS203
+          *(DWORD*)buff = 4096;  // TODO: move to bios
+#endif
 #ifdef DS213
           *(DWORD*)buff = 2047;  // TODO: move to bios
 #endif

@@ -5,7 +5,7 @@
 #include "DS213Bios.h"
 
 void SysInt(void);
-
+uint32_t counter = 0;
 //=================+=====+=====+=====+=====+=====+=====+=====+=====+=====+=====+
 //
 //=================+=====+=====+=====+=====+=====+=====+=====+=====+=====+=====+
@@ -95,6 +95,7 @@ void USB_DiskLink(u8 NewState)
 *******************************************************************************/
 void SysInt(void)
 {
+  counter++;
   static u16 LastEnc, LastSt, Cnt_20mS, CursorCnt, Cnt_mS, LED_Dir, LED_Pwm;
   if (Dly_mS != 0) Dly_mS--;
   Cnt_mS++;
@@ -210,14 +211,17 @@ u32 GetDev_SN(void)
 *******************************************************************************/
 void SmplStart(void)
 { 
-  if(Menu[RUN].Val == HOLD) return;          // 
+//  if(Menu[RUN].Val == HOLD) return;          // 
   FPGA_DataWr(A_C_CH, SMPL_MODE, SEPARATE);  // 
   FPGA_DataWr(B_D_CH, SMPL_MODE, SEPARATE);
-  SetPreSmplDpth(30*Menu[T_0].Val);          // Ԥ
+  SetPreSmplDpth(20);//30*Menu[T_0].Val);          // Ԥ
   SetBase(Menu[TIM].Val);                    // 
   FPGA_ByteWr(A_C_CH, TRIG_VOLT, Vt[CH_A]);  // 
   FPGA_ByteWr(B_D_CH, TRIG_VOLT, Vt[CH_B]);
   SetTriggTyp(Menu[TRG].Val, Menu[V_T].Src); // 
+
+  FPGA_ByteWr(A_C_CH, TRIG_KIND, TRIG_AiDN);
+  FPGA_ByteWr(B_D_CH, TRIG_KIND, TRIG_AiDN);
   
   Trigg = 0, ScrnF = 0;                      // 
   *Hw.pOut_Clr = 1, *Hw.pOut_Clr = 0;        // FPGA 

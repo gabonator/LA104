@@ -22,6 +22,7 @@ void dbgPrint(const char* msg, ...)
   BIOS::DBG::Print(buf);
 }
 
+//TODO: remove
 char dbgPushBuf[64];
 void dbgPushPrint(const char* msg, ...)
 {

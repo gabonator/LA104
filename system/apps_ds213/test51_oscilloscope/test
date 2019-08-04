@@ -1,0 +1,46 @@
+u8  FPGA_CtrlRW(u8 Dev, u8 Cmd)
+{
+  SPI_TypeDef* SpiX = (SPI_TypeDef*)Hw.Fpga_Spi;
+  vu8* nSS = (Dev == 0) ? Hw.pOut_nSS0 : Hw.pOut_nSS1;
+  *nSS = 0;
+  SpiX->DR = Cmd;                          // 
+  while(!(SpiX->SR & SPI_I2S_FLAG_RXNE)){}
+  u8 Info = SpiX->DR;                      // 
+  *nSS = 1;
+  return Info;
+}
+/*******************************************************************************
+  bit0: Dgtl Smpl Bit,  bit1~5: Info, bit8~15: Anlg Smpl Byte
+*******************************************************************************/
+u16 FPGA_SmplRd(u8 Dev)
+{
+  SPI_TypeDef* SpiX = (SPI_TypeDef*)Hw.Fpga_Spi;
+  vu8* nSS = (Dev == 0) ? Hw.pOut_nSS0 : Hw.pOut_nSS1;
+  *nSS = 0;
+  SpiX->DR = SMPL_RD;                      // 
+  while(!(SpiX->SR & SPI_I2S_FLAG_RXNE)){}
+  u16 Data = (u8)(SpiX->DR) ;              // 
+  while(!(SpiX->SR & SPI_I2S_FLAG_TXE)){}
+  SpiX->DR = 0;                            // 
+  while(!(SpiX->SR & SPI_I2S_FLAG_RXNE)){}
+  Data |= (u8)(SpiX->DR) << 8;             // 
+  *nSS = 1;
+  return Data;
+}
+
+
+
+  u32 Status = FPGA_CtrlRW(CH_A, SMPL_ST) | FPGA_CtrlRW(CH_B, SMPL_ST);
+  if(Status & TRIGG) Trigg = 1;
+  if(Status & SCRNF) ScrnF = 1;
+
+
+  FPGA_DataWr(A_C_CH, SMPL_RPTR, Xposi);              // 
+  FPGA_DataWr(B_D_CH, SMPL_RPTR, Xposi);
+  
+    u32 SmplAC = FPGA_SmplRd(A_C_CH);
+    u32 SmplBD = FPGA_SmplRd(B_D_CH);
+
+    if(Status & TRIGG) Trigg = 1;
+    if(Status & SCRNF) ScrnF = 1;
+    if(Status & EMPTY) return Status;

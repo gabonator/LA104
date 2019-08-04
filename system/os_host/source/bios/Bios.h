@@ -25,6 +25,11 @@ namespace BIOS
     const int Height = 240;
 #endif
 
+#ifdef DS203
+    const int Width = 400;
+    const int Height = 240;
+#endif
+
     void Clear(unsigned short clr);
 
     int Print (int x, int y, unsigned short clrf, unsigned short clrb, char c);
@@ -114,7 +119,15 @@ namespace BIOS
       char strName[13];
     };
 
+#ifdef DS203
+    const int SectorSize = 512;
+#endif
+#ifdef DS213
     const int SectorSize = 4096;
+#endif
+#ifdef LA104
+    const int SectorSize = 4096;
+#endif
     PVOID GetSharedBuffer();
 
     EResult Init();

@@ -7,3 +7,7 @@
 #ifdef LA104
 #include "la104/imports.c"
 #endif
+
+#ifdef DS203
+#include "ds203/imports.c"
+#endif
