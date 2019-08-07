@@ -68,6 +68,7 @@ uint32_t GetProcAddress(char* symbol)
     case 0x294424be: return (uint32_t)static_cast<void(*)()>(BIOS::USB::InitializeSerial); 
     case 0xfdc7c062: return (uint32_t)static_cast<void(*)()>(BIOS::USB::Enable); 
     case 0x0f974530: return (uint32_t)static_cast<void(*)()>(BIOS::USB::Disable); 
+#ifdef LA104
     case 0xa24234b9: return (uint32_t)static_cast<int(*)(BIOS::GPIO::EPin)>(BIOS::GPIO::AnalogRead); 
     case 0x8fdd2172: return (uint32_t)static_cast<void(*)(BIOS::GPIO::EPin, int)>(BIOS::GPIO::AnalogWrite); 
     case 0xfaa84c46: return (uint32_t)static_cast<bool(*)(BIOS::GPIO::EPin)>(BIOS::GPIO::DigitalRead); 
@@ -82,6 +83,7 @@ uint32_t GetProcAddress(char* symbol)
     case 0xad9a496d: return (uint32_t)static_cast<void(*)(unsigned char)>(BIOS::GPIO::UART::Write); 
     case 0x0a8c2875: return (uint32_t)static_cast<bool(*)()>(BIOS::GPIO::UART::Available); 
     case 0x1d877761: return (uint32_t)static_cast<void(*)(BIOS::GPIO::EPin, BIOS::GPIO::EMode)>(BIOS::GPIO::PinMode); 
+#endif
     case 0x37f17362: return (uint32_t)static_cast<void(*)()>(BIOS::MEMORY::LinearStart); 
     case 0xa8ff17f6: return (uint32_t)static_cast<bool(*)()>(BIOS::MEMORY::LinearFinish); 
     case 0x7ac18f26: return (uint32_t)static_cast<bool(*)(unsigned long, unsigned char*, int)>(BIOS::MEMORY::LinearProgram); 

@@ -143,38 +143,6 @@ namespace BIOS
     EResult FindNext(TFindFile* pFile);
   }
 
-  namespace GPIO
-  {
-    enum EPin {P1, P2, P3, P4, CH1, CH2, CH3, CH4};
-    enum EMode {Input = 1, Output = 2, Pwm = 4, PullUp = 8, PullDown = 16, I2c = 32, Uart = 64};
-    const int AnalogRange = 1024;
-
-    void DigitalWrite(EPin pin, bool value);
-    bool DigitalRead(EPin pin);
-    void AnalogWrite(EPin pin, int value);
-    int AnalogRead(EPin pin);
-    void PinMode(EPin pin, EMode mode);
-
-    namespace I2C          
-    {
-      bool BeginTransmission(uint8_t address);
-      bool RequestFrom(uint8_t address, uint8_t bytes);
-      bool Write(uint8_t data);
-      uint8_t Read();
-      bool EndTransmission();
-    }
-
-    namespace UART
-    {
-      enum EConfig {length8 = 0, length9 = 0x10, stopBits1 = 0, stopBits15 = 0x1, stopBits2 = 0x2,
-        parityNone = 0, parityEven = 0x4, paritOdd = 0x08, flowNone = 0, flowHw = 0x20};
-      void Setup(int baudrate, EConfig config);
-      bool Available();
-      uint8_t Read();
-      void Write(uint8_t);
-    }
-  }
-
   namespace OS
   {
     typedef void (*TInterruptHandler)(void);
@@ -225,5 +193,41 @@ namespace BIOS
 
     void InitializeFinish(int msk);
   }
+
+#ifdef LA104
+  namespace GPIO
+  {
+    enum EPin {P1, P2, P3, P4, CH1, CH2, CH3, CH4};
+    enum EMode {Input = 1, Output = 2, Pwm = 4, PullUp = 8, PullDown = 16, I2c = 32, Uart = 64};
+    const int AnalogRange = 1024;
+
+    void DigitalWrite(EPin pin, bool value);
+    bool DigitalRead(EPin pin);
+    void AnalogWrite(EPin pin, int value);
+    int AnalogRead(EPin pin);
+    void PinMode(EPin pin, EMode mode);
+
+    namespace I2C          
+    {
+      bool BeginTransmission(uint8_t address);
+      bool RequestFrom(uint8_t address, uint8_t bytes);
+      bool Write(uint8_t data);
+      uint8_t Read();
+      bool EndTransmission();
+    }
+
+    namespace UART
+    {
+      enum EConfig {length8 = 0, length9 = 0x10, stopBits1 = 0, stopBits15 = 0x1, stopBits2 = 0x2,
+        parityNone = 0, parityEven = 0x4, paritOdd = 0x08, flowNone = 0, flowHw = 0x20};
+      void Setup(int baudrate, EConfig config);
+      bool Available();
+      uint8_t Read();
+      void Write(uint8_t);
+    }
+  }
+#endif
 }
+
+
 

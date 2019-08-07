@@ -102,6 +102,12 @@ struct bpb33* check_bootsector(int fd)
 
 bool checkCompatibility(int fdi, bpb33* bpb)
 {
+    if (!bpb)
+    {
+      fprintf(stderr, "Device identification failed\n");
+      return false;
+    }
+
     if (bpb->bpbBytesPerSec != 512 || bpb->bpbSecPerClust != 1 || bpb->bpbSectors != 4096)
     {
       fprintf(stderr, "Incompatible device\n");

@@ -1,3 +1,4 @@
+#ifdef LA104
 #include "Bios.h"
 
 #include <stm32f10x_tim.h>
@@ -107,6 +108,8 @@ namespace PIN
   }
 }
 
+// TIM8 CH4
+
 namespace PWM
 {
   void RCCInit(void)
@@ -121,7 +124,7 @@ namespace PWM
     RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM4, ENABLE);
   } 
 
-  void TimerInit(uint16_t period) 
+  void TimerInit(uint16_t period)  // TOTO!!! TIM8_CH4 alebo TIM3_CH4
   {
     TIM_TimeBaseInitTypeDef timerInitStructure;
 
@@ -764,3 +767,5 @@ extern "C"
      BIOS::GPIO::UART::mUartBuffer.push(data);
   }
 }
+
+#endif

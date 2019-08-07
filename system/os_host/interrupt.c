@@ -85,10 +85,12 @@ extern void UartPushByte(uint8_t data);
 
 void USART3_IRQHandler(void)
 {
+#ifdef LA104
   if ((USART3->SR & USART_FLAG_RXNE) != (u16)RESET)
   {
     UartPushByte(USART_ReceiveData(USART3));
   }
+#endif
 }
 
 extern void USB_Istr(void);
