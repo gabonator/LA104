@@ -6,37 +6,12 @@
 	static const CBarItem arrMenuItems[] = {
 
 		{ CBarItem::IMain,	(PSTR)"Oscilloscope", nullptr},
-		{ CBarItem::ISub,	(PSTR)"Input", nullptr},
-		{ CBarItem::ISub,	(PSTR)"Cursor", nullptr},
-		{ CBarItem::ISub,	(PSTR)"Meas", nullptr},
-		{ CBarItem::ISub,	(PSTR)"Math", nullptr},
-		{ CBarItem::ISub,	(PSTR)"Disp", nullptr},
-		{ CBarItem::ISub,	(PSTR)"Mask", nullptr},
-
-		{ CBarItem::IMain,	(PSTR)"Spectrum", nullptr},
-		{ CBarItem::ISub,	(PSTR)"FFT", nullptr},
-		{ CBarItem::ISub,	(PSTR)"Marker", nullptr},
-
-		{ CBarItem::IMain,	(PSTR)"Generator", nullptr},
-		{ CBarItem::ISub,	(PSTR)"Wave", nullptr},
-		{ CBarItem::ISub,	(PSTR)"Edit", nullptr},
-//		{ CBarItem::ISub,	(PSTR)"Modulation", &MainWnd.m_wndMenuGeneratorMod},
-		
-		{ CBarItem::IMain,	(PSTR)"Settings", nullptr},
-		{ CBarItem::ISub,	(PSTR)"Main", nullptr},
-		{ CBarItem::ISub,	(PSTR)"Keys", nullptr},
-		{ CBarItem::ISub,	(PSTR)"Calib", nullptr},
-		
-		{ CBarItem::IMain,	(PSTR)"About", nullptr},
-		{ CBarItem::ISub,	(PSTR)"Device", nullptr},
-		{ CBarItem::ISub,	(PSTR)"Firmware", nullptr},
-		{ CBarItem::ISub,	(PSTR)"Modules", nullptr},
-		{ CBarItem::ISub,	(PSTR)"Status", nullptr},
-
-
-		{ CBarItem::IMain,	(PSTR)"User app", nullptr},
-		{ CBarItem::ISub,	(PSTR)"File manager", nullptr},
-
+		{ CBarItem::ISub,	(PSTR)"Input", &MainWnd.m_wndMenuInput},
+		{ CBarItem::ISub,	(PSTR)"Cursor", &MainWnd.m_wndMenuCursor},
+		{ CBarItem::ISub,	(PSTR)"Meas", &MainWnd.m_wndMenuMeas},
+		{ CBarItem::ISub,	(PSTR)"Math", &MainWnd.m_wndMenuMath},
+		{ CBarItem::ISub,	(PSTR)"Disp", &MainWnd.m_wndMenuDisplay},
+		{ CBarItem::ISub,	(PSTR)"Mask", &MainWnd.m_wndMenuMask},
 		{ CBarItem::IEnd,		NULL, NULL }
 	};
 

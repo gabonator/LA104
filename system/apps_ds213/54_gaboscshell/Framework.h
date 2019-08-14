@@ -37,7 +37,7 @@ public:
 		}
 	}
 
-	virtual void OnPaint()
+	virtual void OnPaint() override
 	{
 		if ( HasFocus() )
 		{
@@ -62,7 +62,7 @@ public:
 			BIOS::LCD::Print( m_rcClient.left+12, m_rcClient.top, RGB565(000000), RGBTRANS, m_pszId );
 		}
 	}
-	virtual void OnKey(ui16 nKey)
+	virtual void OnKey(int nKey) override
 	{
 		// Parent will manage the movement
 		GetParent()->OnKey( nKey );

@@ -35,7 +35,7 @@ public:
 
 	virtual void Create(CWnd *pParent, ui16 dwFlags);
 	virtual void OnPaint();
-	virtual void OnKey(ui16 nKey);
+	virtual void OnKey(int nKey);
 
 private:
 	const TMenuBlockStruct* GetLayout();

@@ -1,0 +1,48 @@
+#https://developer.arm.com/open-source/gnu-toolchain/gnu-rm/downloads
+
+export PATH="/Users/gabrielvalky/Downloads/gcc-arm-none-eabi-7-2018-q2-update/bin/":"$PATH"
+mkdir -p build
+cd build
+
+arm-none-eabi-g++ -Os -Werror -fno-common -mcpu=cortex-m3 -mthumb -msoft-float -fno-exceptions -fno-rtti -fno-threadsafe-statics -Wno-psabi -MD -D DS203 -D _ARM -D STM32F10X_HD -c \
+  ../source/main.cpp \
+  ../source/MainWnd.cpp \
+  ../source/Toolbar.cpp \
+  ../source/Shapes.cpp \
+  ../source/Oscilloscope/Controls/GraphOsc.cpp \
+  ../source/Oscilloscope/Core/CoreOscilloscope.cpp \
+  ../source/Oscilloscope/Disp/MenuDisp.cpp \
+  ../source/Oscilloscope/Input/MenuInput.cpp \
+  ../source/Oscilloscope/Marker/MenuMarker.cpp \
+  ../source/Oscilloscope/Mask/MenuMask.cpp \
+  ../source/Oscilloscope/Math/ChannelMath.cpp \
+  ../source/Oscilloscope/Math/FirFilter.cpp \
+  ../source/Oscilloscope/Math/MenuMath.cpp \
+  ../source/Oscilloscope/Meas/MenuMeas.cpp \
+  ../source/Oscilloscope/Meas/Statistics.cpp \
+  ../../../os_host/source/framework/Wnd.cpp \
+  ../../../os_host/source/framework/Utils.cpp \
+  -I../../../os_library/include/ \
+  -I../source/
+
+arm-none-eabi-gcc -fPIC -mcpu=cortex-m3 -mthumb -o output.elf -nostartfiles -T ../app.lds \
+  ./main.o \
+  ./MainWnd.o \
+  ./ToolBar.o \
+  ./Wnd.o \
+  ./Utils.o \
+  ./Shapes.o \
+  -lbios -L../../../os_library/build
+
+arm-none-eabi-objdump -d -S output.elf > output.asm
+arm-none-eabi-readelf -all output.elf > output.txt
+
+find . -type f -name '*.o' -delete
+find . -type f -name '*.d' -delete
+
+../../../../tools/elfstrip/elfstrip output.elf 54shell.elf
+
+nm --print-size --size-sort -gC output.elf | grep " B " > symbols_ram.txt
+nm --print-size --size-sort -gC output.elf | grep " T " > symbols_rom.txt
+nm --print-size --size-sort -gC output.elf > symbols_all.txt
+#objdump -s -j .dynamic output.elf
