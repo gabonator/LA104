@@ -24,7 +24,7 @@ public:
         mWndSignalZoom.Create(RGB565(b0b0b0), this);
     }
     
-    virtual void OnMessage(CWnd* pSender, ui16 code, ui32 data) override
+    virtual void OnMessage(CWnd* pSender, int code, uintptr_t data) override
     {
         m_pParent->OnMessage(pSender, code, data);
     }
@@ -103,7 +103,7 @@ public:
         BIOS::LCD::Printf(rcStatus.left, rcStatus.top, RGB565(808080), RGBTRANS, "    ms     t");
     }
     
-    virtual void OnMessage(CWnd* pSender, ui16 code, ui32 data) override
+    virtual void OnMessage(CWnd* pSender, int code, uintptr_t data) override
     {
         if (code == ToWord('D', 'A')) // new data
         {

@@ -14,10 +14,10 @@ class CWndUserManager : public CWnd
 public:
 	CWndUserManager();
 	virtual void Create(CWnd *pParent, ui16 dwFlags);
-	virtual void OnPaint();
-	virtual void OnTimer();
-	virtual void OnMessage(CWnd* pSender, ui16 code, ui32 data);
-	virtual void OnKey(ui16 nKey);
+	virtual void OnPaint() override;
+	virtual void OnTimer() override;
+	virtual void OnMessage(CWnd* pSender, int code, uintptr_t data) override;
+	virtual void OnKey(int nKey) override;
 	uint32_t GetExecutionEntry();
 
 private:

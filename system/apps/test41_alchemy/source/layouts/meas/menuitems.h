@@ -73,7 +73,7 @@ public:
         }
     }
     
-    virtual void OnKey(ui16 nKey)
+    virtual void OnKey(int nKey) override
     {
         if ( nKey == BIOS::KEY::Right && mSettings.mHistogramScaleX > 1 )
         {
@@ -134,7 +134,7 @@ public:
         }
     }
     
-    virtual void OnKey(ui16 nKey)
+    virtual void OnKey(int nKey) override
     {
         if ( nKey == BIOS::KEY::Left && mSettings.mHistogramScaleY > 1 )
         {
@@ -191,7 +191,7 @@ public:
         }
     }
     
-    virtual void OnKey(ui16 nKey)
+    virtual void OnKey(int nKey) override
     {
         if ( nKey == BIOS::KEY::Left && mSettings.mSignalScaleX > 1 )
         {
@@ -262,7 +262,7 @@ public:
         }
     }
     
-    virtual void OnKey(ui16 nKey)
+    virtual void OnKey(int nKey) override
     {
         static long last = 0;
         long now = BIOS::SYS::GetTick();

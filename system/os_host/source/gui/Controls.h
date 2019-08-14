@@ -21,14 +21,14 @@ public:
 		CWnd::Create( pszId, dwFlags, rc, pParent );
 	}
 
-	virtual void OnPaint()
+	virtual void OnPaint() override
 	{
 		CDesign::Window( m_rcClient, m_clrFrame );
 		BIOS::LCD::Print( m_rcClient.CenterX()-((ui8)strlen(m_pszId)<<2), m_rcClient.top+2, 
 			RGB565(000000), RGBTRANS, m_pszId);
 	}
 
-	virtual void OnMessage(CWnd* pSender, ui16 code, ui32 data)
+	virtual void OnMessage(CWnd* pSender, int code, uintptr_t data) override
 	{
 		// send in foreign name, not very nice...
 		pSender->SendMessage( GetParent(), code, data );
@@ -58,14 +58,15 @@ public:
 		CWnd::Create( pszId, dwFlags, rcRect, pParent );
 	}
 
-	virtual void OnPaint()
+	virtual void OnPaint() override
 	{
 		if ( !HasFocus() )
 			CDesign::ListItemDisabled( m_rcClient );
 		else
 			CDesign::ListItemEnabled( m_rcClient );
 	}
-	virtual void OnKey(ui16 nKey)
+	
+	virtual void OnKey(int nKey) override
 	{
 		if ( nKey & BIOS::KEY::Escape )
 			m_pParent->SendMessage( m_pParent, ToWord('e', 'x'), 0 );
@@ -120,7 +121,7 @@ public:
 		m_pClr = pclr;
 	}
 
-	virtual void OnPaint()
+	virtual void OnPaint() override
 	{
 		if ( m_pClr )
 			m_clr = *m_pClr;
@@ -146,9 +147,9 @@ public:
 		m_rcClient.left -= MarginLeft;
 	}
 
-	virtual void OnKey(ui16 nKey)
+	virtual void OnKey(int nKey) override
 	{
-		if ( nKey & BIOS::KEY::Enter )
+		if ( nKey == BIOS::KEY::Enter )
 		{
 			SendMessage(m_pParent, ToWord('m', 'o'), 0);
 		}
@@ -169,7 +170,7 @@ public:
 		CWnd::Create( pszId, WsVisible, rcRect, pParent );
 	}
 
-	virtual void OnPaint()
+	virtual void OnPaint() override
 	{
 		if ( HasFocus() )
 		{
@@ -180,7 +181,7 @@ public:
 			BIOS::LCD::Print( m_rcClient.left+12, m_rcClient.top, RGB565(000000), RGBTRANS, m_pszId );
 		}
 	}
-	virtual void OnKey(ui16 nKey)
+	virtual void OnKey(int nKey) override
 	{
 		// Parent will manage the movement
 		GetParent()->OnKey( nKey );
@@ -325,7 +326,7 @@ public:
 		CListItem::Create( pszId, dwFlags, pParent );
 	}
 
-	virtual void OnPaint()
+	virtual void OnPaint() override
 	{
 		ui16 clr = HasFocus() ? RGB565(ffffff) : RGB565(000000);
 		
@@ -357,21 +358,21 @@ public:
 			x += BIOS::LCD::Draw( x, m_rcClient.top, RGB565(808080), RGBTRANS, CShapes::more_right );
 	}	
 
-	virtual void OnKey(ui16 nKey)
+	virtual void OnKey(int nKey) override
 	{
-		if ( nKey & BIOS::KEY::Left && (*m_pProvider)-1 == CValueProvider::Yes )
+		if ( nKey == BIOS::KEY::Left && (*m_pProvider)-1 == CValueProvider::Yes )
 		{
 			(*m_pProvider)--;
 			Invalidate();
 			SendMessage(m_pParent, ToWord('u', 'p'), 0);
 		}
-		if ( nKey & BIOS::KEY::Right && (*m_pProvider)+1 == CValueProvider::Yes )
+		if ( nKey == BIOS::KEY::Right && (*m_pProvider)+1 == CValueProvider::Yes )
 		{
 			(*m_pProvider)++;
 			Invalidate();
 			SendMessage(m_pParent, ToWord('u', 'p'), 0);
 		}
-		if ( nKey & BIOS::KEY::Enter  )
+		if ( nKey == BIOS::KEY::Enter  )
 		{
 			// is that provider enumerator ?
 			if ( m_pProvider->Get() !=	CValueProvider::Invalid )
@@ -403,7 +404,7 @@ public:
 		CWnd::Create( pszId, dwFlags, rc, pParent );
 	}
 
-	virtual void OnPaint()
+	virtual void OnPaint() override
 	{
 		CRect rcClient = m_rcClient;
 		CDesign::WindowSelector(m_rcClient, m_clrFrame);
@@ -488,23 +489,23 @@ public:
 		m_pProvider->Set(old);
 	}
 
-	virtual void OnKey(ui16 nKey)
+	virtual void OnKey(int nKey) override
 	{
-		if ( nKey & BIOS::KEY::Left && (*m_pProvider)-1 != CValueProvider::No )
+		if ( nKey == BIOS::KEY::Left && (*m_pProvider)-1 != CValueProvider::No )
 		{
 			(*m_pProvider)--;
 			Invalidate();
 		}
-		if ( nKey & BIOS::KEY::Right && (*m_pProvider)+1 != CValueProvider::No )
+		if ( nKey == BIOS::KEY::Right && (*m_pProvider)+1 != CValueProvider::No )
 		{
 			(*m_pProvider)++;
 			Invalidate();
 		}
-		if ( nKey & BIOS::KEY::Enter  )
+		if ( nKey == BIOS::KEY::Enter  )
 		{
 			SendMessage(m_pParent, ToWord('o', 'k'), 0);
 		}
-		if ( nKey & BIOS::KEY::Escape  )
+		if ( nKey == BIOS::KEY::Escape  )
 		{
 			m_pProvider->Set(m_nOldValue);
 			SendMessage(m_pParent, ToWord('e', 'x'), 0);
@@ -519,14 +520,14 @@ class CItemProvider : public CWndMenuItem
 	CValueProvider*	m_pProvider;
 
 public:
-	virtual void Create(CValueProvider*	pProvider, const char* pszId, ui16 clr, CWnd *pParent)
+	virtual void Create(CValueProvider*	pProvider, const char* pszId, int clr, CWnd *pParent)
 	{
 		_ASSERT( pProvider );
 		m_pProvider = pProvider;
 		CWndMenuItem::Create( pszId, clr, 2, pParent);
 	}
 
-	virtual void OnPaint()
+	virtual void OnPaint() override
 	{
 		const char *pszTemp = m_pszId;
 		m_pszId = NULL;
@@ -555,7 +556,7 @@ public:
 		}
 	}
 
-	virtual void OnKey(ui16 nKey)
+	virtual void OnKey(int nKey) override
 	{
 		if ( nKey & BIOS::KEY::Left && *m_pProvider - 1 == CValueProvider::Yes )
 		{
@@ -606,7 +607,7 @@ public:
 			BIOS::LCD::Draw( x, m_rcClient.top, clr, RGBTRANS, CShapes::more_right );
 	}	
 
-	virtual void OnKey(ui16 nKey)
+	virtual void OnKey(int nKey) override
 	{
 		if ( nKey & BIOS::KEY::Left && (*m_pProvider)-1 != CValueProvider::No )
 		{

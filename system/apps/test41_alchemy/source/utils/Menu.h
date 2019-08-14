@@ -13,7 +13,7 @@ public:
 public:
     virtual TItem GetItem(int i) = 0; 
     
-    virtual void OnPaint()
+    virtual void OnPaint() override
     {
         GUI::Background(m_rcClient, RGB565(4040b0), RGB565(404040));
 
@@ -77,7 +77,7 @@ public:
         }
     }
     
-    virtual void OnKey(ui16 nKey)
+    virtual void OnKey(int nKey) override
     {
         if (nKey == BIOS::KEY::Left)
         {
@@ -125,7 +125,7 @@ public:
 class CSubMenu : public CTopMenu
 {
 public:
-    virtual void OnPaint()
+    virtual void OnPaint() override
     {
         BIOS::LCD::Bar(m_rcClient, RGB565(b0b0b0));
         

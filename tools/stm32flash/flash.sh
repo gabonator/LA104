@@ -1,0 +1,1 @@
+./stm32flash -w dso_quad_bootloader_flash_modified.bin /dev/tty.usbserial-A9S7RXLX

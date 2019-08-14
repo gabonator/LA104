@@ -76,18 +76,13 @@ public:
 			clr += clradd;
 			pattern[15-i] = clr;
 		}
-		BIOS::LCD::Pattern(rcRect.left, rcRect.top, rcRect.right, rcRect.bottom, pattern, 16);
+//		BIOS::LCD::Pattern(rcRect.left, rcRect.top, rcRect.right, rcRect.bottom, pattern, 16);
 
-/*
-		BIOS::BufferBegin( rcRect, BIOS::BfXY );
-		for (int y=0; y<rcRect.Height(); y++)
-		{
-			clr += clradd;
-			for (int x=rcRect.Width(); x--; )
-				BIOS::BufferPush(clr);
-		}
-		BIOS::BufferEnd();
-		*/
+
+		BIOS::LCD::BufferBegin( rcRect );
+		for (int y=0; y<rcRect.Width(); y++)
+			BIOS::LCD::BufferWrite(pattern, 16);
+		BIOS::LCD::BufferEnd();
 	}
 
 	static void Window(const CRect& rcRect, ui16 clr)

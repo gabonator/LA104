@@ -42,7 +42,7 @@ public:
         mLoad.Create("Load", CWnd::WsHidden, rcContent, this);
     }
 
-    virtual void OnMessage(CWnd* pSender, ui16 code, ui32 data) override
+    virtual void OnMessage(CWnd* pSender, int code, uintptr_t data) override
     {
         if (pSender == &mMenu)
         {

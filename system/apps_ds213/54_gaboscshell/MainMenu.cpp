@@ -67,7 +67,7 @@ const CWndModuleSelector::TMenuBlockStruct* CWndModuleSelector::GetLayout()
 	CWnd::OnPaint();
 }
 
-/*virtual*/ void CWndModuleSelector::OnKey(ui16 nKey)
+/*virtual*/ void CWndModuleSelector::OnKey(int nKey)
 {
 	if ( nKey == BIOS::KEY::Enter )
 	{

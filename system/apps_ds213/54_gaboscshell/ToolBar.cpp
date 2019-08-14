@@ -200,7 +200,7 @@
 Invalidate();
 }
 
-/*virtual*/ void CWndToolBar::OnMessage(CWnd* pSender, ui16 code, ui32 data)
+/*virtual*/ void CWndToolBar::OnMessage(CWnd* pSender, int code, uintptr_t data)
 {
 	if ( code == ToWord('g', 'i') )
 	{

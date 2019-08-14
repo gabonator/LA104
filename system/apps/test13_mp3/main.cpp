@@ -441,7 +441,7 @@ public:
         GUI::Background(m_rcClient, RGB565(404040), RGB565(101010));
     }
 
-    virtual void WindowMessage(int nMsg, int nParam)
+    virtual void WindowMessage(int nMsg, int nParam) override
     {
         if (nMsg == CWnd::WmTick)
             mp3.check();
@@ -525,7 +525,7 @@ public:
     {
     }
     
-    virtual void OnMessage(CWnd* pSender, ui16 code, ui32 data)
+    virtual void OnMessage(CWnd* pSender, int code, uintptr_t data) override
     {
         if (code == ToWord('M', 'S'))
         {

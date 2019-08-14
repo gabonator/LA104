@@ -46,8 +46,10 @@ class CSdlHal : public CHal
     return 0;
   }
 
+#ifdef LA104
     virtual void UartSetup(int baudrate, BIOS::GPIO::UART::EConfig config) override
     {
+#ifdef USEUART
         // Open port
         fd = open("/dev/tty.usbmodemLA104CDC", O_RDWR | O_NOCTTY | O_NDELAY);
         if (fd == -1){
@@ -84,6 +86,7 @@ class CSdlHal : public CHal
         options.c_cc[VTIME]=0;                          // Timer unused
         options.c_cc[VMIN]=0;                           // At least on character before satisfy reading
         tcsetattr(fd, TCSANOW, &options);               // Activate the settings
+#endif
     }
     
     virtual void UartClose() override
@@ -94,23 +97,34 @@ class CSdlHal : public CHal
     
     virtual bool UartAvailable() override
     {
+#ifdef USEUART
         int count;
         ioctl(fd, FIONREAD, &count);
         return count>0;
+#else
+        return false;
+#endif
     }
     
     virtual uint8_t UartRead() override
     {
+#ifdef USEUART
         uint8_t data;
         _ASSERT(read(fd, &data, 1) == 1);
         return data;
+#else
+        return 0;
+#endif
     }
     
     virtual void UartWrite(uint8_t data) override
     {
+#ifdef USEUART
         _ASSERT(write(fd, &data, 1) == 1);
+#endif
     }
-    
+#endif
+	
     // SYS
     virtual void Delay(int intervalMs) override
     {

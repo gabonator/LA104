@@ -1,5 +1,5 @@
 #include "Bios.h"
-
+#ifdef LA104
 namespace BIOS
 {
   namespace GPIO
@@ -83,3 +83,4 @@ namespace BIOS
     }
   }
 }
+#endif

@@ -139,6 +139,7 @@ uint32_t GetProcAddress(char* symbol)
   switch (hash)
   {`);
 
+  var wasGpio = false;
   for (var i = 0; i<demangled.length; i++)
   {
     var tokens = demangled[i].match("^(.*?)\\((.*)\\)$")
@@ -150,6 +151,13 @@ uint32_t GetProcAddress(char* symbol)
     var retvalue = method[tokens[1] + "$" + countArgs(tokens[2])];
 //    console.log('  if (strcmp(symbol, "' + mname + '") == 0)');
     var out = "    case "+hash(mname)+": ";
+
+    var isGpio = tokens[1].indexOf("GPIO") != -1
+    if (isGpio && !wasGpio)
+      console.log("#ifdef LA104")
+    if (!isGpio && wasGpio)
+      console.log("#endif")
+    wasGpio = isGpio;
     if (!retvalue)
       out += 'return (uint32_t)' + tokens[1] + ';';
     else

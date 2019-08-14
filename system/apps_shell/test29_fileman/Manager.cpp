@@ -337,7 +337,7 @@ void CWndUserManager::DrawLine( BIOS::FAT::TFindFile& fileInfo, int y, bool bSel
 	DrawDelimLines(y, clr);
 }
 
-void CWndUserManager::OnKey(ui16 nKey)
+void CWndUserManager::OnKey(int nKey)
 {
 	if ( nKey == BIOS::KEY::Down ) 
 	{
@@ -456,7 +456,7 @@ void CWndUserManager::SelectFile(char* strName)
 }
 
 
-void CWndUserManager::OnMessage(CWnd* pSender, ui16 code, ui32 data)
+void CWndUserManager::OnMessage(CWnd* pSender, int code, uintptr_t data)
 {
 	// LAYOUT ENABLE/DISABLE FROM TOP MENU BAR
 	if (code == ToWord('L', 'D') )

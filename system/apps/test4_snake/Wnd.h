@@ -62,7 +62,7 @@ public:
 public:
 	static CWnd*	m_pTop;					
 	static CWnd*	m_pFocus;
-	static ui16		m_nInstances;
+	static int		m_nInstances;
 
 	static CTimer	m_arrTimers_[16];
 	static CModal	m_arrModals_[8];
@@ -75,7 +75,7 @@ public:
 	CWnd*	m_pParent;						// 4
 	CWnd*	m_pFirst;						// 4
 	CWnd*	m_pNext;						// 4
-	ui16	m_dwFlags;						// 4
+	int	m_dwFlags;						// 4
 	const char* m_pszId;					// 4
 	// Total 28 bytes per window (+5 virtuals)
 
@@ -86,10 +86,10 @@ public:
 	CWnd* GetFocus();
 
 	void Destroy();
-	void Create( const char* pszId, ui16 dwFlags, const CRect& rc, CWnd* pParent );
+	void Create( const char* pszId, int dwFlags, const CRect& rc, CWnd* pParent );
 	virtual void OnPaint();
-	virtual void OnKey(ui16 nKey);
-	virtual void OnMessage(CWnd* pSender, ui16 code, ui32 data);
+	virtual void OnKey(int nKey);
+	virtual void OnMessage(CWnd* pSender, int code, uintptr_t data);
 	virtual void WindowMessage(int nMsg, int nParam = 0);
 	virtual void OnTimer();
 
@@ -99,9 +99,9 @@ public:
 	bool IsVisible();
 	CWnd* GetActiveWindow();
 	void Invalidate();
-	void SendMessage(CWnd* pTarget, ui16 code, ui32 data);
+	void SendMessage(CWnd* pTarget, int code, uintptr_t data);
 	void ShowWindow(ui8 sh);
-	void SetTimer(ui32 nInterval);
+	void SetTimer(int nInterval);
 	void KillTimer();
 	void StartModal(CWnd* pwndChildFocus = NULL);
 	void StopModal();

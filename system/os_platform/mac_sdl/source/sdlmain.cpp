@@ -7,6 +7,7 @@
 CHal* gHal{nullptr};
 
 void _main(void);
+const int pixelSize = 2;
 
 std::vector< unsigned char > pixels( BIOS::LCD::Width * BIOS::LCD::Height * 4, 0 );
 
@@ -51,7 +52,7 @@ void sdl_init()
     (
      "LA104 emulator",
      SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
-     BIOS::LCD::Width*3, BIOS::LCD::Height*3,
+     BIOS::LCD::Width*2, BIOS::LCD::Height*2,
      SDL_WINDOW_SHOWN
      );
     

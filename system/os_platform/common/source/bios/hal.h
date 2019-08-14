@@ -7,12 +7,14 @@ public:
     virtual uint16_t GetPixel(int x, int y) = 0;
     virtual bool IsRunning() = 0;
     virtual char GetKey() = 0;
+#ifdef LA104
     // GPIO
     virtual void UartSetup(int baudrate, BIOS::GPIO::UART::EConfig config) = 0;
     virtual void UartClose() = 0;
     virtual bool UartAvailable() = 0;
     virtual uint8_t UartRead() = 0;
     virtual void UartWrite(uint8_t data) = 0;
+#endif
     // SYS
     virtual void Delay(int intervalMs) = 0;
     virtual uint32_t GetTick() = 0;

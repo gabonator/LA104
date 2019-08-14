@@ -24,7 +24,11 @@ void _HandleAssertion(const char*, int, const char*);
 #define min(a,b) std::min(a,b)
 #define max(a,b) std::max(a,b)
 #define COUNT(arr) (int)(sizeof(arr)/sizeof(arr[0]))
+#ifdef __APPLE__
+#define NATIVEENUM uint32_t
+#else
 #define NATIVEENUM uint8_t
+#endif
 #define NATIVEPTR ui32
 //typedef const unsigned short uc16;
 typedef unsigned char ui8;

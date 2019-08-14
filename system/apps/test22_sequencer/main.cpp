@@ -138,7 +138,7 @@ public:
         }
     }
     
-    virtual void OnKey(ui16 nKey)
+    virtual void OnKey(int nKey) override
     {
         if (nKey == BIOS::KEY::Left)
         {
@@ -522,7 +522,7 @@ public:
 //        LCD::Print(160, LCD::Height-20, RGB565(ffffff), RGB565(000000), msg);
     }
     
-    virtual void OnKey(ui16 nKey)
+    virtual void OnKey(int nKey) override
     {
         if (nKey == BIOS::KEY::Left && mCursorX > -1)
         {
@@ -760,7 +760,7 @@ public:
         }
     }
     
-    virtual void OnKey(ui16 nKey)
+    virtual void OnKey(int nKey) override
     {
         if (nKey == BIOS::KEY::F1)
         {
@@ -825,7 +825,7 @@ public:
         GUI::Background(m_rcClient, RGB565(404040), RGB565(101010));
     }
     
-    virtual void OnMessage(CWnd* pSender, ui16 code, ui32 data)
+    virtual void OnMessage(CWnd* pSender, int code, uint32_t data)
     {
         if (pSender == &mPlay)
             mSequencer.Play();

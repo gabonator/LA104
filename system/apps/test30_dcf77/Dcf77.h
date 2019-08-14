@@ -104,7 +104,7 @@ public:
 		return true;
 	}
 
-	virtual void OnTimer()
+	virtual void OnTimer() override
 	{
 		if ( HasOverlay() )
 			return;
@@ -382,7 +382,7 @@ public:
 		}
 	}
 
-	virtual void OnMessage(CWnd* pSender, ui16 code, ui32 data)
+	virtual void OnMessage(CWnd* pSender, int code, uintptr_t data) override
 	{
 	 	if ( code == ToWord('t', 'i') ) // tick, needs 80 fps
 		{

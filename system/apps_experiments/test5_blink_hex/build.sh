@@ -4,7 +4,7 @@ export PATH="/Users/gabrielvalky/Downloads/gcc-arm-none-eabi-7-2018-q2-update/bi
 mkdir -p build
 cd build
 
-arm-none-eabi-gcc -Wall -Os -Werror -fno-common -mcpu=cortex-m3 -mthumb -msoft-float -MD -I ../ -c ../main.c
+arm-none-eabi-gcc -Wall -Os -Werror -fno-common -mcpu=cortex-m3 -mthumb -msoft-float -DLA104 -MD -I ../ -c ../main.c
 arm-none-eabi-gcc -mcpu=cortex-m3 -mthumb -o output.elf -nostartfiles -T ../app.lds ./main.o
 
 arm-none-eabi-objcopy -O binary ./output.elf ./output.bin

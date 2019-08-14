@@ -69,7 +69,7 @@ public:
         }
     }
     
-    virtual void OnKey(ui16 nKey)
+    virtual void OnKey(int nKey) override
     {
         if (nKey == BIOS::KEY::Left)
         {
@@ -226,7 +226,7 @@ public:
         }
     }
     
-    virtual void OnKey(ui16 nKey)
+    virtual void OnKey(int nKey) override
     {
         if (nKey == BIOS::KEY::Left)
         {

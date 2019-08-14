@@ -13,7 +13,7 @@ class CButton : public CWnd
         }
     }
     
-    virtual void OnKey(ui16 nKey) override
+    virtual void OnKey(int nKey) override
     {
         if (nKey == BIOS::KEY::F1)
         {

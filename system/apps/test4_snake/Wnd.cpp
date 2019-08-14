@@ -1,7 +1,7 @@
 #include "Wnd.h"
 
 /*static*/ CWnd* 							CWnd::m_pTop = NULL;
-/*static*/ ui16 							CWnd::m_nInstances = 0;
+/*static*/ int 							CWnd::m_nInstances = 0;
 /*static*/ CWnd* 							CWnd::m_pFocus = NULL;
 /*static*/ CWnd::CTimer 					CWnd::m_arrTimers_[16];
 /*static*/ CArray<CWnd::CTimer> 			CWnd::m_arrTimers;
@@ -81,7 +81,7 @@ void CWnd::Destroy()
 	m_dwFlags = WsHidden;
 }
 
-void CWnd::Create( const char* pszId, ui16 dwFlags, const CRect& rc, CWnd* pParent )
+void CWnd::Create( const char* pszId, int dwFlags, const CRect& rc, CWnd* pParent )
 {
 	_ASSERT( m_pParent == NULL ); // Already created
 	m_pszId = pszId;
@@ -112,7 +112,7 @@ void CWnd::Create( const char* pszId, ui16 dwFlags, const CRect& rc, CWnd* pPare
 {
 }
 
-/*virtual*/ void CWnd::OnKey(ui16 nKey)
+/*virtual*/ void CWnd::OnKey(int nKey)
 {
 	if ( nKey == BIOS::KEY::Down )
 	{
@@ -176,7 +176,7 @@ void CWnd::Create( const char* pszId, ui16 dwFlags, const CRect& rc, CWnd* pPare
 	}
 }
 
-/*virtual*/ void CWnd::OnMessage(CWnd* pSender, ui16 code, ui32 data)
+/*virtual*/ void CWnd::OnMessage(CWnd* pSender, int code, uintptr_t data)
 {
 }
 
@@ -259,7 +259,7 @@ void CWnd::Invalidate()
 		WindowMessage(WmPaint);
 }
 
-void CWnd::SendMessage(CWnd* pTarget, ui16 code, ui32 data)
+void CWnd::SendMessage(CWnd* pTarget, int code, uintptr_t data)
 {
 	pTarget->OnMessage(this, code, data);
 }
@@ -337,7 +337,7 @@ CWnd* CWnd::_GetFirstActiveWindow()
 	return pWndLast;
 }
 
-void CWnd::SetTimer(ui32 nInterval)
+void CWnd::SetTimer(int nInterval)
 {
 	m_arrTimers.Add( CTimer(this, nInterval) ); 
 }

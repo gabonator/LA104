@@ -227,6 +227,84 @@ namespace BIOS
     }
   }
 #endif
+	
+#if defined(DS203) || defined(DS213)
+  namespace ADC
+  {
+    constexpr int NumSamples = 4096;
+
+    union TSample 
+    {
+      typedef uint32_t SampleType;
+
+      struct
+      {
+        uint8_t CH1 : 8;
+        uint8_t CH2 : 8;
+        uint8_t CH3 : 1;
+        uint8_t CH4 : 1;
+      };
+      uint8_t CH[4];
+      SampleType value;
+    };
+
+    enum class ERunState {
+      Start = 0,
+      Empty = 1,
+      Full = 2
+    };
+
+    enum class EInput {
+      CH1,
+      CH2,
+      CH3,
+      CH4
+    };
+
+    enum class ECouple {
+      DC = 0,
+      AC = 1
+    };
+
+    enum class EResolution {
+      _50mV,  
+      _100mV, 
+      _200mV, 
+      _500mV, 
+      _1V, 
+      _2V, 
+      _5V, 
+      _10V
+    }; 
+
+    enum class ETriggerType { 
+      EdgeHL, 
+      EdgeLH, 
+      LevelLow, 
+      LevelHigh, 
+      LowerDTLow, 
+      GreaterDTLow, 
+      LowerDTHigh, 
+      GreaterDTHigh,
+      None
+    };
+
+    void Init();
+    bool Ready();
+    ERunState GetState();
+
+    void Restart();
+    TSample::SampleType Get();
+
+    int GetPointer();
+    void Enable(bool bEnable);
+    bool Enabled();
+
+    void ConfigureInput(EInput input, ECouple couple, EResolution res, int offset);
+    void ConfigureTimebase(float timePerDiv);
+    void ConfigureTrigger(int time, int value, ETriggerType type, EInput source);
+  }
+#endif
 }
 
 

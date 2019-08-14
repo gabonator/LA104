@@ -280,7 +280,7 @@ public:
             KillTimer();
     }
     
-    virtual void OnKey(ui16 nKey) override
+    virtual void OnKey(int nKey) override
     {
         KillTimer();
         BIOS::SYS::Beep(20);

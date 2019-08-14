@@ -5,4 +5,5 @@
 /system/apps/test41_alchemy/logs/unsorted
 /system/apps/test41_alchemy/root
 /system/**/build
+/system/**/_temp
 /temp/

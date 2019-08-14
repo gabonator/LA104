@@ -297,7 +297,7 @@ public:
             Print(bx+32-strlen(line2)*3, by+64+10+16, line2, RGB565(ffffff));
     }
     
-    virtual void OnPaint()
+    virtual void OnPaint() override
     {
         if (HasFocus())
         {
@@ -367,7 +367,7 @@ public:
             }
     }
     
-    void OnKey(ui16 nKey)
+    void OnKey(int nKey) override
     {
         int newCursor = mCursor;
         if (nKey == BIOS::KEY::Left)
@@ -586,7 +586,7 @@ public:
         mBrowser.SetFocus();
     }
 
-    virtual void OnMessage(CWnd* pSender, ui16 code, ui32 data)
+    virtual void OnMessage(CWnd* pSender, int code, uintptr_t data) override
     {
         if (pSender == &mBrowser)
         {

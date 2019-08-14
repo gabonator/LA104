@@ -4,7 +4,7 @@ export PATH="/Users/gabrielvalky/Downloads/gcc-arm-none-eabi-7-2018-q2-update/bi
 mkdir -p build
 cd build
 
-arm-none-eabi-g++  -Wall -Os -Werror -fno-common -mcpu=cortex-m3 -mthumb -msoft-float -fno-exceptions -fno-rtti -fno-threadsafe-statics -Wno-psabi -MD -c \
+arm-none-eabi-g++  -Wall -Os -Werror -fno-common -mcpu=cortex-m3 -mthumb -msoft-float -fno-exceptions -fno-rtti -fno-threadsafe-statics -Wno-psabi -DLA104 -MD -c \
   -D USE_STDPERIPH_DRIVER -D STM32F10X_HD \
   ../source/main.cpp \
   ../source/devices/infra/ir_tx.c \

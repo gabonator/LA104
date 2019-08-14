@@ -8,6 +8,7 @@ set (CMAKE_CXX_STANDARD 17)
 
 # call "brew install sdl2"
 
+
 if (ARM)
 include_directories("../../os_platform/common/include")
 endif()
@@ -42,53 +43,48 @@ file(GLOB main_src
 )
 
 file(GLOB linker_script
-    "../../apps/test41_alchemy/app.lds"
+    "../../apps_ds213/55_gabosc/app.lds"
 )
 endif()
 
+include_directories("../../apps_ds213/55_gabosc/")
+
 file(GLOB application_src
-    "../../apps/test41_alchemy/source/*.cpp"
-    "../../apps/test41_alchemy/source/*.h"
+    "../../apps_ds213/55_gabosc/*.cpp"
+    "../../apps_ds213/55_gabosc/*.h"
 )
 
-file(GLOB application_devices_src
-    "../../apps/test41_alchemy/source/devices/*.cpp"
-    "../../apps/test41_alchemy/source/devices/*.h"
+file(GLOB application_framework_src
+    "../../apps_ds213/55_gabosc/Framework/*.cpp"
+    "../../apps_ds213/55_gabosc/Framework/*.h"
 )
 
-file(GLOB application_codecs_src
-    "../../apps/test41_alchemy/source/codecs/*.cpp"
-    "../../apps/test41_alchemy/source/codecs/*.h"
+file(GLOB application_windows_src
+    "../../apps_ds213/55_gabosc/Windows/*.cpp"
+    "../../apps_ds213/55_gabosc/Windows/*.h"
 )
 
-file(GLOB application_layouts_src
-    "../../apps/test41_alchemy/source/layouts/*.cpp"
-    "../../apps/test41_alchemy/source/layouts/*.h"
-)
-
-file(GLOB application_layouts_file_src
-    "../../apps/test41_alchemy/source/layouts/file/*.cpp"
-    "../../apps/test41_alchemy/source/layouts/file/*.h"
-)
-
-file(GLOB application_layouts_meas_src
-    "../../apps/test41_alchemy/source/layouts/meas/*.cpp"
-    "../../apps/test41_alchemy/source/layouts/meas/*.h"
-)
-
-file(GLOB application_layouts_modem_src
-    "../../apps/test41_alchemy/source/layouts/modem/*.cpp"
-    "../../apps/test41_alchemy/source/layouts/modem/*.h"
-)
-
-file(GLOB application_utils_src
-    "../../apps/test41_alchemy/source/utils/*.cpp"
-    "../../apps/test41_alchemy/source/utils/*.h"
-)
-
-file(GLOB application_controls_src
-    "../../apps/test41_alchemy/source/controls/*.cpp"
-    "../../apps/test41_alchemy/source/controls/*.h"
+file(GLOB application_oscilloscope_src
+    "../../apps_ds213/55_gabosc/Oscilloscope/*.cpp"
+    "../../apps_ds213/55_gabosc/Oscilloscope/*.h"
+    "../../apps_ds213/55_gabosc/Oscilloscope/Controls/*.cpp"
+    "../../apps_ds213/55_gabosc/Oscilloscope/Controls/*.h"
+    "../../apps_ds213/55_gabosc/Oscilloscope/Core/*.cpp"
+    "../../apps_ds213/55_gabosc/Oscilloscope/Core/*.h"
+    "../../apps_ds213/55_gabosc/Oscilloscope/Disp/*.cpp"
+    "../../apps_ds213/55_gabosc/Oscilloscope/Disp/*.h"
+    "../../apps_ds213/55_gabosc/Oscilloscope/Input/*.cpp"
+    "../../apps_ds213/55_gabosc/Oscilloscope/Input/*.h"
+    "../../apps_ds213/55_gabosc/Oscilloscope/Marker/*.cpp"
+    "../../apps_ds213/55_gabosc/Oscilloscope/Marker/*.h"
+    "../../apps_ds213/55_gabosc/Oscilloscope/Mask/*.cpp"
+    "../../apps_ds213/55_gabosc/Oscilloscope/Mask/*.h"
+    "../../apps_ds213/55_gabosc/Oscilloscope/Math/*.cpp"
+    "../../apps_ds213/55_gabosc/Oscilloscope/Math/*.h"
+    "../../apps_ds213/55_gabosc/Oscilloscope/Meas/*.cpp"
+    "../../apps_ds213/55_gabosc/Oscilloscope/Meas/*.h"
+    "../../apps_ds213/55_gabosc/Oscilloscope/Meas/Decoders/*.cpp"
+    "../../apps_ds213/55_gabosc/Oscilloscope/Meas/Decoders/*.h"
 )
 
 if (DESKTOP)           	
@@ -105,26 +101,21 @@ source_group("platform\\framework" FILES ${framework_src})
 endif()
 
 source_group("application" FILES ${application_src})
-source_group("application\\devices" FILES ${application_devices_src})
-source_group("application\\codecs" FILES ${application_codecs_src})
-source_group("application\\layouts" FILES ${application_layouts_src})
-source_group("application\\layouts\\file" FILES ${application_layouts_file_src})
-source_group("application\\layouts\\meas" FILES ${application_layouts_meas_src})
-source_group("application\\layouts\\modem" FILES ${application_layouts_modem_src})
-source_group("application\\utils" FILES ${application_utils_src})
-source_group("application\\controls" FILES ${application_controls_src})
+source_group("application\\framework" FILES ${application_framework_src})
+source_group("application\\windows" FILES ${application_windows_src})
+source_group("application\\oscilloscope" FILES ${application_oscilloscope_src})
 source_group("include" FILES "../../os_platform/common/include")
 
 file(GLOB application_exec
   ${main_src} ${bios_src} ${framework_src} 
-  ${gui_src} ${application_src} ${application_devices_src} ${application_codecs_src} 
-  ${application_layouts_src} ${application_utils_src} ${application_controls_src} 
-  ${application_layouts_file_src} ${application_layouts_meas_src} ${application_layouts_modem_src}
+  ${gui_src} ${application_src} ${application_framework_src} ${application_windows_src} 
+  ${application_oscilloscope_src} 
 )
 
 add_executable(application ${application_exec})
 
 add_definitions(-DEMULATED)
+add_definitions(-DDS203)
 
 if (ARM)
 target_link_libraries(application m)

@@ -118,8 +118,7 @@ public:
 		return true;
 	}
 
-	// RAM optimization int->short
-	short left, top, right, bottom;
+	int left, top, right, bottom;
 };
 
 template <class TYPE>

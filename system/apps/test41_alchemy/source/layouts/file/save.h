@@ -33,7 +33,7 @@ public:
         x += BIOS::LCD::Draw( x, y, RGB565(b0b0b0), RGBTRANS, CShapes_tab_right);
     }
     
-    virtual void OnMessage(CWnd* pSender, ui16 code, ui32 data) override
+    virtual void OnMessage(CWnd* pSender, int code, uintptr_t data) override
     {
         if (pSender == &mSave)
         {

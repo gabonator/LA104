@@ -51,7 +51,7 @@ public:
         rcButton.bottom += 20;
     }
     
-    virtual void OnMessage(CWnd* pSender, ui16 code, ui32 data) override
+    virtual void OnMessage(CWnd* pSender, int code, uintptr_t data) override
     {
         if (pSender == &mButton433)
         {
@@ -106,7 +106,7 @@ public:
         mRaw.Create("Raw", CWnd::WsHidden | CWnd::WsTick, rcContent, this);
     }
 
-    virtual void OnMessage(CWnd* pSender, ui16 code, ui32 data) override
+    virtual void OnMessage(CWnd* pSender, int code, uintptr_t data) override
     {
         if (pSender == &mMenu)
         {

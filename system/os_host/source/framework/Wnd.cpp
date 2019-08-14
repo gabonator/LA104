@@ -1,7 +1,7 @@
 #include "Wnd.h"
 
 /*static*/ CWnd* 							CWnd::m_pTop = NULL;
-/*static*/ ui16 							CWnd::m_nInstances = 0;
+/*static*/ int	 							CWnd::m_nInstances = 0;
 /*static*/ CWnd* 							CWnd::m_pFocus = NULL;
 /*static*/ CWnd::CTimer 					CWnd::m_arrTimers_[8];
 /*static*/ CArray<CWnd::CTimer> 			CWnd::m_arrTimers;
@@ -84,7 +84,7 @@ void CWnd::Destroy()
 	m_dwFlags = WsHidden;
 }
 
-void CWnd::Create( const char* pszId, ui16 dwFlags, const CRect& rc, CWnd* pParent )
+void CWnd::Create(const char* pszId, int dwFlags, const CRect& rc, CWnd* pParent)
 {
 	_ASSERT( m_pParent == NULL ); // Already created
 	m_pszId = pszId;
@@ -115,11 +115,11 @@ void CWnd::Create( const char* pszId, ui16 dwFlags, const CRect& rc, CWnd* pPare
 {
 }
 
-/*virtual*/ void CWnd::OnKey(ui16 nKey)
+/*virtual*/ void CWnd::OnKey(int nKey)
 {
 	if ( nKey == BIOS::KEY::Down )
 	{
-		_ASSERT( m_pFocus == this ); // ja mam focus!
+//		_ASSERT( m_pFocus == this ); // ja mam focus!
 		CWnd *pFocus = _GetNextActiveWindow();
 		
 		// cycle items, when there are no more window, jump to first possible
@@ -140,7 +140,7 @@ void CWnd::Create( const char* pszId, ui16 dwFlags, const CRect& rc, CWnd* pPare
 
 	if ( nKey == BIOS::KEY::Up )
 	{
-		_ASSERT( m_pFocus == this ); 
+//		_ASSERT( m_pFocus == this ); 
 		CWnd *pFocus = _GetPrevActiveWindow();
 
 		// cycle items
@@ -183,7 +183,7 @@ void CWnd::Create( const char* pszId, ui16 dwFlags, const CRect& rc, CWnd* pPare
 	}
 }
 
-/*virtual*/ void CWnd::OnMessage(CWnd* pSender, ui16 code, ui32 data)
+/*virtual*/ void CWnd::OnMessage(CWnd* pSender, int code, uintptr_t data)
 {
 }
 
@@ -276,7 +276,7 @@ void CWnd::Invalidate()
 		WindowMessage(WmPaint);
 }
 
-void CWnd::SendMessage(CWnd* pTarget, ui16 code, ui32 data)
+void CWnd::SendMessage(CWnd* pTarget, int code, uintptr_t data)
 {
 	pTarget->OnMessage(this, code, data);
 }
@@ -358,7 +358,7 @@ CWnd* CWnd::_GetFirstActiveWindow()
 	return pWndLast;
 }
 
-void CWnd::SetTimer(ui32 nInterval)
+void CWnd::SetTimer(int nInterval)
 {
 	m_arrTimers.Add( CTimer(this, nInterval) ); 
 }
@@ -375,12 +375,12 @@ void CWnd::KillTimer()
 
 void CWnd::_UpdateTimers()
 {
-	ui32 nTick = BIOS::SYS::GetTick();
+	int32_t nTick = BIOS::SYS::GetTick();
 
 	for ( int i = 0; i < m_arrTimers.GetSize(); i++ )
 	{
 		CTimer& timer = m_arrTimers[i];
-		if ( /*(si32)(nTick - timer.m_nLast)*/ nTick > timer.m_nNext )
+		if ( /*(si32)(nTick - timer.m_nLast)*/ nTick - timer.m_nNext > 0 )
 		{
 			// enable resident timers ?
 			//_ASSERT( timer.m_pWnd->m_dwFlags & CWnd::WsVisible );

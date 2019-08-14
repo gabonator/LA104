@@ -156,7 +156,7 @@ void CWndCharMap::OnPaint()
 	UpdateChar( nCursor, HasFocus() ? true : false );
 }
 
-void CWndCharMap::OnKey(ui16 nKey)
+void CWndCharMap::OnKey(int nKey)
 {
 	if ( nKey == BIOS::KEY::Left && nCursor > 0 )
 	{
@@ -188,7 +188,7 @@ void CWndCharMap::OnKey(ui16 nKey)
 	}
 }
 
-void CWndCharMap::OnMessage(CWnd* pSender, ui16 code, ui32 data)
+void CWndCharMap::OnMessage(CWnd* pSender, int code, uintptr_t data)
 {
 	// LAYOUT ENABLE/DISABLE FROM TOP MENU BAR
 	if (code == ToWord('L', 'D') )

@@ -72,7 +72,7 @@ public:
 
     }
     
-    void OnKey(uint16_t key)
+    virtual void OnKey(int key) override
     {
         switch (key)
         {
@@ -309,7 +309,7 @@ private:
         BIOS::LCD::Bar(rcRssi, RGB565(f0f020));
     }
     
-    virtual void OnKey(ui16 nKey) override
+    virtual void OnKey(int nKey) override
     {
         if (nKey == BIOS::KEY::Left)
         {

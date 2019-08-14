@@ -2,11 +2,14 @@
 #include "Utils.h"
 //#include "../bios/Bios.h"
 
+namespace CUtils
+{
+
 char tmp[16];
 /*static */ const char hex[16] = {'0', '1', '2', '3', '4',
 			'5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f'};
 
-/*static*/ int CUtils::atoi(char *str)
+/*static*/ int atoi(char *str)
 {
 	int nValue = 0;
 	while ( *str >= '0' && *str <= '9' )
@@ -39,7 +42,7 @@ bool ishex(char c)
 	return false;
 }*/
 
-/*static*/ ui32 CUtils::htoi(char *str)
+/*static*/ ui32 htoi(char *str)
 {
 	ui32 nValue = 0;
 	int nDigit = 0;
@@ -51,7 +54,7 @@ bool ishex(char c)
 	return nValue;
 }
 
-/*static*/ char* CUtils::itoa2(ui8 n)
+/*static*/ char* itoa2(ui8 n)
 {
 	for (int i=0; i<8; i++)
 		if (n & (128>>i) )
@@ -62,7 +65,7 @@ bool ishex(char c)
 	return tmp;
 }
 
-/*static*/ char* CUtils::itoa(si16 n)
+/*static*/ char* itoa(si16 n)
 {
 	int i = 0;
 	ui8 bSignum = 0;
@@ -91,12 +94,12 @@ bool ishex(char c)
 	}
 	return tmp;
 }
-/*static*/ char CUtils::tohex(ui8 n)
+/*static*/ char tohex(ui8 n)
 {
 	_ASSERT( n >= 0 && n < 16 );
 	return hex[n];
 }
-/*static*/ char* CUtils::clrhex(ui16 c)
+/*static*/ char* clrhex(ui16 c)
 {
 	tmp[0] = tohex((c&0x1f)>>1);
 	tmp[1] = tohex(((c>>5)&0x3f)>>2);
@@ -105,7 +108,7 @@ bool ishex(char c)
 	return tmp;
 }
 #if 0
-/*static*/ char* CUtils::FormatVoltage( float fV, int nChars )
+/*static*/ char* FormatVoltage( float fV, int nChars )
 {
 	sprintf(tmp, "%f", fV );
 	_ASSERT( strlen(tmp) < 15 );
@@ -118,7 +121,7 @@ bool ishex(char c)
 	return tmp;
 }
 	
-/*static*/ char* CUtils::FormatFrequency( float fF, int nChars )
+/*static*/ char* FormatFrequency( float fF, int nChars )
 {
 	char* strUnits = (char*)" Hz";
 	if (fF >= 1000)
@@ -142,7 +145,7 @@ bool ishex(char c)
 	return tmp;
 }
 
-/*static*/ char* CUtils::FormatTime( float fT, int nChars )
+/*static*/ char* FormatTime( float fT, int nChars )
 {
 	char* strUnits = (char*)" s";
 
@@ -168,13 +171,13 @@ bool ishex(char c)
 	return tmp;
 }
 
-/*static*/ char* CUtils::ftoa(float f)
+/*static*/ char* ftoa(float f)
 {
 	sprintf( tmp, "%f", f );
 	return tmp;
 }
 
-/*static*/ char* CUtils::FormatFloat5( float f )
+/*static*/ char* FormatFloat5( float f )
 {
 	tmp[0] = ( f < 0.0f ) ? '-' : ' ';
 	if ( f < 0 )
@@ -190,7 +193,7 @@ bool ishex(char c)
 	return tmp;
 }
 	
-/*static*/ char* CUtils::MidiNote(int n)
+/*static*/ char* MidiNote(int n)
 {
 	const static char notes[] = "C-" "C#" "D-" "D#" "E-" "F-" "F#" "G-" "G#" "A-" "A#" "B-";
 	if ( n < 12 || n >= 78 )
@@ -208,7 +211,7 @@ bool ishex(char c)
 	return tmp;
 }
 #endif
-ui16 CUtils::InterpolateColor( ui16 clrA, ui16 clrB, int nLevel )
+ui16 InterpolateColor( ui16 clrA, ui16 clrB, int nLevel )
 {
 	int br = Get565R(clrB)*nLevel;
 	int bg = Get565G(clrB)*nLevel;
@@ -223,7 +226,7 @@ ui16 CUtils::InterpolateColor( ui16 clrA, ui16 clrB, int nLevel )
 	return RGB565RGB(ar, ag, ab);
 }
 
-int CUtils::Sqrt(int a)
+int Sqrt(int a)
 {
 	int ret=0;
 	int s;
@@ -238,4 +241,42 @@ int CUtils::Sqrt(int a)
 		}
 	}
 	return ret;
+}
+
+unsigned int Random()
+{
+	// our initial starting seed is 5323
+	static unsigned int nSeed = 5323;
+	static unsigned int nX = 0;
+	
+	// Take the current seed and generate a new value from it
+	// Due to our use of large constants and overflow, it would be
+	// very hard for someone to predict what the next number is
+	// going to be from the previous one.
+	nSeed = (8253729 * nSeed + 2396403);
+	nSeed += nX++;
+	
+	// Take the seed and return a value between 0 and 32767
+	return nSeed & 32767;
+}
+	
+	template <class T>
+	inline void Clamp(T& nVariable, T nMin, T nMax)
+	 {
+	 if ( nVariable < nMin )
+	 {
+	 nVariable = nMin;
+	 return;
+	 }
+	 if ( nVariable > nMax )
+	 {
+	 nVariable = nMax;
+	 return;
+	 }
+	 }
+
+	template void Clamp<int>(int& nVariable, int nMin, int nMax);
+	template void Clamp<short>(int16_t& nVariable, int16_t nMin, int16_t nMax);
+
+
 }

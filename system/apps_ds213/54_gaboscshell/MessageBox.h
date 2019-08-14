@@ -24,7 +24,7 @@ public:
 		SetTimer(3000);
 	}
 
-	virtual void OnPaint()
+	virtual void OnPaint() override
 	{
 		CRect rcClient = m_rcClient;
 		GUI::Window(m_rcClient, m_clrFrame);
@@ -46,7 +46,7 @@ public:
 		StopModal();
 	}
 
-	virtual void OnKey(ui16 nKey)
+	virtual void OnKey(int nKey) override
 	{
 		Hide();
 	}
