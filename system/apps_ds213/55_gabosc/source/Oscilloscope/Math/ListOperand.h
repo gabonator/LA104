@@ -39,7 +39,7 @@ public:
 		m_itmScale.ShowWindow( bShowSca );
 	}
 
-	virtual void OnMessage(CWnd* pSender, ui16 code, ui32 data)
+	virtual void OnMessage(CWnd* pSender, int code, uintptr_t data) override
 	{
 		if ( code == ToWord('u', 'p') && pSender == &m_itmType )
 		{

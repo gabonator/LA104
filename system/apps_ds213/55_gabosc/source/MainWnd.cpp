@@ -9,6 +9,7 @@ void CMainWnd::Create()
 	m_pInstance = this;
 	CWnd::Create("CMainWnd", WsVisible | WsListener, CRect(0, 0, BIOS::LCD::Width, BIOS::LCD::Height), NULL );
 	mWndToolBar.Create(this);
+	m_wndGraph.Create( this, WsHidden | WsNoActivate );
 
 	m_wndMenuInput.Create( this, WsVisible );
 	m_wndMenuCursor.Create( this, WsHidden );
@@ -23,6 +24,30 @@ void CMainWnd::Create()
 	m_wndMenuInput.SetFocus();
 }
 
+/*virtual*/ void CMainWnd::OnMessage(CWnd* pSender, int code, uintptr_t data)
+{
+	if ( pSender == &mWndToolBar )
+	{
+		if ( code == ToWord('L', 'D') && data )	// Layout disable
+		{
+			CWnd* pLayout = (CWnd*)data;
+			SendMessage( pLayout, code, 0 );
+			pLayout->ShowWindow( false );
+		}
+		if ( code == ToWord('L', 'E') && data )	// Layout enable
+		{
+			CWnd* pLayout = (CWnd*)data;
+			SendMessage( pLayout, code, 0 );
+			pLayout->ShowWindow( true );
+		}
+		if ( code == ToWord('L', 'R') )	// Layout reset
+		{
+			Invalidate();
+		}
+		return;
+	}
+}
+
 /*virtual*/ void CMainWnd::WindowMessage(int nMsg, int nParam)
 {
 	if ( nMsg == WmTick )
@@ -31,7 +56,7 @@ void CMainWnd::Create()
 		long n = BIOS::SYS::GetTick();
 		if (n-l > 100)
 		{
-			WindowMessage( CWnd::WmBroadcast, ToWord('d', 'g') );
+			CWnd::WindowMessage( CWnd::WmBroadcast, ToWord('d', 'g') );
 			l = n;
 		}
 /*

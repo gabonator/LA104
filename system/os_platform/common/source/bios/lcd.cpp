@@ -85,6 +85,9 @@ int BIOS::LCD::Printf(int x, int y, unsigned short clrf, unsigned short clrb, co
     char* bbuf = buf;
     
     va_list args;
+	
+	if (strcmp(format, "%f") == 0)
+		format = "%.3f";
     
     va_start( args, format );
     vsprintf( bbuf, format, args );

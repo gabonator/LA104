@@ -53,7 +53,7 @@ public:
 			{ 
 				float fTimeRes = Settings.Runtime.m_fTimeRes / CWndGraph::BlkX;
 				float fValue = fTimeRes * ( m_pMarker2->nValue - m_pMarker1->nValue );
-				x += BIOS::LCD::Printf( x, y, clr, RGBTRANS, "%f", fValue*1000 ) * 8;
+				x += BIOS::LCD::Printf( x, y, clr, RGBTRANS, "%f", fValue*1000 );
 				x += 2;
 				BIOS::LCD::Print( x, y, RGB565(404040), RGBTRANS, "ms");
 				x = _x;
@@ -68,7 +68,7 @@ public:
 						fValue = 1.0f / fValue;
 					fValue /= 1000.0f; // kHz
 					fValue += 0.0001f; // sprintf rounding 
-					x += BIOS::LCD::Printf( x, y, clr, RGBTRANS, "%f", fValue ) * 8;
+					x += BIOS::LCD::Printf( x, y, clr, RGBTRANS, "%f", fValue );
 					x += 2;
 					BIOS::LCD::Print( x, y, RGB565(404040), RGBTRANS, "kHz");
 				}
@@ -89,7 +89,7 @@ public:
 					float fValue1 = Settings.CH1Calib.Voltage( fastCalc, (float)m_pMarker1->nValue );
 					float fValue2 = Settings.CH1Calib.Voltage( fastCalc, (float)m_pMarker2->nValue );
 					float fResult = fValue2 - fValue1;
-					x += BIOS::LCD::Printf( x, y, clr, RGBTRANS, "%f", fResult ) * 8;
+					x += BIOS::LCD::Printf( x, y, clr, RGBTRANS, "%f", fResult );
 					x += 2;
 					BIOS::LCD::Print( x, y, RGB565(404040), RGBTRANS, "V");
 				}

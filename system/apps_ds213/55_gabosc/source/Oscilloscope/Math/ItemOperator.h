@@ -24,7 +24,7 @@ public:
 
 		int x = m_rcClient.left + 10 + MarginLeft;
 		int y = m_rcClient.top;
-		BIOS::LCD::Print( x, y, clr, RGBTRANS, "Operation" );
+		BIOS::LCD::Print( x, y, clr, RGBTRANS, "Function" );
 	    y += 16;
 		BIOS::LCD::Print( x, y, clr, RGBTRANS, CSettings::MathOperator::ppszTextType[ (int)m_pOper->Type ] );
 	}

@@ -17,7 +17,7 @@ CWndMenuCursor::CWndMenuCursor()
 	m_itmDeltaX.Create( (char*)"dX", &Settings.MarkT1, &Settings.MarkT2, this);
 }
 
-/*virtual*/ void CWndMenuCursor::OnMessage(CWnd* pSender, ui16 code, ui32 data)
+/*virtual*/ void CWndMenuCursor::OnMessage(CWnd* pSender, int code, uintptr_t data)
 {
 	// LAYOUT ENABLE/DISABLE FROM TOP MENU BAR
 	if (code == ToWord('L', 'D') )

@@ -27,7 +27,7 @@
 	m_itmAxis.Create("Axis", RGB565(808080), &m_proAxis, this);
 }
 
-/*virtual*/ void CWndMenuDisplay::OnMessage(CWnd* pSender, ui16 code, ui32 data)
+/*virtual*/ void CWndMenuDisplay::OnMessage(CWnd* pSender, int code, uintptr_t data)
 {
 	// LAYOUT ENABLE/DISABLE FROM TOP MENU BAR
 	if (code == ToWord('L', 'D') )

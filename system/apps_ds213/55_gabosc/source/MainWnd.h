@@ -28,6 +28,7 @@ public:
 	CWndTimeReferences	m_wndTReferences;
 
 	void Create();
+	virtual void OnMessage(CWnd* pSender, int code, uintptr_t data) override;
 	virtual void WindowMessage(int nMsg, int nParam = 0) override;
 
 };

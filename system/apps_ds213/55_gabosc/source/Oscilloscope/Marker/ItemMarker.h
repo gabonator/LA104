@@ -60,7 +60,8 @@ public:
 			{ 
 				float fTimeRes = Settings.Runtime.m_fTimeRes / CWndGraph::BlkX;
 				float fValue = fTimeRes * ( m_pMarker->nValue - ( Settings.Trig.nTime - Settings.Time.Shift) );
-				x += BIOS::LCD::Printf( x, y, clr, RGBTRANS, "%f", fValue*1000 ) * 8;
+				
+				x += BIOS::LCD::Printf( x, y, clr, RGBTRANS, "%f", fValue*1000 );
 				if (!HasFocus())
 				{
 					x += 2;
@@ -76,7 +77,7 @@ public:
 					Settings.CH2Calib.Prepare( &Settings.CH2, fastCalc );
 
 				float fValue = Settings.CH1Calib.Voltage( fastCalc, (float)m_pMarker->nValue );
-				x += BIOS::LCD::Printf( x, y, clr, RGBTRANS, "%f", fValue ) * 8;
+				x += BIOS::LCD::Printf( x, y, clr, RGBTRANS, "%f", fValue );
 				if (!HasFocus())
 				{
 					x += 2;

@@ -117,6 +117,7 @@
 		// potrebujem vediet rozlisenie a vertikalnu polohu
 		void Prepare(AnalogChannel* pSource, FastCalc& fast)
 		{
+			return; // TODO:
 			const static float arrMultipliers[AnalogChannel::_ResolutionMax+1] = 
 				{50e-3f, 100e-3f, 200e-3f, 500e-3f, 1.0f, 2.0f, 5.0f, 10.0f};
 
@@ -149,13 +150,17 @@
 
 		int Correct( FastCalc& fast, int nAdc )
 		{
+			return nAdc;
+			
 			//return -fast.Zero + ( ((fast.Q + nAdc * fast.K)*5) >> (16-5) ); // *32/200mV 5=1/200mV		
 			// K, Q by mali byt v rozmere pixelov (0..255) reprezentujuce vysku od 0..8divov a nie vo voltoch!
 			return -fast.Zero + ( (fast.Q + nAdc * fast.K) >> 11 );
 		}
 
 		float Voltage(FastCalc& fast, float fAdc)
-		{	
+		{
+			return 0; // TODO:!
+			
 			//return (fast.Q + fAdc * fast.K)/65536.0f; 
 			// toto by malo vratit hodnotu 0..256 zodpovedajucu 0 az 8 divom
 			// pre ziskanie skutocneho napatia teda vydelime osmimi a prenasobime konstantou

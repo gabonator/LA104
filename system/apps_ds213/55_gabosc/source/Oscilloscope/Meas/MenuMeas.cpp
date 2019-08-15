@@ -15,7 +15,7 @@
 	m_itmMeas[5].Create( &Settings.Meas[5], this );
 }
 
-/*virtual*/ void CWndMenuMeas::OnMessage(CWnd* pSender, ui16 code, ui32 data)
+/*virtual*/ void CWndMenuMeas::OnMessage(CWnd* pSender, int code, uintptr_t data)
 {
 	// LAYOUT ENABLE/DISABLE FROM TOP MENU BAR
 	if (code == ToWord('L', 'D') )

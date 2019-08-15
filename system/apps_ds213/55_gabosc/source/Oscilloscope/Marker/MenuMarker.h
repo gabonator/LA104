@@ -23,7 +23,7 @@ public:
 	CWndMenuCursor();
 
 	virtual void		Create(CWnd *pParent, ui16 dwFlags);
-	virtual void		OnMessage(CWnd* pSender, ui16 code, ui32 data);
+	virtual void		OnMessage(CWnd* pSender, int code, uintptr_t data) override;
 
 private:
 	void				Find(CSettings::Marker* pMarker, CSettings::Marker::EFind mode);

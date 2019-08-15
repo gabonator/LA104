@@ -235,7 +235,7 @@ void CWnd::Create(const char* pszId, int dwFlags, const CRect& rc, CWnd* pParent
 			CWnd *pChild = m_pFirst;
 			while (pChild)
 			{
-				if ( pChild->m_dwFlags & WsVisible )
+				if ( (pChild->m_dwFlags & WsVisible) && (pChild->m_dwFlags & WsListener) )
 					pChild->WindowMessage( WmBroadcast, nParam );
 				pChild = pChild->m_pNext;
 			}

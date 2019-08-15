@@ -15,8 +15,8 @@ class CWndOscGraph : public CWndGraph, public CMathChannel
 public:
 	CWndOscGraph();
 	virtual void	Create(CWnd *pParent, ui16 dwFlags);
-	virtual void	OnMessage(CWnd* pSender, ui16 code, ui32 data);
-	virtual void	OnPaint();
+	virtual void	OnMessage(CWnd* pSender, int code, uintptr_t data) override;
+	virtual void	OnPaint() override;
 	void			SetupMarkers( CSettings::Calibrator::FastCalc& Ch1fast, CSettings::Calibrator::FastCalc& Ch2fast,
 		int& nMarkerT1, int& nMarkerT2, int& nMarkerY1, int& nMarkerY2 );
 	void			SetupSelection( bool& bSelection, int& nMarkerT1, int& nMarkerT2 );
