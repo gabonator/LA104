@@ -2,7 +2,7 @@
 
 #include <MainWnd.h>
 
-/*virtual*/ void CWndMenuDisplay::Create(CWnd *pParent, ui16 dwFlags) 
+/*virtual*/ void CWndMenuDisplay::Create(CWnd *pParent, int dwFlags) 
 {
 	CWnd::Create("CWndMenuDisp", dwFlags, CRect(320-CWndMenuItem::MarginLeft, 20, 400, 240), pParent);
 

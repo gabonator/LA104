@@ -5,7 +5,15 @@
 class CDesignPalette
 {
 public:
+#ifdef LA104
     constexpr static int gray = RGB565(505050);
+#endif
+#ifdef DS203
+	constexpr static int gray = RGB565(b0b0b0);
+#endif
+#ifdef DS213
+	constexpr static int gray = RGB565(b0b0b0);
+#endif
 };
 
 // TODO: Remove and merge with Gui!
@@ -31,13 +39,13 @@ public:
 
 	static void MenuItemClearDisabled(const CRect& rcRect)
 	{
-        GUI::Background(rcRect, RGB565(404040), RGB565(101010));
+        GUI::Background(rcRect, RGB565(101010), RGB565(404040));
 //		BIOS::LCD::Bar(rcRect.left, rcRect.top, rcRect.left + MenuItemIndent + 4, rcRect.bottom, RGB565(000000));
 	}
 
 	static void MenuItemClearEnabled(const CRect& rcRect)
 	{
-        GUI::Background(rcRect, RGB565(404040), RGB565(101010));
+        GUI::Background(rcRect, RGB565(101010), RGB565(404040));
 		//BIOS::LCD::Bar(rcRect.left, rcRect.top, rcRect.left + MenuItemIndent + 4, rcRect.bottom, RGB565(000000));
 		//BIOS::LCD::Bar(rcRect.right-4, rcRect.top, rcRect.right, rcRect.bottom, RGB565(000000));
 	}

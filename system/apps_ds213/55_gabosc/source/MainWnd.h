@@ -27,8 +27,11 @@ public:
 	CWndLevelReferencesMath	m_wndLReferencesM;
 	CWndTimeReferences	m_wndTReferences;
 
+	bool				mRunning{true};
+	
 	void Create();
 	virtual void OnMessage(CWnd* pSender, int code, uintptr_t data) override;
 	virtual void WindowMessage(int nMsg, int nParam = 0) override;
-
+	virtual void OnPaint() override;
+	bool IsRunning();
 };

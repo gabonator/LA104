@@ -18,6 +18,11 @@ void CMainWnd::Create()
 	m_wndMenuDisplay.Create( this, WsHidden );
 	m_wndMenuMask.Create( this, WsHidden );
 
+	m_wndLReferences.Create( this, WsHidden );
+	m_wndLReferencesM.Create( this, WsHidden );
+	m_wndTReferences.Create( this, WsHidden );
+	
+	m_wndZoomBar.Create(this, WsHidden, &m_wndGraph);
 
 	constexpr int nMenuItem = 1;
 	SendMessage( &mWndToolBar, ToWord('g', 'i'), nMenuItem);
@@ -40,12 +45,28 @@ void CMainWnd::Create()
 			SendMessage( pLayout, code, 0 );
 			pLayout->ShowWindow( true );
 		}
+		if ( code == ToWord('L', 'E') && !data )
+		{
+			// Entered root menu, exit app
+			mRunning = false;
+		}
 		if ( code == ToWord('L', 'R') )	// Layout reset
 		{
 			Invalidate();
 		}
 		return;
 	}
+}
+
+/*virtual*/ void CMainWnd::OnPaint()
+{
+	//BIOS::LCD::Clear(RGB565(000000));
+	GUI::Background(CRect(0, 0, BIOS::LCD::Width, BIOS::LCD::Height), RGB565(101010), RGB565(404040));
+}
+
+bool CMainWnd::IsRunning()
+{
+	return mRunning;
 }
 
 /*virtual*/ void CMainWnd::WindowMessage(int nMsg, int nParam)
@@ -56,6 +77,7 @@ void CMainWnd::Create()
 		long n = BIOS::SYS::GetTick();
 		if (n-l > 100)
 		{
+			Sampler::Copy();
 			CWnd::WindowMessage( CWnd::WmBroadcast, ToWord('d', 'g') );
 			l = n;
 		}

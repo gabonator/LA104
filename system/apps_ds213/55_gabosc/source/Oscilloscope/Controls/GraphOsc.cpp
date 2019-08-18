@@ -100,7 +100,7 @@ ui16 CWndOscGraph::_Interpolate( ui16 clrA, ui16 clrB )
 	return RGB565RGB(ar, ag, ab);
 }
 
-/*virtual*/ void CWndOscGraph::Create(CWnd *pParent, ui16 dwFlags) 
+/*virtual*/ void CWndOscGraph::Create(CWnd *pParent, int dwFlags) 
 {
 	CWndGraph::Create( pParent, dwFlags | CWnd::WsListener );
 }

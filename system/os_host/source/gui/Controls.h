@@ -68,7 +68,7 @@ public:
 	
 	virtual void OnKey(int nKey) override
 	{
-		if ( nKey & BIOS::KEY::Escape )
+		if ( nKey == BIOS::KEY::Escape )
 			m_pParent->SendMessage( m_pParent, ToWord('e', 'x'), 0 );
 		CWnd::OnKey(nKey);
 	}

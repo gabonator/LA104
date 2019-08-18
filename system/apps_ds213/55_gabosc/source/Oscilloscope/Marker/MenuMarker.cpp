@@ -6,7 +6,7 @@ CWndMenuCursor::CWndMenuCursor()
 {
 }
 
-/*virtual*/ void CWndMenuCursor::Create(CWnd *pParent, ui16 dwFlags) 
+/*virtual*/ void CWndMenuCursor::Create(CWnd *pParent, int dwFlags) 
 {
 	CWnd::Create("CWndMenuCursor", dwFlags | CWnd::WsListener, CRect(320-CWndMenuItem::MarginLeft, 20, 400, 240), pParent);
 	m_itmX1.Create( (char*)"X1", &Settings.MarkT1, this );

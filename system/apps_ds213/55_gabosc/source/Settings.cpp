@@ -287,4 +287,44 @@ void CSettings::Reset()
 	Runtime.m_bUartTest = true;
 	Runtime.m_bUartEcho = false;
 	Runtime.m_bUartSdk = true;
+
+	ResetCalibration();
+}
+
+void CSettings::ResetCalibration()
+{
+	// valid on range 128..4096
+	//DacCalib.m_arrCurveIn[0] = 0.1765f;	DacCalib.m_arrCurveOut[0] = 256;
+	//DacCalib.m_arrCurveIn[1] = 1.412f;	DacCalib.m_arrCurveOut[1] = 2048;
+//	DacCalib.m_arrCurveIn[0] = 0.5f;	DacCalib.m_arrCurveOut[0] = 725;
+//	DacCalib.m_arrCurveIn[1] = 1.5f;	DacCalib.m_arrCurveOut[1] = 2176;
+
+	const static si16 defaultQin[] = {0, 256};
+	const static si32 defaultQout[] = {0, -(256<<11)};
+	const static si16 defaultKin[] = {0, 0, 0, 0, 0, 256};
+	const static si32 defaultKout[] = {1<<11, 1<<11, 1<<11, 1<<11, 1<<11, 1<<11};
+
+	for ( int i = 0; i <= AnalogChannel::_ResolutionMax; i++ )
+	{
+		memcpy( CH1Calib.CalData[i].m_arrCurveQin, defaultQin, sizeof(defaultQin) );
+		memcpy( CH1Calib.CalData[i].m_arrCurveQout, defaultQout, sizeof(defaultQout) );
+		memcpy( CH1Calib.CalData[i].m_arrCurveKin, defaultKin, sizeof(defaultKin) );
+		memcpy( CH1Calib.CalData[i].m_arrCurveKout, defaultKout, sizeof(defaultKout) );
+
+		memcpy( CH2Calib.CalData[i].m_arrCurveQin, defaultQin, sizeof(defaultQin) );
+		memcpy( CH2Calib.CalData[i].m_arrCurveQout, defaultQout, sizeof(defaultQout) );
+		memcpy( CH2Calib.CalData[i].m_arrCurveKin, defaultKin, sizeof(defaultKin) );
+		memcpy( CH2Calib.CalData[i].m_arrCurveKout, defaultKout, sizeof(defaultKout) );
+	}
+
+	#define CONCAT2(x, y) x ## y
+	#define CONCAT(x, y) CONCAT2(x, y)
+	#define _COPY(type, target, ...) \
+		const static type CONCAT(tmp,__LINE__)[] = __VA_ARGS__; \
+		memcpy( target, CONCAT(tmp,__LINE__), sizeof(CONCAT(tmp,__LINE__)) );
+
+//	_COPY( si16, CH1Calib.CalData[AnalogChannel::_200mV].m_arrCurveQin, {-20, 280} );
+//	_COPY( si32, CH1Calib.CalData[AnalogChannel::_200mV].m_arrCurveQout, {9380*5, -154816*5} );
+//	_COPY( si16, CH1Calib.CalData[AnalogChannel::_200mV].m_arrCurveKin, {-20, 15, 75, 90, 245, 280} );
+//	_COPY( si32, CH1Calib.CalData[AnalogChannel::_200mV].m_arrCurveKout, {581*5, 580*5, 581*5, 582*5, 584*5, 580*5} );
 }

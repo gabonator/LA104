@@ -132,11 +132,12 @@
 	{
 		if ((pItems[m_nFocus+1].m_eType == CBarItem::IMain)||((pItems[m_nFocus+1].m_eType == CBarItem::IEnd)))
 		{
+			/*
 			m_nFocus--;
 			while(pItems[m_nFocus].m_eType != CBarItem::IMain)
 			{	// Find the first item
 				m_nFocus--;
-			}
+			}*/
 		}
 		else
 		{

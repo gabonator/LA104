@@ -4,7 +4,7 @@
 #include <math.h>
 #include "Statistics.h"
 
-/*virtual*/ void CWndMenuMeas::Create(CWnd *pParent, ui16 dwFlags) 
+/*virtual*/ void CWndMenuMeas::Create(CWnd *pParent, int dwFlags) 
 {
 	CWnd::Create("CWndMenuMeas", dwFlags | CWnd::WsListener, CRect(320-CWndMenuItem::MarginLeft, 20, 400, 240), pParent);
 	m_itmMeas[0].Create( &Settings.Meas[0], this );

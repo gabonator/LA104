@@ -2,10 +2,22 @@
 
 namespace Sampler
 {
-  BIOS::ADC::TSample::SampleType& GetAt(int)
+	constexpr INT Samples =  BIOS::ADC::NumSamples;
+	BIOS::ADC::TSample::SampleType memory[Samples];
+	
+	void Copy()
+	{
+		BIOS::ADC::Restart();
+		for (int i=0; i<Samples; i++)
+		{
+			memory[i] &= 0xff000000;
+			memory[i] |= BIOS::ADC::Get();
+		}
+	}
+	
+  BIOS::ADC::TSample::SampleType& GetAt(int i)
   {
-    static BIOS::ADC::TSample::SampleType v{0};
-    return v;
+    return memory[i % Samples];
   }
 }
 

@@ -1,4 +1,5 @@
 namespace Sampler
 {
-  BIOS::ADC::TSample::SampleType& GetAt(int);
+	void Copy();
+	BIOS::ADC::TSample::SampleType& GetAt(int);
 }

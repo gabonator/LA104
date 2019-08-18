@@ -24,7 +24,7 @@ int BlurFilter( int a, int b, int c )
 /*static*/ const char* const CWndMenuMask::m_ppszDispAction[] =
 	{"No", "Yes"};
 
-/*virtual*/ void CWndMenuMask::Create(CWnd *pParent, ui16 dwFlags) 
+/*virtual*/ void CWndMenuMask::Create(CWnd *pParent, int dwFlags) 
 {
 	m_Action = ActionNone;
 	m_Display = DisplayNo;

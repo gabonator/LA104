@@ -22,6 +22,6 @@ public:
 	CMPItem m_itmGrid;
 	CMPItem m_itmAxis;
 
-	virtual void		Create(CWnd *pParent, ui16 dwFlags);
+	virtual void		Create(CWnd *pParent, int dwFlags);
 	virtual void		OnMessage(CWnd* pSender, int code, uintptr_t data) override;
 };

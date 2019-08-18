@@ -21,8 +21,7 @@ namespace CUtils
 	static char* FormatFloat5( float f );
 */
 	template <class T>
-	inline void Clamp(T& nVariable, T nMin, T nMax);
-	/*
+	inline void Clamp(T& nVariable, T nMin, T nMax)
 	{
 		if ( nVariable < nMin )
 		{
@@ -34,7 +33,7 @@ namespace CUtils
 			nVariable = nMax;
 			return;
 		}
-	}*/
+	}
 
 	unsigned int Random();
 	ui16 InterpolateColor( ui16 clrA, ui16 clrB, int nLevel );

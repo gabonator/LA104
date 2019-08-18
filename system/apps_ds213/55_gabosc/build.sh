@@ -9,6 +9,7 @@ arm-none-eabi-g++ -Os -Werror -fno-common -mcpu=cortex-m3 -mthumb -msoft-float -
   ../source/MainWnd.cpp \
   ../source/Toolbar.cpp \
   ../source/Shapes.cpp \
+  ../source/Settings.cpp \
   ../source/Oscilloscope/Controls/GraphOsc.cpp \
   ../source/Oscilloscope/Core/CoreOscilloscope.cpp \
   ../source/Oscilloscope/Disp/MenuDisp.cpp \
@@ -22,17 +23,23 @@ arm-none-eabi-g++ -Os -Werror -fno-common -mcpu=cortex-m3 -mthumb -msoft-float -
   ../source/Oscilloscope/Meas/Statistics.cpp \
   ../../../os_host/source/framework/Wnd.cpp \
   ../../../os_host/source/framework/Utils.cpp \
+  ../../../os_host/source/framework/Serialize.cpp \
+  ../../../os_host/source/gui/Controls.cpp \
+  ../source/Framework/Sampler.cpp \
   -I../../../os_library/include/ \
   -I../source/
 
-arm-none-eabi-gcc -fPIC -mcpu=cortex-m3 -mthumb -o output.elf -nostartfiles -T ../app.lds \
+arm-none-eabi-gcc -fPIC -mcpu=cortex-m3 -mthumb -o output.elf -nostartfiles -T ../source/app.lds \
   ./main.o \
   ./MainWnd.o \
   ./ToolBar.o \
   ./Wnd.o \
   ./Utils.o \
   ./Shapes.o \
-  -lbios -L../../../os_library/build
+  ./GraphOsc.o ./CoreOscilloscope.o ./MenuDisp.o ./MenuInput.o ./MenuMarker.o ./MenuMask.o \
+  ./ChannelMath.o ./FirFilter.o ./MenuMath.o ./MenuMeas.o ./Statistics.o \
+  ./Sampler.o ./Settings.o ./Controls.o ./Serialize.o \
+  -lbios -L../../../os_library/build -lm
 
 arm-none-eabi-objdump -d -S output.elf > output.asm
 arm-none-eabi-readelf -all output.elf > output.txt

@@ -21,7 +21,7 @@ public:
 //	static ui16	m_nMaxX;
 
 public:
-	virtual void Create(CWnd *pParent, ui16 dwFlags) 
+	virtual void Create(CWnd *pParent, int dwFlags) 
 	{
 		CWnd::Create("CWndGraph", dwFlags, CRect(12, 22, 12+DivsX*BlkX, 22+DivsY*BlkY), pParent);
 //		CWndGraph::m_nMaxX = -1;

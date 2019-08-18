@@ -2,7 +2,7 @@
 
 #include <MainWnd.h>
 
-/*virtual*/ void CWndMenuMath::Create(CWnd *pParent, ui16 dwFlags) 
+/*virtual*/ void CWndMenuMath::Create(CWnd *pParent, int dwFlags) 
 {
 	CWnd::Create("CWndMenuMath", dwFlags, CRect(320-CWndMenuItem::MarginLeft, 20, 400, 240), pParent);
 	m_itmOperand[0].Create( &Settings.MathA, this );

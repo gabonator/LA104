@@ -1,4 +1,5 @@
 #include "Bios.h"
+#include <math.h>
 
 char gArgument[128] = "";
 
@@ -60,8 +61,20 @@ void BIOS::ADC::Init() {}
 bool BIOS::ADC::Ready() { return true; }
 BIOS::ADC::ERunState BIOS::ADC::GetState() { return BIOS::ADC::ERunState::Full; }
 
-void BIOS::ADC::Restart() {}
-BIOS::ADC::TSample::SampleType BIOS::ADC::Get() { return rand()&255;}
+int _adc_i = 0;
+void BIOS::ADC::Restart() { _adc_i = 0;}
+BIOS::ADC::TSample::SampleType BIOS::ADC::Get()
+{
+	int i = _adc_i++;
+	
+	BIOS::ADC::TSample s;
+	 s.CH1 = (int)(sin(i*0.1)*110+128 + (random()%10));
+	 s.CH2 = (i%60)*2 + (random()%5);
+	 s.CH3 = 0;
+	 s.CH4 = 0;
+	return s.value;
+	
+}
 
 int BIOS::ADC::GetPointer() { return 0; }
 void BIOS::ADC::Enable(bool bEnable) {}

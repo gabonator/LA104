@@ -259,7 +259,7 @@ unsigned int Random()
 	// Take the seed and return a value between 0 and 32767
 	return nSeed & 32767;
 }
-	
+/*	
 	template <class T>
 	inline void Clamp(T& nVariable, T nMin, T nMax)
 	 {
@@ -277,6 +277,6 @@ unsigned int Random()
 
 	template void Clamp<int>(int& nVariable, int nMin, int nMax);
 	template void Clamp<short>(int16_t& nVariable, int16_t nMin, int16_t nMax);
-
+*/
 
 }

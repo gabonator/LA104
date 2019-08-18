@@ -1,7 +1,7 @@
 class CWndLevelReferences : public CWnd
 {
 public:
-	virtual void Create(CWnd *pParent, ui16 dwFlags) 
+	virtual void Create(CWnd *pParent, int dwFlags)
 	{
 		CWnd::Create("CWndLevelReferences", dwFlags | CWnd::WsNoActivate, 
 			CRect(0, 22, 11, 22+CWndGraph::DivsY*CWndGraph::BlkY), pParent);
@@ -9,7 +9,8 @@ public:
 
 	virtual void OnPaint()
 	{
-		BIOS::LCD::Bar( m_rcClient, RGB565(000000) );
+		//BIOS::LCD::Bar( m_rcClient, RGB565(000000) );
+		GUI::Background(m_rcClient, RGB565(101010), RGB565(404040));
 		//if ( Settings.Trig.Sync != CSettings::Trigger::_None )                                           
 		{
 			ui16 y = Settings.Trig.nLevel;
@@ -51,7 +52,7 @@ public:
 class CWndLevelReferencesMath : public CWnd
 {
 public:
-	virtual void Create(CWnd *pParent, ui16 dwFlags) 
+	virtual void Create(CWnd *pParent, int dwFlags)
 	{
 		CWnd::Create("CWndLevelReferencesMath", dwFlags | CWnd::WsNoActivate, 
 			CRect(0, 22, 11, 22+CWndGraph::DivsY*CWndGraph::BlkY), pParent);

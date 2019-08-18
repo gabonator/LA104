@@ -41,7 +41,8 @@ class CSdlHal : public CHal
       case SDL_SCANCODE_UP: return '<'; break;
       case SDL_SCANCODE_DOWN: return '>'; break;
       case SDL_SCANCODE_RETURN: return '1'; break;
-      case SDL_SCANCODE_BACKSPACE: return '3'; break;
+      case SDL_SCANCODE_BACKSPACE: return '2'; break;
+	  //case SDL_SCANCODE_BACKSPACE: return '3'; break;
     }
     return 0;
   }

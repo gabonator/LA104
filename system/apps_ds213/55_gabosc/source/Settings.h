@@ -416,6 +416,7 @@ public:
 	}
 
 	void Reset();
+	void ResetCalibration();
 	
 	CSettings()
  	{

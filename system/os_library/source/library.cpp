@@ -80,6 +80,7 @@ namespace BIOS
     EResult FindNext(TFindFile* pFile) { return EOk; }
   }
 
+#ifdef LA104
   namespace GPIO
   {
     void DigitalWrite(EPin pin, bool value) {}
@@ -105,6 +106,7 @@ namespace BIOS
       void Write(uint8_t) {}
     }
   }
+#endif
 
   namespace OS
   {
@@ -131,6 +133,26 @@ namespace BIOS
     void InitializeSerial() {}
     void InitializeFinish(int imr_msk) {}
   }
+                   
+#if defined(DS203) || defined(DS213)
+  namespace ADC
+  {
+    void Init() {}
+    bool Ready() { return true; }
+    BIOS::ADC::ERunState GetState() { return BIOS::ADC::ERunState::Full; }
+
+    void Restart() {}
+    BIOS::ADC::TSample::SampleType Get() { return 0;}
+
+    int GetPointer() { return 0; }
+    void Enable(bool bEnable) {}
+    bool Enabled() { return true; }
+
+    void ConfigureInput(BIOS::ADC::EInput input, BIOS::ADC::ECouple couple, BIOS::ADC::EResolution res, int offset) {}
+    void ConfigureTimebase(float timePerDiv) {}
+    void ConfigureTrigger(int time, int value, BIOS::ADC::ETriggerType type, BIOS::ADC::EInput source) {}
+  }
+#endif
 }
 
 namespace GUI

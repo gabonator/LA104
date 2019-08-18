@@ -14,7 +14,7 @@ public:
 	
 	CWndListMeas		m_wndListMeas;
 
-	virtual void		Create(CWnd *pParent, ui16 dwFlags);
+	virtual void		Create(CWnd *pParent, int dwFlags);
 	virtual void		OnMessage(CWnd* pSender, int code, uintptr_t data) override;
 
 private:

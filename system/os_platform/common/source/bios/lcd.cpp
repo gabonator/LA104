@@ -8,10 +8,8 @@ int _DrawChar(int x, int y, unsigned short clrf, unsigned short clrb, char ch);
 
 void BIOS::LCD::Clear(unsigned short clr)
 {
-  uint32_t i;
-  Set_Posi(0, 0);
-  for(i = 0; i < BIOS::LCD::Width * BIOS::LCD::Height; i++) 
-    Set_Pixel(clr);
+	BIOS::LCD::Bar(0, 0, BIOS::LCD::Width, BIOS::LCD::Height, clr);
+	
 }
 
 void BIOS::LCD::Bar(int x1, int y1, int x2, int y2, unsigned short clr)
