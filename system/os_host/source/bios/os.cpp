@@ -1,5 +1,5 @@
 #include "Bios.h"
-#include "../../lib/STM32F10x_StdPeriph_Driver/inc/misc.h"
+#include "../../library/STM32F10x_StdPeriph_Driver/inc/misc.h"
 //      NVIC_SetVectorTable(NVIC_VectTab_RAM, (uint32_t)(g_pfnRamVectorTable - NVIC_VectTab_RAM));
 
 namespace BIOS

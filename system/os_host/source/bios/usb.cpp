@@ -1,10 +1,10 @@
 #include "Bios.h"
 #include "imports.h"
 #include "system_stm32f10x.h"
-#include "lib/STM32F10x_StdPeriph_Driver/inc/misc.h"
+#include "library/STM32F10x_StdPeriph_Driver/inc/misc.h"
 
 extern "C" {
-#include "lib/COMMON/commonusb_app.h"
+#include "library/COMMON/commonusb_app.h"
 #include "usb_core.h"
 #include "usb_init.h"
 }

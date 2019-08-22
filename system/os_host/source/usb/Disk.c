@@ -13,8 +13,8 @@
 #include "msdusb_bot.h"
 #include <usb_mem.h>
 #include <usb_lib.h>
-#include "../../lib/COMMON/commonusb_pwr.h"
-#include "stm32f10x_flash.h"
+#include "../../library/COMMON/commonusb_pwr.h"
+#include "../../library/STM32F10x_StdPeriph_Driver/inc/stm32f10x_flash.h"
 #include "../bios/imports.h"
 
 #define TXFR_IDLE      0

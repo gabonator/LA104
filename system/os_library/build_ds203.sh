@@ -14,4 +14,4 @@ find . -type f -name '*.o' -delete
 find . -type f -name '*.d' -delete
 
 cd ..
-node exports.js > ../os_host/source/Shared.h
+node exports.js > ../os_host/source/main/Shared.h

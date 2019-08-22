@@ -173,10 +173,11 @@ Connect your midi keyboard with two wires (3V and P1 through 100-330 ohm resisto
   - Analog oscilloscope using PCF8591 (90% done)
   - Test signal generator running in background for testing of logic analyser app (80% done)
   - swiss army knife for hardware engineers - package of applications that can talk to popular electronic devices (some samples are already there) and monitor any digital buses (logic analyser)
-  - DCF77 decoding application with visualization
+  - DCF77 decoding application with visualization (100%)
   - manual & text reader app (100%)
   - solve problem how to pass file as argument to app run through gui shell (100% only using file manager)
   - ESP8266 AP webserver using AT commands (100% simple webserver with file system listing, using promises)
+  - GPIO tool (simple 8 channel visualizer/controller) with 4 channel PWM generator (100%)
 
 #### In progress
   - usb apps & screenshotter do not work reliably after last changes (partially fixed, needs more testing)
@@ -201,15 +202,15 @@ Connect your midi keyboard with two wires (3V and P1 through 100-330 ohm resisto
   - add screenshots of gui & some video showing how it performs
   - finish conversion of original firmware into ELF (80%)
   - optimize memory usage, switch to 500 byte clusters instead of 4k (2 buffers required => 8kb wasted)
-  - beeper
   - hybrid app use relative paths
   - obtain FPGA code from manufacturer 
   - setup FPGA build environment
   - tutorials: what toolchain to use, how to build
   - add desc: toolchain, building, ld script?
-  - faster pixel operations and custom lcd initialization (not available, since Bios functions are not open sourced)
   - add blank states for gui shell/file manager, add error message to system.elf when shell was not found
   - simple application for testing addressable RGB leds
+  - OK: beeper
+  - OK: faster pixel operations and custom lcd initialization (not available, since Bios functions are not open sourced)
 
 #### Ideas
   - floppy disk drive over USB 

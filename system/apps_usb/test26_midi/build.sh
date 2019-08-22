@@ -13,7 +13,7 @@ cd build
   ../usb/cdcusb_desc.c \
   ../usb/cdcusb_endp.c \
   ../usb/cdcusb_app.c \
-  -I../../../os_library/include/  -I ../../../os_host/lib/CMSIS/Device/STM32F10x/Include -I ../../../os_host/lib/CMSIS/Include   -I ../../../os_host/lib/STM32_USB-FS-Device_Driver/inc 
+  -I../../../os_library/include/  -I ../../../os_host/library/CMSIS/Device/STM32F10x/Include -I ../../../os_host/library/CMSIS/Include   -I ../../../os_host/library/STM32_USB-FS-Device_Driver/inc 
 
 #arm-none-eabi-gcc -fPIC -mcpu=cortex-m3 -mthumb -o output.elf -nostartfiles -T ../app.lds \
 arm-none-eabi-gcc -mcpu=cortex-m3 -mthumb -o output.elf -nostartfiles -T ../app.lds \

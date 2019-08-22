@@ -1,7 +1,7 @@
 #include "Ext_Flash.c"
 #include <stdint.h>
 #include <stdbool.h>
-#include "lib/STM32F10x_StdPeriph_Driver/inc/misc.h"
+#include "library/STM32F10x_StdPeriph_Driver/inc/misc.h"
 
 extern void (* g_pfnVectors[76])(void);
 

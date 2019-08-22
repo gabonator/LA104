@@ -1,5 +1,5 @@
 #include "Bios.h"
-#include "../library/spf.h"
+#include "library/spf/spf.h"
 #include <stdarg.h>
 
 int px = 0;

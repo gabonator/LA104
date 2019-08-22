@@ -18,6 +18,7 @@ public:
     // SYS
     virtual void Delay(int intervalMs) = 0;
     virtual uint32_t GetTick() = 0;
+	/*
     // FAT
     virtual bool FatInit() = 0;
     virtual bool FatOpen(const char* strName, ui8 nIoMode) = 0;
@@ -28,6 +29,10 @@ public:
     virtual bool FatFindNext(BIOS::FAT::TFindFile* pFile) = 0;
     virtual uint32_t FatGetFileSize() = 0;
     virtual bool FatSeek(uint32_t offset) = 0;
+	 */
+	// FLASH
+	virtual void FlashRead(uint8_t* buff, int offset, int length) = 0;
+	virtual void FlashWrite(const uint8_t* buff, int offset, int length) = 0;
 };
 
 extern CHal* gHal;

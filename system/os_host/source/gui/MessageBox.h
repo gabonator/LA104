@@ -51,7 +51,7 @@ public:
 		Hide();
 	}
 
-	virtual void OnTimer()
+	virtual void OnTimer() override
 	{		
 		Hide();
 	}

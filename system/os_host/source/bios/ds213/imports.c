@@ -1,6 +1,6 @@
 #include <stdint.h>
 #include <stdbool.h>
-#include "lib/STM32F10x_StdPeriph_Driver/inc/misc.h"
+#include "library/STM32F10x_StdPeriph_Driver/inc/misc.h"
 #include "DS213HwDriver.h"
 
 #define _SEC_SIZE         4096 // TODO: JOIN

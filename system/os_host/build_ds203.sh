@@ -1,6 +1,7 @@
 #https://developer.arm.com/open-source/gnu-toolchain/gnu-rm/downloads
 
 GITREVISION=`git log --pretty=format:'%h' -n 1`
+TARGET=DS203
 
 export PATH="/Users/gabrielvalky/Downloads/gcc-arm-none-eabi-7-2018-q2-update/bin/":"$PATH"
 mkdir -p build
@@ -8,56 +9,52 @@ cd build
 
 INCLUDES="\
   -I ../sources \
-  -I ../lib/STM32_USB-FS-Device_Driver/inc \
-  -I ../lib/MSD \
-  -I ../lib/CDC \
-  -I ../lib/CMSIS/Include \
-  -I ../lib/STM32F10x_StdPeriph_Driver/inc \
+  -I ../library/STM32_USB-FS-Device_Driver/inc \
+  -I ../library/MSD \
+  -I ../library/CDC \
+  -I ../library/CMSIS/Include \
+  -I ../library/STM32F10x_StdPeriph_Driver/inc \
   -I .. \
   -I ../source \
-  -I ../lib/CMSIS/Device/STM32F10x/Include \
-  -I ../lib"
+  -I ../library/CMSIS/Device/STM32F10x/Include \
+  -I ../library"
 
 arm-none-eabi-gcc -Wall -Os -Werror -fno-common -mcpu=cortex-m3 -mthumb -msoft-float -MD \
   -D USE_STDPERIPH_DRIVER \
   -D STM32F10X_HD \
-  -D DS203 \
+  -D $TARGET \
   ${INCLUDES} -c \
-  ../startup.c \
-  ../interrupt.c \
-  ../lib/STM32F10x_StdPeriph_Driver/src/stm32f10x_flash.c \
-  ../lib/STM32F10x_StdPeriph_Driver/src/stm32f10x_spi.c \
-  ../lib/STM32F10x_StdPeriph_Driver/src/stm32f10x_rcc.c \
-  ../lib/STM32_USB-FS-Device_Driver/src/usb_init.c \
-  ../lib/STM32_USB-FS-Device_Driver/src/usb_mem.c \
-  ../lib/STM32_USB-FS-Device_Driver/src/usb_core.c \
-  ../lib/STM32_USB-FS-Device_Driver/src/usb_int.c \
-  ../lib/STM32_USB-FS-Device_Driver/src/usb_regs.c \
-  ../lib/STM32_USB-FS-Device_Driver/src/usb_sil.c \
-  ../lib/CMSIS/Device/STM32F10x/Source/system_stm32f10x.c \
+  ../source/startup.c \
+  ../source/interrupt.c \
+  ../library/STM32F10x_StdPeriph_Driver/src/stm32f10x_flash.c \
+  ../library/STM32F10x_StdPeriph_Driver/src/stm32f10x_spi.c \
+  ../library/STM32F10x_StdPeriph_Driver/src/stm32f10x_rcc.c \
+  ../library/STM32_USB-FS-Device_Driver/src/usb_init.c \
+  ../library/STM32_USB-FS-Device_Driver/src/usb_mem.c \
+  ../library/STM32_USB-FS-Device_Driver/src/usb_core.c \
+  ../library/STM32_USB-FS-Device_Driver/src/usb_int.c \
+  ../library/STM32_USB-FS-Device_Driver/src/usb_regs.c \
+  ../library/STM32_USB-FS-Device_Driver/src/usb_sil.c \
+  ../library/CMSIS/Device/STM32F10x/Source/system_stm32f10x.c \
   ../source/bios/imports.c \
-  ../lib/STM32F10x_StdPeriph_Driver/src/stm32f10x_gpio.c \
-  ../lib/STM32F10x_StdPeriph_Driver/src/stm32f10x_tim.c \
-  ../lib/STM32F10x_StdPeriph_Driver/src/stm32f10x_i2c.c \
-  ../lib/STM32F10x_StdPeriph_Driver/src/stm32f10x_usart.c \
-  ../lib/STM32F10x_StdPeriph_Driver/src/misc.c \
-  ../lib/CDC/cdcusb_endp.c \
-  ../lib/CDC/cdcusb_desc.c \
-  ../lib/CDC/cdcusb_prop.c \
-  ../lib/CDC/cdcusb_app.c \
+  ../library/STM32F10x_StdPeriph_Driver/src/stm32f10x_gpio.c \
+  ../library/STM32F10x_StdPeriph_Driver/src/stm32f10x_tim.c \
+  ../library/STM32F10x_StdPeriph_Driver/src/stm32f10x_i2c.c \
+  ../library/STM32F10x_StdPeriph_Driver/src/stm32f10x_usart.c \
+  ../library/STM32F10x_StdPeriph_Driver/src/misc.c \
+  ../library/CDC/cdcusb_endp.c \
+  ../library/CDC/cdcusb_desc.c \
+  ../library/CDC/cdcusb_prop.c \
+  ../library/CDC/cdcusb_app.c \
   ../source/usb/Disk.c \
-  ../lib/MSD/msdusb_scsi.c \
-  ../lib/MSD/msdusb_bot.c \
-  ../lib/MSD/msdusb_desc.c \
-  ../lib/MSD/msdusb_prop.c \
-  ../lib/MSD/msdusb_endp.c \
-  ../lib/COMMON/commonusb_pwr.c \
-  ../lib/COMMON/commonusb_istr.c \
-  ../lib/COMMON/commonusb_app.c \
-
-
-#  ../lib/MSD/msdusb_istr.c \
-#  ../lib/MSD/msdusb_pwr.c \
+  ../library/MSD/msdusb_scsi.c \
+  ../library/MSD/msdusb_bot.c \
+  ../library/MSD/msdusb_desc.c \
+  ../library/MSD/msdusb_prop.c \
+  ../library/MSD/msdusb_endp.c \
+  ../library/COMMON/commonusb_pwr.c \
+  ../library/COMMON/commonusb_istr.c \
+  ../library/COMMON/commonusb_app.c \
 
 arm-none-eabi-g++ -Wall -Os -Werror -fno-common -mcpu=cortex-m3 -mthumb -msoft-float -MD -fno-exceptions -fno-rtti -fno-threadsafe-statics -Wno-psabi -c -Wall -Werror \
   -D __USER__=\"$USER\" \
@@ -65,9 +62,9 @@ arm-none-eabi-g++ -Wall -Os -Werror -fno-common -mcpu=cortex-m3 -mthumb -msoft-f
   -D __GITREVISION__=\"$GITREVISION\" \
   -D USE_STDPERIPH_DRIVER \
   -D STM32F10X_HD \
-  -D DS203 \
+  -D $TARGET \
   ${INCLUDES} -c \
-  ../main.cpp \
+  ../source/main.cpp \
   ../source/bios/sys.cpp \
   ../source/bios/lcd.cpp \
   ../source/bios/memory.cpp \
@@ -77,16 +74,13 @@ arm-none-eabi-g++ -Wall -Os -Werror -fno-common -mcpu=cortex-m3 -mthumb -msoft-f
   ../source/bios/usb.cpp \
   ../source/bios/dbg.cpp \
   ../source/bios/gpio.cpp \
-  ../source/library/spf.c \
-  ../source/Execute.cpp \
+  ../source/bios/adc.cpp \
+  ../library/spf/spf.c \
+  ../source/main/Execute.cpp \
   ../source/gui/Gui.cpp \
   ../source/Framework/Serialize.cpp \
 
-#  ../source/framework/Wnd.cpp \
-#  ../source/framework/Utils.cpp \
-#  ../source/Manager.cpp \
-
-arm-none-eabi-gcc -mcpu=cortex-m3 -mthumb -o output.elf -nostartfiles -T ../app_ds203.ld \
+arm-none-eabi-gcc -mcpu=cortex-m3 -mthumb -o output.elf -nostartfiles -T ../app.ld \
   ./main.o \
   ./startup.o \
   ./interrupt.o \
@@ -132,13 +126,7 @@ arm-none-eabi-gcc -mcpu=cortex-m3 -mthumb -o output.elf -nostartfiles -T ../app_
   ./commonusb_app.o \
   ./Gui.o \
   ./Serialize.o \
-
-#  ./Wnd.o \
-#  ./Utils.o \
-#  ./Manager.o \
-#  ./msdusb_istr.o \
-#  ./msdusb_pwr.o \
-
+  ./adc.o \
 
 arm-none-eabi-objcopy -O binary ./output.elf ./output.bin
 arm-none-eabi-objcopy -O ihex ./output.elf ./system.hex
