@@ -585,7 +585,7 @@ public:
 		CWnd::Create( pszId, dwFlags, rcClient, pParent );
 	}
 
-	virtual void OnPaint()
+	virtual void OnPaint() override
 	{
 		ui16 clr = HasFocus() ? RGB565(ffffff) : RGB565(000000);
 			

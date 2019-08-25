@@ -1,3 +1,5 @@
+#define BEEP_VOLUME       3     // 
+
   #define KEY_STATUS             4    // Current keys status 
   #define K_ITEM_D_STATUS      0x0008    // 0 = Key push on
   #define K_ITEM_S_STATUS      0x0040    // 0 = Key push on

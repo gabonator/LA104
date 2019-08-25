@@ -4,28 +4,6 @@
 #include "STM32F10x.h"
 #include "UsbTypes.h"
 
-#define SECTOR_SIZE      SEC_SIZE
-#define SECTOR_CNT       SEC_AMNT
-
-#define DISKSTR          "8MB Internal"
-
-#ifdef DS203
-#define SEC_SIZE         512 // TODO: JOIN
-#define SEC_AMNT         4096 // TODO: bios
-#endif
-
-#ifdef DS213
-#define SEC_SIZE         4096 // TODO: JOIN
-#define SEC_AMNT         2047 // TODO: bios
-#endif
-
-#ifdef LA104
-#define SEC_SIZE         4096 // TODO: JOIN
-#define SEC_AMNT         2048 // TODO: bios
-#endif
-
-#define FLASH_PAGE       0x0800
-
 extern u8 DiskBuf[];
 
 void Disk_Init(void);

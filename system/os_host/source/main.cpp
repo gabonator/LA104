@@ -2,8 +2,6 @@
 #include "source/bios/Bios.h"
 #include "source/main/Execute.h"
 
-extern "C" uint32_t /*__attribute__((naked))*/ GetStackPointer();
-
 class CTokenizer
 {
   char* mString;
@@ -37,13 +35,37 @@ public:
   }
 };
 
-int main()
+void DumpRoot()
 {
+    BIOS::FAT::EResult res = BIOS::FAT::OpenDir((char*)"");
+    if (res != BIOS::FAT::EOk)
+    {
+      BIOS::DBG::Print("Open dir failed!\n");
+      return;
+    }
+
+      BIOS::DBG::Print("Files:<");
+    BIOS::FAT::TFindFile f;
+    while ((res = BIOS::FAT::FindNext(&f)) == BIOS::FAT::EOk)
+    {
+      BIOS::DBG::Print("'%s', ", f.strName);
+    }
+      BIOS::DBG::Print(">\n");
+}
+
+int main()
+{                   
+  // TODO: move to ds203 startup code
+  BIOS::SYS::Beep(0);
+
   BIOS::SYS::Init();
   BIOS::FAT::Init();
+#ifndef DS203
   BIOS::USB::Enable();
 //  BIOS::USB::InitializeSerial();
   BIOS::USB::InitializeMass();
+#endif
+
   BIOS::OS::SetArgument((char*)"");
   BIOS::LCD::Print(0, 0, RGB565(ffffff), RGB565(00000), "OS Revision: " __GITREVISION__);
   BIOS::LCD::Print(0, 16, RGB565(ffffff), RGB565(00000), "Build date: " __DATE__ " " __TIME__);
@@ -55,6 +77,9 @@ int main()
   while (BIOS::KEY::GetKey() == BIOS::KEY::F3)
 #endif
 #ifdef DS213
+  while (BIOS::KEY::GetKey() == BIOS::KEY::F4)
+#endif
+#ifdef DS203
   while (BIOS::KEY::GetKey() == BIOS::KEY::F4)
 #endif
   {
@@ -72,7 +97,17 @@ int main()
     {
       CTokenizer tok(BIOS::OS::GetArgument());
       tok.GetToken(filename, 63);
+
+      uint8_t gFlashSharedBuffer[BIOS::MEMORY::SharedBufferSize]; 
+      BIOS::MEMORY::SetSharedBuffer(gFlashSharedBuffer);
+
+      uint8_t gFatSharedBuffer[BIOS::FAT::SharedBufferSize]; 
+      BIOS::FAT::SetSharedBuffer(gFatSharedBuffer);
+
       address = ElfExecute(filename);
+
+      BIOS::MEMORY::SetSharedBuffer(nullptr);
+      BIOS::FAT::SetSharedBuffer(nullptr);
     }
 
     if (!address)
@@ -93,6 +128,7 @@ int main()
     else
       BIOS::OS::SetArgument((char*)"");
   }
+
   return 0;
 }
 

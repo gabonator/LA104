@@ -76,7 +76,9 @@ namespace BIOS
   namespace MEMORY
   {
     const int SharedBufferSize = 2048+128;
-    PVOID GetSharedBuffer();
+
+    void SetSharedBuffer(void*);
+    void* GetSharedBuffer();
 
     void LinearStart();
     bool LinearFinish();
@@ -120,15 +122,22 @@ namespace BIOS
     };
 
 #ifdef DS203
-    const int SectorSize = 512;
+    constexpr int SectorSize = 512;
+    constexpr int SectorCount = 4096;
 #endif
 #ifdef DS213
-    const int SectorSize = 4096;
+    constexpr int SectorSize = 4096;
+    constexpr int SectorCount = 2047;
 #endif
 #ifdef LA104
-    const int SectorSize = 4096;
+    constexpr int SectorSize = 4096;
+    constexpr int SectorCount = 2048;
 #endif
-    PVOID GetSharedBuffer();
+
+    constexpr int SharedBufferSize = SectorSize;
+
+    void SetSharedBuffer(void*);
+    void* GetSharedBuffer();
 
     EResult Init();
     EResult Open(const char* strName, ui8 nIoMode);
@@ -249,9 +258,9 @@ namespace BIOS
     };
 
     enum class ERunState {
-      Start = 0,
-      Empty = 1,
-      Full = 2
+      Start = 1,
+      Empty = 2,
+      Full = 4
     };
 
     enum class EInput {

@@ -7,17 +7,23 @@
 
 namespace BIOS {
   namespace MEMORY {
-    uint8_t gSharedBuffer[BIOS::MEMORY::SharedBufferSize];
+    uint8_t* gSharedBuffer{nullptr};
 
-    static_assert(sizeof(LinearFlashing) <= sizeof(BIOS::MEMORY::gSharedBuffer), "Shared buffer size mismatch");
+    static_assert(sizeof(LinearFlashing) <= BIOS::MEMORY::SharedBufferSize, "Shared buffer size mismatch");
 
-    PVOID GetSharedBuffer()
+    void SetSharedBuffer(void* buffer)
+    {
+      gSharedBuffer = (uint8_t*)buffer;
+    }
+
+    void* GetSharedBuffer()
     {
       return gSharedBuffer;
     }
 
     void LinearStart()
     {
+        _ASSERT(gSharedBuffer);
     	// TODO: for some reason the variable gets corrupted after first flashing (or uninitialized)
       //BIOS::DBG::Print("FL0 (%08x, %08x)", g_pLinearFlashing, g_ADCMem);
     	memset( gSharedBuffer, 0, sizeof(LinearFlashing) );
@@ -26,6 +32,7 @@ namespace BIOS {
 
     bool LinearFinish()
     {
+        _ASSERT(gSharedBuffer);
     	bool bOk = linearFlashProgramFinish((LinearFlashing*)gSharedBuffer);
     	memset( gSharedBuffer, 0, sizeof(LinearFlashing) );
     	return bOk;
@@ -33,6 +40,7 @@ namespace BIOS {
 
     bool LinearProgram( ui32 nAddress, unsigned char* pData, int nLength )
     {
+        _ASSERT(gSharedBuffer);
         int result = linearFlashProgram((LinearFlashing*)gSharedBuffer, nAddress, (flashdata_t*)pData, nLength);
     	return result == 0;
     }

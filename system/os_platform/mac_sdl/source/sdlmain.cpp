@@ -10,7 +10,9 @@ void _main(void);
 const int pixelSize = 2;
 
 std::vector< unsigned char > pixels( BIOS::LCD::Width * BIOS::LCD::Height * 4, 0 );
+void sdl_blit();
 
+int nc = 0;
 void setPixel(int x, int y, int c)
 {
     y = BIOS::LCD::Height-1-y;
@@ -22,6 +24,14 @@ void setPixel(int x, int y, int c)
     pixels[ offset + 1 ] = Get565G(c);
     pixels[ offset + 2 ] = Get565R(c);
     pixels[ offset + 3 ] = SDL_ALPHA_OPAQUE;
+	
+	// show drawing artifacts
+	if (0 && nc++ > 200)
+	{
+		nc = 0;
+		sdl_blit();
+
+	}
 }
 
 int getPixel(int x, int y)
@@ -52,7 +62,7 @@ void sdl_init()
     (
      "LA104 emulator",
      SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
-     BIOS::LCD::Width*2, BIOS::LCD::Height*2,
+     BIOS::LCD::Width*pixelSize, BIOS::LCD::Height*pixelSize,
      SDL_WINDOW_SHOWN
      );
     
@@ -86,15 +96,29 @@ int sdl_lastKey()
     return temp;
 }
 
+void sdl_blit()
+{
+	SDL_SetRenderDrawColor( renderer, 0, 0, 0, SDL_ALPHA_OPAQUE );
+	SDL_RenderClear( renderer );
+	
+	SDL_UpdateTexture
+	(
+	 texture,
+	 NULL,
+	 &pixels[0],
+	 BIOS::LCD::Width * 4
+	 );
+	
+	SDL_RenderCopy( renderer, texture, NULL, NULL );
+	SDL_RenderPresent( renderer );
+}
+
 void sdl_loop()
 {
     SDL_Event event;
     
     //const Uint64 start = SDL_GetPerformanceCounter();
     
-    SDL_SetRenderDrawColor( renderer, 0, 0, 0, SDL_ALPHA_OPAQUE );
-    SDL_RenderClear( renderer );
-
     while( SDL_PollEvent( &event ) )
     {
         if (SDL_KEYDOWN == event.type)
@@ -107,18 +131,9 @@ void sdl_loop()
             break;
         }
     }
-    
-    SDL_UpdateTexture
-    (
-     texture,
-     NULL,
-     &pixels[0],
-     BIOS::LCD::Width * 4
-     );
-    
-    SDL_RenderCopy( renderer, texture, NULL, NULL );
-    SDL_RenderPresent( renderer );
-    
+	
+	sdl_blit();
+	
     //const Uint64 end = SDL_GetPerformanceCounter();
     //const static Uint64 freq = SDL_GetPerformanceFrequency();
     //const double seconds = ( end - start ) / static_cast< double >( freq );

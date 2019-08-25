@@ -1,6 +1,11 @@
 #include "Bios.h"
 #include "imports.h"
 
+#include "fat.h"
+
+static_assert(BIOS_FAT_SectorSize == BIOS::FAT::SectorSize);
+static_assert(BIOS_FAT_SectorCount == BIOS::FAT::SectorCount);
+
 extern "C" 
 {
   #include "fatfs/ff.c"
@@ -46,15 +51,7 @@ extern "C"
       }
       else if (ctrl == GET_SECTOR_COUNT)
       {
-#ifdef DS203
-          *(DWORD*)buff = 4096;  // TODO: move to bios
-#endif
-#ifdef DS213
-          *(DWORD*)buff = 2047;  // TODO: move to bios
-#endif
-#ifdef LA104
-          *(DWORD*)buff = 2048;
-#endif
+          *(DWORD*)buff = BIOS::FAT::SectorCount;
           return RES_OK;
       }
       else if (ctrl == GET_SECTOR_SIZE || ctrl == GET_BLOCK_SIZE)
@@ -99,8 +96,7 @@ namespace BIOS
 {
   namespace FAT 
   {
-    // could be possibly replaced by g_fatfs->win to save 4kB
-    uint8_t gSharedBuffer[SectorSize];
+    void* gSharedBuffer{nullptr};
 
     FIL g_file;
     DIR g_directory;
@@ -120,8 +116,16 @@ namespace BIOS
 	}
     }
 
-    PVOID GetSharedBuffer()
+    void SetSharedBuffer(void* sharedBufferPtr)
     {
+      gSharedBuffer = sharedBufferPtr;
+    }
+
+    void* GetSharedBuffer()
+    {
+      if (!gSharedBuffer)
+        return g_fatfs.win;
+
       return gSharedBuffer;
     }
 

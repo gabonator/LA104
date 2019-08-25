@@ -251,15 +251,6 @@ uint32_t ElfExecute( char* strName )
 	int nStringTableLen = elfSection.size;
 
 	int nSymbolNamesOffset = -1;
-//	char strSymbolNames[600]; // too small!
-
-/*
-	_ASSERT( nStringTableLen < 128 );
-	char strSectionNames[128];
-	char* strSymbolNames = strSectionNames;
-	fw.Seek(nStringTableOfs);
-	fw >> CStream(strSectionNames, nStringTableLen);
-*/
 
 	enum SecType {
 		SecNone = 0,
@@ -303,8 +294,6 @@ uint32_t ElfExecute( char* strName )
 
 		fw.Seek(nStringTableOfs + elfSection.name);
 		fw >> CStream( strSectionName, nSectionNameMaxLen );
-
-//		char* strSectionName = strSectionNames + elfSection.name;
 
 		if ( strncmp( strSectionName, ".text", 5 ) == 0 )
 		{
@@ -354,7 +343,6 @@ uint32_t ElfExecute( char* strName )
 				break;
 			}
 
-//		_ASSERT( sectionType > 0 );
 		if ( sectionType > 0 )
 		{
 			arrSectionIndex[sectionType] = i;	
@@ -366,11 +354,6 @@ uint32_t ElfExecute( char* strName )
 			_ASSERT( sectionType > 0 );
 			return 0;
 		}
-		/*
-		BIOS::DBG::Print("Section%d '%s' ofs=%d addr=%08x len=%d\n", i, 
-			strSectionNames+elfSection.name, elfSection.offset, elfSection.addr,
-			elfSection.size);
-			*/
 	}
 
 	for ( int i=0; i<(int)COUNT(arrSectionIndex); i++)
@@ -409,9 +392,6 @@ uint32_t ElfExecute( char* strName )
 			case SecDynStr:
 			{
 				nSymbolNamesOffset = elfSection.offset;
-//				_ASSERT( elfSection.size < sizeof(strSymbolNames) );
-//				fw.Seek( elfSection.offset );
-//				fw >> CStream( strSymbolNames, elfSection.size );
 				break;
 			}
 			case SecRelPlt:
@@ -449,31 +429,15 @@ uint32_t ElfExecute( char* strName )
                                           BIOS::DBG::Print(strSymbolName);
                                           BIOS::DBG::Print("' not found!\n");
                                         }
-/*
-char temp[64];
-sprintf(temp, "S:'%s'     ", strSymbolName);
-BIOS::LCD::Print(0,80, RGB565(ffffff), RGB565(ff0000), temp);
-sprintf(temp, "%08x -> %08x", dwProcAddr, elfRelocation.r_offset);
-BIOS::LCD::Print(0,80+16, RGB565(ffffff), RGB565(ff0000), temp);
-*/
-//					BIOS::DBG::Print("%s, ", strSymbolName);
-//					if ( i == nSymbolCount-1 )
-//					{
-//						BIOS::DBG::Print("\n");
-//					}
 					_ASSERT(dwProcAddr);
-#ifndef _WIN32
+
+					// Execute only on ARM!
 					/*
 					0x20000E84 (GOT[2]) -> 0x20000DAC (PLT[0])
 					0x20000E84 (GOT[2]) <- new address
 					*/
 					ui32* pRelocation = (ui32*)elfRelocation.r_offset;
 					*pRelocation = dwProcAddr;
-#endif
-//sprintf(temp, "%08x ?= %08x", *(ui32*)elfRelocation.r_offset, dwProcAddr);
-//BIOS::LCD::Print(0,80+32, RGB565(ffffff), RGB565(ff0000), temp);
-//BIOS::SYS::DelayMs(1000);
-
 				}
 				break;
 			}
@@ -500,23 +464,11 @@ BIOS::LCD::Print(0,80+16, RGB565(ffffff), RGB565(ff0000), temp);
 			}
 			case SecStrTab:
 			{
-//				_ASSERT( elfSection.size < sizeof(strSymbolNames) );
-//				fw.Seek( elfSection.offset );
-//				fw >> CStream( strSymbolNames, elfSection.size );
 				break;
 			}
 			case SecSymTab:
 			{
-//				_ASSERT( arrSectionOffset[SecStrTab] != -1 );
-//				int nSymbolCount = elfSection.size/sizeof(Elf32_Sym);
-//				for (int i=0; i<nSymbolCount; i++)
-//				{
-//					Elf32_Sym elfSymbol;
-//					fw.Seek( elfSection.offset + i * sizeof(Elf32_Sym) );
-//					fw >> CStream(&elfSymbol, sizeof(Elf32_Sym));
-//					char* strExportName = strSymbolNames + elfSymbol.st_name;
-//					BIOS::DBG::Print("%s = %08x ", strExportName, elfSymbol.st_value);
-//				}
+				break;
 			}
 		}
 		Show("\n");

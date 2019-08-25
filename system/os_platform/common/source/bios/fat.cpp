@@ -4,6 +4,88 @@ extern "C"
 {
 #include <../library/fatfs/ff.c>
 	
+	
+#if 0
+	/*-----------------------------------------------------------------------*/
+	/* Read File                                                             */
+	/*-----------------------------------------------------------------------*/
+	
+	FRESULT f_read (
+					FIL *fp, 		/* Pointer to the file object */
+					void *buff,		/* Pointer to data buffer */
+					UINT btr,		/* Number of bytes to read */
+					UINT *br		/* Pointer to number of bytes read */
+	)
+	{
+		FRESULT res;
+		DWORD clst, sect, remain;
+		UINT rcnt, cc;
+		BYTE csect, *rbuff = (BYTE*)buff;
+		
+		
+		*br = 0;	/* Clear read byte counter */
+		
+		res = validate(fp);							/* Check validity */
+		if (res != FR_OK) LEAVE_FF(fp->fs, res);
+		if (fp->flag & FA__ERROR)					/* Aborted file? */
+			LEAVE_FF(fp->fs, FR_INT_ERR);
+		if (!(fp->flag & FA_READ)) 					/* Check access mode */
+			LEAVE_FF(fp->fs, FR_DENIED);
+		remain = fp->fsize - fp->fptr;
+		if (btr > remain) btr = (UINT)remain;		/* Truncate btr by remaining bytes */
+		
+		for ( ;  btr;								/* Repeat until all data read */
+			 rbuff += rcnt, fp->fptr += rcnt, *br += rcnt, btr -= rcnt) {
+			if ((fp->fptr % SS(fp->fs)) == 0) {		/* On the sector boundary? */
+				csect = (BYTE)(fp->fptr / SS(fp->fs) & (fp->fs->csize - 1));	/* Sector offset in the cluster */
+				if (!csect) {						/* On the cluster boundary? */
+					if (fp->fptr == 0) {			/* On the top of the file? */
+						clst = fp->sclust;			/* Follow from the origin */
+					} else {						/* Middle or end of the file */
+							clst = get_fat(fp->fs, fp->clust);	/* Follow cluster chain on the FAT */
+					}
+					if (clst < 2)
+						ABORT(fp->fs, FR_INT_ERR);
+					if (clst == 0xFFFFFFFF)
+						ABORT(fp->fs, FR_DISK_ERR);
+					fp->clust = clst;				/* Update current cluster */
+				}
+				sect = clust2sect(fp->fs, fp->clust);	/* Get current sector */
+				if (!sect)
+				{
+					sect = clust2sect(fp->fs, fp->clust);	/* Get current sector */
+					ABORT(fp->fs, FR_INT_ERR);
+				}
+				sect += csect;
+				cc = btr / SS(fp->fs);				/* When remaining bytes >= sector size, */
+				if (cc) {							/* Read maximum contiguous sectors directly */
+					if (csect + cc > fp->fs->csize)	/* Clip at cluster boundary */
+						cc = fp->fs->csize - csect;
+					if (disk_read(fp->fs->drv, rbuff, sect, (BYTE)cc) != RES_OK)
+						ABORT(fp->fs, FR_DISK_ERR);
+					if (fp->fs->wflag && fp->fs->winsect - sect < cc)
+						mem_cpy(rbuff + ((fp->fs->winsect - sect) * SS(fp->fs)), fp->fs->win, SS(fp->fs));
+
+					// Memory optimization: Reading directly into internal buffer, invalidate win
+					if (buff==fp->fs->win)
+						fp->fs->winsect = -1;
+
+					rcnt = SS(fp->fs) * cc;			/* Number of bytes transferred */
+					continue;
+				}
+				fp->dsect = sect;
+			}
+			rcnt = SS(fp->fs) - ((UINT)fp->fptr % SS(fp->fs));	/* Get partial sector data from sector buffer */
+			if (rcnt > btr) rcnt = btr;
+			if (move_window(fp->fs, fp->dsect))		/* Move sector window */
+				ABORT(fp->fs, FR_DISK_ERR);
+			mem_cpy(rbuff, &fp->fs->win[fp->fptr % SS(fp->fs)], rcnt);	/* Pick partial sector */
+		}
+		
+		LEAVE_FF(fp->fs, FR_OK);
+	}
+	
+#endif
 	DSTATUS disk_initialize(BYTE drv)
 	{
 		// Supports only one drive, no initialization necessary.
@@ -95,8 +177,7 @@ namespace BIOS
 {
 	namespace FAT
 	{
-		// could be possibly replaced by g_fatfs->win to save 4kB
-		uint8_t gSharedBuffer[SectorSize];
+		uint8_t* gSharedBuffer{nullptr};
 		
 		FIL g_file;
 		DIR g_directory;
@@ -116,8 +197,16 @@ namespace BIOS
 			}
 		}
 		
-		PVOID GetSharedBuffer()
+		void SetSharedBuffer(void* sharedBufferPtr)
 		{
+			gSharedBuffer = (uint8_t*)sharedBufferPtr;
+		}
+		
+		void* GetSharedBuffer()
+		{
+			if (!gSharedBuffer)
+				return g_fatfs.win;
+			
 			return gSharedBuffer;
 		}
 		

@@ -2414,7 +2414,6 @@ FRESULT f_open (
 
 
 
-
 /*-----------------------------------------------------------------------*/
 /* Read File                                                             */
 /*-----------------------------------------------------------------------*/
@@ -2480,6 +2479,11 @@ FRESULT f_read (
 					mem_cpy(rbuff + ((fp->dsect - sect) * SS(fp->fs)), fp->buf, SS(fp->fs));
 #endif
 #endif
+				
+				// GABO: Memory optimization: Reading directly into internal buffer, invalidate win
+				if (buff==fp->fs->win)
+					fp->fs->winsect = -1;
+
 				rcnt = SS(fp->fs) * cc;			/* Number of bytes transferred */
 				continue;
 			}
@@ -2511,8 +2515,6 @@ FRESULT f_read (
 
 	LEAVE_FF(fp->fs, FR_OK);
 }
-
-
 
 
 #if !_FS_READONLY

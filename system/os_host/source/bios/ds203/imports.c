@@ -2,6 +2,8 @@
 #include <stdbool.h>
 #include "library/STM32F10x_StdPeriph_Driver/inc/misc.h"
 #include "ds203bios.h"
+//#include "BIOS.h"
+//#include "lowlcd.h"
 
 void dbgPrint(const char* msg, ...);
 
@@ -9,7 +11,22 @@ void Delay_mS(uint32_t mS);
 
 
 extern void (* g_pfnVectors[76])(void);
-                 
+
+void ___Set(int x, int y)
+{
+  __Set(x, y);
+}             
+
+void ___Int_HP()
+{
+  __CTR_HP();
+}
+
+void ___Int_LP()
+{
+  __USB_Istr();
+}
+    
 void Set_Pixel(uint_fast16_t Color)
 {
   __LCD_SetPixl(Color);
@@ -43,11 +60,12 @@ void ExtFlash_CS_HIGH(void)
 
 void Set_Block(int x1, int y1, int x2, int y2)
 {
-  __LCD_Set_Block(x1, y1, x2, y2);
+  __LCD_Set_Block(x1, x2-1, y1, y2-1);
 }
 
 void xBeep(bool b)
 {
+  __Set(BEEP_VOLUME, b ? 100 : 0);
 }
 
 void Set_Posi(uint_fast16_t x, uint_fast16_t y)
@@ -61,8 +79,14 @@ void EnableUsb(bool enable)
 
 void HardwareInit()
 {
+
+//  LCD_Init();
+//  __LCD_Initial();
+
   NVIC_SetVectorTable(NVIC_VectTab_FLASH, (uint32_t)g_pfnVectors - NVIC_VectTab_FLASH);
-  while (SysTick_Config(SystemCoreClock / 1000));
+  __USB_Init();
+//  SysTick_Config(SystemCoreClock / 1000);
+
 }
 
 uint32_t GetKeys()

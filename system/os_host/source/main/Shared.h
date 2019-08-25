@@ -22,9 +22,23 @@ uint32_t GetProcAddress(char* symbol)
     case 0xcd2d85b8: return (uint32_t)static_cast<uint32_t(*)()>(BIOS::OS::DisableInterrupts); 
     case 0x3d2d2490: return (uint32_t)BIOS::OS::GetInterruptVector;
     case 0x7a04e3e3: return (uint32_t)static_cast<void(*)(BIOS::OS::EInterruptVector, void (*)())>(BIOS::OS::SetInterruptVector); 
+#if defined(DS203) || defined(DS213)
+    case 0x6c5868c5: return (uint32_t)static_cast<int(*)()>(BIOS::ADC::GetPointer); 
+    case 0x9f1b1ff6: return (uint32_t)static_cast<void(*)(BIOS::ADC::EInput, BIOS::ADC::ECouple, BIOS::ADC::EResolution, int)>(BIOS::ADC::ConfigureInput); 
+    case 0xd5b1d88f: return (uint32_t)static_cast<void(*)(int, int, BIOS::ADC::ETriggerType, BIOS::ADC::EInput)>(BIOS::ADC::ConfigureTrigger); 
+    case 0xc45face7: return (uint32_t)static_cast<void(*)(float)>(BIOS::ADC::ConfigureTimebase); 
+    case 0x41dfb8f6: return (uint32_t)BIOS::ADC::Get;
+    case 0xd018fc2b: return (uint32_t)static_cast<void(*)()>(BIOS::ADC::Init); 
+    case 0x5eaf58cd: return (uint32_t)static_cast<bool(*)()>(BIOS::ADC::Ready); 
+    case 0x5e60670c: return (uint32_t)static_cast<void(*)(bool)>(BIOS::ADC::Enable); 
+    case 0x2e785a45: return (uint32_t)static_cast<bool(*)()>(BIOS::ADC::Enabled); 
+    case 0x5d4f13bf: return (uint32_t)static_cast<void(*)()>(BIOS::ADC::Restart); 
+    case 0x8b38ea1c: return (uint32_t)BIOS::ADC::GetState;
+#endif
     case 0xd6251d2c: return (uint32_t)static_cast<void(*)(char const*, ...)>(BIOS::DBG::Print); 
     case 0xd00658b3: return (uint32_t)static_cast<ui32(*)()>(BIOS::FAT::GetFileSize); 
-    case 0x2e3556ed: return (uint32_t)static_cast<PVOID(*)()>(BIOS::FAT::GetSharedBuffer); 
+    case 0x2e3556ed: return (uint32_t)static_cast<void*(*)()>(BIOS::FAT::GetSharedBuffer); 
+    case 0x1de9c9a9: return (uint32_t)static_cast<void(*)(void*)>(BIOS::FAT::SetSharedBuffer); 
     case 0x3737a1be: return (uint32_t)static_cast<BIOS::FAT::EResult(*)()>(BIOS::FAT::Init); 
     case 0xa9fb0fcc: return (uint32_t)static_cast<BIOS::FAT::EResult(*)(char const*, unsigned char)>(BIOS::FAT::Open); 
     case 0xbd600008: return (uint32_t)static_cast<BIOS::FAT::EResult(*)(unsigned char*)>(BIOS::FAT::Read); 
@@ -68,22 +82,6 @@ uint32_t GetProcAddress(char* symbol)
     case 0x294424be: return (uint32_t)static_cast<void(*)()>(BIOS::USB::InitializeSerial); 
     case 0xfdc7c062: return (uint32_t)static_cast<void(*)()>(BIOS::USB::Enable); 
     case 0x0f974530: return (uint32_t)static_cast<void(*)()>(BIOS::USB::Disable); 
-#ifdef LA104
-    case 0xa24234b9: return (uint32_t)static_cast<int(*)(BIOS::GPIO::EPin)>(BIOS::GPIO::AnalogRead); 
-    case 0x8fdd2172: return (uint32_t)static_cast<void(*)(BIOS::GPIO::EPin, int)>(BIOS::GPIO::AnalogWrite); 
-    case 0xfaa84c46: return (uint32_t)static_cast<bool(*)(BIOS::GPIO::EPin)>(BIOS::GPIO::DigitalRead); 
-    case 0x77562c58: return (uint32_t)static_cast<void(*)(BIOS::GPIO::EPin, bool)>(BIOS::GPIO::DigitalWrite); 
-    case 0x9a034af5: return (uint32_t)static_cast<bool(*)(unsigned char, unsigned char)>(BIOS::GPIO::I2C::RequestFrom); 
-    case 0x812b4743: return (uint32_t)static_cast<bool(*)()>(BIOS::GPIO::I2C::EndTransmission); 
-    case 0x591badc5: return (uint32_t)static_cast<bool(*)(unsigned char)>(BIOS::GPIO::I2C::BeginTransmission); 
-    case 0xd01c088c: return (uint32_t)static_cast<uint8_t(*)()>(BIOS::GPIO::I2C::Read); 
-    case 0x5faf3b2e: return (uint32_t)static_cast<bool(*)(unsigned char)>(BIOS::GPIO::I2C::Write); 
-    case 0xabaecaeb: return (uint32_t)static_cast<uint8_t(*)()>(BIOS::GPIO::UART::Read); 
-    case 0x5fafe25c: return (uint32_t)static_cast<void(*)(int, BIOS::GPIO::UART::EConfig)>(BIOS::GPIO::UART::Setup); 
-    case 0xad9a496d: return (uint32_t)static_cast<void(*)(unsigned char)>(BIOS::GPIO::UART::Write); 
-    case 0x0a8c2875: return (uint32_t)static_cast<bool(*)()>(BIOS::GPIO::UART::Available); 
-    case 0x1d877761: return (uint32_t)static_cast<void(*)(BIOS::GPIO::EPin, BIOS::GPIO::EMode)>(BIOS::GPIO::PinMode); 
-#endif
     case 0x37f17362: return (uint32_t)static_cast<void(*)()>(BIOS::MEMORY::LinearStart); 
     case 0xa8ff17f6: return (uint32_t)static_cast<bool(*)()>(BIOS::MEMORY::LinearFinish); 
     case 0x7ac18f26: return (uint32_t)static_cast<bool(*)(unsigned long, unsigned char*, int)>(BIOS::MEMORY::LinearProgram); 

@@ -35,7 +35,7 @@ char* GetCookie()
 
 void _HandleAssertion(const char* file, int line, const char* cond)
 {
-    //BIOS::DBG::Print("Assertion failed in %s [%d]: %s\n", file, line, cond);
+    BIOS::DBG::Print("Assertion failed in %s [%d]: %s\n", file, line, cond);
     while (1);
 }
 
@@ -189,7 +189,7 @@ public:
         DrawIcons();
     }
     
-    virtual CTopMenu::TItem GetItem(int i)
+    virtual CTopMenu::TItem GetItem(int i) override
     {
         if (i==0)
             return CTopMenu::TItem{"LA104 apps", CTopMenu::TItem::EState::Default};
@@ -309,11 +309,11 @@ public:
     {
         mItems.RemoveAll();
         
-#ifdef __APPLE__
-        static char* rootPath = (char*)"/Users/gabrielvalky/Documents/git/LA104/system/release/apps";
-#else
+//#ifdef __APPLE__
+//        static char* rootPath = (char*)"/Users/gabrielvalky/Documents/git/LA104/system/release/apps";
+//#else
         static char* rootPath = (char*)"APPS";
-#endif
+//#endif
         
         strcpy(mCurrentDir, rootPath);
         for (int i=0; i<mFolderStack.GetSize(); i++)
@@ -574,10 +574,13 @@ class CApplication : public CWnd
 {
     CMenuMain mMenu;
     CBrowser mBrowser;
+	uint8_t mFileSystemBuffer[BIOS::FAT::SectorSize];
     
 public:
     void Create()
     {
+		BIOS::FAT::SetSharedBuffer(mFileSystemBuffer);
+		
         CWnd::Create("Application", CWnd::WsVisible, CRect(0, 0, BIOS::LCD::Width, BIOS::LCD::Height), nullptr);
         mMenu.Create("MainMenu", CWnd::WsVisible, CRect(0, 0, BIOS::LCD::Width, 14), this);
         mMenu.SetEnumerator(&mBrowser);
@@ -601,6 +604,7 @@ public:
 
     void Destroy()
     {
+		BIOS::FAT::SetSharedBuffer(nullptr);
     }
 };
 

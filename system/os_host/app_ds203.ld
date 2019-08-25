@@ -1,8 +1,8 @@
 /* Define memory regions. */
 MEMORY
 {
+  rom (rx) : ORIGIN = 0x0800C000, LENGTH = 50K
   ram (rwx) : ORIGIN = 0x20003000, LENGTH = 34K
-  rom (rx)  : ORIGIN = 0x08014000, LENGTH = 64K
 }
 
 _estack = ORIGIN(ram)+LENGTH(ram)-0x100;
@@ -30,10 +30,6 @@ _estack = ORIGIN(ram)+LENGTH(ram)-0x100;
 SECTIONS
 {
   .  = 0x0;          /* From 0x00000000 */
-
-  .bios 0x08000100 (NOLOAD) : {
-    *(.biosfunc) 
-  }
 
   .text : {
     _vectors = .;

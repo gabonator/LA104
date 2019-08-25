@@ -80,7 +80,7 @@ arm-none-eabi-g++ -Wall -Os -Werror -fno-common -mcpu=cortex-m3 -mthumb -msoft-f
   ../source/gui/Gui.cpp \
   ../source/Framework/Serialize.cpp \
 
-arm-none-eabi-gcc -mcpu=cortex-m3 -mthumb -o output.elf -nostartfiles -T ../app.ld \
+arm-none-eabi-gcc -mcpu=cortex-m3 -mthumb -o output.elf -nostartfiles -T ../app_ds203.ld \
   ./main.o \
   ./startup.o \
   ./interrupt.o \

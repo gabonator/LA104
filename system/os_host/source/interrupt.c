@@ -7,15 +7,9 @@
 #include "system_stm32f10x.h"
 #include <stdbool.h>
 
-//#define _DEBUG_SP
-
 volatile uint32_t gCounter = 0;
 volatile uint32_t Dly_mS = 0;
 volatile uint32_t gBeepCounter = 0;
-
-#ifdef _DEBUG_SP
-uint32_t GetStackPointer();
-#endif
 
 volatile char lastChar = 0;
 char GetLastChar()
@@ -32,15 +26,6 @@ char PeekLastChar()
 
 void SysTickHandler(void)
 {
-#ifdef _DEBUG_SP
-  static uint32_t dcounter = 0;
-  if (dcounter++ == 500)
-  {
-    dcounter = 0;
-    dbgPrint("$<%08x>", GetStackPointer());
-  } 
-#endif
-
   gCounter++;
   if (Dly_mS)
     Dly_mS--;
@@ -81,6 +66,20 @@ void SysTickHandler(void)
   }
 }
 
+#ifdef DS203
+#define KEY_IF_RST 19
+//extern void __Set(uint8_t Object, uint32_t Value);
+extern void ___Set(int x, int y);
+
+void TIM3_IRQHandler(void)
+{
+  ___Set(KEY_IF_RST, 0);
+
+  //__Set(KEY_IF_RST, 0);
+  SysTickHandler();
+}
+#endif
+
 extern void UartPushByte(uint8_t data);
 
 void USART3_IRQHandler(void)
@@ -93,9 +92,32 @@ void USART3_IRQHandler(void)
 #endif
 }
 
+// TODO: move to platform dependent code
+#ifdef DS203
+
 extern void USB_Istr(void);
+extern void __USB_Istr(void);
+extern void __CTR_HP(void);
+
+extern void ___Int_HP();
+extern void ___Int_LP();
+
+void USB_HP_CAN_TX_IRQHandler(void)
+{
+  ___Int_HP();
+//  __CTR_HP();
+}
+
+void USB_LP_CAN_RX0_IRQHandler(void)
+{
+  ___Int_LP();
+//  __USB_Istr();
+}
+
+#else
 
 void USB_LP_CAN_RX0_IRQHandler(void)
 {
     USB_Istr();
 }
+#endif

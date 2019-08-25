@@ -6,6 +6,7 @@
 #include "msdusb_bot.h"
 #include <usb_regs.h>
 #include <usb_lib.h>
+#include "source/bios/fat.h"
 #include "source/usb/Disk.h"
 
 u8 Page00_Inquiry_Data[] ={ 0, 0, 0, 0, 0};
@@ -53,14 +54,14 @@ void SCSI_Inquiry_Cmd(void)
 *******************************************************************************/
 void SCSI_ReadFormatCapacity_Cmd(void)
 {
-  ReadFormatCapacity[ 4] = (u8)(SECTOR_SIZE >> 24);
-  ReadFormatCapacity[ 5] = (u8)(SECTOR_SIZE >> 16);
-  ReadFormatCapacity[ 6] = (u8)(SECTOR_SIZE >>  8);
-  ReadFormatCapacity[ 7] = (u8)(SECTOR_SIZE);
+  ReadFormatCapacity[ 4] = (u8)(BIOS_FAT_SectorSize >> 24);
+  ReadFormatCapacity[ 5] = (u8)(BIOS_FAT_SectorSize >> 16);
+  ReadFormatCapacity[ 6] = (u8)(BIOS_FAT_SectorSize >>  8);
+  ReadFormatCapacity[ 7] = (u8)(BIOS_FAT_SectorSize);
 
-  ReadFormatCapacity[ 9] = (u8)(SECTOR_SIZE >> 16);
-  ReadFormatCapacity[10] = (u8)(SECTOR_SIZE >>  8);
-  ReadFormatCapacity[11] = (u8)(SECTOR_SIZE);
+  ReadFormatCapacity[ 9] = (u8)(BIOS_FAT_SectorSize >> 16);
+  ReadFormatCapacity[10] = (u8)(BIOS_FAT_SectorSize >>  8);
+  ReadFormatCapacity[11] = (u8)(BIOS_FAT_SectorSize);
 
   Transfer_Data_Request(ReadFormatCapacity, READ_FORMAT_CAPACITY_DATA_LEN);
 }
@@ -69,15 +70,15 @@ void SCSI_ReadFormatCapacity_Cmd(void)
 *******************************************************************************/
 void SCSI_ReadCapacity10_Cmd(void)
 {
-  ReadCapacity10_Data[0] = (u8)((SECTOR_CNT - 1) >> 24);
-  ReadCapacity10_Data[1] = (u8)((SECTOR_CNT - 1) >> 16);
-  ReadCapacity10_Data[2] = (u8)((SECTOR_CNT - 1) >>  8);
-  ReadCapacity10_Data[3] = (u8)((SECTOR_CNT - 1));
+  ReadCapacity10_Data[0] = (u8)((BIOS_FAT_SectorCount - 1) >> 24);
+  ReadCapacity10_Data[1] = (u8)((BIOS_FAT_SectorCount - 1) >> 16);
+  ReadCapacity10_Data[2] = (u8)((BIOS_FAT_SectorCount - 1) >>  8);
+  ReadCapacity10_Data[3] = (u8)((BIOS_FAT_SectorCount - 1));
 
-  ReadCapacity10_Data[4] = (u8)(SECTOR_SIZE >>  24);
-  ReadCapacity10_Data[5] = (u8)(SECTOR_SIZE >>  16);
-  ReadCapacity10_Data[6] = (u8)(SECTOR_SIZE >>  8);
-  ReadCapacity10_Data[7] = (u8)(SECTOR_SIZE);
+  ReadCapacity10_Data[4] = (u8)(BIOS_FAT_SectorSize >>  24);
+  ReadCapacity10_Data[5] = (u8)(BIOS_FAT_SectorSize >>  16);
+  ReadCapacity10_Data[6] = (u8)(BIOS_FAT_SectorSize >>  8);
+  ReadCapacity10_Data[7] = (u8)(BIOS_FAT_SectorSize);
 
   Transfer_Data_Request(ReadCapacity10_Data, READ_CAPACITY10_DATA_LEN);
 }
@@ -211,14 +212,14 @@ void SCSI_Invalid_Cmd(void)
 u8 SCSI_Address_Management(u8 Cmd , u32 LBA , u32 BlockNbr)
 {
 
-  if ((LBA + BlockNbr) > SECTOR_CNT){
+  if ((LBA + BlockNbr) > BIOS_FAT_SectorCount){
     if (Cmd == SCSI_WRITE10)  Bot_Abort(BOTH_DIR);
     Bot_Abort(DIR_IN);
     Set_Scsi_Sense_Data(ILLEGAL_REQUEST, ADDRESS_OUT_OF_RANGE);
     Set_CSW (CSW_CMD_FAILED, SEND_CSW_DISABLE);
     return (FALSE);
   }
-  if (CBW.dDataLength != BlockNbr * SECTOR_SIZE){
+  if (CBW.dDataLength != BlockNbr * BIOS_FAT_SectorSize){
     if (Cmd == SCSI_WRITE10) Bot_Abort(BOTH_DIR);
     else                     Bot_Abort(DIR_IN);
     Set_Scsi_Sense_Data(ILLEGAL_REQUEST, INVALID_FIELED_IN_COMMAND);

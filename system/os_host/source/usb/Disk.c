@@ -16,6 +16,7 @@
 #include "../../library/COMMON/commonusb_pwr.h"
 #include "../../library/STM32F10x_StdPeriph_Driver/inc/stm32f10x_flash.h"
 #include "../bios/imports.h"
+#include "../bios/fat.h"
 
 #define TXFR_IDLE      0
 #define TXFR_ONGOING   1
@@ -45,7 +46,7 @@ void Disk_SecRd(u8 *pBuf, u32 DiskAddr);
 u8   Char2Nib(u8 x);
 u8   *SecBuf, *Var, *Data;   u32 *V32; // 
 // Join with BIOS::FAT::gSharedBuffer to save 4kB
-u8   DiskBuf[SECTOR_SIZE+32+28];       // USB 
+u8   DiskBuf[BIOS_FAT_SectorSize+32+28];       // USB 
 bool gUsbDidWriteToDisk = false;
 
 /*******************************************************************************
@@ -56,9 +57,9 @@ bool gUsbDidWriteToDisk = false;
 void Disk_Init(void)
 {
     SecBuf      = (u8 *)&DiskBuf[0];
-    V32         = (u32 *)&DiskBuf[SECTOR_SIZE];
-    Var         = (u8 *)&DiskBuf[SECTOR_SIZE + 0x20];
-    Data        = (u8 *)&DiskBuf[SECTOR_SIZE + 0x20] + SEG_DATA;
+    V32         = (u32 *)&DiskBuf[BIOS_FAT_SectorSize];
+    Var         = (u8 *)&DiskBuf[BIOS_FAT_SectorSize + 0x20];
+    Data        = (u8 *)&DiskBuf[BIOS_FAT_SectorSize + 0x20] + SEG_DATA;
     V32[WR_CNT] = 0;
     V32[RD_CNT] = 0;
 }
@@ -83,7 +84,7 @@ void Disk_SecWr(u8 *pBuf, u32 Addr)
 *******************************************************************************/
 void Disk_SecRd(u8 *pBuf, u32 Addr)
 {
-    ExtFlashDataRd(pBuf, Addr, SECTOR_SIZE);
+    ExtFlashDataRd(pBuf, Addr, BIOS_FAT_SectorSize);
 }
 
 /*******************************************************************************
@@ -98,8 +99,8 @@ void Read_Memory(u32 RdOffset, u32 RdLength)
 
     if (Var[USB_ST] == TXFR_IDLE)
     {
-        Offset = RdOffset * SECTOR_SIZE;
-        Length = RdLength * SECTOR_SIZE;
+        Offset = RdOffset * BIOS_FAT_SectorSize;
+        Length = RdLength * BIOS_FAT_SectorSize;
         Var[USB_ST] = TXFR_ONGOING;
     }
     if (Var[USB_ST] == TXFR_ONGOING)
@@ -108,7 +109,7 @@ void Read_Memory(u32 RdOffset, u32 RdLength)
         {
             Disk_SecRd(SecBuf, Offset);
             UserToPMABufferCopy(SecBuf, ENDP1_TXADDR, BULK_MAX_PACKET_SIZE);
-            V32[RD_CNT] = SECTOR_SIZE - BULK_MAX_PACKET_SIZE;
+            V32[RD_CNT] = BIOS_FAT_SectorSize - BULK_MAX_PACKET_SIZE;
             Block       = BULK_MAX_PACKET_SIZE;
         } else
         {
@@ -146,8 +147,8 @@ void Write_Memory(u32 WrOffset, u32 WrLength)
 
     if (Var[USB_ST] == TXFR_IDLE)
     {
-        Offset = WrOffset * SECTOR_SIZE;
-        Length = WrLength * SECTOR_SIZE;
+        Offset = WrOffset * BIOS_FAT_SectorSize;
+        Length = WrLength * BIOS_FAT_SectorSize;
         Var[USB_ST] = TXFR_ONGOING;
     }
     if (Var[USB_ST] == TXFR_ONGOING)
@@ -157,10 +158,10 @@ void Write_Memory(u32 WrOffset, u32 WrLength)
         Offset += Data_Len;
         Length -= Data_Len;
 
-        if (!(Length % SECTOR_SIZE))
+        if (!(Length % BIOS_FAT_SectorSize))
         {
             V32[WR_CNT] = 0;
-            Disk_SecWr(SecBuf, Offset - SECTOR_SIZE);
+            Disk_SecWr(SecBuf, Offset - BIOS_FAT_SectorSize);
         }
 
         CSW.dDataResidue -= Data_Len;

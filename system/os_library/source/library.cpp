@@ -65,7 +65,8 @@ namespace BIOS
 
   namespace FAT
   {
-    PVOID GetSharedBuffer() { return 0; }
+    void SetSharedBuffer(void*) {}
+    void* GetSharedBuffer() { return 0; }
 
     EResult Init() { return EOk; }
     EResult Open(const char* strName, ui8 nIoMode) { return EOk; }

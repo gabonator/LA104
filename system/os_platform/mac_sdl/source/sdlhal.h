@@ -136,7 +136,7 @@ class CSdlHal : public CHal
     {
         return SDL_GetTicks();
     }
-    
+#if 0
     // FAT
     virtual bool FatInit() override
     {
@@ -230,4 +230,8 @@ class CSdlHal : public CHal
         fseek(f, offset, SEEK_SET);
         return true;
     }
+#endif
+	virtual void FlashRead(uint8_t* buff, int offset, int length) {}
+	virtual void FlashWrite(const uint8_t* buff, int offset, int length) {}
+
 };
