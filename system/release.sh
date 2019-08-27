@@ -1,7 +1,7 @@
 echo Building release package
 
 cp release/bin/28shell.elf release/shell.elf
-cp release/bin/29fileman.elf release/fileman.elf
+cp release/bin/29fileman_la104.elf release/fileman.elf
 cp release/bin/35view.elf release/viewtxt.elf
 cp release/bin/23screen.elf release/apps/utils/screen/screen.elf
 cp release/bin/15chars.elf release/apps/utils/charmap/charmap.elf

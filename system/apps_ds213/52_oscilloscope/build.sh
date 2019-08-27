@@ -27,7 +27,7 @@ arm-none-eabi-gcc -fPIC -mcpu=cortex-m3 -mthumb -o output.elf -nostartfiles -T .
 ./Sys.o \
 ./File.o \
 ./Func.o \
--lbios -L../../../os_library/build
+-lbios_ds203 -L../../../os_library/build
 
 arm-none-eabi-objdump -d -S output.elf > output.asm
 

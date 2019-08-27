@@ -8,7 +8,7 @@ arm-none-eabi-g++ -Wall -Os -Werror -fno-common -mcpu=cortex-m3 -mthumb -msoft-f
 
 #exit 1
 #arm-none-eabi-gcc -fPIC -mcpu=cortex-m3 -mthumb -o output.elf -nostartfiles -Wl,--unresolved-symbols=ignore-all -T ../app.lds ./main.o 
-arm-none-eabi-gcc -fPIC -mcpu=cortex-m3 -mthumb -o output.elf -nostartfiles -T ../app.lds ./Main.o ./Menu.o ./GUI.o ./Func.o ./Ctrl.o ./Analyze.o ./AppBios.o -lbios -L../../../os_library/build
+arm-none-eabi-gcc -fPIC -mcpu=cortex-m3 -mthumb -o output.elf -nostartfiles -T ../app.lds ./Main.o ./Menu.o ./GUI.o ./Func.o ./Ctrl.o ./Analyze.o ./AppBios.o -lbios_la104 -L../../../os_library/build
 
 arm-none-eabi-objdump -d -S output.elf > output.asm
 

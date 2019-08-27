@@ -147,6 +147,10 @@ namespace BIOS
     {
       gEnabled = bEnable;
       __Set(ADC_CTRL, bEnable ? EN : DN );
+if (bEnable)
+{
+          __Set(ADC_MODE, SEPARATE);
+}
     }
 
     bool Enabled()
@@ -159,7 +163,7 @@ namespace BIOS
       switch (input)
       {
         case BIOS::ADC::EInput::CH1:
-          __Set(ADC_MODE, SEPARATE);
+//          __Set(ADC_MODE, SEPARATE);
 
           __Set(CH_A_COUPLE, (int)couple);
           __Set(CH_A_RANGE,  (int)res);
@@ -167,7 +171,7 @@ namespace BIOS
           break;
 
         case BIOS::ADC::EInput::CH2:
-          __Set(ADC_MODE, SEPARATE);
+//          __Set(ADC_MODE, SEPARATE);
 
           __Set(CH_B_COUPLE, (int)couple);
           __Set(CH_B_RANGE,  (int)res);
@@ -206,6 +210,7 @@ namespace BIOS
 	_ASSERT( nI >= 0 || nI < (int)COUNT(arrPsc) );
 	if ( nI == -1 )
 	{
+		_ASSERT(0);
 		return;
 	}
 

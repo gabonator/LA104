@@ -134,9 +134,9 @@ uint32_t GetProcAddress(char* symbol)
   uint32_t hash = 5381;
   uint8_t c;
   while ((c = *symbol++) != 0)
-    hash = ((hash << 5) + hash) + c;
+    hash = hash*37 + c;
 
-  switch (hash)
+  switch (hash & 0x0000ffff)
   {`);
 
   var wasGpio = false;
@@ -157,7 +157,7 @@ uint32_t GetProcAddress(char* symbol)
     var isAdc  = tokens[1].indexOf("ADC") != -1;
 
     if (isGpio && !wasGpio)
-      console.log("#ifdef LA104")
+      console.log("#if defined(LA104)")
     if (!isGpio && wasGpio)
       console.log("#endif")
 
@@ -189,9 +189,10 @@ function hash(str)
 {
   var h = 5381;
   for (var i = 0; i<str.length; i++)
-    h = (h * 33 + str.charCodeAt(i)) >>> 0;
+    h = (h * 37 + str.charCodeAt(i)) >>> 0;
 //  h &= 0xffffffff;
   h = h >>> 0;
+  h &= 0x0000ffff;
 
   return "0x"+("00000000" + h.toString(16)).substr(-8);
 }

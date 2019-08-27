@@ -26,10 +26,10 @@ void CMainWnd::Create()
 	m_wndMenuInput.SetFocus();
 
 	// Start in scan mode
-	BIOS::ADC::Enable(true);
-	BIOS::ADC::Restart();
 	Settings.Trig.Sync = CSettings::Trigger::_Scan;
 	CCoreOscilloscope::ConfigureTrigger();
+	CCoreOscilloscope::ConfigureAdc();
+	BIOS::ADC::Restart();
 }
 
 /*virtual*/ void CMainWnd::OnMessage(CWnd* pSender, int code, uintptr_t data)

@@ -4,7 +4,7 @@
   rm -rf build
 #  rm build/manager.hex 2> /dev/null
   ./build.sh
-  if [ ! -f build/system.hex ]; then
+  if [ ! -f build/system_la104.hex ]; then
     echo Unable to build operating system firmware
   fi
 )
@@ -19,7 +19,7 @@ fi
   rm -rf build
 #  rm build/libbios.so 2> /dev/null
   ./build.sh
-  if [ ! -f build/libbios.so ]; then
+  if [ ! -f build/libbios_la104.so ]; then
     echo Unable to build shared library prototype
   fi
 )
@@ -80,7 +80,7 @@ for d in apps_usb/*/ ; do
 done
 
 # copy fresh builds
-cp os_host/build/system.hex release/system.hex
+cp os_host/build/system*.hex release/
 mkdir release
 mkdir release/bin
 for d in apps*/*/ ; do

@@ -24,7 +24,7 @@ arm-none-eabi-gcc -fPIC -mcpu=cortex-m3 -mthumb -o output.elf -nostartfiles -T .
   ./Serialize.o \
   ./ir_tx.o \
   ./system_stm32f10x.o ./stm32f10x_gpio.o ./stm32f10x_rcc.o ./stm32f10x_tim.o ./misc.o \
-  -lbios -lm -L../../../os_library/build
+  -lbios_la104 -lm -L../../../os_library/build
 
 #arm-none-eabi-strip --strip-unneeded output.elf
 arm-none-eabi-objdump -d -S -C -l output.elf > output.asm

@@ -75,16 +75,6 @@ file(GLOB application_oscilloscope_src
     "source/Oscilloscope/Disp/*.h"
     "source/Oscilloscope/Input/*.cpp"
     "source/Oscilloscope/Input/*.h"
-    "source/Oscilloscope/Marker/*.cpp"
-    "source/Oscilloscope/Marker/*.h"
-    "source/Oscilloscope/Mask/*.cpp"
-    "source/Oscilloscope/Mask/*.h"
-    "source/Oscilloscope/Math/*.cpp"
-    "source/Oscilloscope/Math/*.h"
-    "source/Oscilloscope/Meas/*.cpp"
-    "source/Oscilloscope/Meas/*.h"
-    "source/Oscilloscope/Meas/Decoders/*.cpp"
-    "source/Oscilloscope/Meas/Decoders/*.h"
 )
 
 if (DESKTOP)           	

@@ -22,7 +22,7 @@ arm-none-eabi-gcc -fPIC -mcpu=cortex-m3 -mthumb -o output.elf -nostartfiles -T .
   ./Wnd.o \
   ./Utils.o \
   ./Shapes.o \
-  -lbios -L../../../os_library/build
+  -lbios_ds203 -L../../../os_library/build
 
 arm-none-eabi-objdump -d -S output.elf > output.asm
 arm-none-eabi-readelf -all output.elf > output.txt

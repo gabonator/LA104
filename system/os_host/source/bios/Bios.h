@@ -18,14 +18,10 @@ namespace BIOS
 #ifdef LA104
     const int Width = 320;
     const int Height = 240;
-#endif
-
-#ifdef DS213
+#elif defined(DS213)
     const int Width = 400;
     const int Height = 240;
-#endif
-
-#ifdef DS203
+#elif defined(DS203)
     const int Width = 400;
     const int Height = 240;
 #endif
@@ -121,15 +117,13 @@ namespace BIOS
       char strName[13];
     };
 
-#ifdef DS203
+#if defined(DS203)
     constexpr int SectorSize = 512;
     constexpr int SectorCount = 4096;
-#endif
-#ifdef DS213
+#elif defined(DS213)
     constexpr int SectorSize = 4096;
     constexpr int SectorCount = 2047;
-#endif
-#ifdef LA104
+#elif defined(LA104)
     constexpr int SectorSize = 4096;
     constexpr int SectorCount = 2048;
 #endif

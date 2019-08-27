@@ -25,7 +25,7 @@ arm-none-eabi-gcc -mcpu=cortex-m3 -mthumb -o output.elf -nostartfiles -T ../app.
   ./cdcusb_app.o \
   ./cdcusb_desc.o \
   ./cdcusb_endp.o \
-  -lbios -lnosys -L../../../os_library/build
+  -lbios_la104 -lnosys -L../../../os_library/build
 
 arm-none-eabi-objdump -d -S output.elf > output.asm
 

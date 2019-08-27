@@ -116,6 +116,8 @@ void USB_LP_CAN_RX0_IRQHandler(void)
 
 #else
 
+extern void USB_Istr();
+
 void USB_LP_CAN_RX0_IRQHandler(void)
 {
     USB_Istr();

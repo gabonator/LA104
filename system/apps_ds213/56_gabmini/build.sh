@@ -33,7 +33,7 @@ arm-none-eabi-gcc -fPIC -mcpu=cortex-m3 -mthumb -o output.elf -nostartfiles -T .
   ./GraphOsc.o ./CoreOscilloscope.o ./MenuDisp.o ./MenuInput.o \
   ./MenuMarker.o \
   ./Sampler.o ./Settings.o ./Controls.o ./Serialize.o \
-  -lbios -L../../../os_library/build -lm
+  -lbios_ds203 -L../../../os_library/build -lm
 
 arm-none-eabi-objdump -d -S output.elf > output.asm
 arm-none-eabi-readelf -all output.elf > output.txt

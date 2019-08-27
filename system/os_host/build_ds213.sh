@@ -129,7 +129,7 @@ arm-none-eabi-gcc -mcpu=cortex-m3 -mthumb -o output.elf -nostartfiles -T ../app.
   ./adc.o \
 
 arm-none-eabi-objcopy -O binary ./output.elf ./output.bin
-arm-none-eabi-objcopy -O ihex ./output.elf ./system.hex
+arm-none-eabi-objcopy -O ihex ./output.elf ./system_ds213.hex
 
 arm-none-eabi-readelf -all output.elf > output.txt
 arm-none-eabi-objdump -d -S output.elf > output.asm
