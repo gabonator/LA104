@@ -75,7 +75,6 @@ void TIM3_IRQHandler(void)
 {
   ___Set(KEY_IF_RST, 0);
 
-  //__Set(KEY_IF_RST, 0);
   SysTickHandler();
 }
 #endif

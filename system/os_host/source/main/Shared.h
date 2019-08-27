@@ -34,6 +34,11 @@ uint32_t GetProcAddress(char* symbol)
     case 0x000083ed: return (uint32_t)static_cast<bool(*)()>(BIOS::ADC::Enabled); 
     case 0x0000946f: return (uint32_t)static_cast<void(*)()>(BIOS::ADC::Restart); 
     case 0x00006300: return (uint32_t)BIOS::ADC::GetState;
+    case 0x00004740: return (uint32_t)static_cast<int(*)()>(BIOS::DAC::GetFrequency); 
+    case 0x0000fdaf: return (uint32_t)static_cast<void(*)(int)>(BIOS::DAC::SetFrequency); 
+    case 0x0000fca4: return (uint32_t)static_cast<int(*)()>(BIOS::DAC::GetDuty); 
+    case 0x0000df23: return (uint32_t)static_cast<void(*)(int)>(BIOS::DAC::SetDuty); 
+    case 0x0000c8c0: return (uint32_t)static_cast<void(*)(unsigned short*, int)>(BIOS::DAC::SetWave); 
 #endif
     case 0x0000ffe4: return (uint32_t)static_cast<void(*)(char const*, ...)>(BIOS::DBG::Print); 
     case 0x0000758f: return (uint32_t)static_cast<ui32(*)()>(BIOS::FAT::GetFileSize); 
@@ -101,7 +106,8 @@ uint32_t GetProcAddress(char* symbol)
     case 0x00000b9e: return (uint32_t)static_cast<void(*)()>(BIOS::MEMORY::LinearStart); 
     case 0x0000493a: return (uint32_t)static_cast<bool(*)()>(BIOS::MEMORY::LinearFinish); 
     case 0x0000cbce: return (uint32_t)static_cast<bool(*)(unsigned long, unsigned char*, int)>(BIOS::MEMORY::LinearProgram); 
-    case 0x0000807e: return (uint32_t)static_cast<PVOID(*)()>(BIOS::MEMORY::GetSharedBuffer); 
+    case 0x0000807e: return (uint32_t)static_cast<void*(*)()>(BIOS::MEMORY::GetSharedBuffer); 
+    case 0x0000f7ea: return (uint32_t)static_cast<void(*)(void*)>(BIOS::MEMORY::SetSharedBuffer); 
     case 0x0000ed83: return (uint32_t)BIOS::PRIVATE::GetCharRom;
     default: return 0;
   }

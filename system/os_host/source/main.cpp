@@ -1,4 +1,4 @@
-#include "../library/CMSIS/Device/STM32F10x/Include/STM32F10x.h"
+//#include "../library/CMSIS/Device/STM32F10x/Include/STM32F10x.h"
 #include "source/bios/Bios.h"
 #include "source/main/Execute.h"
 

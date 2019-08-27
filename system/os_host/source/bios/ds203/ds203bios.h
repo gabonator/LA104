@@ -12,6 +12,8 @@
   #define KEY1_STATUS          0x4000    // 0 = Key push on
   #define K_ITEM_I_STATUS      0x8000    // 0 = Key push on
 
+// TODO: one level of indirection could be reduced somehow!
+
 #define BiosBase(addr) (void*)(0x08004200+addr)
 
 const void (*__CTR_HP)(void) = BiosBase(0x01);

@@ -75,6 +75,7 @@ arm-none-eabi-g++ -Wall -Os -Werror -fno-common -mcpu=cortex-m3 -mthumb -msoft-f
   ../source/bios/dbg.cpp \
   ../source/bios/gpio.cpp \
   ../source/bios/adc.cpp \
+  ../source/bios/dac.cpp \
   ../library/spf/spf.c \
   ../source/main/Execute.cpp \
   ../source/gui/Gui.cpp \
@@ -127,6 +128,7 @@ arm-none-eabi-gcc -mcpu=cortex-m3 -mthumb -o output.elf -nostartfiles -T ../app.
   ./Gui.o \
   ./Serialize.o \
   ./adc.o \
+  ./dac.o \
 
 arm-none-eabi-objcopy -O binary ./output.elf ./output.bin
 arm-none-eabi-objcopy -O ihex ./output.elf ./system_la104.hex

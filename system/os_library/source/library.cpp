@@ -1,5 +1,11 @@
 #include "../include/library.h"
 
+#ifdef ALL_PLATFORMS
+#define LA104
+#define DS203
+#define DS213
+#endif
+
 namespace BIOS
 {
   namespace SYS
@@ -56,7 +62,8 @@ namespace BIOS
 
   namespace MEMORY
   {
-    PVOID GetSharedBuffer() { return 0; }
+    void SetSharedBuffer(void*) {}
+    void* GetSharedBuffer() { return nullptr; }
 
     void LinearStart() {}
     bool LinearFinish() { return 0; }
@@ -152,6 +159,15 @@ namespace BIOS
     void ConfigureInput(BIOS::ADC::EInput input, BIOS::ADC::ECouple couple, BIOS::ADC::EResolution res, int offset) {}
     void ConfigureTimebase(float timePerDiv) {}
     void ConfigureTrigger(int time, int value, BIOS::ADC::ETriggerType type, BIOS::ADC::EInput source) {}
+  }
+
+  namespace DAC
+  {
+    void SetFrequency(int freqHz) {}
+    void SetDuty(int duty) {}
+    int GetFrequency() {return 0;}
+    int GetDuty() {return 0;}
+    void SetWave(uint16_t* wave, int length) {}
   }
 #endif
 }

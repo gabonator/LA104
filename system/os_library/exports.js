@@ -154,7 +154,7 @@ uint32_t GetProcAddress(char* symbol)
     var out = "    case "+hash(mname)+": ";
 
     var isGpio = tokens[1].indexOf("GPIO") != -1;
-    var isAdc  = tokens[1].indexOf("ADC") != -1;
+    var isAdc  = tokens[1].indexOf("ADC") != -1 || tokens[1].indexOf("DAC") != -1;
 
     if (isGpio && !wasGpio)
       console.log("#if defined(LA104)")

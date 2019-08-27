@@ -307,6 +307,18 @@ namespace BIOS
     void ConfigureTimebase(float timePerDiv);
     void ConfigureTrigger(int time, int value, ETriggerType type, EInput source);
   }
+
+  namespace DAC
+  {
+    constexpr int SampleMaxValue = 0xfff;
+
+    void SetFrequency(int freqHz);
+    void SetDuty(int duty);
+    int GetFrequency();
+    int GetDuty();
+    void SetWave(uint16_t* wave, int length);
+  }
+
 #endif
 }
 
