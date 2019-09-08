@@ -12,6 +12,18 @@ void Delay_mS(uint32_t mS)
     while(Dly_mS);
 }
 
+char* BIOS::SYS::GetDeviceType()
+{
+#ifdef LA104
+  return (char*)"LA104";
+#elif defined(DS213)
+  return (char*)"DS213";
+#elif defined(DS203)
+  return (char*)"DS203";
+#endif
+  return nullptr;
+}
+
 void BIOS::SYS::Init()
 {
   HardwareInit();

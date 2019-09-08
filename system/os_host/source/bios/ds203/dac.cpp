@@ -5,7 +5,7 @@ typedef uint8_t u8;
 
 extern "C"
 {
-extern const void (*__Set)(u8, u32);
+extern void __Set(u8, u32);
 #define ANALOG_ARR       13     // ģ
 #define ANALOG_PTR       14     // ģ
 #define ANALOG_CNT       15     // ÿ

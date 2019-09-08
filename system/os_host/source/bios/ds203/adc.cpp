@@ -57,9 +57,10 @@ typedef uint32_t u32;
 
 extern "C"
 {
-extern const void (*__Set)(u8, u32);
-extern const u32 (*__Read_FIFO)();
-extern const u32 (*__Get)(u8, u32);
+extern void __Set(u8, u32);
+extern u32 _Read_FIFO();
+extern u32 __Get(u8, u32);
+extern u32 __Read_FIFO();
 }
 
 int _binary_search(ui32* A, ui32 key, int imin, int imax)

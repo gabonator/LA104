@@ -69,11 +69,11 @@ void SysTickHandler(void)
 #ifdef DS203
 #define KEY_IF_RST 19
 //extern void __Set(uint8_t Object, uint32_t Value);
-extern void ___Set(int x, int y);
+extern void __Set(int x, int y);
 
 void TIM3_IRQHandler(void)
 {
-  ___Set(KEY_IF_RST, 0);
+  __Set(KEY_IF_RST, 0);
 
   SysTickHandler();
 }
@@ -98,19 +98,14 @@ extern void USB_Istr(void);
 extern void __USB_Istr(void);
 extern void __CTR_HP(void);
 
-extern void ___Int_HP();
-extern void ___Int_LP();
-
 void USB_HP_CAN_TX_IRQHandler(void)
 {
-  ___Int_HP();
-//  __CTR_HP();
+  __CTR_HP();
 }
 
 void USB_LP_CAN_RX0_IRQHandler(void)
 {
-  ___Int_LP();
-//  __USB_Istr();
+  __USB_Istr();
 }
 
 #else

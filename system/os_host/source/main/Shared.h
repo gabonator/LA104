@@ -77,6 +77,7 @@ uint32_t GetProcAddress(char* symbol)
     case 0x0000850d: return (uint32_t)static_cast<void(*)(CRect const&, unsigned short)>(BIOS::LCD::Rectangle); 
     case 0x0000f4c2: return (uint32_t)static_cast<void(*)(CRect const&, unsigned short)>(BIOS::LCD::RoundRect); 
     case 0x0000ba0f: return (uint32_t)static_cast<void(*)(int, int, int, int, unsigned short)>(BIOS::LCD::RoundRect); 
+    case 0x000085dc: return (uint32_t)static_cast<char*(*)()>(BIOS::SYS::GetDeviceType); 
     case 0x0000c701: return (uint32_t)static_cast<void(*)(int)>(BIOS::SYS::Beep); 
     case 0x00005757: return (uint32_t)static_cast<void(*)(int)>(BIOS::SYS::DelayMs); 
     case 0x00003867: return (uint32_t)static_cast<int(*)(unsigned long)>(BIOS::SYS::Execute); 

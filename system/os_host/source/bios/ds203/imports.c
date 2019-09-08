@@ -1,31 +1,16 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include "library/STM32F10x_StdPeriph_Driver/inc/misc.h"
-#include "ds203bios.h"
-//#include "BIOS.h"
+//#include "ds203bios.h"
+#include "BIOS.h"
 //#include "lowlcd.h"
+
 
 void dbgPrint(const char* msg, ...);
 
 void Delay_mS(uint32_t mS);
 
-
 extern void (* g_pfnVectors[76])(void);
-
-void ___Set(int x, int y)
-{
-  __Set(x, y);
-}             
-
-void ___Int_HP()
-{
-  __CTR_HP();
-}
-
-void ___Int_LP()
-{
-  __USB_Istr();
-}
     
 void Set_Pixel(uint_fast16_t Color)
 {

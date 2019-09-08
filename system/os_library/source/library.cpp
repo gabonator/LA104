@@ -14,6 +14,7 @@ namespace BIOS
     int Execute(uint32_t addr) {return 0;}
     void Beep(int intervalMs) {}
     void DelayMs(int intervalMs) {}
+    char* GetDeviceType() {return nullptr;}
   }
 
   namespace LCD

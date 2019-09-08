@@ -17,6 +17,11 @@ Go to release section on top of this page, download *system.hex*. Power on the L
 
 #### News
 
+##### One firmware to rule them all
+
+Operating system developed as a part of this project was ported to other handheld devices from miniware (DS203 rev. 2.60, DS213, LA104). Still in early development stage, but looks very promising.
+![one system to rule them all](resources/ladsall.jpg)
+
 ##### Dream SAM2695
 
 LA104 playing midi on SAM2695 wavetable synthesizer through UART:
