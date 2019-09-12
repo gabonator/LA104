@@ -120,19 +120,17 @@ int _DrawChar(int x, int y, unsigned short clrf, unsigned short clrb, char ch)
 		}
 	} else
 	{
-        CRect rcChar(x, y, x+8, y+14);
-        BIOS::LCD::BufferBegin(rcChar);
-        uint16_t buf[8];
-        pFont += 13;
-		for (ui8 _y=0; _y<14; _y++)
+				CRect rcChar(x, y, x+8, y+14);
+				BIOS::LCD::BufferBegin(rcChar);
+				uint16_t buf[14];
+
+					for (ui8 _x=0; _x<8; _x++)
 		{
-			ui8 col = *pFont--;
-	
-			for (ui8 _x=0; _x<8; _x++, col <<= 1)
-                buf[_x] = (col & 128) ? clrb : clrf;
-            
-            BIOS::LCD::BufferWrite(buf, 8);
-		}
+				for (ui8 _y=0; _y<14; _y++)
+						buf[_y] = (pFont[13-_y] & (128 >> _x)) ? clrb : clrf;
+					
+					BIOS::LCD::BufferWrite(buf, 14);
+				}
 	}
 	return 8;
 }
@@ -278,6 +276,17 @@ void Set_Posi(uint16_t x, uint16_t y)
 void Set_Pixel(uint16_t Color)
 {
     gHal->SetPixel(lcdX, lcdY, Color);
+	lcdY++;
+    if (lcdY >= lcdY2)
+    {
+        lcdY = lcdY1;
+        lcdX++;
+        if (lcdX >= lcdX2)
+        {
+            lcdX = lcdX1;
+        }
+    }
+	/*
     lcdX++;
     if (lcdX >= lcdX2)
     {
@@ -287,7 +296,7 @@ void Set_Pixel(uint16_t Color)
         {
             lcdY = lcdY1;
         }
-    }
+    }*/
 }
 
 int Get_Pixel()

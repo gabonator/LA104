@@ -33,3 +33,9 @@ void BIOS::DBG::Print(const char * format, ...)
 	}
 }
 
+
+void BIOS::DAC::SetFrequency(int freqHz){}
+void BIOS::DAC::SetDuty(int duty){}
+int BIOS::DAC::GetFrequency(){return 0;}
+int BIOS::DAC::GetDuty(){return 0;}
+void BIOS::DAC::SetWave(uint16_t* wave, int length){}

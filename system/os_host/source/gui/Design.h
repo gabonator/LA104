@@ -79,20 +79,19 @@ public:
 
 		ui16 clradd = RGB565(00000b);
 		ui16 clr = RGB565(00204f);
-		/*
 		for (int i=0; i<16; i++)
 		{
 			clr += clradd;
 			pattern[15-i] = clr;
 		}
-		 BIOS::LCD::BufferBegin( rcRect );
-		 for (int y=0; y<rcRect.Width(); y++)
-		 BIOS::LCD::BufferWrite(pattern, 16);
-		 BIOS::LCD::BufferEnd();
-		 */
+		BIOS::LCD::BufferBegin( rcRect );
+		for (int y=0; y<rcRect.Width(); y++)
+		  BIOS::LCD::BufferWrite(pattern, 16);
+		BIOS::LCD::BufferEnd();
 //		BIOS::LCD::Pattern(rcRect.left, rcRect.top, rcRect.right, rcRect.bottom, pattern, 16);
 		
-		// TODO: Optimize!!!
+/*
+		// TODO: Optimize!!! STACK OVERFLOW!!!!!!!!!
 		uint16_t row[BIOS::LCD::Width];
 		BIOS::LCD::BufferBegin( rcRect );
 		for (int i=0; i<16; i++)
@@ -104,6 +103,7 @@ public:
 
 		}
 		BIOS::LCD::BufferEnd();
+*/
 	}
 
 	static void Window(const CRect& rcRect, ui16 clr)

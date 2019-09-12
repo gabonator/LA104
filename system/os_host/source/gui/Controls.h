@@ -558,13 +558,13 @@ public:
 
 	virtual void OnKey(int nKey) override
 	{
-		if ( nKey & BIOS::KEY::Left && *m_pProvider - 1 == CValueProvider::Yes )
+		if ( nKey == BIOS::KEY::Left && *m_pProvider - 1 == CValueProvider::Yes )
 		{
 			(*m_pProvider)--;
 			Invalidate();
 			SendMessage(m_pParent, ToWord('i', 'u'), 0);
 		}
-		if ( nKey & BIOS::KEY::Right && *m_pProvider + 1 == CValueProvider::Yes )
+		if ( nKey == BIOS::KEY::Right && *m_pProvider + 1 == CValueProvider::Yes )
 		{
 			(*m_pProvider)++;
 			Invalidate();

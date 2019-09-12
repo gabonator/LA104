@@ -101,10 +101,12 @@ namespace BIOS
       return ccr * 100 / arr;
     }
 
-    void SetWave(uint16_t* wave, int length)
+    void SetWave(uint16_t* _wave, int length)
     {
-      ConfigureWave(wave, length);
+      if (wave)
+        ConfigureWave(_wave, length);
       samples = length;
+      wave = _wave;
     }
   }
 }

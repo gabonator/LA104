@@ -1,7 +1,6 @@
-#pragma once
-
 #include "Framework.h"
 #include "Oscilloscope/Oscilloscope.h"
+#include "Generator/Generator.h"
 #include "ToolBar.h"
 
 #define MainWnd (*CMainWnd::m_pInstance)
@@ -13,17 +12,10 @@ public:
 
 	CWndToolBar mWndToolBar;
 
-	CWndOscGraph		m_wndGraph;
-
-	CWndMenuInput		m_wndMenuInput;
-	CWndMenuCursor		m_wndMenuCursor;
-	CWndMenuDisplay		m_wndMenuDisplay;
-
-	CWndMessageBox		m_wndMessage;	
-	CWndZoomBar			m_wndZoomBar;
-	CWndOscInfo			m_wndInfoBar;
-	CWndLevelReferences	m_wndLReferences;
-	CWndTimeReferences	m_wndTReferences;
+	CWndSigGraph		m_wndSignalGraph;
+	CWndMenuGenerator	m_wndMenuGenerator;
+//	CWndMenuGeneratorMod	m_wndMenuGeneratorMod;
+	CWndMenuGeneratorEdit	m_wndMenuGeneratorEdit;
 
 	bool				mRunning{true};
 	

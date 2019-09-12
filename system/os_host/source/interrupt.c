@@ -38,6 +38,8 @@ void SysTickHandler(void)
     }
   }
 
+  // TODO: Could be somewhere else!
+
   // keyboard
   uint32_t keyMask = GetKeys();
 
@@ -45,6 +47,7 @@ void SysTickHandler(void)
 
   if (keyMaskOld != keyMask)
   {
+    lastChar = 0;
     if (keyMask & KeyUp)
       lastChar = '>';
     if (keyMask & KeyDown)

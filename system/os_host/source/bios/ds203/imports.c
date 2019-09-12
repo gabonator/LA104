@@ -82,8 +82,8 @@ uint32_t GetKeys()
   if (status & K_INDEX_D_STATUS ) out |= KeyLeft;
   if (status & K_INDEX_I_STATUS ) out |= KeyRight;
 //  if (status & K_INDEX_S_STATUS ) out |= EKeyMask::KeyF5;
-  if (status & K_ITEM_D_STATUS ) out |= KeyUp;
-  if (status & K_ITEM_I_STATUS ) out |= KeyDown;
+  if (status & K_ITEM_D_STATUS ) out |= KeyDown;
+  if (status & K_ITEM_I_STATUS ) out |= KeyUp;
 //  if (status & K_ITEM_S_STATUS ) out |= EKeyMask::KeyF6;
   if (status & KEY1_STATUS ) out |= KeyF1;
   if (status & KEY2_STATUS ) out |= KeyF2;
