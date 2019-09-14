@@ -21,6 +21,19 @@ bool _IsVisible(CWnd& wnd)
 	if ( dwFlags & CWnd::WsVisible )
 		OnMessage( &m_itmWave, ToWord('i', 'u'), 0 ); // force update
 }
+
+/*virtual*/ void CWndMenuGenerator::OnTimer()
+{
+/*
+	// FM modulation
+	float t = BIOS::SYS::GetTick() / 1000.0f;
+	float f = sin(t)* 500.f + 1000.f;
+	m_itmFreq.SetFrequency(f);
+	CCoreGenerator::ConfigureWaveRate( Settings.Gen.nArr );
+	m_itmFreq.Invalidate();
+*/
+}
+
 /*virtual*/ void CWndMenuGenerator::OnMessage(CWnd* pSender, int code, uintptr_t data)
 {
 	#define CPUCLOCK (72 MHz)
@@ -29,12 +42,15 @@ bool _IsVisible(CWnd& wnd)
 	// LAYOUT ENABLE/DISABLE FROM TOP MENU BAR
 	if (code == ToWord('L', 'D') )
 	{
+KillTimer();
 		MainWnd.m_wndSignalGraph.ShowWindow( false );
 		return;
 	}
 
 	if (code == ToWord('L', 'E') )
 	{
+    SetTimer(50);
+
 		m_itmAmpl.SetAmplitude( Settings.Gen.nScale / (float)0x10000 * 2.0f );
 		m_itmOffset.SetOffset( Settings.Gen.nOffset / (float)0x10000 * 2.0f );
 

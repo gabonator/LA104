@@ -44,6 +44,7 @@ public:
         
         mSeries.Init(mSeriesData, COUNT(mSeriesData));
         
+		// Initial range
         mRange.mMin = 0;
         mRange.mMax = 20;
         mPrecalcWindowTop = m_rcClient.top*256+1;
@@ -114,12 +115,12 @@ public:
     {
         CPoint mLast;
 
-        BIOS::LCD::Bar(m_rcClient, RGB565(b0b0b0));
+        BIOS::LCD::Bar(m_rcClient, MyGui::BackgroundColor);
 
         int zero = (CalcY(0) >> 8)+1; // +1 ??
         if (zero >= m_rcClient.top && zero < m_rcClient.bottom)
         {
-            BIOS::LCD::Bar(m_rcClient.left, zero, m_rcClient.right, zero+1, RGB565(ffffff));
+            BIOS::LCD::Bar(m_rcClient.left, zero, m_rcClient.right, zero+1, MyGui::AxisZeroColor);
         }
 
         for (int s=0; s<mSeries.GetSize(); s++)

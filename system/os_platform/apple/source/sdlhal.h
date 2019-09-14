@@ -19,6 +19,13 @@ class CSdlHal : public CHal
 	FILE* f{nullptr};
     DIR* dirp;
 
+public:
+	virtual ~CSdlHal()
+	{
+		if (f)
+			fclose(f);
+	}
+
   virtual void SetPixel(int x, int y, uint16_t c) override
   {
     setPixel(x, y, c);
@@ -236,16 +243,23 @@ class CSdlHal : public CHal
 	{
 		if (!f)
 		{
-			f = fopen("/Users/gabrielvalky/Documents/git/LA104/system/os_platform/apple/data/la104.fat", "rb");
+			// TODO: use relative path!
+			f = fopen("/Users/gabrielvalky/Documents/git/LA104/system/os_platform/apple/data/la104.fat", "rb+");
 			_ASSERT(f);
 		}
 		fseek(f, offset, SEEK_SET);
 		fread(buff, length, 1, f);
+		int err = ferror(f);
+		_ASSERT(err==0);
 	}
 	
 	virtual void FlashWrite(const uint8_t* buff, int offset, int length) override
 	{
-		_ASSERT(0);
+		_ASSERT(f);
+		fseek(f, offset, SEEK_SET);
+		fwrite(buff, length, 1, f);
+		int err = ferror(f);
+		_ASSERT(err==0);
 	}
 
 };

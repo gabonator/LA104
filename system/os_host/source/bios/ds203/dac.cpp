@@ -78,7 +78,7 @@ namespace BIOS
 		}
 
 		psc = 20;
-		arr = (int)((CPUCLOCK) / (psc * freqHz * samples)) - 1;
+		arr = (int)((CPUCLOCK) / (psc * freqHz /* * samples*/)) - 1;
 		__Set(ANALOG_ARR, arr);
     }
 
@@ -90,10 +90,11 @@ namespace BIOS
 
     int GetFrequency() 
     {
+//TODO: verify calculation arr+1 / arr
       if (!wave) // square
         return CPUCLOCK / (arr + 1) / (psc + 1);
 
-      return CPUCLOCK / 20 / ( arr + 1 ) / samples; 
+      return CPUCLOCK / 20 / ( arr + 1 ) /* / samples */; 
     }
 
     int GetDuty() 
@@ -104,7 +105,11 @@ namespace BIOS
     void SetWave(uint16_t* _wave, int length)
     {
       if (wave)
+      {
+        if (wave == _wave && length == samples)
+          return;
         ConfigureWave(_wave, length);
+      }
       samples = length;
       wave = _wave;
     }

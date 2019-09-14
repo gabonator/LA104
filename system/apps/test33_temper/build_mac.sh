@@ -1,3 +1,3 @@
-mkdir _build
-cd _build
+mkdir build
+cd build
 cmake .. -DDESKTOP=1 -DCMAKE_INSTALL_PREFIX=../_install -GXcode

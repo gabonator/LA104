@@ -11,15 +11,26 @@ void dbgPrint(const char* msg, ...);
 void Delay_mS(uint32_t mS);
 
 extern void (* g_pfnVectors[76])(void);
-    
-void Set_Pixel(uint_fast16_t Color)
+
+#define GPIOD_BRR   (*((volatile uint32_t *)(0x40011400+0x14)))
+#define GPIOD_BSRR  (*((volatile uint32_t *)(0x40011400+0x10)))
+#define LCD_nRST_LOW()    GPIOD_BRR  = GPIO_Pin_11
+#define LCD_nRST_HIGH()   GPIOD_BSRR = GPIO_Pin_11
+#define LCD_RS_LOW()      GPIOD_BRR  = GPIO_Pin_12
+#define LCD_RS_HIGH()     GPIOD_BSRR = GPIO_Pin_12
+#define LCD_PORT *((volatile uint16_t*)0x60000000)
+
+void LCD_WR_Ctrl(int Reg) 
 {
-  __LCD_SetPixl(Color);
+  LCD_RS_LOW();
+  LCD_PORT = Reg;      
+  LCD_RS_HIGH();
 }
 
-uint32_t ReadPixel(void)
+void Set_Pixel(uint_fast16_t Color)
 {
-  return __LCD_GetPixl();
+  LCD_PORT = Color;
+//  __LCD_SetPixl(Color);
 }
 
 void ReadStart(void)
@@ -30,9 +41,14 @@ void ReadFinish(void)
 {
 }
 
-uint16_t Get_Pixel()
+uint32_t ReadPixel()
 {
-  return __LCD_GetPixl();
+    uint16_t Data;
+    LCD_WR_Ctrl(0x2E);
+    Data  = LCD_PORT; 
+    Data  = LCD_PORT; 
+    LCD_WR_Ctrl(0x2C);
+    return Data;
 }
 
 void ExtFlash_CS_LOW(void)
@@ -45,17 +61,42 @@ void ExtFlash_CS_HIGH(void)
 
 void Set_Block(int x1, int y1, int x2, int y2)
 {
-  __LCD_Set_Block(x1, x2-1, y1, y2-1);
+    x2--; y2--;
+    LCD_WR_Ctrl(0x2A);      // Block End X Address
+    LCD_PORT = (y1 >> 8); 
+    LCD_PORT = (y1 & 0xFF); 
+    LCD_PORT = (y2 >> 8); 
+    LCD_PORT = (y2 & 0xFF); 
+    LCD_WR_Ctrl(0x2B);      // Block End Y Address
+    LCD_PORT = (x1 >> 8); 
+    LCD_PORT = (x1 & 0xFF); 
+    LCD_PORT = (x2 >> 8); 
+    LCD_PORT = (x2 & 0xFF); 
+    LCD_WR_Ctrl(0x2C); 
 }
 
 void xBeep(bool b)
 {
-  __Set(BEEP_VOLUME, b ? 100 : 0);
+  #define TIM8_CCR2   (*((vu32 *)(0x40013400+0x38)))
+  TIM8_CCR2 = 100 - (b ? 100 : 0)/2;
+//  __Set(BEEP_VOLUME, b ? 100 : 0);
 }
 
 void Set_Posi(uint_fast16_t x, uint_fast16_t y)
 {
-  __Point_SCR(x, y);
+    LCD_WR_Ctrl(0x2A);      // Block End X Address
+    LCD_PORT = (0x00); 
+    LCD_PORT = (y & 0xFF); 
+    LCD_PORT = (0x00); 
+    LCD_PORT = (0xEF); 
+    LCD_WR_Ctrl(0x2B);      // Block End Y Address
+    LCD_PORT = (x >> 8); 
+    LCD_PORT = (x & 0xFF); 
+    LCD_PORT = (399 >> 8); 
+    LCD_PORT = (399 & 0xFF); 
+    LCD_WR_Ctrl(0x2C); 
+
+//  __Point_SCR(x, y);
 }
 
 void EnableUsb(bool enable)

@@ -17,6 +17,13 @@ Go to release section on top of this page, download *system.hex*. Power on the L
 
 #### News
 
+##### Temperature grapher
+
+Shows temperature of up to 8 DS1820 sensors in form of graph. Automatic export of measured values into [html](system/apps/test33_temper/visualize/TEMPER01.HTM).
+
+![temperature measure tool 1](resources/imgTempMeas1.jpg)
+![temperature measure tool 2](resources/imgTempMeas2.png)
+
 ##### One firmware to rule them all
 
 Operating system developed as a part of this project was ported to other handheld devices from miniware (DS203 rev. 2.60, DS213, LA104). Still in early development stage, but looks very promising.

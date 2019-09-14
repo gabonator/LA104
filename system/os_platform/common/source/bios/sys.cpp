@@ -54,6 +54,10 @@ bool BIOS::OS::HasArgument()
 	return false;
 }
 
+char* BIOS::SYS::GetDeviceType()
+{
+	return (char*)"EM104";
+}
 
 ///// TODO: move to adc.cpp
 #if defined(DS203) || defined(DS213)

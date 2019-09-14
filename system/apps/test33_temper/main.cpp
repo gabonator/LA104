@@ -4,6 +4,8 @@
 #include <library.h>
 #include <algorithm>
 
+#include "../../os_host/source/framework/BufferedIo.h"
+
 constexpr int gConfigMaxSensors = 8;
 
 #include "graph/palette.h"
@@ -13,6 +15,7 @@ constexpr int gConfigMaxSensors = 8;
 #include "graph/axis.h"
 
 #include "sensor/ds1820.h"
+#include "logger.h"
 
 #define EVERY(ms) static long dwTick##__LINE__ = 0; bool bDo##__LINE__ = BIOS::SYS::GetTick() - dwTick##__LINE__ > ms; if (bDo##__LINE__) dwTick##__LINE__ = BIOS::SYS::GetTick(); if (bDo##__LINE__)
 
@@ -204,6 +207,7 @@ class CApplication : public CWnd
     CArray<CSimpleSeries> mSeries;
     
     CDeviceManager mDevice;
+	CLogger mLog;
     
 public:
     void Create( const char* pszId, ui16 dwFlags, const CRect& rc, CWnd* pParent )
@@ -212,20 +216,27 @@ public:
         mSeries.SetSize(COUNT(mSeriesData));
         
         CWnd::Create(pszId, dwFlags, rc, pParent);
-        CRect rcGraph(10+4+40, 16+20+20, BIOS::LCD::Width-10-4, BIOS::LCD::Height-20-8-16+4);
+        CRect rcGraph(10+4+40, 16+20+20-8, BIOS::LCD::Width-10-4, BIOS::LCD::Height-20-8-16+4-8);
 
         mWndGraph.Create("graph", CWnd::WsVisible, rcGraph, this);
         for (int i=0; i<mSeries.GetSize(); i++)
             mWndGraph.AddSeries(&mSeries[i]);
 
-        CRect rcXAxis(10+4+40, BIOS::LCD::Height-20-8-16+4, BIOS::LCD::Width-10-4, BIOS::LCD::Height-20-8+4);
+        CRect rcXAxis(10+4+40, BIOS::LCD::Height-20-8-16+4-8, BIOS::LCD::Width-10-4, BIOS::LCD::Height-20-8+4-8);
         mXAxis.Create("xaxis", CWnd::WsVisible, rcXAxis, this);
 
-        CRect rcYAxis(10+4, 16+20+20, 10+4+40, BIOS::LCD::Height-20-8-16+4);
+        CRect rcYAxis(10+4, 16+20+20-8, 10+4+40, BIOS::LCD::Height-20-8-16+4-8);
         mYAxis.Create("yaxis", CWnd::WsVisible, rcYAxis, this);
 
+		mLog.Open();
         SetTimer(100);
     }
+	
+	void Destroy()
+	{
+		mLog.Close();
+		CWnd::Destroy();
+	}
 
     void OnPaint()
     {
@@ -237,14 +248,20 @@ public:
 
         BIOS::LCD::Print(8, 0, RGB565(ffffff), RGBTRANS, "Multi temperature grapher (DS1820)");
 
-        CRect rc2(10, 16+20, 310, 220);
-        GUI::Window(rc2, RGB565(ffffff));
+        CRect rc2(10, 16+20-8, 310, 220-8);
+        MyGui::Window(rc2, MyGui::TitleColor);
         
-        mWndGraph.SetRange(Range{0, 20*16});
+		// Initial range
+        mWndGraph.SetRange(Range{0*16, 20*16});
         mYAxis.Update(mWndGraph.GetRange());
         mXAxis.Update(5000);
         
         ShowMeasurement(-1, 0);
+		
+		if (mLog.IsOpened())
+		{
+			BIOS::LCD::Printf(8, BIOS::LCD::Height-16, RGB565(404040), RGBTRANS, "Recording to %s...", mLog.GetLogName());
+		}
     }
     
     uint_fast16_t InterpolateColor( uint_fast16_t clrA, uint_fast16_t clrB, uint_fast8_t nLevel )
@@ -268,26 +285,26 @@ public:
         if (index == -1)
         {
             nosignal = true;
-            BIOS::LCD::Print(10+16+50, 16+20+2, RGB565(000000), RGB565(ffffff), "No sensor detected...");
+            BIOS::LCD::Print(10+16+50, 16+20+2-8, RGB565(000000), MyGui::TitleColor, "No sensor detected...");
             return;
         }
         
         if (nosignal)
         {
             nosignal = false;
-            BIOS::LCD::Bar(10+8, 16+20+2, 310-8, 16+20+2+14, RGB565(ffffff));
+            BIOS::LCD::Bar(10+8, 16+20+2-8, 310-8, 16+20+2+14-8, MyGui::TitleColor);
         }
         
         if (index>=4)
             return;
         
         int color = CPalette::GetColor(index);
-        int colorY = (Get565R(color) + Get565G(color)*2 + Get565B(color))/4;
-        if (colorY > 150)
-            color = InterpolateColor(color, RGB565(000000), 128);
+        //int colorY = (Get565R(color) + Get565G(color)*2 + Get565B(color))/4;
+        //if (colorY > 120)
+        //    color = InterpolateColor(color, RGB565(000000), 128);
         
         if (value == CSeriesBase::Invalid)
-            BIOS::LCD::Printf(10+16+index*64, 16+20+2, color, RGB565(ffffff), "        ");
+            BIOS::LCD::Printf(10+16+index*64, 16+20+2-8, color, MyGui::TitleColor, "        ");
         else
         {
             char buf[16];
@@ -295,7 +312,7 @@ public:
                 sprintf(buf, "%d.%d", value/16, (value%16)*10/16);
             else
                 sprintf(buf, "-%d.%d", (-value)/16, ((-value)%16)*10/16);
-            BIOS::LCD::Printf(10+16+index*64, 16+20+2, color, RGB565(ffffff), "%s" "\xf8" "C  ", buf);
+            BIOS::LCD::Printf(10+16+index*64, 16+20+2-8, color, MyGui::TitleColor, "%s" "\xf8" "C  ", buf);
         }
     }
     
@@ -314,9 +331,12 @@ public:
             
             for (int i=0; i<data.GetSize(); i++)
                 ShowMeasurement(i, data[i]);
+			
+			if (mLog.IsOpened())
+				mLog.Append(data);
         }
     }
-    
+	
     void OnTimer()
     {
         static int counter = 0;

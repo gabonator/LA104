@@ -227,12 +227,13 @@ void CCoreGenerator::ConfigureWaveRate( int arr )
 
 void CCoreGenerator::ConfigureDc( int dc )
 {
-	static ui16 sData;
-	sData = dc;
-	ConfigureWave( &sData, 1 );
+  static ui16 sData;
+  sData = min(dc, BIOS::DAC::SampleMaxValue);
+  ConfigureWave( &sData, 1 );
 }
 
 void CCoreGenerator::ConfigureWave( uint16_t* p, int n)
 {
   BIOS::DAC::SetWave(p, n);
 }
+

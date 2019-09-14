@@ -14,29 +14,34 @@ if (ARM)
 include_directories("../os_library/include")
 endif()
 
+include_directories("../../os_host/source")
+
 if (DESKTOP)           	
 find_package(SDL2 REQUIRED)
 include_directories(${SDL2_INCLUDE_DIRS})
 include_directories("include/")
+include_directories("../../os_platform/common/include")
 
 file(GLOB main_src 
-    "source/sdlmain.cpp"
-    "include/library.h"
+    "../../os_platform/apple/source/sdlmain.cpp"
+    "../../os_platform/apple/source/sdlhal.h"
+    "../../os_platform/common/include/library.h"
 )
 
 file(GLOB bios_src
-    "source/bios/*.cpp"
-    "source/bios/*.h"
+    "../../os_platform/common/source/bios/*.cpp"
+    "../../os_platform/common/source/bios/*.h"
 )
 
 file(GLOB framework_src
-    "source/framework/*.cpp"
-    "source/framework/*.h"
+    "../../os_platform/common/source/framework/*.cpp"
+    "../../os_platform/common/source/framework/*.h"
 )
 
+
 file(GLOB gui_src
-    "source/gui/*.cpp"
-    "source/gui/*.h"
+    "../../os_platform/common/source/gui/*.cpp"
+    "../../os_platform/common/source/gui/*.h"
 )
 endif()
 
@@ -51,18 +56,18 @@ file(GLOB linker_script
 endif()
 
 file(GLOB application_src
-    "../apps_experiments/test33_temper/*.cpp"
-    "../apps_experiments/test33_temper/*.h"
+    "*.cpp"
+    "*.h"
 )
 
 file(GLOB application_graph_src
-    "../apps_experiments/test33_temper/graph/*.cpp"
-    "../apps_experiments/test33_temper/graph/*.h"
+    "graph/*.cpp"
+    "graph/*.h"
 )
 
 file(GLOB application_sensor_src
-    "../apps_experiments/test33_temper/sensor/*.cpp"
-    "../apps_experiments/test33_temper/sensor/*.h"
+    "sensor/*.cpp"
+    "sensor/*.h"
 )
 
 if (DESKTOP)           	
@@ -78,6 +83,8 @@ source_group("application\\sensor" FILES ${application_sensor_src})
 source_group("include" FILES "include/library.h")
 
 add_executable(application ${main_src} ${bios_src} ${framework_src} ${gui_src} ${application_src} ${application_graph_src} ${application_sensor_src})
+
+add_definitions(-DLA104)
 
 if (ARM)
 target_link_libraries(application m)

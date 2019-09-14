@@ -131,7 +131,21 @@ namespace BIOS
 
     BIOS::ADC::TSample::SampleType Get() 
     {
-	return __Read_FIFO();
+      __asm (
+        "LDR     R1,  = 0x40011000\n"  //     ; GPIO  PORT_C   
+        "MOVW    R2,  #0x20\n"         // ; H_L pin: GPIO_PORT_B_Bit5 
+        "LDR     R3,  =0x64000000\n"   //  ; FIFO Port address
+        "STR     R2,  [R1, #0x14]\n"   // ; 0 -> H_L
+        "LDRH    R0,  [R3, #0]\n"      // ; FIFO Data -> R0
+        "LSL     R0,  R0,  #16\n"      //
+
+        "STR     R2,  [R1, #0x10]\n"   // ; 1 -> H_L
+        "LDRH    R1,  [R3, #0]\n"      // ; FIFO Data -> R1  
+        "ADD     R0,  R0, R1\n"
+        "BX LR\n"
+      );
+
+      return 0; 
     }
 
     int GetPointer() 

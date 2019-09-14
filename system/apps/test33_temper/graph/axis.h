@@ -51,7 +51,7 @@ protected:
         //BIOS::DBG::Print("orig=%d max=%d step=%d\n", origValue, value, step);
         CRect rcDeflated(m_rcClient);
         rcDeflated.Deflate(2, 0, 2, 0);
-        BIOS::LCD::Bar(rcDeflated, RGB565(b0b0b0));
+        BIOS::LCD::Bar(rcDeflated, MyGui::BackgroundColor);
         
         for (int _i=0; _i<=value; _i += step)
         {
@@ -71,10 +71,10 @@ protected:
             if (tx-width/2+width > rcDeflated.right)
                 tx = m_rcClient.right - 2 - width/2;
             
-            BIOS::LCD::Print(tx - width/2, m_rcClient.bottom-14, RGB565(404040), RGB565(b0b0b0), formatted);
+            BIOS::LCD::Print(tx - width/2, m_rcClient.bottom-14, MyGui::LabelColor, MyGui::BackgroundColor, formatted);
             
             if (x >= rcDeflated.left && x < rcDeflated.right)
-                BIOS::LCD::Bar(x, m_rcClient.top, x+1, m_rcClient.top+3, RGB565(ffffff));
+                BIOS::LCD::Bar(x, m_rcClient.top, x+1, m_rcClient.top+3, MyGui::AxisTickColor);
         }
     }
     
@@ -116,13 +116,13 @@ public:
             return;
         mRange = range;
         
-        BIOS::LCD::Bar(m_rcClient, RGB565(b0b0b0));
+        BIOS::LCD::Bar(m_rcClient, MyGui::BackgroundColor);
         
         auto drawTick = [&](int i)
         {
             int y = m_rcClient.bottom - (backward(i)-range.mMin)*m_rcClient.Height()/(range.mMax-range.mMin);
             if (y < m_rcClient.bottom)
-                BIOS::LCD::Bar(m_rcClient.right-2, y, m_rcClient.right, y+1, RGB565(ffffff));
+                BIOS::LCD::Bar(m_rcClient.right-2, y, m_rcClient.right, y+1, MyGui::AxisTickColor);
 
             char buffer[16];
             FormatNumber(buffer, i);
@@ -133,7 +133,7 @@ public:
             if (ty+14>m_rcClient.bottom)
                 ty = m_rcClient.bottom-14;
             
-            BIOS::LCD::Print(m_rcClient.right - strlen(buffer)*8-3, ty, RGB565(404040), RGB565(b0b0b0), buffer);
+            BIOS::LCD::Print(m_rcClient.right - strlen(buffer)*8-3, ty, MyGui::LabelColor, MyGui::BackgroundColor, buffer);
         };
 
         int rangeMaxModified = forward(range.mMax/2);

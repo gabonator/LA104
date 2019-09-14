@@ -4,7 +4,9 @@
 #include <vector>
 #include "sdlhal.h"
 
-CHal* gHal{nullptr};
+//CHal* gHal{nullptr};
+CSdlHal sdlHal;
+CHal* gHal = &sdlHal;
 
 void _main(void);
 const int pixelSize = 2;
@@ -82,7 +84,7 @@ void sdl_init()
      BIOS::LCD::Width, BIOS::LCD::Height
      );
 
-     gHal = new CSdlHal;
+//     gHal = new CSdlHal;
 }
 
 bool sdl_running()
@@ -149,7 +151,7 @@ void sdl_deinit()
     SDL_DestroyWindow( window );
     SDL_Quit();
 
-    delete gHal;
+//    delete gHal;
 }
 
 int main( int argc, char** argv )

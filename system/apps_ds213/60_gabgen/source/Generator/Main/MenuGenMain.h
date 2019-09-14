@@ -22,7 +22,8 @@ public:
 	CItemDuty			m_itmDuty;
 
 	virtual void Create(CWnd *pParent, ui16 dwFlags);
-	virtual void OnMessage(CWnd* pSender, int code, uintptr_t data);
+	virtual void OnMessage(CWnd* pSender, int code, uintptr_t data) override;
+	virtual void OnTimer() override;
 };
 
 #endif
