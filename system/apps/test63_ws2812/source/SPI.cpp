@@ -43,6 +43,9 @@ void __Bios(uint32_t a, uint32_t b)
 
 void CSPI::begin()
 {
+#ifdef EMULATED
+	return;
+#endif
 	enum
 	{
 		SYSINFO, NIVCPTR, SYSTICK, AF_RMAP, PWRCTRL, BUZZDEV, KEYnDEV, DELAYuS,
@@ -73,6 +76,10 @@ void CSPI::setClockDivider(int clockDivider)
 
 void SpiSend(uint8_t d)
 {
+	#ifdef EMULATED
+		return;
+	#endif
+
 	#define SPI_I2S_FLAG_TXE                ((uint16_t)0x0002)
 
 	SPIx->DR = d;
