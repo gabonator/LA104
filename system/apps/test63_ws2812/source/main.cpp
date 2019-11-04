@@ -49,13 +49,13 @@ public:
 public:
 	enum EDriver { WS2812, WS2812B } mDriver {WS2812};
 	int mLedCount{24};
-	enum EPattern { User, Black, Gray25, Gray50, Gray75, White, Red, Green, Blue, Gradient, Ring, Colors, Total} mPattern {Gradient};
+	enum EPattern { UserColor, UserGradient, Black, Gray25, Gray50, Gray75, White, Red, Green, Blue, Gradient, Ring, Colors, Total} mPattern {Gradient};
 	int mBrightness{64};
 	int mSpeed{256};
 	
 	const char* PatternName()
 	{
-		const char* modes[] = {"User", "Black", "25% Gray", "50% Gray", "75% Gray", "White", "Red", "Green", "Blue", "Gradient", "Ring", "Colors"};
+		const char* modes[] = {"User color", "User gradient", "Black", "25% Gray", "50% Gray", "75% Gray", "White", "Red", "Green", "Blue", "Gradient", "Ring", "Colors"};
 		return modes[mPattern];
 	}
 	
@@ -65,7 +65,7 @@ public:
 	}
 };
 
-class CPattern
+class CPatternGenerator
 {
 public:
 	inline float xabs(float x)
@@ -154,7 +154,8 @@ public:
 	{
 		switch (CSettings::Settings().mPattern)
 		{
-			case CSettings::User: _ASSERT(0);
+			case CSettings::UserColor: _ASSERT(0);
+			case CSettings::UserGradient: _ASSERT(0);
 			case CSettings::Black: return RGB32(0, 0, 0);
 			case CSettings::Gray25: return RGB32(64, 64, 64);
 			case CSettings::Gray50: return RGB32(128, 128, 128);
@@ -173,6 +174,107 @@ public:
 	}
 };
 
+using CGetterFunction = int(*)(void);
+using CSetterFunction = void(*)(int);
+
+class CAssignable
+{
+	CGetterFunction mGetter;
+	CSetterFunction mSetter;
+public:
+	CAssignable()
+	{
+		mGetter = [](){_ASSERT(0); return 0;};
+		mSetter = [](int){_ASSERT(0);};
+	}
+	CAssignable(CGetterFunction getter, CSetterFunction setter)
+	{
+		mGetter = getter;
+		mSetter = setter;
+	}
+	int operator=(int v)
+	{
+		mSetter(v);
+		return v;
+	}
+	operator int()
+	{
+		return mGetter();
+	}
+};
+
+class CPattern
+{
+	uint32_t mColors[WS2812B_MAXCOUNT];
+	CPatternGenerator mGenerator;
+	long lTime{0};
+	long lLastTick{0};
+	
+	CAssignable mAssignable;
+	int mIndex;
+	
+public:
+	CPattern()
+	{
+		static CPattern* _this = this;
+		mAssignable = CAssignable([]()
+		   {
+				return _this->Get(_this->mIndex);
+		   }, [](int color)
+		   {
+				_this->Set(_this->mIndex, color);
+		   });
+	}
+	
+	void Update()
+	{
+		if (CSettings::Settings().mPattern == CSettings::UserColor || CSettings::Settings().mPattern == CSettings::UserGradient)
+			return;
+		
+		long lCurrentTick = BIOS::SYS::GetTick();
+		if (lLastTick == 0)
+			lLastTick = lCurrentTick;
+		
+		if (CSettings::Settings().mSpeed == 256)
+			lTime += lCurrentTick - lLastTick;
+		else
+			lTime += (lCurrentTick - lLastTick) * CSettings::Settings().mSpeed >> 8;
+		
+		lLastTick = lCurrentTick;
+
+		constexpr int count = CSettings::Settings().mLedCount;
+		for (int i=0; i<count; i++)
+			mColors[i] = mGenerator.GetColor(i, lTime);
+	}
+	
+	int Get(int i)
+	{
+		return mColors[i];
+	}
+	
+	void Set(int i, int color)
+	{
+		if (CSettings::Settings().mPattern == CSettings::UserColor)
+		{
+			for (int i=0; i<CSettings::Settings().mLedCount; i++)
+				mColors[i] = color;
+			return;
+		}
+		if (CSettings::Settings().mPattern == CSettings::UserGradient)
+		{
+			mColors[i] = color;
+			return;
+		}
+		_ASSERT(0);
+	}
+	
+	CAssignable& operator[](int i)
+	{
+		mIndex = i;
+		return mAssignable;
+	}
+};
+
 class CBlock : public CWnd
 {
 public:
@@ -180,7 +282,7 @@ public:
 	{
 		CRect rcInside(m_rcClient);
 		rcInside.Deflate(1, 1, 1, 1);
-		GUI::Background(rcInside, RGB565(202020), RGB565(202020));
+		GUI::Background(rcInside, RGB565(101010), RGB565(101010));
 
 		if (HasFocus())
 		{
@@ -260,7 +362,7 @@ public:
 					Invalidate();
 					break;
 				case 4:
-					CSettings::Settings().mSpeed = minmax(0, CSettings::Settings().mSpeed + dir*32, 256*5);
+					CSettings::Settings().mSpeed = minmax(-256*5, CSettings::Settings().mSpeed + dir*32, 256*5);
 					Invalidate();
 					break;
 			}
@@ -296,7 +398,7 @@ public:
 	CPattern mPattern;
 	WS2812B mLeds;
 	long lTime = 0;
-	uint32_t mColors[WS2812B_MAXCOUNT];
+	//uint32_t mColors[WS2812B_MAXCOUNT];
 
 	CPreview() : mLeds(WS2812B_MAXCOUNT)
 	{
@@ -315,24 +417,7 @@ public:
 
 	void Update()
 	{
-		if (CSettings::Settings().mPattern == CSettings::User)
-			return;
-		
-		static long lLastTick = 0;
-		long lCurrentTick = BIOS::SYS::GetTick();
-		if (lLastTick == 0)
-			lLastTick = lCurrentTick;
-		
-		if (CSettings::Settings().mSpeed == 256)
-			lTime += lCurrentTick - lLastTick;
-		else
-			lTime += (lCurrentTick - lLastTick) * CSettings::Settings().mSpeed >> 8;
-		
-		lLastTick = lCurrentTick;
-
-		constexpr int count = CSettings::Settings().mLedCount;
-		for (int i=0; i<count; i++)
-			mColors[i] = mPattern.GetColor(i, lTime);
+		mPattern.Update();
 	}
 	
 	void Redraw()
@@ -343,7 +428,7 @@ public:
 		
 		for (int i=0; i<count; i++)
 		{
-			uint32_t color32 = mColors[i];
+			uint32_t color32 = mPattern[i];
 			if (brightness == 256)
 				mLeds.setPixelColor(i, color32);
 			else
@@ -356,6 +441,11 @@ public:
 			DrawColor(i, color32);
 		}
 		mLeds.show();
+	}
+	
+	void SetColor(uint32_t c)
+	{
+		mPattern[mSelected] = c;
 	}
 	
 	CRect GetRect(int i)
@@ -395,15 +485,15 @@ public:
 		CRect rcRect(GetRect(i));
 
 		rcRect.Inflate(2, 2, 2, 2);
-		GUI::Background(rcRect, RGB565(202020), RGB565(202020));
+		GUI::Background(rcRect, RGB565(101010), RGB565(101010));
 
-		uint32_t color32 = mColors[i];
+		uint32_t color32 = mPattern[i];
 		DrawColor(i, color32);
 	}
 
 	uint32_t GetColor()
 	{
-		return mColors[mSelected];
+		return mPattern[mSelected];
 	}
 	
 	virtual void OnKey(int key) override
@@ -436,23 +526,29 @@ public:
 class CColorSelector : public CBlock
 {
 	int mFocus{0};
-	uint32_t mLastColor{0};
+	uint32_t mLastColor{0x10000000};
+	int mLastFocus{-1};
 	
 public:
 	constexpr int Height = 64;
 	
 	virtual void OnPaint() override
 	{
+		mLastFocus = -1;
 		CBlock::OnPaint();
 		SetColor(mLastColor);
 	}
 
 	void SetColor(const uint32_t color)
 	{
+		if (mLastColor == color && mLastFocus == mFocus)
+			return;
+		
 		mLastColor = color;
+		mLastFocus = mFocus;
 		
 		CRect rcClear(m_rcClient.left+8, m_rcClient.top+4, m_rcClient.left+8+32+32, m_rcClient.top+4+58);
-		GUI::Background(rcClear, RGB565(202020), RGB565(202020));
+		GUI::Background(rcClear, RGB565(101010), RGB565(101010));
 
 		Colorspace::RgbColor rgb{(uint8_t)GetColorR(color), (uint8_t)GetColorG(color), (uint8_t)GetColorB(color)};
 
@@ -464,7 +560,7 @@ public:
 		Colorspace::HsvColor hsv = Colorspace::RgbToHsv(rgb);
 
 		CRect rcClear2(m_rcClient.left+8+100, m_rcClient.top+4, m_rcClient.left+8+100+80, m_rcClient.top+4+58);
-		GUI::Background(rcClear2, RGB565(202020), RGB565(202020));
+		GUI::Background(rcClear2, RGB565(101010), RGB565(101010));
 
 		FocusableInt(3, m_rcClient.left+8+100, m_rcClient.top+4+14*0, "H:", hsv.h);
 		FocusableInt(4, m_rcClient.left+8+100, m_rcClient.top+4+14*1, "S:", hsv.s);
@@ -476,6 +572,62 @@ public:
 	
 	virtual void OnKey(int key) override
 	{
+		int diff = 0;
+		if (key == BIOS::KEY::Left)
+			diff = -1;
+		if (key == BIOS::KEY::Right)
+			diff = +1;
+		
+		if (diff != 0)
+		{
+			if (CSettings::Settings().mPattern != CSettings::UserColor &&
+				CSettings::Settings().mPattern != CSettings::UserGradient)
+			{
+				// Start editing
+				CSettings::Settings().mPattern = CSettings::UserGradient;
+				GetParent()->Invalidate();
+				return;
+			} else
+			{
+				diff *= 8;
+				int diffR = 0, diffG = 0, diffB = 0;
+				int diffH = 0, diffS = 0, diffV = 0;
+				switch (mFocus)
+				{
+					case 0: diffR = diff; break;
+					case 1: diffG = diff; break;
+					case 2: diffB = diff; break;
+					case 3: diffH = diff; break;
+					case 4: diffS = diff; break;
+					case 5: diffV = diff; break;
+				}
+
+				Colorspace::RgbColor rgb{(uint8_t)GetColorR(mLastColor), (uint8_t)GetColorG(mLastColor), (uint8_t)GetColorB(mLastColor)};
+				if (diffR != 0 || diffG != 0 || diffB != 0)
+				{
+					rgb.r = minmax(0, rgb.r+diffR, 255);
+					rgb.g = minmax(0, rgb.g+diffG, 255);
+					rgb.b = minmax(0, rgb.b+diffB, 255);
+				}
+
+				if (diffH != 0 || diffS != 0 || diffV != 0)
+				{
+					Colorspace::HsvColor hsv = Colorspace::RgbToHsv(rgb);
+					hsv.h = hsv.h+diffH;
+					hsv.s = minmax(0, hsv.s+diffS, 255);
+					hsv.v = minmax(0, hsv.v+diffV, 255);
+					rgb = Colorspace::HsvToRgb(hsv);
+				}
+				uint32_t newColor = RGB32(rgb.r, rgb.g, rgb.b);
+				if (newColor != mLastColor)
+				{
+					SetColor(newColor);
+					SendMessage(GetParent(), 0, newColor);
+				}
+			}
+			return;
+		}
+		
 		if (key == BIOS::KEY::Up)
 		{
 			if (mFocus > 0)
@@ -520,7 +672,7 @@ public:
 	{
 		CWnd::Create("Application", CWnd::WsVisible, CRect(0, 0, BIOS::LCD::Width, BIOS::LCD::Height), nullptr);
 		
-		constexpr int padding = 20;
+		constexpr int padding = 26;
 		
 		mControl.Create(" Control ", CWnd::WsVisible, CRect(padding, 14+padding, BIOS::LCD::Width-padding, 14+padding + mControl.Height), this);
 		mPreview.Create(" Preview ", CWnd::WsVisible, CRect(padding, mControl.m_rcClient.bottom + padding, BIOS::LCD::Width-padding, mControl.m_rcClient.bottom + padding + mPreview.Height), this);
@@ -546,22 +698,10 @@ public:
 	
 	virtual void OnMessage(CWnd* pSender, int code, uintptr_t data) override
 	{
-		/*
-		if (code == ToWord('M', 'S'))
+		if (pSender == &mColor)
 		{
-			if (pSender == &mMenu && data == 1 && !mDigital.IsVisible())
-			{
-				mPwm.ShowWindow(false);
-				mDigital.ShowWindow(true);
-				Invalidate();
-			}
-			if (pSender == &mMenu && data == 2 && !mPwm.IsVisible())
-			{
-				mDigital.ShowWindow(false);
-				mPwm.ShowWindow(true);
-				Invalidate();
-			}
-		}*/
+			mPreview.SetColor(data);
+		}
 	}
 	
 private:
@@ -572,14 +712,8 @@ private:
 		CRect rc1(m_rcClient);
 		rc1.bottom = 14;
 		GUI::Background(rc1, RGB565(4040b0), RGB565(404040));
-		BIOS::LCD::Print(8, rc1.top, RGB565(ffffff), RGBTRANS, "WS2812 addressable led test");
-
-		CRect rc2(m_rcClient);
-		rc2.top = rc2.bottom-14;
-		GUI::Background(rc2, RGB565(404040), RGB565(202020));
-		BIOS::LCD::Print(8, rc2.top, RGB565(808080), RGBTRANS, "spi dma protocol emulation");
+		BIOS::LCD::Print(8, rc1.top, RGB565(ffffff), RGBTRANS, "WS2812 addressable led tester");
 	}
-
 };
 
 CSettings* CSettings::mSettings;
