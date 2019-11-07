@@ -36,8 +36,10 @@
 /**
  * @brief Check if the given address is within user flash region.
  */
-#define FLASH_IS_ADDRESS_USERSPACE(address)                                  \
-                        (address >= FLASH_USER_BASE && address <= FLASH_TOP)
+#define FLASH_IS_ADDRESS_USERSPACE(address) 1
+
+//#define FLASH_IS_ADDRESS_USERSPACE(address)                                  
+//                        (address >= FLASH_USER_BASE && address <= FLASH_TOP)
 
 
 /* Error codes */

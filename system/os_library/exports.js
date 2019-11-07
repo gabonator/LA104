@@ -141,6 +141,7 @@ uint32_t GetProcAddress(char* symbol)
 
   var wasGpio = false;
   var wasAdc = false;
+  var wasUsb = false;
   for (var i = 0; i<demangled.length; i++)
   {
     var tokens = demangled[i].match("^(.*?)\\((.*)\\)$")
@@ -155,20 +156,25 @@ uint32_t GetProcAddress(char* symbol)
 
     var isGpio = tokens[1].indexOf("GPIO") != -1;
     var isAdc  = tokens[1].indexOf("ADC") != -1 || tokens[1].indexOf("DAC") != -1;
+    var isUsb  = tokens[1].indexOf("USB") != -1;
+
+    if (!isGpio && wasGpio)
+      console.log("#endif")
+    if (!isAdc && wasAdc)
+      console.log("#endif")
+    if (!isUsb && wasUsb)
+      console.log("#endif")
 
     if (isGpio && !wasGpio)
       console.log("#if defined(LA104)")
-    if (!isGpio && wasGpio)
-      console.log("#endif")
-
-    wasGpio = isGpio;
-
     if (isAdc && !wasAdc)
       console.log("#if defined(DS203) || defined(DS213)")
-    if (!isAdc && wasAdc)
-      console.log("#endif")
+    if (isUsb && !wasUsb)
+      console.log("#if !defined(DISABLE_USB)")
 
+    wasGpio = isGpio;
     wasAdc = isAdc;
+    wasUsb = isUsb;
 
     if (!retvalue)
       out += 'return (uint32_t)' + tokens[1] + ';';

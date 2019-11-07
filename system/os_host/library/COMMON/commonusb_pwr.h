@@ -11,7 +11,7 @@
 
 #include <stdbool.h>
 #include <usb_core.h>
-#include "cdcusb_app.h"
+//#include "cdcusb_app.h"
 
 typedef enum _RESUME_STATE {
 	RESUME_EXTERNAL,
@@ -24,8 +24,14 @@ typedef enum _RESUME_STATE {
 	RESUME_ESOF
 } common_RESUME_STATE;
 
+typedef RESULT USB_RESULT;
+
 void common_Suspend(void);
 void common_Resume_Init(void);
 void common_Resume(common_RESUME_STATE eResumeSetVal);
 USB_RESULT common_PowerOn(void);
 USB_RESULT common_PowerOff(void);
+void common_USB_Cable_Config (FunctionalState NewState);
+
+// imports
+extern void USB_Leave_LowPowerMode();

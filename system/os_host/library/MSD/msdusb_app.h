@@ -1,0 +1,10 @@
+typedef enum _DEVICE_STATE {
+	UNCONNECTED,
+	ATTACHED,
+	POWERED,
+	SUSPENDED,
+	ADDRESSED,
+	CONFIGURED
+} DEVICE_STATE;
+
+extern DEVICE_STATE massDeviceState; /* USB device status */

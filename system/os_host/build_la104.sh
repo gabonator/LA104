@@ -42,16 +42,14 @@ arm-none-eabi-gcc -Wall -Os -Werror -fno-common -mcpu=cortex-m3 -mthumb -msoft-f
   ../library/STM32F10x_StdPeriph_Driver/src/stm32f10x_i2c.c \
   ../library/STM32F10x_StdPeriph_Driver/src/stm32f10x_usart.c \
   ../library/STM32F10x_StdPeriph_Driver/src/misc.c \
-  ../library/CDC/cdcusb_endp.c \
-  ../library/CDC/cdcusb_desc.c \
-  ../library/CDC/cdcusb_prop.c \
-  ../library/CDC/cdcusb_app.c \
   ../source/usb/Disk.c \
   ../library/MSD/msdusb_scsi.c \
   ../library/MSD/msdusb_bot.c \
   ../library/MSD/msdusb_desc.c \
   ../library/MSD/msdusb_prop.c \
   ../library/MSD/msdusb_endp.c \
+  ../library/MSD/msdusb_pwr.c \
+  ../library/MSD/msdusb_app.c \
   ../library/COMMON/commonusb_pwr.c \
   ../library/COMMON/commonusb_istr.c \
   ../library/COMMON/commonusb_app.c \
@@ -76,6 +74,7 @@ arm-none-eabi-g++ -Wall -Os -Werror -fno-common -mcpu=cortex-m3 -mthumb -msoft-f
   ../source/bios/gpio.cpp \
   ../source/bios/adc.cpp \
   ../source/bios/dac.cpp \
+  ../source/bios/private.cpp \
   ../library/spf/spf.c \
   ../source/main/Execute.cpp \
   ../source/gui/Gui.cpp \
@@ -112,16 +111,14 @@ arm-none-eabi-gcc -mcpu=cortex-m3 -mthumb -o output.elf -nostartfiles -T ../app.
   ./stm32f10x_i2c.o \
   ./stm32f10x_usart.o \
   ./misc.o \
-  ./cdcusb_prop.o \
-  ./cdcusb_desc.o \
-  ./cdcusb_endp.o \
-  ./cdcusb_app.o \
   ./Disk.o \
   ./msdusb_scsi.o \
   ./msdusb_bot.o \
   ./msdusb_prop.o \
   ./msdusb_desc.o \
   ./msdusb_endp.o \
+  ./msdusb_pwr.o \
+  ./msdusb_app.o \
   ./commonusb_pwr.o \
   ./commonusb_istr.o \
   ./commonusb_app.o \
@@ -129,6 +126,7 @@ arm-none-eabi-gcc -mcpu=cortex-m3 -mthumb -o output.elf -nostartfiles -T ../app.
   ./Serialize.o \
   ./adc.o \
   ./dac.o \
+  ./private.o 
 
 arm-none-eabi-objcopy -O binary ./output.elf ./output.bin
 arm-none-eabi-objcopy -O ihex ./output.elf ./system_la104.hex
@@ -143,3 +141,5 @@ nm --print-size --size-sort -gC output.elf | grep " B " > symbols_ram.txt
 nm --print-size --size-sort -gC output.elf | grep " T " > symbols_rom.txt
 nm --print-size --size-sort -gC output.elf > symbols_all.txt
 nm output.elf > symbols_all2.txt
+cat symbols_all.txt | grep _addressR
+

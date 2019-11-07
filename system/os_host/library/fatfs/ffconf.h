@@ -130,6 +130,7 @@
 
 
 #define	_MAX_SS		4096
+// TODO: DS203 uses 512 bytes long sectors!
 // TODO: GABO WASTING OF MEMORY!!
 
 //#define	_MAX_SS		512		/* 512, 1024, 2048 or 4096 */

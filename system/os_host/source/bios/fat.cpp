@@ -82,7 +82,7 @@ extern "C"
     f_flush(0);
   }
 
-  extern bool gUsbDidWriteToDisk;
+  bool gUsbDidWriteToDisk = false;
 
   bool NeedInvalidateFat()
   {

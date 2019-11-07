@@ -10,17 +10,21 @@ MEMORY
 SECTIONS
   {
     .text : {
+      _addressRomBegin = .;
       *(.entry)
       *(.text*)        /* Program code */
       *(.rodata*)      /* Read only data */
+      _addressRomEnd = .;
     } >rom
 
     .data : {
+      _addressRamBegin = .;
       *(.data)        /* Data memory */
     } >ram AT >rom
 
   .bss : {
     *(.bss)         /* Zero-filled run time allocate data memory */
+      _addressRamEnd = .;
     } >ram
 
   .rel.plt : { *(.rel.plt)  } > rom

@@ -19,4 +19,4 @@
 #define RGB32(r,g,b) ((r) | ((g)<<8) | ((b)<<16))
 
 #define RGB(rgb) 0x##rgb
-#define RGB32TO565(rgb) RGB565RGB( GetHtmlR(rgb), GetHtmlG(rgb), GetHtmlB(rgb))
+#define RGB32TO565(rgb) RGB565RGB( GetColorR(rgb), GetColorG(rgb), GetColorB(rgb))

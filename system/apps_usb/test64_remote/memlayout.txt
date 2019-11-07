@@ -1,0 +1,20 @@
+system:
+20000000 00000000 D _addressRamBegin
+20003424 00000000 B _addressRamEnd
+08008000 00000000 T _addressRomBegin
+080120dc 00000000 T _addressRomEnd
+
+fileman:
+20004800 00000000 T _addressRamBegin
+20005208 00000000 B _addressRamEnd
+08014000 00000000 T _addressRomBegin
+08015cbd 00000000 T _addressRomEnd
+
+tsr:
+20005000 00000000 D _addressRamBegin
+20005230 00000000 B _addressRamEnd
+08020000 00000000 T _addressRomBegin
+08020a3b 00000000 T _addressRomEnd
+
+
+20003000 .. 2000b800

@@ -1,6 +1,6 @@
 MEMORY
 {
-  rom (rx) : ORIGIN = 0x08017000, LENGTH = 20K
+  rom (rx) : ORIGIN = 0x08019000, LENGTH = 16K
   ram (rwx) : ORIGIN = 0x20005000, LENGTH = 4K
   null (rwx): ORIGIN = 0x00001000, LENGTH = 4K
 /*
@@ -15,17 +15,21 @@ MEMORY
 SECTIONS
   {
     .text : {
+      _addressRomBegin = .;
       *(.entry)
       *(.text*)        /* Program code */
       *(.rodata*)      /* Read only data */
+      _addressRomEnd = .;
     } >rom
 
     .data : {
+      _addressRamBegin = .;
       *(.data)        /* Data memory */
-    } >ram AT >rom
+    } >ram
 
   .bss : {
     *(.bss)         /* Zero-filled run time allocate data memory */
+      _addressRamEnd = .;
     } >ram
 
   .rel.plt : { *(.rel.plt)  } > rom

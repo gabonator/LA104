@@ -130,18 +130,19 @@ namespace BIOS
 
   namespace PRIVATE
   {
-    const void* GetCharRom() { return nullptr; }
+    uintptr_t GetInternal(EInternal eInternal) { return 0; }
   }
 
+#if !defined(DISABLE_USB)
   namespace USB
   {
     void Enable() {}
     void Disable() {}
-    void Initialize(void* pDeviceInfo, void* pDevice, void* pDeviceProperty, void* pUserStandardRequests, THandler arrHandlerIn[], THandler arrHandlerOut[], THandler arrCallbacks[]) {}
+    void Initialize(void* pDeviceInfo, void* pDevice, void* pDeviceProperty, void* pUserStandardRequests, THandler arrHandlerIn[], THandler arrHandlerOut[], THandler arrCallbacks[], THandler LeaveLowPowerMode) {}
     void InitializeMass() {}
-    void InitializeSerial() {}
     void InitializeFinish(int imr_msk) {}
   }
+#endif
                    
 #if defined(DS203) || defined(DS213)
   namespace ADC

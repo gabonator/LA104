@@ -21,8 +21,13 @@ void _HandleAssertion(const char*, int, const char*);
 #define ToWord(a, b) (ui16)(((a)<<8)|(b))
 #define ToDword(a, b, c, d) (ui32)((ToWord(d, c)<<16)|ToWord(b,a))
 //#define NULL nullptr
+#ifdef __APPLE__
 #define min(a,b) std::min(a,b)
 #define max(a,b) std::max(a,b)
+#else
+#define min(a,b) (((a)<(b))?(a):(b))
+#define max(a,b) (((a)>(b))?(a):(b))
+#endif
 #define COUNT(arr) (int)(sizeof(arr)/sizeof(arr[0]))
 #ifdef __APPLE__
 #define NATIVEENUM uint32_t

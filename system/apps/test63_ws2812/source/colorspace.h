@@ -6,6 +6,7 @@ typedef struct RgbColor
     unsigned char r;
     unsigned char g;
     unsigned char b;
+    unsigned char w;
 } RgbColor;
 
 typedef struct HsvColor
@@ -13,6 +14,7 @@ typedef struct HsvColor
     unsigned char h;
     unsigned char s;
     unsigned char v;
+    unsigned char w;
 } HsvColor;
 
 RgbColor HsvToRgb(HsvColor hsv)
@@ -25,6 +27,7 @@ RgbColor HsvToRgb(HsvColor hsv)
         rgb.r = hsv.v;
         rgb.g = hsv.v;
         rgb.b = hsv.v;
+		rgb.w = hsv.v;
         return rgb;
     }
 
@@ -35,6 +38,7 @@ RgbColor HsvToRgb(HsvColor hsv)
     q = (hsv.v * (255 - ((hsv.s * remainder) >> 8))) >> 8;
     t = (hsv.v * (255 - ((hsv.s * (255 - remainder)) >> 8))) >> 8;
 
+	rgb.w = hsv.w;
     switch (region)
     {
         case 0:
@@ -68,6 +72,7 @@ HsvColor RgbToHsv(RgbColor rgb)
     rgbMin = rgb.r < rgb.g ? (rgb.r < rgb.b ? rgb.r : rgb.b) : (rgb.g < rgb.b ? rgb.g : rgb.b);
     rgbMax = rgb.r > rgb.g ? (rgb.r > rgb.b ? rgb.r : rgb.b) : (rgb.g > rgb.b ? rgb.g : rgb.b);
 
+	hsv.w = rgb.w;
     hsv.v = rgbMax;
     if (hsv.v == 0)
     {

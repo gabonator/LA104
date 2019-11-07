@@ -82,12 +82,13 @@ uint32_t GetProcAddress(char* symbol)
     case 0x00005757: return (uint32_t)static_cast<void(*)(int)>(BIOS::SYS::DelayMs); 
     case 0x00003867: return (uint32_t)static_cast<int(*)(unsigned long)>(BIOS::SYS::Execute); 
     case 0x000080a4: return (uint32_t)static_cast<uint32_t(*)()>(BIOS::SYS::GetTick); 
-    case 0x000082e8: return (uint32_t)static_cast<void(*)(void*, void*, void*, void*, void (**)(), void (**)(), void (**)())>(BIOS::USB::Initialize); 
+#if !defined(DISABLE_USB)
+    case 0x00004de1: return (uint32_t)static_cast<void(*)(void*, void*, void*, void*, void (**)(), void (**)(), void (**)(), void (*)())>(BIOS::USB::Initialize); 
     case 0x0000148c: return (uint32_t)static_cast<void(*)()>(BIOS::USB::InitializeMass); 
     case 0x00005b72: return (uint32_t)static_cast<void(*)(int)>(BIOS::USB::InitializeFinish); 
-    case 0x0000c932: return (uint32_t)static_cast<void(*)()>(BIOS::USB::InitializeSerial); 
     case 0x0000c9d6: return (uint32_t)static_cast<void(*)()>(BIOS::USB::Enable); 
     case 0x000029c0: return (uint32_t)static_cast<void(*)()>(BIOS::USB::Disable); 
+#endif
 #if defined(LA104)
     case 0x000005e5: return (uint32_t)static_cast<int(*)(BIOS::GPIO::EPin)>(BIOS::GPIO::AnalogRead); 
     case 0x00006d86: return (uint32_t)static_cast<void(*)(BIOS::GPIO::EPin, int)>(BIOS::GPIO::AnalogWrite); 
@@ -109,7 +110,7 @@ uint32_t GetProcAddress(char* symbol)
     case 0x0000cbce: return (uint32_t)static_cast<bool(*)(unsigned long, unsigned char*, int)>(BIOS::MEMORY::LinearProgram); 
     case 0x0000807e: return (uint32_t)static_cast<void*(*)()>(BIOS::MEMORY::GetSharedBuffer); 
     case 0x0000f7ea: return (uint32_t)static_cast<void(*)(void*)>(BIOS::MEMORY::SetSharedBuffer); 
-    case 0x0000ed83: return (uint32_t)BIOS::PRIVATE::GetCharRom;
+    case 0x000072f7: return (uint32_t)static_cast<uintptr_t(*)(BIOS::PRIVATE::EInternal)>(BIOS::PRIVATE::GetInternal); 
     default: return 0;
   }
 }

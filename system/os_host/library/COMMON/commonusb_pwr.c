@@ -10,7 +10,7 @@
 #include <usb_lib.h>
 #include "commonusb_conf.h"
 #include "commonusb_pwr.h"
-#include "commonusb_app.h"
+//#include "commonusb_app.h"
 
 extern uint16_t wInterrupt_Mask;
 bool common_remotewakeupon = false; // GABO
@@ -39,7 +39,7 @@ USB_RESULT common_PowerOn(void)
 	wInterrupt_Mask = CNTR_RESETM | CNTR_SUSPM | CNTR_WKUPM;
 	_SetCNTR(wInterrupt_Mask);
 
-	USB_Cable_Config(ENABLE);	/* cable plugged-in */
+	common_USB_Cable_Config(ENABLE);	/* cable plugged-in */
 
 	return USB_SUCCESS;
 }
@@ -53,7 +53,7 @@ USB_RESULT common_PowerOff()
 	_SetCNTR(CNTR_FRES);				/* disable all interrupts and force USB reset */
 	_SetISTR(0);						/* clear interrupt status register */
 
-	USB_Cable_Config(DISABLE);			/* Disable the Pull-Up */
+	common_USB_Cable_Config(DISABLE);			/* Disable the Pull-Up */
 	_SetCNTR(CNTR_FRES + CNTR_PDWN);	/* switch-off device */
 
 	/* sw variables reset */
@@ -181,7 +181,7 @@ void common_Resume_Init(void)
 
 	/* restore full power */
 	/* ... on connected devices */
-	Leave_LowPowerMode();
+	USB_Leave_LowPowerMode();
 
 	/* reset FSUSP bit */
 	_SetCNTR(IMR_MSK);
@@ -257,4 +257,8 @@ void common_Resume(common_RESUME_STATE eResumeSetVal)
 		common_ResumeS.eState = RESUME_OFF;
 		break;
 	}
+}
+
+void common_USB_Cable_Config (FunctionalState NewState)
+{
 }

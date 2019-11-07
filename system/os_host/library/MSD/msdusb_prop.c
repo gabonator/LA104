@@ -8,10 +8,11 @@
 #include "msdusb_bot.h"
 #include "msdusb_prop.h"
 #include "msdusb_conf.h"
+#include "msdusb_app.h"
 
 u32 Max_Lun = 0;
 
-DEVICE_STATE massbDeviceState = UNCONNECTED; /* USB device status */
+extern DEVICE_STATE massDeviceState; /* USB device status */
 
 DEVICE_INFO massDevice_Info;
 
@@ -67,7 +68,7 @@ void MASS_init()
   pInformation->Current_Configuration = 0;
   common_PowerOn();       // Connect the device
   USB_SIL_Init(IMR_MSK);			/* Perform basic device initialization operations */
-  massbDeviceState = UNCONNECTED;
+  massDeviceState = UNCONNECTED;
 }
 /*******************************************************************************
   MASS_Reset: Mass Storage reset routine.
@@ -102,7 +103,7 @@ void MASS_Reset()
   // Set the device to response on default address
   SetDeviceAddress(0);
 
-  massbDeviceState = ATTACHED;
+  massDeviceState = ATTACHED;
 
   CBW.dSignature = BOT_CBW_SIGNATURE;
   Bot_State = BOT_IDLE;
@@ -114,7 +115,7 @@ void MASS_Reset()
 void Mass_Storage_SetConfiguration(void)
 {
   if (pInformation->Current_Configuration != 0){
-    massbDeviceState = CONFIGURED; // Device configured
+    massDeviceState = CONFIGURED; // Device configured
     ClearDTOG_TX(ENDP1);
     ClearDTOG_RX(ENDP2);
     Bot_State = BOT_IDLE;      // set the Bot state machine to the IDLE state
@@ -135,7 +136,7 @@ void Mass_Storage_ClearFeature(void)
 *******************************************************************************/
 void Mass_Storage_SetDeviceAddress (void)
 {
-  massbDeviceState = ADDRESSED;
+  massDeviceState = ADDRESSED;
 }
 /*******************************************************************************
   MASS_Status_In: Mass Storage Status IN routine.

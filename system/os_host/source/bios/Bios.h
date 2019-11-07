@@ -1,6 +1,6 @@
 #pragma once
 #include "../framework/Classes.h"
-
+//#define constexpr const
 namespace BIOS
 {
   namespace SYS
@@ -10,8 +10,9 @@ namespace BIOS
     int Execute(uint32_t addr);
     void Beep(int intervalMs);
     void DelayMs(int intervalMs);
-    void DelayUs(int intervalUs);
-    char* GetDeviceType();
+    void DelayUs(int intervalUs);  // TODO: remove?
+    char* GetDeviceType(); 
+    // TODO: GetDeviceId();
   }
 
   namespace LCD
@@ -119,17 +120,17 @@ namespace BIOS
     };
 
 #if defined(DS203)
-    constexpr int SectorSize = 512;
-    constexpr int SectorCount = 4096;
+    const int SectorSize = 512;
+    const int SectorCount = 4096;
 #elif defined(DS213)
-    constexpr int SectorSize = 4096;
-    constexpr int SectorCount = 2047;
+    const int SectorSize = 4096;
+    const int SectorCount = 2047;
 #elif defined(LA104)
-    constexpr int SectorSize = 4096;
-    constexpr int SectorCount = 2048;
+    const int SectorSize = 4096;
+    const int SectorCount = 2048;
 #endif
 
-    constexpr int SharedBufferSize = SectorSize;
+    const int SharedBufferSize = SectorSize;
 
     void SetSharedBuffer(void*);
     void* GetSharedBuffer();
@@ -181,7 +182,8 @@ namespace BIOS
 
   namespace PRIVATE
   {
-    const void* GetCharRom();
+    enum class EInternal {CharRom, LastChar};
+    uintptr_t GetInternal(EInternal eInternal);
   }
 
   namespace USB
@@ -190,9 +192,8 @@ namespace BIOS
 
     void Enable();
     void Initialize(void* pDeviceInfo, void* pDevice, void* pDeviceProperty, void* pUserStandardRequests,
-      THandler arrHandlerIn[], THandler arrHandlerOut[], THandler arrCallbacks[]);
+      THandler arrHandlerIn[], THandler arrHandlerOut[], THandler arrCallbacks[], THandler leaveLowPowerMode);
     void InitializeMass();
-    void InitializeSerial();
     void Disable();
 
     void InitializeFinish(int msk);
@@ -235,7 +236,7 @@ namespace BIOS
 #if defined(DS203) || defined(DS213)
   namespace ADC
   {
-    constexpr int NumSamples = 4096;
+    const int NumSamples = 4096;
 
     union TSample 
     {
@@ -311,7 +312,7 @@ namespace BIOS
 
   namespace DAC
   {
-    constexpr int SampleMaxValue = 0xfff;
+    const int SampleMaxValue = 0xfff;
 
     void SetFrequency(int freqHz);
     void SetDuty(int duty);

@@ -16,7 +16,7 @@ TCallback common_Callback[8] = {
 
 extern DEVICE_PROP* common_Device_Property;
 
-void commmon_Initialize(DEVICE_PROP* prop, TCallback callback[])
+void common_Initialize(DEVICE_PROP* prop, TCallback callback[])
 {
   common_Device_Property = prop;
   for (int i=0; i<sizeof(common_Callback)/sizeof(common_Callback[0]); i++)

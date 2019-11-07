@@ -1,10 +1,18 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include "library/STM32F10x_StdPeriph_Driver/inc/misc.h"
-//#include "ds203bios.h"
 #include "BIOS.h"
-//#include "lowlcd.h"
 
+/*
+imports from BIOS:
+interrupt.c:(.text+0xac): undefined reference to `__CTR_HP'
+interrupt.c:(.text+0xb0): undefined reference to `__USB_Istr'
+imports.c:(.text+0x160): undefined reference to `__ProgDiskPage'
+imports.c:(.text+0x16a): undefined reference to `__ReadDiskData'
+imports.c:(.text+0xfc): undefined reference to `__USB_Init'
+adc.cpp:(.text+0x74): undefined reference to `__Get'
+adc.cpp:(.text+0x16e): undefined reference to `__Set'
+*/
 
 void dbgPrint(const char* msg, ...);
 
@@ -144,27 +152,6 @@ uint16_t FPGA16(uint8_t Cmd, uint16_t Cnt, uint16_t Data)
 {
   return 0;
 }
-
-void USB_DevInit(void)
-{
-  GPIO_InitTypeDef  GPIO_Struct;
-  NVIC_InitTypeDef  NVIC_Struct;
-
-  RCC->APB2ENR |= RCC_APB2Periph_GPIOA;
-  GPIO_Struct.GPIO_Pin  = GPIO_Pin_12 | GPIO_Pin_11;
-  GPIO_Struct.GPIO_Mode = GPIO_Mode_AF_PP;
-  GPIO_Init(GPIOA, &GPIO_Struct);
-  RCC->APB1ENR |= RCC_APB1Periph_USB;
-  RCC_USBCLKConfig(RCC_USBCLKSource_PLLCLK_1Div5);
-
-  NVIC_PriorityGroupConfig(NVIC_PriorityGroup_2);
-  NVIC_Struct.NVIC_IRQChannel                   = USB_LP_CAN1_RX0_IRQn;
-  NVIC_Struct.NVIC_IRQChannelPreemptionPriority = 2;
-  NVIC_Struct.NVIC_IRQChannelSubPriority        = 0;
-  NVIC_Struct.NVIC_IRQChannelCmd                = ENABLE;
-  NVIC_Init(&NVIC_Struct);
-}
-
 
 bool ExtFlashSecWr(uint8_t* pBuffer, uint32_t WriteAddr)
 {

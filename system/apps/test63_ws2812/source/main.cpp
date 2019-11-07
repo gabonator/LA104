@@ -11,6 +11,9 @@ using namespace BIOS;
 #include "WS2812B.h"
 #include "colorspace.h"
 
+#define RGBW32(r,g,b,w) ((r) | ((g)<<8) | ((b)<<16) | ((w)<<24))
+#define GetColorW(rgbw) (((rgbw) >> 24)&0xff)
+
 
 template <typename T> T minmax(T min, T val, T max)
 {
@@ -21,12 +24,12 @@ template <typename T> T minmax(T min, T val, T max)
 	return val;
 }
 
-template <typename T, typename T2> T enumclamp(T2 val, T max)
+template <typename T> T enumclamp(int val, T max)
 {
 	if (val < 0)
 		return (T)0;
-	if (val > max-1)
-		return (T)(max-1);
+	if (val > (int)max-1)
+		return (T)((int)max-1);
 	return (T)val;
 }
 
@@ -47,21 +50,70 @@ public:
 	}
 	
 public:
-	enum EDriver { WS2812, WS2812B } mDriver {WS2812};
+	enum class EDriver { WS2812RGB, WS2812RGBW, Total } mDriver {EDriver::WS2812RGB};
 	int mLedCount{24};
-	enum EPattern { UserColor, UserGradient, Black, Gray25, Gray50, Gray75, White, Red, Green, Blue, Gradient, Ring, Colors, Total} mPattern {Gradient};
+	enum class EPattern { UserColor, UserGradient, Black, Gray25, Gray50, Gray75, White, Red, Green, Blue, Gradient, Ring, Colors, Total} mPattern {EPattern::Gradient};
 	int mBrightness{64};
 	int mSpeed{256};
 	
 	const char* PatternName()
 	{
 		const char* modes[] = {"User color", "User gradient", "Black", "25% Gray", "50% Gray", "75% Gray", "White", "Red", "Green", "Blue", "Gradient", "Ring", "Colors"};
-		return modes[mPattern];
+		return modes[(int)mPattern];
 	}
 	
 	const char* PlayState()
 	{
 		return "Playing";
+	}
+
+	const char* DriverName()
+	{
+		const char* modes[] = {"WS2812 RGB", "WS2812 RGBW"};
+		return modes[(int)mDriver];
+	}
+};
+
+class CDriver
+{
+	static CDriver* mDriver;
+	WS2812B mWs2812b;
+	
+public:
+	static const int MaxCount = WS2812B_MAXCOUNT;
+	
+public:
+	CDriver() : mWs2812b(MaxCount)
+	{
+		mDriver = this;
+	}
+
+	static CDriver& Driver()
+	{
+		_ASSERT(mDriver);
+		return *mDriver;
+	}
+
+	void Update(const uint32_t* colorPattern, int colorCount)
+	{
+		int brightness = CSettings::Settings().mBrightness;
+		if (mWs2812b.numPixels() != colorCount)
+			mWs2812b.updateLength(colorCount);
+		
+		for (int i=0; i<colorCount; i++)
+		{
+			uint32_t color32 = colorPattern[i];
+			if (brightness == 256)
+				mWs2812b.setPixelColor(i, color32);
+			else
+			{
+				mWs2812b.setPixelColor(i, mWs2812b.Color(
+					GetColorR(color32)*brightness>>8,
+					GetColorG(color32)*brightness>>8,
+					GetColorB(color32)*brightness>>8)); //TODO
+			}
+		}
+		mWs2812b.show();
 	}
 };
 
@@ -77,7 +129,7 @@ public:
 	
 	float xsin(float x)
 	{
-		constexpr float tp = 1.f/(2.f*3.14159265f);
+		const float tp = 1.f/(2.f*3.14159265f);
 		x *= tp;
 		x -= .25f + (int)(x + .25f);
 		x *= 16.f * (xabs(x) - .5f);
@@ -87,18 +139,20 @@ public:
 	uint32_t GetColorGradient(int i, int time)
 	{
 		float a = time * 0.001f;
-		constexpr float q = 0.4f/3.0f;
+		const float q = 0.4f/3.0f;
 		
-		int r, g, b;
+		int r, g, b, w;
 		r = 128 + xsin(a+i*q)*128;
 		g = 128 + xsin(a*0.37f+i*q)*128;
 		b = 128 + xsin(a*0.11f+i*q)*128;
-		 
+		w = 128 + xsin(a*0.07f+i*q)*128;
+
 		r = max(0, min(r, 255));
 		g = max(0, min(g, 255));
 		b = max(0, min(b, 255));
+		w = max(0, min(w, 255));
 
-		return RGB32(r, g, b);
+		return RGBW32(r, g, b, w);
 	}
 		
 	uint32_t GetColorRing(int i, int time)
@@ -129,17 +183,21 @@ public:
 		int r = GetColorR(refColor) * l / 256;
 		int g = GetColorG(refColor) * l / 256;
 		int b = GetColorB(refColor) * l / 256;
-		 
+		int w = GetColorB(refColor) * l / 256;
+
 		r = max(0, min(r, 255));
 		g = max(0, min(g, 255));
 		b = max(0, min(b, 255));
+		w = max(0, min(w, 255));
 
-		return RGB32(r, g, b);
+		return RGBW32(r, g, b, w);
 	}
 	
 	uint32_t GetColorColors(int i, int time)
 	{
-		const static uint32_t colors[] = {0xff0000, 0xffff00, 0x00ff00, 0x00ffff, 0x0000ff, 0xff00ff};
+		const static uint32_t colors[] = {0x00ff0000, 0x40ffff00, 0x8000ff00,
+			0xff00ffff, 0x800000ff, 0x40ff00ff};
+		
  		int index = time/1000;
 		int part = time%1000;
 		int N = 24;
@@ -154,19 +212,19 @@ public:
 	{
 		switch (CSettings::Settings().mPattern)
 		{
-			case CSettings::UserColor: _ASSERT(0);
-			case CSettings::UserGradient: _ASSERT(0);
-			case CSettings::Black: return RGB32(0, 0, 0);
-			case CSettings::Gray25: return RGB32(64, 64, 64);
-			case CSettings::Gray50: return RGB32(128, 128, 128);
-			case CSettings::Gray75: return RGB32(192, 192, 192);
-			case CSettings::White: return RGB32(255, 255, 255);
-			case CSettings::Red: return RGB32(255, 0, 0);
-			case CSettings::Green: return RGB32(0, 255, 0);
-			case CSettings::Blue: return RGB32(0, 0, 255);
-			case CSettings::Gradient: return GetColorGradient(i, time);
-			case CSettings::Ring: return GetColorRing(i, time);
-			case CSettings::Colors: return GetColorColors(i, time);
+			case CSettings::EPattern::UserColor: _ASSERT(0);
+			case CSettings::EPattern::UserGradient: _ASSERT(0);
+			case CSettings::EPattern::Black: return RGB32(0, 0, 0);
+			case CSettings::EPattern::Gray25: return RGBW32(64, 64, 64, 64);
+			case CSettings::EPattern::Gray50: return RGBW32(128, 128, 128, 128);
+			case CSettings::EPattern::Gray75: return RGBW32(192, 192, 192, 192);
+			case CSettings::EPattern::White: return RGBW32(255, 255, 255, 255);
+			case CSettings::EPattern::Red: return RGB32(255, 0, 0);
+			case CSettings::EPattern::Green: return RGB32(0, 255, 0);
+			case CSettings::EPattern::Blue: return RGB32(0, 0, 255);
+			case CSettings::EPattern::Gradient: return GetColorGradient(i, time);
+			case CSettings::EPattern::Ring: return GetColorRing(i, time);
+			case CSettings::EPattern::Colors: return GetColorColors(i, time);
 			default:
 				_ASSERT(0);
 		}
@@ -205,7 +263,7 @@ public:
 
 class CPattern
 {
-	uint32_t mColors[WS2812B_MAXCOUNT];
+	uint32_t mColors[CDriver::MaxCount];
 	CPatternGenerator mGenerator;
 	long lTime{0};
 	long lLastTick{0};
@@ -228,7 +286,7 @@ public:
 	
 	void Update()
 	{
-		if (CSettings::Settings().mPattern == CSettings::UserColor || CSettings::Settings().mPattern == CSettings::UserGradient)
+		if (CSettings::Settings().mPattern == CSettings::EPattern::UserColor || CSettings::Settings().mPattern == CSettings::EPattern::UserGradient)
 			return;
 		
 		long lCurrentTick = BIOS::SYS::GetTick();
@@ -242,7 +300,7 @@ public:
 		
 		lLastTick = lCurrentTick;
 
-		constexpr int count = CSettings::Settings().mLedCount;
+		const int count = CSettings::Settings().mLedCount;
 		for (int i=0; i<count; i++)
 			mColors[i] = mGenerator.GetColor(i, lTime);
 	}
@@ -254,13 +312,13 @@ public:
 	
 	void Set(int i, int color)
 	{
-		if (CSettings::Settings().mPattern == CSettings::UserColor)
+		if (CSettings::Settings().mPattern == CSettings::EPattern::UserColor)
 		{
 			for (int i=0; i<CSettings::Settings().mLedCount; i++)
 				mColors[i] = color;
 			return;
 		}
-		if (CSettings::Settings().mPattern == CSettings::UserGradient)
+		if (CSettings::Settings().mPattern == CSettings::EPattern::UserGradient)
 		{
 			mColors[i] = color;
 			return;
@@ -272,6 +330,16 @@ public:
 	{
 		mIndex = i;
 		return mAssignable;
+	}
+	
+	const uint32_t* GetBuffer()
+	{
+		return mColors;
+	}
+	
+	int GetSize()
+	{
+		return CSettings::Settings().mLedCount;
 	}
 };
 
@@ -300,7 +368,7 @@ public:
 class CAniControl : public CBlock
 {
 public:
-	constexpr int Height = 56;
+	const int Height = 52;
 	int mFocus = 5;
 	
 	bool HasFocus(int i)
@@ -319,7 +387,7 @@ public:
 		_x += BIOS::LCD::Printf(_x, _y, FOCUS(0) ? "<%d>" : "%d", CSettings::Settings().mLedCount);
 		_x += BIOS::LCD::Print(_x, _y, RGB565(b0b0b0), RGBTRANS, "x");
 		_x += 8;
-		_x += BIOS::LCD::Printf(_x, _y, FOCUS(1) ? "<%s>" : "%s", "WS2812");
+		_x += BIOS::LCD::Printf(_x, _y, FOCUS(1) ? "<%s>" : "%s", CSettings::Settings().DriverName());
 
 		_x = m_rcClient.left+8, _y += 14;
 		_x += BIOS::LCD::Print(_x, _y, RGB565(b0b0b0), RGBTRANS, "Pattern: ");
@@ -327,10 +395,10 @@ public:
 
 		_x = m_rcClient.left+8, _y += 14;
 		_x += BIOS::LCD::Print(_x, _y, RGB565(b0b0b0), RGBTRANS, "Brightness: ");
-		_x += BIOS::LCD::Printf(_x, _y, FOCUS(3) ? "<%d>%%" : "%d%%", CSettings::Settings().mBrightness*100/256);
+		_x += BIOS::LCD::Printf(_x, _y, FOCUS(3) ? "<%d%%>" : "%d%%", CSettings::Settings().mBrightness*100/256);
 		_x = BIOS::LCD::Width/2+20;
 		_x += BIOS::LCD::Print(_x, _y, RGB565(b0b0b0), RGBTRANS, "Speed: ");
-		_x += BIOS::LCD::Printf(_x, _y, FOCUS(4) ? "<%d>%%" : "%d%%", CSettings::Settings().mSpeed*100/256);
+		_x += BIOS::LCD::Printf(_x, _y, FOCUS(4) ? "<%d%%>" : "%d%%", CSettings::Settings().mSpeed*100/256);
 
 		// Driver: WS2812/B
 		// Leds: 24
@@ -353,8 +421,12 @@ public:
 					CSettings::Settings().mLedCount = minmax(1, CSettings::Settings().mLedCount + dir, 25);
 					GetParent()->Invalidate();
 					break;
+				case 1:
+					CSettings::Settings().mDriver = enumclamp((int)CSettings::Settings().mDriver + dir, CSettings::EDriver::Total);
+					GetParent()->Invalidate();
+					break;
 				case 2:
-					CSettings::Settings().mPattern = enumclamp(CSettings::Settings().mPattern + dir, CSettings::EPattern::Total);
+					CSettings::Settings().mPattern = enumclamp((int)CSettings::Settings().mPattern + dir, CSettings::EPattern::Total);
 					Invalidate();
 					break;
 				case 3:
@@ -393,18 +465,15 @@ public:
 class CPreview : public CBlock
 {
 public:
-	constexpr int Height = 14;
+	const int Height = 14;
 	int mSelected = 0;
 	CPattern mPattern;
 	WS2812B mLeds;
 	long lTime = 0;
-	//uint32_t mColors[WS2812B_MAXCOUNT];
 
 	CPreview() : mLeds(WS2812B_MAXCOUNT)
 	{
-		//lBaseTime = BIOS::SYS::GetTick();
 		mLeds.begin();
-		//mLeds.setBrightness(CSettings::Settings().mBrightness);
 	}
 	
 	virtual void OnPaint() override
@@ -423,24 +492,11 @@ public:
 	void Redraw()
 	{
 		Update();
-		constexpr int count = CSettings::Settings().mLedCount;
-		int brightness = CSettings::Settings().mBrightness;
+		CDriver::Driver().Update(mPattern.GetBuffer(), mPattern.GetSize());
 		
+		const int count = CSettings::Settings().mLedCount;
 		for (int i=0; i<count; i++)
-		{
-			uint32_t color32 = mPattern[i];
-			if (brightness == 256)
-				mLeds.setPixelColor(i, color32);
-			else
-			{
-				mLeds.setPixelColor(i, mLeds.Color(
-					GetColorR(color32)*brightness>>8,
-					GetColorG(color32)*brightness>>8,
-					GetColorB(color32)*brightness>>8));
-			}
-			DrawColor(i, color32);
-		}
-		mLeds.show();
+			DrawColor(i, mPattern[i]);
 	}
 	
 	void SetColor(uint32_t c)
@@ -450,7 +506,7 @@ public:
 	
 	CRect GetRect(int i)
 	{
-		constexpr int spacing = 4;
+		const int spacing = 4;
 		int x1 = m_rcClient.left + spacing + i*(7+spacing);
 		int x2 = x1 + 7;
 		return CRect(x1, m_rcClient.top+4, x2, m_rcClient.top + 4+6);
@@ -526,11 +582,11 @@ public:
 class CColorSelector : public CBlock
 {
 	int mFocus{0};
-	uint32_t mLastColor{0x10000000};
+	uint32_t mLastColor{0};
 	int mLastFocus{-1};
 	
 public:
-	constexpr int Height = 64;
+	const int Height = 64;
 	
 	virtual void OnPaint() override
 	{
@@ -550,24 +606,39 @@ public:
 		CRect rcClear(m_rcClient.left+8, m_rcClient.top+4, m_rcClient.left+8+32+32, m_rcClient.top+4+58);
 		GUI::Background(rcClear, RGB565(101010), RGB565(101010));
 
-		Colorspace::RgbColor rgb{(uint8_t)GetColorR(color), (uint8_t)GetColorG(color), (uint8_t)GetColorB(color)};
+		Colorspace::RgbColor rgb{(uint8_t)GetColorR(color), (uint8_t)GetColorG(color), (uint8_t)GetColorB(color), (uint8_t)GetColorW(color)};
 
 		FocusableInt(0, m_rcClient.left+8, m_rcClient.top+4+14*0, "R:", rgb.r);
 		FocusableInt(1, m_rcClient.left+8, m_rcClient.top+4+14*1, "G:", rgb.g);
 		FocusableInt(2, m_rcClient.left+8, m_rcClient.top+4+14*2, "B:", rgb.b);
-		FocusableInt(-1, m_rcClient.left+8, m_rcClient.top+4+14*3, "W:", 0);
+		if (CSettings::Settings().mDriver == CSettings::EDriver::WS2812RGB)
+			BIOS::LCD::Printf(m_rcClient.left+8, m_rcClient.top+4+14*3, RGB565(b0b0b0), RGBTRANS, "W:");
+		else
+			FocusableInt(3, m_rcClient.left+8, m_rcClient.top+4+14*3, "W:", rgb.w);
 
 		Colorspace::HsvColor hsv = Colorspace::RgbToHsv(rgb);
 
 		CRect rcClear2(m_rcClient.left+8+100, m_rcClient.top+4, m_rcClient.left+8+100+80, m_rcClient.top+4+58);
 		GUI::Background(rcClear2, RGB565(101010), RGB565(101010));
 
-		FocusableInt(3, m_rcClient.left+8+100, m_rcClient.top+4+14*0, "H:", hsv.h);
-		FocusableInt(4, m_rcClient.left+8+100, m_rcClient.top+4+14*1, "S:", hsv.s);
-		FocusableInt(5, m_rcClient.left+8+100, m_rcClient.top+4+14*2, "L:", hsv.v);
-		BIOS::LCD::Printf(m_rcClient.left+8+100, m_rcClient.top+4+14*3, RGB565(b0b0b0), RGBTRANS, "#%06x", color);
+		FocusableInt(4, m_rcClient.left+8+100, m_rcClient.top+4+14*0, "H:", hsv.h);
+		FocusableInt(5, m_rcClient.left+8+100, m_rcClient.top+4+14*1, "S:", hsv.s);
+		FocusableInt(6, m_rcClient.left+8+100, m_rcClient.top+4+14*2, "L:", hsv.v);
+		if (CSettings::Settings().mDriver == CSettings::EDriver::WS2812RGB)
+			BIOS::LCD::Printf(m_rcClient.left+8+100, m_rcClient.top+4+14*3, RGB565(b0b0b0), RGBTRANS, "#%06x", color & 0xffffff);
+		else
+			BIOS::LCD::Printf(m_rcClient.left+8+100, m_rcClient.top+4+14*3, RGB565(b0b0b0), RGBTRANS, "#%08x", color);
 
-		BIOS::LCD::Bar(CRect(m_rcClient.right-50, m_rcClient.top+4, m_rcClient.right-4, m_rcClient.bottom-4), RGB32TO565(color));
+		CRect rcPreview(m_rcClient.right-50, m_rcClient.top+4, m_rcClient.right-4, m_rcClient.bottom-4);
+		BIOS::LCD::Bar(rcPreview, RGB32TO565(color));
+		rcPreview.left = rcPreview.left-10;
+		rcPreview.right = rcPreview.left+10;
+		int h = rcPreview.Height()/4;
+		BIOS::LCD::Bar(CRect(rcPreview.left, rcPreview.top, rcPreview.right, rcPreview.top + h), RGB565RGB(rgb.r, 0, 0));
+		BIOS::LCD::Bar(CRect(rcPreview.left, rcPreview.top+h, rcPreview.right, rcPreview.top + h*2), RGB565RGB(0, rgb.g, 0));
+		BIOS::LCD::Bar(CRect(rcPreview.left, rcPreview.top+h*2, rcPreview.right, rcPreview.top+h*3), RGB565RGB(0, 0, rgb.b));
+		if (CSettings::Settings().mDriver == CSettings::EDriver::WS2812RGBW)
+			BIOS::LCD::Bar(CRect(rcPreview.left, rcPreview.top+h*3, rcPreview.right, rcPreview.bottom), RGB565RGB(rgb.w, rgb.w, rgb.w));
 	}
 	
 	virtual void OnKey(int key) override
@@ -580,34 +651,37 @@ public:
 		
 		if (diff != 0)
 		{
-			if (CSettings::Settings().mPattern != CSettings::UserColor &&
-				CSettings::Settings().mPattern != CSettings::UserGradient)
+			if (CSettings::Settings().mPattern != CSettings::EPattern::UserColor &&
+				CSettings::Settings().mPattern != CSettings::EPattern::UserGradient)
 			{
 				// Start editing
-				CSettings::Settings().mPattern = CSettings::UserGradient;
+				CSettings::Settings().mPattern = CSettings::EPattern::UserGradient;
 				GetParent()->Invalidate();
 				return;
 			} else
 			{
 				diff *= 8;
-				int diffR = 0, diffG = 0, diffB = 0;
+				int diffR = 0, diffG = 0, diffB = 0, diffW;
 				int diffH = 0, diffS = 0, diffV = 0;
 				switch (mFocus)
 				{
 					case 0: diffR = diff; break;
 					case 1: diffG = diff; break;
 					case 2: diffB = diff; break;
-					case 3: diffH = diff; break;
-					case 4: diffS = diff; break;
-					case 5: diffV = diff; break;
+					case 3: diffW = diff; break;
+					case 4: diffH = diff; break;
+					case 5: diffS = diff; break;
+					case 6: diffV = diff; break;
 				}
 
-				Colorspace::RgbColor rgb{(uint8_t)GetColorR(mLastColor), (uint8_t)GetColorG(mLastColor), (uint8_t)GetColorB(mLastColor)};
-				if (diffR != 0 || diffG != 0 || diffB != 0)
+				Colorspace::RgbColor rgb{(uint8_t)GetColorR(mLastColor), (uint8_t)GetColorG(mLastColor), (uint8_t)GetColorB(mLastColor), (uint8_t)GetColorW(mLastColor)};
+				
+				if (diffR != 0 || diffG != 0 || diffB != 0 || diffW != 0)
 				{
 					rgb.r = minmax(0, rgb.r+diffR, 255);
 					rgb.g = minmax(0, rgb.g+diffG, 255);
 					rgb.b = minmax(0, rgb.b+diffB, 255);
+					rgb.w = minmax(0, rgb.w+diffW, 255);
 				}
 
 				if (diffH != 0 || diffS != 0 || diffV != 0)
@@ -618,7 +692,8 @@ public:
 					hsv.v = minmax(0, hsv.v+diffV, 255);
 					rgb = Colorspace::HsvToRgb(hsv);
 				}
-				uint32_t newColor = RGB32(rgb.r, rgb.g, rgb.b);
+				
+				uint32_t newColor = RGBW32(rgb.r, rgb.g, rgb.b, rgb.w);
 				if (newColor != mLastColor)
 				{
 					SetColor(newColor);
@@ -633,15 +708,21 @@ public:
 			if (mFocus > 0)
 			{
 				mFocus--;
+				if (CSettings::Settings().mDriver == CSettings::EDriver::WS2812RGB && mFocus == 3)
+					mFocus--;
+				
 				SetColor(mLastColor);
 				return;
 			}
 		}
 		if (key == BIOS::KEY::Down)
 		{
-			if (mFocus < 5)
+			if (mFocus < 6)
 			{
 				mFocus++;
+				if (CSettings::Settings().mDriver == CSettings::EDriver::WS2812RGB && mFocus == 3)
+					mFocus++;
+
 				SetColor(mLastColor);
 				return;
 			}
@@ -672,7 +753,7 @@ public:
 	{
 		CWnd::Create("Application", CWnd::WsVisible, CRect(0, 0, BIOS::LCD::Width, BIOS::LCD::Height), nullptr);
 		
-		constexpr int padding = 26;
+		const int padding = 26;
 		
 		mControl.Create(" Control ", CWnd::WsVisible, CRect(padding, 14+padding, BIOS::LCD::Width-padding, 14+padding + mControl.Height), this);
 		mPreview.Create(" Preview ", CWnd::WsVisible, CRect(padding, mControl.m_rcClient.bottom + padding, BIOS::LCD::Width-padding, mControl.m_rcClient.bottom + padding + mPreview.Height), this);
@@ -718,6 +799,8 @@ private:
 
 CSettings* CSettings::mSettings;
 CSettings set;
+CDriver* CDriver::mDriver;
+CDriver driver;
 CApplication app;
 
 #ifdef _ARM
@@ -749,4 +832,3 @@ void _HandleAssertion(const char* file, int line, const char* cond)
 #endif
     while (1);
 }
-

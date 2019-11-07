@@ -1,0 +1,1 @@
+cp build/58gmini.elf /Volumes/MINIDSO/

@@ -36,6 +36,7 @@ SECTIONS
   }
 
   .text : {
+    _addressRomBegin = .;
     _vectors = .;
     *(.isr_vectors)      /* Vector table */
     _stext = .;
@@ -45,11 +46,13 @@ SECTIONS
     . = ALIGN(4);
     _etext = .;
     _sidata = _etext;
+    _addressRomEnd = .;
   } >rom
 
   .  = 0x20000000;   /* From 0x20000000 */      
 
   .data : {
+    _addressRamBegin = .;
     _sdata = . ;
     *(.isr_ram_vectors)      /* Vector table */
     *(.data)        /* Data memory */
@@ -60,6 +63,7 @@ SECTIONS
     _sbss = .;
     *(.bss)         /* Zero-filled run time allocate data memory */
     _ebss = .;
+    _addressRamEnd = .;
   } >ram AT >rom
 }  
 /*========== end of file ==========*/

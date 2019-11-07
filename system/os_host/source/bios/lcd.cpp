@@ -107,7 +107,7 @@ int _DrawChar(int x, int y, unsigned short clrf, unsigned short clrb, char ch)
 	{
 		for (ui8 _y=0; _y<14; _y++)
 		{
-			ui8 col = ~*pFont++;
+			ui8 col = *pFont++;
 	
 			for (ui8 _x=0; _x<8; _x++, col <<= 1)
 				if ( col & 128 )
@@ -117,7 +117,7 @@ int _DrawChar(int x, int y, unsigned short clrf, unsigned short clrb, char ch)
 	{
 		for (ui8 _y=0; _y<14; _y++)
 		{
-			ui8 col = *pFont++;
+			ui8 col = ~*pFont++;
 	
 			for (ui8 _x=0; _x<8; _x++, col <<= 1)
 				if ( col & 128 )
@@ -132,7 +132,7 @@ int _DrawChar(int x, int y, unsigned short clrf, unsigned short clrb, char ch)
 			for (ui8 _x=0; _x<8; _x++)
 {
 		for (ui8 _y=0; _y<14; _y++)
-                buf[_y] = (pFont[13-_y] & (128 >> _x)) ? clrb : clrf;
+                buf[_y] = (pFont[13-_y] & (128 >> _x)) ? clrf : clrb;
             
             BIOS::LCD::BufferWrite(buf, 14);
 		}

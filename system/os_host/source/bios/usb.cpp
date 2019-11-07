@@ -1,5 +1,6 @@
 #include "Bios.h"
 #include "imports.h"
+
 #include "system_stm32f10x.h"
 #include "library/STM32F10x_StdPeriph_Driver/inc/misc.h"
 
@@ -43,16 +44,20 @@ void EnableUsb()
     NVIC_EnableIRQ(USB_LP_CAN1_RX0_IRQn);
 }
 */
+BIOS::USB::THandler pLeaveLowPowerMode = DummyFunction;
+
 extern "C" {
   void USB_Init(void);
   void Disk_Init(void);
   void common_PowerOn();
   void USB_SIL_Init(uint16_t);
 
-  // placement for non instantiaed required attributes
+  // placement for non instantiated required attributes
   void (*pEpInt_IN[7])(void) = {};
   void (*pEpInt_OUT[7])(void) = {};
   DEVICE Device_Table;
+
+  extern DEVICE_INFO*	pInformation;
 
   // imports for mass device
   extern DEVICE_INFO massDevice_Info;
@@ -62,15 +67,7 @@ extern "C" {
   extern void (*masspEpInt_IN[7])(void);
   extern void (*masspEpInt_OUT[7])(void);
   extern void (*masspCallbacks[8])(void);
-
-  // imports for cdc
-  extern DEVICE_INFO cdcDevice_Info;
-  extern DEVICE cdcDevice_Table;
-  extern DEVICE_PROP cdcDevice_Property;
-  extern USER_STANDARD_REQUESTS cdcUser_Standard_Requests;
-  extern void (*cdcpEpInt_IN[7])(void);
-  extern void (*cdcpEpInt_OUT[7])(void);
-  extern void (*cdcpCallbacks[8])(void);
+  extern void mass_Leave_LowPowerMode(void);
 
   extern void commonUSB_Istr(void);
 
@@ -78,19 +75,21 @@ extern "C" {
   {
     commonUSB_Istr();
   }
+
+  void USB_Leave_LowPowerMode()
+  {
+    pLeaveLowPowerMode();
+  }
 }
 
 namespace BIOS
 {
   namespace USB
   {
-//    void Initialize(DEVICE* pDevice, DEVICE_PROP* pDeviceProperty, USER_STANDARD_REQUESTS *pUserStandardRequests,
-//      THandler arrHandlerIn[], THandler arrHandlerOut[], THandler istrHandler)
-
     void Initialize(void* pDeviceInfo, void* pDevice, void* pDeviceProperty, void* pUserStandardRequests,
-      THandler arrHandlerIn[], THandler arrHandlerOut[], THandler arrCallbacks[])
+      THandler arrHandlerIn[], THandler arrHandlerOut[], THandler arrCallbacks[], THandler LeaveLowPowerMode)
     {
-      commmon_Initialize((DEVICE_PROP*)pDeviceProperty, arrCallbacks);
+      common_Initialize((DEVICE_PROP*)pDeviceProperty, arrCallbacks);
 
       for (int i=0; i<7; i++)
       {
@@ -115,14 +114,8 @@ namespace BIOS
     void InitializeMass()
     {
       Disable();
-      Initialize(&massDevice_Info, &massDevice_Table, &massDevice_Property, &massUser_Standard_Requests, masspEpInt_IN, masspEpInt_OUT, masspCallbacks);
+      Initialize(&massDevice_Info, &massDevice_Table, &massDevice_Property, &massUser_Standard_Requests, masspEpInt_IN, masspEpInt_OUT, masspCallbacks, mass_Leave_LowPowerMode);
       Disk_Init();
-    }
-
-    void InitializeSerial()
-    {
-      Disable();
-      Initialize(&cdcDevice_Info, &cdcDevice_Table, &cdcDevice_Property, &cdcUser_Standard_Requests, cdcpEpInt_IN, cdcpEpInt_OUT, cdcpCallbacks);
     }
 
     void Enable()

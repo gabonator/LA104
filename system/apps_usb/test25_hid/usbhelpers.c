@@ -1,7 +1,7 @@
 #include <stdint.h>
 #include <usb_type.h>
 #include <usb_core.h>
-#include "usb/cdcusb_app.h"
+#include "usb/hid_app.h"
 
 extern DEVICE_INFO *pDeviceInfo;
 extern DEVICE* pDeviceTable;

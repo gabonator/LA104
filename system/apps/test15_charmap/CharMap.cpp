@@ -56,7 +56,7 @@ void DrawBig(int _x, int _y, int s, int ch)
 	ui8* pData;
 	if (1)
         {
-		pData = (ui8*)BIOS::PRIVATE::GetCharRom();
+		pData = (ui8*)BIOS::PRIVATE::GetInternal(BIOS::PRIVATE::EInternal::CharRom);
 		pData += ch*14;
         } else {
 	        pData = GetBiosChar(ch);

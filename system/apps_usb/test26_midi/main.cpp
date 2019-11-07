@@ -8,9 +8,9 @@ typedef void (*THandler)(void);
 extern "C" 
 {
   void _Initialize(void* pDeviceInfo, void* pDevice, void* pDeviceProperty, void* pUserStandardRequests,
-        THandler arrHandlerIn[], THandler arrHandlerOut[], THandler callbacks[])
+        THandler arrHandlerIn[], THandler arrHandlerOut[], THandler callbacks[], THandler pLeaveLowPowerMode)
   {
-    BIOS::USB::Initialize(pDeviceInfo, pDevice, pDeviceProperty, pUserStandardRequests, arrHandlerIn, arrHandlerOut, callbacks);
+    BIOS::USB::Initialize(pDeviceInfo, pDevice, pDeviceProperty, pUserStandardRequests, arrHandlerIn, arrHandlerOut, callbacks, pLeaveLowPowerMode);
   }
 
   void InitializeFinish(int imr_msk)
@@ -23,7 +23,6 @@ RingBuffer<uint8_t, 128> bufferReceive;
 RingBuffer<uint8_t, 128> bufferTransmit;
 
 extern "C" {
-#include "usb/common.h"
 
 char dbgPushBuf[512];
 

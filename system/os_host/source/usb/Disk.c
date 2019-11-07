@@ -47,7 +47,7 @@ u8   Char2Nib(u8 x);
 u8   *SecBuf, *Var, *Data;   u32 *V32; // 
 // Join with BIOS::FAT::gSharedBuffer to save 4kB
 u8   DiskBuf[BIOS_FAT_SectorSize+32+28];       // USB 
-bool gUsbDidWriteToDisk = false;
+extern bool gUsbDidWriteToDisk;
 
 /*******************************************************************************
  * FunctionName : Disk_Init
