@@ -58,6 +58,8 @@ class WS2812B {
     Color(uint8_t r, uint8_t g, uint8_t b, uint8_t w);
  // uint32_t
  //   getPixelColor(uint16_t n) const;
+   int getBytesPerPixel() { return bytesPerPixel; }
+   void setBytesPerPixel(int n) { bytesPerPixel = n; }
 
 	private:
 
@@ -78,7 +80,9 @@ class WS2812B {
   uint32_t
     endTime;       // Latch timing reference
 
-  uint8_t buffer[((WS2812B_MAXCOUNT<<3) + WS2812B_MAXCOUNT+ 2)*2];
+  int bytesPerPixel{3};
+
+  uint8_t buffer[(WS2812B_MAXCOUNT*3*4+ 2)*2];
   static constexpr int maxCount{WS2812B_MAXCOUNT};
 };
 

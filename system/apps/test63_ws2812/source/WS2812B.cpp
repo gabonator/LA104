@@ -55,9 +55,9 @@ if (!begun)
 
 void WS2812B::updateLength(uint16_t n)
 {
-
-  numBytes = (n<<3) + n + 2; // 9 encoded bytes per pixel. 1 byte empty peamble to fix issue with SPI MOSI and on byte at the end to clear down MOSI 
+  numBytes = n*bytesPerPixel*3 + 2; // 9 encoded bytes per pixel. 1 byte empty peamble to fix issue with SPI MOSI and on byte at the end to clear down MOSI 
 							// Note. (n<<3) +n is a fast way of doing n*9
+
   if((doubleBuffer = buffer))
   {
     numLEDs = n;	 
@@ -101,6 +101,7 @@ void WS2812B::show(void)
 */
 void WS2812B::setPixelColor(uint16_t n, uint8_t r, uint8_t g, uint8_t b)
  {
+/*
    uint8_t *bptr = pixels + (n<<3) + n +1;
    uint8_t *tPtr = (uint8_t *)encoderLookup + g*2 + g;// need to index 3 x g into the lookup
    
@@ -117,26 +118,29 @@ void WS2812B::setPixelColor(uint16_t n, uint8_t r, uint8_t g, uint8_t b)
    *bptr++ = *tPtr++;
    *bptr++ = *tPtr++;
    *bptr++ = *tPtr++;
+*/
  }
 
 void WS2812B::setPixelColor(uint16_t n, uint32_t c)
   {
-     uint8_t r,g,b;
+     uint8_t r,g,b,w;
    
     if(brightness) 
 	{ 
+      w = ((int)((uint8_t)(c >> 24)) * (int)brightness) >> 8;
       r = ((int)((uint8_t)(c >> 16)) * (int)brightness) >> 8;
       g = ((int)((uint8_t)(c >>  8)) * (int)brightness) >> 8;
       b = ((int)((uint8_t)c) * (int)brightness) >> 8;
 	}
 	else
 	{
+          w = (uint8_t)(c >> 24);		
       r = (uint8_t)(c >> 16),
       g = (uint8_t)(c >>  8),
 	  b = (uint8_t)c;		
 	}
 	
-   uint8_t *bptr = pixels + (n<<3) + n +1;
+   uint8_t *bptr = pixels + n*bytesPerPixel*3 +1;
    uint8_t *tPtr = (uint8_t *)encoderLookup + g*2 + g;// need to index 3 x g into the lookup
    
    *bptr++ = *tPtr++;
@@ -152,6 +156,14 @@ void WS2812B::setPixelColor(uint16_t n, uint32_t c)
    *bptr++ = *tPtr++;
    *bptr++ = *tPtr++;
    *bptr++ = *tPtr++;
+
+   if (bytesPerPixel == 4)
+   {
+       tPtr = (uint8_t *)encoderLookup + w*2 + w;
+       *bptr++ = *tPtr++;
+       *bptr++ = *tPtr++;
+       *bptr++ = *tPtr++;
+   }
 }
 
 // Convert separate R,G,B into packed 32-bit RGB color.

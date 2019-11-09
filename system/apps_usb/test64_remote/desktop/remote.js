@@ -1,7 +1,5 @@
 const SerialPort = require('serialport')
-const Readline = require('@serialport/parser-readline')
 const port = new SerialPort("/dev/tty.usbmodemLA104RCS1", { baudRate: 115200 })
-//const port = new SerialPort("/dev/tty.usbmodemLA104CDC1", { baudRate: 115200 })
 
 function send(b)
 {
