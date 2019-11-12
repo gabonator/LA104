@@ -17,6 +17,10 @@ Go to release section on top of this page, download *system.hex*. Power on the L
 
 #### News
 
+##### Addressable RGB led strip tester
+
+[Try it online!](http://htmlpreview.github.io/?https://github.com/gabonator/LA104/tree/master/system/apps/test63_ws2812/build_wasm/)
+
 ##### Temperature grapher
 
 Shows temperature of up to 8 DS1820 sensors in form of graph. Automatic export of measured values into [html](system/apps/test33_temper/visualize/TEMPER01.HTM).
