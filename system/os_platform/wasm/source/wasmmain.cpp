@@ -32,6 +32,7 @@ void appFinish()
   gHal = nullptr;
 }
 
+/*
 class CStorage
 {
 public:
@@ -75,3 +76,4 @@ bool appAnalyse()
     } 
     return false;
 }
+*/

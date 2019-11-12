@@ -2,6 +2,7 @@
 
 extern "C"
 {
+extern void js_init();
 extern void js_setPixel(int x, int y, int c);
 extern int js_getPixel(int x, int y);
 extern bool js_running();
@@ -12,6 +13,11 @@ extern int js_ticks();
 
 class CWasmHal : public CHal
 {
+public:
+  CWasmHal()
+  {
+    js_init();
+  }
   virtual void SetPixel(int x, int y, uint16_t c) override
   {
     js_setPixel(x, y, c);
@@ -61,7 +67,7 @@ class CWasmHal : public CHal
     {
         return js_ticks();
     }
-    
+/*    
     // FAT
     virtual bool FatInit() override
     {
@@ -107,4 +113,9 @@ class CWasmHal : public CHal
     {
         return false;
     }
+*/
+
+	virtual void FlashRead(uint8_t* buff, int offset, int length) override {}
+	virtual void FlashWrite(const uint8_t* buff, int offset, int length) override {}
+
 };

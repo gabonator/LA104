@@ -939,7 +939,7 @@ __attribute__((__section__(".entry")))
 int _main(void)
 {
     app.Create();
-	app.WindowMessage( CWnd::WmPaint );
+    app.WindowMessage( CWnd::WmPaint );
     BIOS::KEY::EKey key;
     while ((key = KEY::GetKey()) != KEY::EKey::Escape)
     {
@@ -950,6 +950,28 @@ int _main(void)
     
     return 0;
 }
+
+void mainInit()
+{
+    app.Create();
+    app.WindowMessage( CWnd::WmPaint );
+}
+
+bool mainLoop()
+{
+    BIOS::KEY::EKey key;
+    key = KEY::GetKey();
+    if (key != BIOS::KEY::None)
+        app.WindowMessage(CWnd::WmKey, key);
+    app.WindowMessage(CWnd::WmTick);
+
+    return key != KEY::EKey::Escape;
+}
+
+void mainFinish()
+{
+}
+
 
 void _HandleAssertion(const char* file, int line, const char* cond)
 {
