@@ -19,7 +19,9 @@ Go to release section on top of this page, download *system.hex*. Power on the L
 
 ##### Addressable RGB led strip tester
 
-[Try it online!](http://htmlpreview.github.io/?https://github.com/gabonator/LA104/tree/master/system/apps/test63_ws2812/build_wasm/)
+![temperature measure tool 1](resources/imgWs2812.png)
+
+[Try it online!](http://pub.valky.eu/2019/ws2812wasm/)
 
 ##### Temperature grapher
 
