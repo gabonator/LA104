@@ -1,6 +1,6 @@
 #ifndef __APPLE__
-#include "../../../os_host/source/library/spf.h"
-#include "../../../os_host/source/library/spf.c"
+#include "../../../os_host/library/spf/spf.h"
+#include "../../../os_host/library/spf/spf.c"
 #endif
 #include "../../../../os_host/source/framework/Wnd.cpp"
 #include "../../../os_host/source/framework/BufferedIo.h"
