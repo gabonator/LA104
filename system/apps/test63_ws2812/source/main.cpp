@@ -1,19 +1,12 @@
-#include <stdint.h>
 #include <library.h>
-#include "SPI.h"
-#include "../../os_host/source/framework/Console.h"
 using namespace BIOS;
-#ifdef EMULATED
-#include <math.h>
-#define abs fabs
-#endif
 
+#include "SPI.h"
 #include "WS2812B.h"
 #include "colorspace.h"
 
 #define RGBW32(r,g,b,w) ((r) | ((g)<<8) | ((b)<<16) | ((w)<<24))
 #define GetColorW(rgbw) (((rgbw) >> 24)&0xff)
-
 
 template <typename T> T minmax(T min, T val, T max)
 {
@@ -52,20 +45,22 @@ public:
 public:
 	enum class EDriver { WS2812RGB, WS2812RGBW, Total } mDriver {EDriver::WS2812RGB};
 	int mLedCount{24};
-	enum class EPattern { UserColor, UserGradient, Black, Gray25, Gray50, Gray75, White, Red, Green, Blue, Gradient, Ring, Colors, Marching1, Marching3, MarchingSoft, Total} mPattern {EPattern::Gradient};
-	enum class EFilter { None, Red, Green, Blue, Grayscale, Inverted, First, Strobo, Total} mFilter {EFilter::None};
+	enum class EPattern { UserColor, UserGradient, Black, Gray25, Gray50, Gray75, White, Red, Green, Blue, Gradient, Ring, Colors, Marching1, Marching3, MarchingSoft, NightSky, Run, Total} mPattern {EPattern::Gradient};
+	enum class EFilter { None, Red, Green, Blue, Grayscale, Inverted, First, Strobo, Detector, Total} mFilter {EFilter::None};
 	int mBrightness{64};
 	int mSpeed{256};
 	
 	const char* PatternName()
 	{
-		const char* modes[] = {"User color", "User gradient", "Black", "25% Gray", "50% Gray", "75% Gray", "White", "Red", "Green", "Blue", "Gradient", "Ring", "Colors", "Marching1", "Marching3", "Marching soft"};
+		const char* modes[] = {"User color", "User gradient", "Black", "25% Gray", "50% Gray", "75% Gray", "White", "Red", "Green", "Blue", "Gradient", "Ring", "Colors", "Marching1", "Marching3", "Marching soft",
+			"Night sky", "Run"
+		};
 		return modes[(int)mPattern];
 	}
 	
 	const char* FilterName()
 	{
-		const char* modes[] = {"None", "Red", "Green", "Blue", "Grayscale", "Inverted", "First pixel", "Strobo"};
+		const char* modes[] = {"None", "Red", "Green", "Blue", "Grayscale", "Inverted", "First pixel", "Strobo", "QP Detector"};
 		return modes[(int)mFilter];
 	}
 	
@@ -137,6 +132,8 @@ public:
 
 class CPatternGenerator
 {
+	uint32_t mTempMemory[WS2812B_MAXCOUNT];
+	static const uint8_t randomized[256];
 public:
 	uint32_t Interpolate( uint32_t clrA, uint32_t clrB, uint32_t nLevel )
 	{
@@ -276,6 +273,40 @@ public:
 		return Interpolate(colorA, colorB, partial);
 	}
 
+	uint32_t GetColorNightSky(int i, int time)
+	{
+		int r = 0;
+		int g = 0;
+		int b = randomized[(time + i)&255] >> 3; // 8 levels
+		
+		int dot = time >> 10;
+		int dotindex = randomized[dot & 255] & 31;
+		if (i == dotindex)
+		{
+			int subtime = time & 1023;
+			if (subtime < 256)
+				r = g = subtime;
+			else if (subtime < 512)
+				r = g = 512 - subtime;
+		}
+		return RGB32(r, g, b);
+	}
+	
+	uint32_t GetColorRun(int i, int time)
+	{
+		constexpr int Period = 128;
+		constexpr int Strength = 700;
+		i = i*256;
+		int current = ((time*5) & (256*Period-1)) - Strength;
+		int dist = abs(i-current);
+		if (dist > Strength)
+			return 0;
+		dist = Strength-dist;
+		if (dist > 255)
+			dist = 255;
+		return RGBW32(dist, dist, dist, dist);
+	}
+
 	uint32_t GetPatternColor(int i, int time)
 	{
 		switch (CSettings::Settings().mPattern)
@@ -296,6 +327,8 @@ public:
 			case CSettings::EPattern::Marching1: return GetColorMarch1(i, time);
 			case CSettings::EPattern::Marching3: return GetColorMarch3(i, time);
 			case CSettings::EPattern::MarchingSoft: return GetColorSoftMarch(i, time);
+			case CSettings::EPattern::NightSky: return GetColorNightSky(i, time);
+			case CSettings::EPattern::Run: return GetColorRun(i, time);
 			default:
 				_ASSERT(0);
 		}
@@ -340,13 +373,34 @@ public:
 					return 0;
 				break;
 			}
+			case CSettings::EFilter::Detector:
+			{
+				uint32_t& memColor = mTempMemory[i];
+				int r = GetColorR(memColor) - 3;
+				int g = GetColorG(memColor) - 3;
+				int b = GetColorB(memColor) - 3;
+				int w = GetColorW(memColor) - 3;
+				int nr = GetColorR(color);
+				int ng = GetColorG(color);
+				int nb = GetColorB(color);
+				int nw = GetColorW(color);
+				r = max(max(r, nr), 0);
+				g = max(max(g, ng), 0);
+				b = max(max(b, nb), 0);
+				w = max(max(w, nw), 0);
+				memColor = RGBW32(r, g, b, w);
+				return memColor;
+			}
 			default:
 				_ASSERT(0);
 		}
 		return color;
 	}
-
 };
+
+// PRNG generator
+const uint8_t CPatternGenerator::randomized[256] = {184, 74, 51, 56, 238, 145, 171, 89, 183, 55, 88, 79, 218, 78, 69, 28, 21, 27, 126, 158, 46, 176, 30, 110, 72, 191, 247, 159, 224, 19, 169, 67, 246, 189, 234, 138, 58, 61, 103, 211, 187, 235, 141, 166, 23, 68, 45, 146, 174, 252, 185, 22, 121, 95, 76, 231, 26, 71, 232, 157, 66, 219, 2, 102, 44, 207, 206, 13, 177, 81, 101, 20, 7, 151, 149, 98, 40, 182, 15, 49, 210, 24, 131, 163, 42, 124, 14, 65, 97, 202, 99, 94, 106, 250, 70, 114, 140, 16, 128, 34, 54, 168, 77, 33, 90, 35, 155, 4, 170, 29, 31, 217, 96, 32, 83, 143, 57, 111, 192, 226, 199, 10, 173, 37, 17, 222, 80, 115, 63, 133, 130, 172, 59, 119, 167, 12, 244, 52, 82, 227, 208, 53, 9, 123, 91, 100, 136, 228, 197, 236, 164, 239, 50, 86, 25, 75, 230, 175, 195, 142, 0, 144, 237, 251, 198, 178, 73, 240, 225, 132, 87, 135, 221, 253, 220, 92, 93, 201, 120, 161, 112, 41, 249, 60, 214, 150, 156, 134, 229, 118, 5, 162, 254, 116, 204, 1, 188, 205, 160, 245, 212, 180, 190, 196, 62, 117, 233, 203, 200, 107, 193, 137, 38, 125, 109, 181, 153, 8, 241, 152, 64, 113, 127, 108, 179, 194, 3, 43, 84, 216, 18, 243, 11, 6, 223, 248, 165, 48, 104, 148, 215, 242, 186, 129, 147, 139, 213, 209, 255, 47, 154, 36, 105, 85, 39, 122};
+
 
 using CGetterFunction = int(*)(void);
 using CSetterFunction = void(*)(int);
@@ -644,7 +698,7 @@ public:
 	
 	void DrawCursor(int i)
 	{
-		if (i>=24)
+		if (i>24)
 			return;
 		
 		CRect rcRect(GetRect(i));
@@ -871,7 +925,6 @@ public:
 	}
 };
 
-
 class CApplication : public CWnd, public CSettings
 {
 	CAniControl mControl;
@@ -933,24 +986,6 @@ CDriver* CDriver::mDriver;
 CDriver driver;
 CApplication app;
 
-#ifdef _ARM
-__attribute__((__section__(".entry")))
-#endif
-int _main(void)
-{
-    app.Create();
-    app.WindowMessage( CWnd::WmPaint );
-    BIOS::KEY::EKey key;
-    while ((key = KEY::GetKey()) != KEY::EKey::Escape)
-    {
-		if (key != BIOS::KEY::None)
-			app.WindowMessage(CWnd::WmKey, key);
-		app.WindowMessage(CWnd::WmTick);
-    }
-    
-    return 0;
-}
-
 void mainInit()
 {
     app.Create();
@@ -972,13 +1007,22 @@ void mainFinish()
 {
 }
 
+#ifdef _ARM
+__attribute__((__section__(".entry")))
+#endif
+int _main(void)
+{
+	mainInit();
+	while (mainLoop());
+	mainFinish();
+    return 0;
+}
 
 void _HandleAssertion(const char* file, int line, const char* cond)
 {
-    CONSOLE::Color(RGB565(ffff00));
-    CONSOLE::Print("Assertion failed in ");
-    CONSOLE::Print(file);
-    CONSOLE::Print(" [%d]: %s\n", line, cond);
+    BIOS::DBG::Print("Assertion failed in ");
+    BIOS::DBG::Print(file);
+    BIOS::DBG::Print(" [%d]: %s\n", line, cond);
 #ifdef __APPLE__
     //kill(getpid(), SIGSTOP);
 #endif
