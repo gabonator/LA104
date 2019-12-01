@@ -11,6 +11,7 @@ void _HandleAssertion(const char* file, int line, const char* cond)
 
 #include "CharMap.h"
 
+#ifndef EMSCRIPTEN
 __attribute__((__section__(".entry"))) int main(void)
 { 
   CWndCharMap app;
@@ -31,3 +32,33 @@ __attribute__((__section__(".entry"))) int main(void)
   }
   return 0;
 }
+
+#else
+CWndCharMap app;
+
+void mainInit()
+{
+  app.Create(nullptr, CWnd::WsVisible);
+  app.OnMessage(nullptr, ToWord('L', 'E'), 0);
+  app.SetFocus();
+  app.OnPaint();
+}
+
+bool mainLoop()
+{
+  BIOS::KEY::EKey key = BIOS::KEY::GetKey();
+
+  if (key == BIOS::KEY::Escape)
+    return false;
+
+  if (key != BIOS::KEY::None)
+    app.WindowMessage(CWnd::WmKey, key);
+
+  app.WindowMessage(CWnd::WmTick, 0);
+  return true;
+}
+
+void mainFinish()
+{
+}
+#endif

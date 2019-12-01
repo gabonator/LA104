@@ -1,15 +1,7 @@
 MEMORY
 {
-/*
-  rom (rx)  : ORIGIN = 0x0801ee00, LENGTH = 163K
-  ram (rwx) : ORIGIN = 0x20004400, LENGTH = 110K
-*/
   null (rwx): ORIGIN = 0x00001000, LENGTH = 4K
-/*
-  rom (rx) : ORIGIN = 0x08014000, LENGTH = 112K
-  ram (rwx) : ORIGIN = 0x20003000, LENGTH = 28K
-*/
-  rom (rx) : ORIGIN = 0x08017000, LENGTH = 70K
+  rom (rx) : ORIGIN = 0x08017000, LENGTH = 32K
   ram (rwx) : ORIGIN = 0x20005000, LENGTH = 28K
 
 }
@@ -24,18 +16,22 @@ failed 648 bytes at 0801f648
 SECTIONS
   {
     .text : {
+      _addressRomBegin = .;
       *(.entry)
       *(.text*)        /* Program code */
       *(.rodata*)      /* Read only data */
+      _addressRomEnd = .;
     } >rom
 
     .data : {
+      _addressRamBegin = .;
       *(.data*)        /* Data memory */
       *(.dynamic)
-    } >ram AT >rom
+    } >ram
 
   .bss : {
     *(.bss*)         /* Zero-filled run time allocate data memory */
+    _addressRamEnd = .;
     } >ram
 
   .rel.plt : { *(.rel.plt)  } > rom

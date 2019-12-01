@@ -610,6 +610,7 @@ public:
 
 CApplication app;
 
+#ifndef EMSCRIPTEN
 #ifdef _ARM
 __attribute__((__section__(".entry")))
 #endif
@@ -635,3 +636,37 @@ int _main(void)
     app.Destroy();
     return 0;
 }
+
+#else
+void mainInit(void)
+{    
+    BIOS::FAT::Init();
+    app.Create();
+    app.WindowMessage( CWnd::WmPaint );
+}
+
+bool mainLoop(void)
+{
+    BIOS::KEY::EKey key;
+
+    if ((key = BIOS::KEY::GetKey()) == BIOS::KEY::Escape)
+        return false;
+
+    if (key != BIOS::KEY::None)
+        app.WindowMessage(CWnd::WmKey, key);
+    app.WindowMessage(CWnd::WmTick);
+
+    if (BIOS::OS::HasArgument()) // was internally set
+    {
+        BIOS::OS::SetArgument(BIOS::OS::GetArgument()); // hack, keep flag set
+        return false;
+    }
+    return true;
+}
+
+void mainFinish()
+{
+    app.Destroy();
+}
+
+#endif

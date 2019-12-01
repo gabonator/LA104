@@ -42,7 +42,7 @@ void sfp_printchar(char **str, int c)
 #define PAD_RIGHT 1
 #define PAD_ZERO 2
 
-#ifdef EMULATED 
+#ifdef EMSCRIPTEN 
 #define register
 #endif
 

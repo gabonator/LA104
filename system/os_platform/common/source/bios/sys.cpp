@@ -2,6 +2,7 @@
 #include <math.h>
 
 char gArgument[128] = "";
+bool hasArgument = false;
 
 void BIOS::SYS::DelayUs(int intervalUs)
 {
@@ -33,6 +34,7 @@ void BIOS::OS::SetArgument(char* argument)
 {
     _ASSERT(strlen(argument) < COUNT(gArgument)-1);
     strcpy(gArgument, argument);
+    hasArgument = true;
 }
 
 char* BIOS::OS::GetArgument()
@@ -51,7 +53,9 @@ void BIOS::OS::SetInterruptVector(BIOS::OS::EInterruptVector, BIOS::OS::TInterru
 
 bool BIOS::OS::HasArgument()
 {
-	return false;
+	bool aux = hasArgument;
+	hasArgument = false;
+	return aux;
 }
 
 char* BIOS::SYS::GetDeviceType()
@@ -88,3 +92,28 @@ void BIOS::ADC::ConfigureInput(EInput input, ECouple couple, EResolution res, in
 void BIOS::ADC::ConfigureTimebase(float timePerDiv) {}
 void BIOS::ADC::ConfigureTrigger(int time, int value, ETriggerType type, EInput source) {}
 #endif
+
+
+// move to private.cpp
+
+extern unsigned char font[256*14];
+//extern "C" volatile char lastChar;
+
+namespace BIOS
+{
+  namespace PRIVATE
+  {
+    uintptr_t GetInternal(EInternal eInternal)
+    {
+      switch (eInternal)
+      {
+        case EInternal::CharRom: return (uintptr_t)font;
+//        case EInternal::LastChar: return (uintptr_t)&lastChar;
+        default:
+          break;
+      }
+      _ASSERT(0);
+      return 0;
+    }
+  }
+}

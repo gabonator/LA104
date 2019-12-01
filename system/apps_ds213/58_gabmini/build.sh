@@ -23,7 +23,7 @@ arm-none-eabi-g++ -Os -Werror -fno-common -mcpu=cortex-m3 -mthumb -msoft-float -
   -I../../../os_library/include/ \
   -I../source/
 
-arm-none-eabi-gcc -fPIC -mcpu=cortex-m3 -mthumb -o output.elf -nostartfiles -T ../source/app.lds \
+arm-none-eabi-gcc -Os -fPIC -mcpu=cortex-m3 -mthumb -o output.elf -nostartfiles -T ../source/app.lds \
   ./main.o \
   ./MainWnd.o \
   ./ToolBar.o \
@@ -46,4 +46,5 @@ find . -type f -name '*.d' -delete
 nm --print-size --size-sort -gC output.elf | grep " B " > symbols_ram.txt
 nm --print-size --size-sort -gC output.elf | grep " T " > symbols_rom.txt
 nm --print-size --size-sort -gC output.elf > symbols_all.txt
+cat symbols_all.txt | grep _address
 #objdump -s -j .dynamic output.elf

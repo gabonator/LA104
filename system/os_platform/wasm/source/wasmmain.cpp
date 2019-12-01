@@ -2,18 +2,38 @@
 CHal* gHal{nullptr};
 
 extern "C" void appInit();
-extern "C" void appLoop();
+extern "C" bool appLoop();
 extern "C" void appFinish();
-extern "C" uint32_t appAnalyseResultPtr();
-extern "C" bool appAnalyse();
-extern "C" void appSetDataCount(uint32_t count);
-extern "C" uint32_t appGetDataPtr();
+//extern "C" uint32_t appAnalyseResultPtr();
+//extern "C" bool appAnalyse();
+//extern "C" void appSetDataCount(uint32_t count);
+//extern "C" uint32_t appGetDataPtr();
+
+//extern "C" void* appVideoBuffer();
+//extern "C" bool appVideoBufferChanged();
+
+//uint8_t pixels[BIOS::LCD::Width * BIOS::LCD::Height*4];
+//bool pixelsChanged{false};
 
 void mainInit();
-bool mainLoop();
+int mainLoop();
 void mainFinish();
 
 CWasmHal hal;
+
+//bool appVideoBufferChanged()
+//{
+//  if (!pixelsChanged)
+//    return false;
+//
+//  pixelsChanged = false;
+//  return true;
+//}
+
+//void* appVideoBuffer()
+//{
+//  return pixels;
+//}
 
 void appInit()
 {
@@ -21,9 +41,9 @@ void appInit()
   mainInit();
 }
 
-void appLoop()
+bool appLoop()
 {
-  mainLoop();
+  return mainLoop();
 }
 
 void appFinish()
@@ -31,7 +51,12 @@ void appFinish()
   mainFinish();
   gHal = nullptr;
 }
-
+/*
+char* appBIOS_OS_GetArgument()
+{
+  return BIOS::OS::GetArgument();
+}
+*/
 /*
 class CStorage
 {

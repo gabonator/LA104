@@ -1,0 +1,112 @@
+<canvas id="canvas" width="320" height="240" style="border: 1px solid #d0d0d0; transform:translate(160px, 120px) scale(2);"></canvas>
+<script src="app_wasm.js"></script>
+<script>
+class MiniApp
+{
+  init() 
+  { 
+    var canvas = document.getElementById('canvas');
+    this.ctx = canvas.getContext('2d');
+    this.imageData = this.ctx.getImageData(0, 0, canvas.width, canvas.height);
+    this.lastKey = 0;
+
+    document.onkeydown = (function(evt) {
+        evt = evt || window.event;
+        switch (evt.keyCode)
+        {
+          case 37: this.lastKey = "-".charCodeAt(0); break;
+          case 39: this.lastKey = "+".charCodeAt(0); break;
+          case 38: this.lastKey = "<".charCodeAt(0); break;
+          case 40: this.lastKey = ">".charCodeAt(0); break;
+          case 13: this.lastKey = "1".charCodeAt(0); break;
+        }
+    }).bind(this);
+  }
+
+  getKey() 
+  {
+    var aux = this.lastKey;
+    this.lastKey = 0;
+    return aux;
+  }
+
+  getPixel(x, y) 
+  { 
+    return 0;
+  }
+
+  loop() 
+  {
+    this.ctx.putImageData(this.imageData, 0, 0);
+  }
+
+  running()
+  {
+    return 1;
+  }
+
+  setPixel(x, y, rgb) 
+  { 
+    y = 240-y;
+    var p = (y*320+x)*4;
+    this.imageData.data[p++] = (((rgb)&0x1f)<<3);
+    this.imageData.data[p++] = ((((rgb)>>5)&0x3f)<<2);
+    this.imageData.data[p++] = ((((rgb)>>11)&0x1f)<<3);
+    this.imageData.data[p++] = 255;
+  }
+
+  ticks() 
+  { 
+    return new Date().getTime();
+  }
+
+  flashRead(ptr, ofs, size)
+  {
+    console.log([ptr, ofs, size]);
+  }
+}
+
+window.miniApp = new MiniApp()
+
+Module['noRun'] = true;	
+
+window.onload = () => {
+  Module['imports'] = {
+    _js_getKey: () => { return window.miniApp.getKey(); },
+    _js_getPixel: (x, y) => { return window.miniApp.getPixel(); },
+    _js_init : () => { return window.miniApp.init(); },
+    _js_loop : () => { return window.miniApp.loop(); },
+    _js_running : () => { return window.miniApp.running(); },
+    _js_setPixel : (x, y, rgb) => { return window.miniApp.setPixel(x, y, rgb); },
+    _js_ticks : () => { return window.miniApp.ticks(); },
+    _js_flashRead : (ptr, ofs, size) => { return window.miniApp.flashRead(ptr, ofs, size); },
+    _js_flashWrite : (ptr, ofs, size) => { return window.miniApp.flashWrite(ptr, ofs, size); },
+    _js_log: (ptr) => {
+      var text = "";
+      for (var i=0; i<100 && Module['memory'][ptr+i] != 0; i++)
+        text += String.fromCharCode(Module['memory'][ptr+i]);
+      console.log(text); 
+    }
+  };
+
+  Module['exports'] = {
+    _appFinish: null,
+    _appInit: null,
+    _appLoop: null
+  };
+
+  if (Module['run']) 
+    Module['run']()
+};
+
+Module['onRuntimeInitialized'] = () =>
+{
+  Module._appInit();
+  setInterval(() =>
+  {
+    Module._appLoop();
+  }, 50);
+}
+</script>
+<script src="app.js"></script>
+

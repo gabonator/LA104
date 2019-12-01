@@ -16,11 +16,6 @@ int _main(void)
     {
 	key = BIOS::KEY::GetKey();
 	
-if (key==BIOS::KEY::F4)
-{
-	CWnd::m_pTop->Invalidate();
-
-}	
         if (key != BIOS::KEY::None)
             app.WindowMessage(CWnd::WmKey, key);
 		
