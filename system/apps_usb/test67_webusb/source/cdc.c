@@ -1,21 +1,13 @@
+//  CDC code from https://github.com/Apress/Beg-STM32-Devel-FreeRTOS-libopencm3-GCC/blob/master/rtos/usbcdcdemo/usbcdc.c
 #include <libopencm3/usb/usbd.h>
 #include <libopencm3/usb/cdc.h>
+#include <logger.h>
 #include "usb_conf.h"
 #include "cdc.h"
-
-
-void dbg(char*);
 
 #define CONTROL_CALLBACK_TYPE (USB_REQ_TYPE_CLASS | USB_REQ_TYPE_INTERFACE)
 #define CONTROL_CALLBACK_MASK (USB_REQ_TYPE_TYPE | USB_REQ_TYPE_RECIPIENT)
 #define USB_CDC_REQ_GET_LINE_CODING		0x21
-
-
-#define debug_println(x...) 
-#define debug_flush() 
-#define debug_print(x...)
-#define debug_print_unsigned(x...)
-#define NULL 0
 
 //  Line config to be returned.
 static const struct usb_cdc_line_coding line_coding = {
@@ -25,7 +17,8 @@ static const struct usb_cdc_line_coding line_coding = {
 	.bDataBits = 0x08
 };
 
-static int cdcacm_control_request(
+
+int cdcacm_control_request(
   usbd_device *usbd_dev __attribute__((unused)),
   struct usb_setup_data *req,
   uint8_t **buf __attribute__((unused)),
@@ -63,7 +56,7 @@ static int cdcacm_control_request(
 			//  Windows requires this request, not Mac or Linux.
 			//  From https://github.com/PX4/Bootloader/blob/master/stm32/cdcacm.c
 			if ( *len < sizeof(struct usb_cdc_line_coding) ) {
-				dbg("*** cdcacm_control notsupp line_coding "); debug_print_unsigned(sizeof(struct usb_cdc_line_coding)); 
+				debug_print("*** cdcacm_control notsupp line_coding "); debug_print_unsigned(sizeof(struct usb_cdc_line_coding)); 
 				debug_print(", len "); debug_print_unsigned(*len);
 				debug_println(""); debug_flush(); ////
 				return USBD_REQ_NOTSUPP;
@@ -74,7 +67,7 @@ static int cdcacm_control_request(
 		}
 		case USB_CDC_REQ_SET_LINE_CODING: {
 			if ( *len < sizeof(struct usb_cdc_line_coding) ) {
-				dbg("*** cdcacm_control notsupp line_coding "); debug_print_unsigned(sizeof(struct usb_cdc_line_coding)); 
+				debug_print("*** cdcacm_control notsupp line_coding "); debug_print_unsigned(sizeof(struct usb_cdc_line_coding)); 
 				debug_print(", len "); debug_print_unsigned(*len);
 				debug_println(""); debug_flush(); ////
 				return USBD_REQ_NOTSUPP;
@@ -106,8 +99,9 @@ cdcacm_data_rx_cb(
 
 	usbd_ep_write_packet(usbd_dev, DATA_IN, cdcbuf, pos); ////  Echo the packet.
 	
-  dbg("["); dbg(cdcbuf); dbg("]");	
-//    debug_print("["); debug_println(cdcbuf); debug_print("]"); // debug_flush(); ////
+    debug_print("["); debug_println(cdcbuf); debug_print("]"); // debug_flush(); ////
+dbg(cdcbuf);
+
 }
 
 static void
@@ -115,7 +109,8 @@ cdcacm_comm_cb(
   usbd_device *usbd_dev,
   uint8_t ep __attribute__((unused))
 ) {
-dbg("comm!");
+
+dbg("comm2");
 	debug_println("comm"); debug_flush();
 }
 
@@ -132,16 +127,29 @@ cdcacm_set_config(
 	usbd_ep_setup(usbd_dev, DATA_OUT, USB_ENDPOINT_ATTR_BULK, MAX_USB_PACKET_SIZE, cdcacm_data_rx_cb);
 	usbd_ep_setup(usbd_dev, DATA_IN, USB_ENDPOINT_ATTR_BULK, MAX_USB_PACKET_SIZE, NULL);
 	usbd_ep_setup(usbd_dev, COMM_IN, USB_ENDPOINT_ATTR_INTERRUPT, COMM_PACKET_SIZE, cdcacm_comm_cb);
-	int status = usbd_register_control_callback(
+	int status = aggregate_register_callback(
 		usbd_dev,
 		CONTROL_CALLBACK_TYPE,
 		CONTROL_CALLBACK_MASK,
 		cdcacm_control_request);
-	if (status < 0) { dbg("*** cdcacm_set_config failed"); debug_flush(); }
+/*
+int aggregate_register_callback(
+    usbd_device *usbd_dev, 
+    uint8_t type,
+    uint8_t type_mask,
+    usbd_control_callback callback) {
+
+typedef int (*usbd_control_callback)(usbd_device *usbd_dev,
+		struct usb_setup_data *req, uint8_t **buf, uint16_t *len,
+		usbd_control_complete_callback *complete);
+
+*/
+
+	if (status < 0) { debug_println("*** cdcacm_set_config failed"); debug_flush(); }
 }
 
 void cdc_setup(usbd_device* usbd_dev) {
     //  debug_println("*** cdc_setup"); ////
-	int status = usbd_register_set_config_callback(usbd_dev, cdcacm_set_config);
-	if (status < 0) { dbg("*** cdc_setup failed"); debug_flush(); }
+	int status = aggregate_register_config_callback(usbd_dev, cdcacm_set_config);
+	if (status < 0) { debug_println("*** cdc_setup failed"); debug_flush(); }
 }

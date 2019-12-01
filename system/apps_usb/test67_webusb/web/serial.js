@@ -39,13 +39,11 @@ var serial = {};
           }
         })
         .then(() => {
-/*
+
           var configurationInterfaces = this.device_.configuration.interfaces;
           configurationInterfaces.forEach(element => {
             element.alternates.forEach(elementalt => {
               if (elementalt.interfaceClass==10) {
-//              if (elementalt.interfaceClass==gabo 0xff 0x0a) {
-//              if (elementalt.interfaceClass==0xff) {
                 this.interfaceNumber_ = element.interfaceNumber;
                 elementalt.endpoints.forEach(elementendpoint => {
                   if (elementendpoint.direction == "out") {
@@ -58,22 +56,19 @@ var serial = {};
               }
             })
           })
-*/
+
         })
         .then(() => this.device_.claimInterface(this.interfaceNumber_))
         .then(() => this.device_.selectAlternateInterface(this.interfaceNumber_, 0))
-/*
+
         .then(() => this.device_.controlTransferOut({
             'requestType': 'class',
             'recipient': 'interface',
             'request': 0x22,
             'value': 0x01,
             'index': this.interfaceNumber_}))
-*/
-        .then(() => {
 
-//           let ascii = (s => s.split('').map(c=>c.charCodeAt(0)) );
-           this.send(Uint8Array.from( ascii("ahoj!")))
+        .then(() => {
           readLoop();
         });
   };

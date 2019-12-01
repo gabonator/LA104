@@ -217,6 +217,7 @@ uint16_t st_usbfs_ep_read_packet(usbd_device *dev, uint8_t addr,
 void st_usbfs_poll(usbd_device *dev)
 {
 	uint16_t istr = *USB_ISTR_REG;
+
 	if (istr & USB_ISTR_RESET) {
 		USB_CLR_ISTR_RESET();
 		dev->pm_top = USBD_PM_TOP;

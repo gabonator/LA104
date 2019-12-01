@@ -12,7 +12,9 @@ cd build
   ../source/main.cpp \
   ../source/usb_conf.c \
   ../source/webusb.c \
+  ../source/winusb.c \
   ../source/cdc.c \
+  ../source/usb21_standard.c \
   ../lib/libopencm3/lib/usb/usb.c \
   ../lib/libopencm3/lib/usb/usb_standard.c \
   ../lib/libopencm3/lib/usb/usb_control.c \
@@ -23,6 +25,7 @@ cd build
   ../lib/libopencm3/lib/stm32/desig.c \
   ../lib/libopencm3/lib/stm32/st_usbfs_v1.c \
   ../lib/libopencm3/lib/cm3/assert.c \
+  -I../source/ \
   -I../../../os_library/include/ \
   -I ../lib/libopencm3/include \
   -I ../../../os_host/library/CMSIS/Include \
@@ -34,9 +37,11 @@ arm-none-eabi-gcc -mcpu=cortex-m3 -mthumb -o output.elf -nostartfiles -T ../sour
   ./main.o \
   ./usb_conf.o \
   ./webusb.o \
+  ./winusb.o \
   ./cdc.o \
   ./usb.o \
   ./usb_standard.o \
+  ./usb21_standard.o \
   ./usb_control.o \
   ./rcc_common_all.o \
   ./st_usbfs_v1.o \

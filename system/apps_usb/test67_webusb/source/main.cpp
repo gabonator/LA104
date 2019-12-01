@@ -23,14 +23,21 @@ extern "C"
 #include "target.h"
 #include "usb_conf.h"
 #include "webusb.h"
+#include "winusb.h"
 #include "cdc.h"
 #include <libopencm3/stm32/desig.h>
+#include "usb21_standard.h"
 }
 
 extern "C"
 void dbg(char*p)
 {
   BIOS::DBG::Print("{%s}", p);
+}
+
+const usbd_driver* target_usb_init(void) 
+{
+    return &st_usbfs_v1_usb_driver;
 }
 
 __attribute__((__section__(".entry")))
@@ -50,8 +57,6 @@ int main(void)
   }
 
   usbd_dev = usb_setup();
-  webusb_setup(usbd_dev, "www.google.com/");
-  cdc_setup(usbd_dev);
 
   BIOS::OS::SetInterruptVector(BIOS::OS::IUSB_LP_CAN_RX0_IRQ, []() {
     usbd_poll(usbd_dev);
