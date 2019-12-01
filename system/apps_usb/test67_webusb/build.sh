@@ -9,19 +9,15 @@ cd build
 #arm-none-eabi-gcc -Wall -Os -Werror -fno-common -mcpu=cortex-m3 -mthumb -msoft-float -Wno-psabi -MD -D _ARM -D STM32F10X_HD -c \
 
  arm-none-eabi-gcc -Os -fno-common -mcpu=cortex-m3 -mthumb -msoft-float -fno-exceptions -DSTM32F1 -DLA104 -MD -D _ARM -D STM32F10X_HD -c \
-  ../source/main.cpp \
-  ../source/usb_conf.c \
-  ../source/webusb.c \
-  ../source/winusb.c \
-  ../source/cdc.c \
-  ../source/usb21_standard.c \
+  ../source_minimal/main.cpp \
+  ../source_minimal/usb_conf.c \
+  ../source_minimal/webusb.c \
+  ../source_minimal/cdc.c \
   ../lib/libopencm3/lib/usb/usb.c \
   ../lib/libopencm3/lib/usb/usb_standard.c \
   ../lib/libopencm3/lib/usb/usb_control.c \
-  ../lib/libopencm3/lib/stm32/common/rcc_common_all.c \
-  ../lib/libopencm3/lib/stm32/common/gpio_common_all.c \
-  ../lib/libopencm3/lib/stm32/common/flash_common_f01.c \
   ../lib/libopencm3/lib/stm32/common/st_usbfs_core.c \
+  ../lib/libopencm3/lib/stm32/common/rcc_common_all.c \
   ../lib/libopencm3/lib/stm32/desig.c \
   ../lib/libopencm3/lib/stm32/st_usbfs_v1.c \
   ../lib/libopencm3/lib/cm3/assert.c \
@@ -37,13 +33,11 @@ arm-none-eabi-gcc -mcpu=cortex-m3 -mthumb -o output.elf -nostartfiles -T ../sour
   ./main.o \
   ./usb_conf.o \
   ./webusb.o \
-  ./winusb.o \
   ./cdc.o \
   ./usb.o \
   ./usb_standard.o \
-  ./usb21_standard.o \
-  ./usb_control.o \
   ./rcc_common_all.o \
+  ./usb_control.o \
   ./st_usbfs_v1.o \
   ./st_usbfs_core.o \
   ./assert.o \
