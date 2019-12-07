@@ -22,6 +22,7 @@
 #include <string.h>
 #include <libopencm3/usb/usbd.h>
 #include <libopencm3/usb/cdc.h>
+#include <libopencm3/stm32/desig.h>
 #include "cdc.h"
 #include "webusb.h"
 #include "usb_conf.h"
@@ -241,6 +242,13 @@ static uint8_t usbd_control_buffer[USB_CONTROL_BUF_SIZE] __attribute__ ((aligned
 usbd_device* usbd_dev = NULL;
 
 usbd_device* usb_setup(void) {
+
+    char serial[USB_SERIAL_NUM_LENGTH+1];
+    serial[0] = '\0';
+    desig_get_unique_id_as_string(serial, USB_SERIAL_NUM_LENGTH);
+    usb_set_serial_number(serial);
+
+
     int num_strings = sizeof(usb_strings) / sizeof(const char*);
     // debug_print("usb_setup num_strings "); debug_print_int(num_strings); debug_println(""); // debug_flush(); ////
     const usbd_driver* driver = target_usb_init();

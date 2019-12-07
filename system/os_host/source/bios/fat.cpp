@@ -79,7 +79,7 @@ extern "C"
 
   void InvalidateFat()
   {
-    f_flush(0);
+    f_flush(&g_fatfs);
   }
 
   bool gUsbDidWriteToDisk = false;

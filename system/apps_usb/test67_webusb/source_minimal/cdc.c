@@ -16,6 +16,8 @@ static const struct usb_cdc_line_coding line_coding = {
 	.bDataBits = 0x08
 };
 
+cdc_receive_callback receive_callback = NULL;
+usbd_device* transmit_device = NULL;
 
 int cdcacm_control_request(
   usbd_device *usbd_dev __attribute__((unused)),
@@ -96,11 +98,12 @@ cdcacm_data_rx_cb(
     uint16_t pos = (len < MAX_USB_PACKET_SIZE) ? len : MAX_USB_PACKET_SIZE;
     cdcbuf[pos] = 0;
 
-	usbd_ep_write_packet(usbd_dev, DATA_IN, cdcbuf, pos); ////  Echo the packet.
+//	usbd_ep_write_packet(usbd_dev, DATA_IN, cdcbuf, pos); ////  Echo the packet.
 	
-    debug_print("["); debug_println(cdcbuf); debug_print("]"); // debug_flush(); ////
-dbg(cdcbuf);
-
+//    debug_print("["); debug_println(cdcbuf); debug_print("]"); // debug_flush(); ////
+//dbg(cdcbuf);
+  if (receive_callback)
+    receive_callback((uint8_t*)cdcbuf, pos);
 }
 
 static void
@@ -108,9 +111,7 @@ cdcacm_comm_cb(
   usbd_device *usbd_dev,
   uint8_t ep __attribute__((unused))
 ) {
-
-dbg("comm2");
-	debug_println("comm"); debug_flush();
+//	debug_println("comm"); debug_flush();
 }
 
 /*
@@ -139,4 +140,15 @@ void cdc_setup(usbd_device* usbd_dev) {
     //  debug_println("*** cdc_setup"); ////
 	int status = aggregate_register_config_callback(usbd_dev, cdcacm_set_config);
 	if (status < 0) { debug_println("*** cdc_setup failed"); debug_flush(); }
+  transmit_device = usbd_dev;
+}
+
+void cdc_set_receive_callback(cdc_receive_callback callback)
+{
+  receive_callback = callback;
+}
+
+void cdc_transmit(uint8_t* buffer, int len)
+{
+  usbd_ep_write_packet(transmit_device, DATA_IN, buffer, len);
 }
