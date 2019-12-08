@@ -3,19 +3,6 @@
 #include "library/STM32F10x_StdPeriph_Driver/inc/misc.h"
 #include "BIOS.h"
 
-/*
-imports from BIOS:
-interrupt.c:(.text+0xac): undefined reference to `__CTR_HP'
-interrupt.c:(.text+0xb0): undefined reference to `__USB_Istr'
-imports.c:(.text+0x160): undefined reference to `__ProgDiskPage'
-imports.c:(.text+0x16a): undefined reference to `__ReadDiskData'
-imports.c:(.text+0xfc): undefined reference to `__USB_Init'
-adc.cpp:(.text+0x74): undefined reference to `__Get'
-adc.cpp:(.text+0x16e): undefined reference to `__Set'
-*/
-
-void dbgPrint(const char* msg, ...);
-
 void Delay_mS(uint32_t mS);
 
 extern void (* g_pfnVectors[76])(void);

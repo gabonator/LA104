@@ -6,8 +6,8 @@ namespace TERMINAL
 void Write(uint8_t* p, int n)
 {
 //BIOS::SYS::DelayMs(20);
-      cdc_transmit(p, n);
-BIOS::SYS::DelayMs(3);
+  cdc_transmit(p, n);
+//BIOS::SYS::DelayMs(3);
 }
 
 void Print(const char* msg, ...)

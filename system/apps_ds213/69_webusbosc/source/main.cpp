@@ -11,6 +11,30 @@ extern "C"
 #include "webusb.h"
 }
 
+char buffer[256];
+extern "C" void dbg(const char*id)
+{
+  strcat(buffer, id);
+/*
+return;
+  char tmp[20];
+  sprintf(tmp, "%d:%s%02x ", BIOS::SYS::GetTick(), id, n);
+  strcat(buffer, tmp);
+  if (strlen(buffer)>100)
+  {
+   BIOS::DBG::Print("~");
+   BIOS::DBG::Print(buffer);
+   buffer[0] = 0;
+  }*/
+}
+extern "C" void __yield()
+{
+  EVERY(1000)
+  {
+    BIOS::DBG::Print("#");
+  }
+}
+
 usbd_device* _usbd_dev = nullptr;
 
 CLineParser parser;
@@ -19,6 +43,8 @@ CEvaluator evaluator;
 __attribute__((__section__(".entry")))
 int main(void) 
 {
+  buffer[0] = 0;
+
   BIOS::OS::TInterruptHandler isrOld = BIOS::OS::GetInterruptVector(BIOS::OS::IUSB_LP_CAN_RX0_IRQ);
   BIOS::OS::SetInterruptVector(BIOS::OS::IUSB_LP_CAN_RX0_IRQ, []() {});
   BIOS::DBG::Print("USB begin\n");
@@ -41,11 +67,23 @@ int main(void)
 
   while ((key = BIOS::KEY::GetKey()) != BIOS::KEY::Escape) 
   {
+    if (buffer[0])
+    {
+      BIOS::DBG::Print(buffer);
+      BIOS::DBG::Print("\n");
+      buffer[0] = 0;
+    }
+//    BIOS::SYS::DelayMs(100);
+
     if (parser.isFull())
     {
       int result = evaluator.Evaluate(parser.get());
       parser.reset();
       TERMINAL::Print("{ret:%d}", result);
+    }
+    EVERY(1000)
+    {
+      BIOS::DBG::Print(".");
     }
   }
 

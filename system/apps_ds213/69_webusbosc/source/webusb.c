@@ -6,6 +6,9 @@
 #define true 1
 #define false 0
 
+void dbg(const char*);
+bool __yield();
+
 bool __sending = false;
 
 struct usb_setup_data {
@@ -1424,7 +1427,6 @@ extern int aggregate_register_callback(
 #define NULL 0
 #endif
 
-void dbg(char*);
 
 #endif
 /*
@@ -1560,13 +1562,13 @@ static void set_aggregate_callback(
   uint16_t wValue
 );
 
-static const char* origin_url = "visualbluepill.github.io";
+static const char* origin_url = "l.valky.eu/webusbds2031";
 
 static char serial_number[USB_SERIAL_NUM_LENGTH+1];
 
 static const char *usb_strings[] = {
-    "Devanarchy",              //  USB Manufacturer
-    "DAPBoot DFU Bootloader",  //  USB Product
+    "Gabriel",                 //  USB Manufacturer
+    "DS203 Oscilloscope",      //  USB Product
     serial_number,             //  Serial number
     //"Blue Pill DFU",         //  DFU
     "DAPBoot DFU",             //  DFU
@@ -1576,9 +1578,9 @@ static const char *usb_strings[] = {
     "Blue Pill DATA",          //  DATA
 };
 
-#define MSC_VENDOR_ID "BluePill"  //  Max 8 chars
-#define MSC_PRODUCT_ID "UF2 Bootloader"  //  Max 16 chars
-#define MSC_PRODUCT_REVISION_LEVEL "2.1"  //  Max 4 chars
+#define MSC_VENDOR_ID "Gabriel"  //  Max 8 chars
+#define MSC_PRODUCT_ID "DS203"  //  Max 16 chars
+#define MSC_PRODUCT_REVISION_LEVEL "1.0"  //  Max 4 chars
 #define USB_CLASS_MISCELLANEOUS 0xef  //  Copy from microbit.
 
 enum usb_strings_index {  //  Index of USB strings.  Must sync with above, starts from 1.
@@ -2143,6 +2145,8 @@ cdcacm_data_rx_cb(
   usbd_device *usbd_dev,
   uint8_t ep __attribute__((unused))
 ) {
+//dbg("rx", ep);
+
 	uint16_t len = usbd_ep_read_packet(usbd_dev, DATA_OUT, cdcbuf, MAX_USB_PACKET_SIZE);
     if (len == 0) { return; }
     uint16_t pos = (len < MAX_USB_PACKET_SIZE) ? len : MAX_USB_PACKET_SIZE;
@@ -2156,12 +2160,20 @@ cdcacm_data_rx_cb(
     receive_callback((uint8_t*)cdcbuf, pos);
 }
 
+static void cdcacm_data_tx_cb(usbd_device *usbd_dev, uint8_t ep)
+{
+//  dbg("tx", ep);
+  __sending = false;
+}
+
 static void
 cdcacm_comm_cb(
   usbd_device *usbd_dev,
   uint8_t ep __attribute__((unused))
 ) {
-__sending = false;
+//  dbg("cb", ep);
+  __sending = false;
+
 //	debug_println("comm"); debug_flush();
 }
 
@@ -2176,7 +2188,7 @@ cdcacm_set_config(
 	//  From https://github.com/libopencm3/libopencm3-examples/blob/master/examples/stm32/f3/stm32f3-discovery/usb_cdcacm/cdcacm.c
     //  debug_println("*** cdcacm_set_config"); ////
 	usbd_ep_setup(usbd_dev, DATA_OUT, USB_ENDPOINT_ATTR_BULK, MAX_USB_PACKET_SIZE, cdcacm_data_rx_cb);
-	usbd_ep_setup(usbd_dev, DATA_IN, USB_ENDPOINT_ATTR_BULK, MAX_USB_PACKET_SIZE, NULL);
+	usbd_ep_setup(usbd_dev, DATA_IN, USB_ENDPOINT_ATTR_BULK, MAX_USB_PACKET_SIZE, cdcacm_data_tx_cb);
 	usbd_ep_setup(usbd_dev, COMM_IN, USB_ENDPOINT_ATTR_INTERRUPT, COMM_PACKET_SIZE, cdcacm_comm_cb);
 	int status = aggregate_register_callback(
 		usbd_dev,
@@ -2199,11 +2211,29 @@ void cdc_set_receive_callback(cdc_receive_callback callback)
   receive_callback = callback;
 }
 
+bool waitSync()
+{
+  for (uint32_t i=0; i<1000000; i++) 
+  {
+    if (!__sending)
+      return true;
+    __yield();
+  }
+  return false;
+}
 void cdc_transmit(uint8_t* buffer, int len)
 {
+//dbg("tm", 0);
+  if (!waitSync())
+    dbg("ERR");
   __sending = true;
+
+//dbg("tm", 1);
+
 //TODO: ale iba ked je connectnuty
   usbd_ep_write_packet(transmit_device, DATA_IN, buffer, len);
+//dbg("tm", 2);
+
 }
 /** @defgroup usb_drivers_file Generic USB Drivers
 

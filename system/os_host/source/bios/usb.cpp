@@ -113,7 +113,7 @@ namespace BIOS
 
     void InitializeMass()
     {
-      Disable();
+//      Disable();
       Initialize(&massDevice_Info, &massDevice_Table, &massDevice_Property, &massUser_Standard_Requests, masspEpInt_IN, masspEpInt_OUT, masspCallbacks, mass_Leave_LowPowerMode);
       Disk_Init();
     }

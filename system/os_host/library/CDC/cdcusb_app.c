@@ -10,8 +10,6 @@ RingBuffer_t USB_Rx		= {	USB_Rx_Buffer, sizeof(USB_Rx_Buffer), 0, 0, 0	};
 bool USB_Tx_Active = false;
 extern DEVICE_INFO cdcDevice_Info;
 
-void dbgPrint(const char* msg, ...);
-
 void cdcGet_SerialNum(void)
 {
 }

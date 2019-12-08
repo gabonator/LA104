@@ -24,7 +24,11 @@ namespace BIOS
           TERMINAL::Write((uint8_t*)buffer, count*5);
           index += count;
         } 
-        BIOS::ADC::Restart();
+
+	for (int i=begin+samples; i<BIOS::ADC::NumSamples; i++)
+          BIOS::ADC::Get();
+
+//        BIOS::ADC::Restart();
     }
 
     int ConfigureTimebase2(float f)
@@ -41,14 +45,15 @@ namespace BIOS
       {
         float base = arrTime[i];
         float thresh = base * 0.1f;
-        if (abs(f-base) < thresh)
+        if (base * 0.9f <= f && f <= base*1.1f)
         {
           // align to constant
           f = base;
-          break;
+          BIOS::ADC::ConfigureTimebase(f);
+          return 0;
         }
       }
-      BIOS::ADC::ConfigureTimebase(f);
+      _ASSERT(0);
       return 0;
     }
 

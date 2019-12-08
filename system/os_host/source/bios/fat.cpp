@@ -6,6 +6,8 @@
 static_assert(BIOS_FAT_SectorSize == BIOS::FAT::SectorSize);
 static_assert(BIOS_FAT_SectorCount == BIOS::FAT::SectorCount);
 
+void InvalidateFat();
+
 extern "C" 
 {
   #include "fatfs/ff.c"
@@ -75,11 +77,6 @@ extern "C"
                           | ((DWORD)13 << 11)
                           | ((DWORD)37 << 5)
                           | ((DWORD)0 >> 1);
-  }
-
-  void InvalidateFat()
-  {
-    f_flush(&g_fatfs);
   }
 
   bool gUsbDidWriteToDisk = false;
@@ -227,4 +224,9 @@ namespace BIOS
     	return Result(r);
     }
   }
+}
+
+void InvalidateFat()
+{
+  f_flush(&BIOS::FAT::g_fatfs);
 }

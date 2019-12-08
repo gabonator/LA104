@@ -1,7 +1,7 @@
 MEMORY
 {
   rom (rx) : ORIGIN = 0x08019000, LENGTH = 16K
-  ram (rwx) : ORIGIN = 0x20005000, LENGTH = 4K
+  ram (rwx) : ORIGIN = 0x20005200, LENGTH = 4K
   null (rwx): ORIGIN = 0x00001000, LENGTH = 4K
 /*
 20004bcd 00000000 B _ebss

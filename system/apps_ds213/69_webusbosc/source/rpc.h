@@ -101,6 +101,7 @@ SPI::write(p, 32);
 #endif
 
 #if defined(DS203)
+    // Oscilloscope
     if (strcmp(command, "OSC::Enable")==0)
       return (uint32_t)BIOS::ADC::Enable;  // malo by zavolat aj reset!
     if (strcmp(command, "OSC::Transfer")==0)
@@ -115,38 +116,18 @@ SPI::write(p, 32);
       return (uint32_t)BIOS::ADC::GetPointer;
     if (strcmp(command, "OSC::ConfigureTimebase")==0)
       return (uint32_t)BIOS::ADC::ConfigureTimebase2;
+    if (strcmp(command, "OSC::Restart")==0)
+      return (uint32_t)BIOS::ADC::Restart;
 
-
-/*
-	constexpr INT Samples =  BIOS::ADC::NumSamples;
-	BIOS::ADC::TSample::SampleType memory[Samples];
-	
-	void Copy()
-	{
-//		BIOS::ADC::Restart(); //TODO: order?
-		for (int i=0; i<Samples; i++)
-		{
-			memory[i] &= 0xff000000;
-			memory[i] |= BIOS::ADC::Get();
-		}
-BIOS::ADC::Restart();
-	}
-
-
-	BIOS::ADC::Enable(true);
-	BIOS::ADC::ConfigureInput( BIOS::ADC::EInput::CH1, (BIOS::ADC::ECouple)nACouple, (BIOS::ADC::EResolution)nARange, nAOffset);
-	BIOS::ADC::ConfigureInput( BIOS::ADC::EInput::CH2, (BIOS::ADC::ECouple)nBCouple, (BIOS::ADC::EResolution)nBRange, nBPosition);
-	BIOS::ADC::ConfigureTimebase(fTimePerDiv);
-	BIOS::ADC::Restart();
-
-	if ( Settings.Trig.Sync == CSettings::Trigger::_None || Settings.Trig.Sync == CSettings::Trigger::_Scan )
-	{
-		BIOS::ADC::ConfigureTrigger(0, 0, BIOS::ADC::ETriggerType::None, BIOS::ADC::EInput::CH1 );
-	} else
-	{
-		BIOS::ADC::ConfigureTrigger(Settings.Trig.nTime, Settings.Trig.nLevel, 
-			(BIOS::ADC::ETriggerType)Settings.Trig.Type, (BIOS::ADC::EInput)Settings.Trig.Source);
-*/
+    // Signal generator
+    if (strcmp(command, "GEN::SetFrequency")==0)
+      return (uint32_t)BIOS::DAC::SetFrequency;
+    if (strcmp(command, "GEN::GetFrequency")==0)
+      return (uint32_t)BIOS::DAC::GetFrequency;
+    if (strcmp(command, "GEN::SetDuty")==0)
+      return (uint32_t)BIOS::DAC::SetDuty;
+    if (strcmp(command, "GEN::SetWave")==0)
+      return (uint32_t)BIOS::DAC::SetWave;
 #endif
 
     if (strcmp(command, "LCD::BufferBegin")==0)

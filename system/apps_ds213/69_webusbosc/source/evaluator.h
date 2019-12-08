@@ -98,8 +98,6 @@ class CEvaluator
 //BIOS::DBG::Print("('%s'=",s);
     float f = _atof(s);
 
-//BIOS::DBG::Print("%f, %f m, %f u",f, f*1000, f*1000000);
-
     _ASSERT(s[0] == ' ' || s[0] == ',' || s[0] == ')');
 
     while (*s == ' ' || *s == ',')

@@ -10,8 +10,16 @@ public:
 
   void push(char* add)
   {
-    _ASSERT(strlen(buffer) + strlen(add) < sizeof(buffer)-1);
-    strcat(buffer, add);
+    if (strlen(buffer) + strlen(add) < sizeof(buffer)-1)
+    {
+      strcat(buffer, add);
+    } else
+    {
+      BIOS::DBG::Print("ERROR: Discarding buffers:\n");
+      BIOS::DBG::Print("'%s'\n", buffer);
+      BIOS::DBG::Print("'%s'\n", add);
+      buffer[0] = 0;
+    }
   }
   bool isFull()
   {

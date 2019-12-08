@@ -7,8 +7,6 @@
 
 HwDrvDef  Hw;
 
-void dbgPrint(const char* msg, ...);
-
 void Delay_mS(uint32_t mS);
 
 
@@ -89,8 +87,6 @@ void HardwareInit()
   Delay_mS(500);
   Hw.pDevInit(USB_DEV);
 
-
-  dbgPrint("\n\n\n\n\nsect=%d,amnt=%d\n", Hw.DiskSecSize, Hw.DiskSecAmnt);
 
 //BIOS::DBG::Print("\n\n\n\n\nsect=%d,amnt=%d\n", Hw.DiskSecSize, Hw.DiskSecAmnt);
   #if 0

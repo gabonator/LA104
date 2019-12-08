@@ -56,7 +56,4 @@ extern DEVICE_INFO cdcDevice_Info;
 extern __IO DEVICE_STATE cdcbDeviceState;
 extern bool USB_Tx_Active;
 
-void dbgPrint(const char* msg, ...);
-void dbgPushPrint(const char* msg, ...);
-
 #endif  /*__HW_CONFIG_H*/

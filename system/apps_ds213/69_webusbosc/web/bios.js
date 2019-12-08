@@ -8,26 +8,28 @@ var COMM = {
 var OSC = {
   Enums: {"CH1": 0, "CH2": 1, "CH3": 2, "CH4": 3,
     // coupling
-    "DC": 0, "AC": 0, 
+    "DC": 0, "AC": 1, 
     // resolution
     "50mV":0, "100mV":1, "200mV":2, "500mV":3, "1V":4, "2V":5, "5V":6, "10V":7,
     // trigger
     "EdgeHL":0, "EdgeLH":1, "LevelLow":2, "LevelHigh":3, "LowerDTLow":4, "GreaterDTLow":5, "LowerDTHigh":6,
-    "GreaterDTHigh":7, "None":8},
-/*
-		{100e-9f, 200e-9f, 500e-9f,
-		1e-6f, 2e-6f, 5e-6f,
-		10e-6f, 20e-6f, 50e-6f, 100e-6f, 200e-6f, 500e-6f,
-		1e-3f, 2e-3f, 5e-3f,
-		10e-3f, 20e-3f, 50e-3f, 100e-3f, 200e-3f, 500e-3f,
-		1.0f};
-*/
+    "GreaterDTHigh":7, "None":8,
+    // timebase
+    "100ns":"100e-9", "200ns":"200e-9", "500ns":"500e-9", 
+    "1us":"1e-6", "2us":"2e-6", "5us":"2e-6",
+    "10us":"10e-6", "20us":"20e-6", "50us":"50e-6", "100us":"100e-6", "200us":"200e-6", "500us":"500e-6",
+    "1ms":"1e-3", "2ms":"2e-3", "5ms":"5e-3",
+    "10ms":"10e-3", "20ms":"20e-3", "50ms":"50e-3", "100ms":"100e-3", "200ms":"200e-3", "500ms":"500e-3", 
+    "1s":"1.0"
+  },
 
   Enable: (enable) => BIOS.rpcCall('OSC::Enable('+enable+');'),
   ConfigureTrigger: (time, value, type, source) => BIOS.rpcCall('OSC::ConfigureTrigger('+time+','+value+','+type+','+source+');'),
   ConfigureTimebase: (timebase) => BIOS.rpcCall('OSC::ConfigureTimebase('+timebase+');'),
   ConfigureInput: (input, couple, res, offset) => BIOS.rpcCall('OSC::ConfigureInput('+input+','+couple+','+res+','+offset+');'),
   Ready: () => BIOS.rpcCall('OSC::Ready();').then( json => BIOS.safeeval(json).ret ),
+  Restart: () => BIOS.rpcCall('OSC::Restart();'),
+  GetPointer: () => BIOS.rpcCall('OSC::GetPointer();').then( json => BIOS.safeeval(json).ret ),
   Transfer: (begin, len) => 
   {
     var requestNibbles = 0;
@@ -59,12 +61,25 @@ var OSC = {
       return requestData()
         .then((data) =>
         {
-          COMM._onReceive = () => 0; // ignore trailing {ret:xxx}
-          return data;
+          return new Promise((resolve, reject) =>
+          {
+            COMM._onReceive = () => resolve(data);
+          });
+//          COMM._onReceive = () => 0; // ignore trailing {ret:xxx}
+//          return data;
         })
     });
   }               
   
+};
+
+
+var GEN =
+{
+  SetFrequency: (freq) => BIOS.rpcCall('GEN::SetFrequency('+freq+');'),
+  GetFrequency: () => BIOS.rpcCall('GEN::GetFrequency();').then( json => BIOS.safeeval(json).ret ),
+  SetDuty: (duty) => BIOS.rpcCall('GEN::SetDuty('+duty+');'),
+  SetWave: (ptr, len) => BIOS.rpcCall('GEN::SetWave('+ptr+','+len+');'),
 };
 
 var BIOS =
@@ -72,7 +87,7 @@ var BIOS =
   biosSpiBegin: (baud) => BIOS.rpcCall('SPI::begin('+baud+');'),
   biosSpiWrite: (addr, len) => BIOS.rpcCall('SPI::write('+addr+', '+len+');'),
   biosMemWrite: (addr, data) => BIOS.rpcCall('RPC::MemoryWrite(0x'+addr.toString(16)+', "'+data.map(i => ("0"+i.toString(16)).substr(-2) ).join("")+'");'),
-  safeeval: (json) => eval("("+json+")"),
+  safeeval: (json) => { if (json[0] == "{") return eval("("+json+")") },
   biosMemGetBufferPtr: () => BIOS.rpcCall('RPC::GetBufferPtr();').then( json => BIOS.safeeval(json).ret ), 
   biosLcdBuffer: (x1, y1, x2, y2, pixels) =>
   {

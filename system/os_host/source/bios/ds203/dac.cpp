@@ -84,7 +84,7 @@ namespace BIOS
 
     void SetDuty(int dutyPercent) 
     {
-      ccr = arr * dutyPercent / 100;
+      ccr = arr * (100-dutyPercent) / 100;
       __Set(DIGTAL_CCR, ccr);
     }
 

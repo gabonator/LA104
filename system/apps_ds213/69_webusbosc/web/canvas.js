@@ -6,7 +6,7 @@ class Renderer
     this.elem.style = "border:1px gray solid;";
     this.elem.width = w;
     this.elem.height = h;
-    document.documentElement.style.background = "#000000";
+    document.documentElement.style.background = "#404040";
     document.documentElement.appendChild(this.elem);
     this.ctx = this.elem.getContext("2d");
   }
