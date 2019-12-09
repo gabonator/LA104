@@ -19,6 +19,12 @@ Go to release section on top of this page, download *system.hex*. Power on the L
 
 ##### Addressable RGB led strip tester
 
+Proud to announce the first oscilloscope in the world using the WebUsb technology (correct me if I am wrong)!
+
+![WebUsb oscilloscope](resources/imgWebusb.png)
+
+##### Addressable RGB led strip tester
+
 Addressable LED tester with advanced functions. Supports up to 32x WS2812/WS2812/SK6812 and other compatible addressable LED modules. More than 15 static and dynamic color presets, speed control, 8 different filter post-process options... Possible to build for OSX as desktop application, or LA104 native app or as [WASM based HTML application. Try it online here!](http://rawgit.valky.eu/gabonator/LA104/master/system/apps/test63_ws2812/build_wasm/index.html) Watch video below:
 
 [![Addressable LED tester video](https://img.youtube.com/vi/4fWqZBbjQPc/0.jpg)](https://www.youtube.com/watch?v=4fWqZBbjQPc "LA104 with addressable leds")
