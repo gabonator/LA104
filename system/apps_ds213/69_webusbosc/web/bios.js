@@ -27,9 +27,9 @@ var OSC = {
   ConfigureTrigger: (time, value, type, source) => BIOS.rpcCall('OSC::ConfigureTrigger('+time+','+value+','+type+','+source+');'),
   ConfigureTimebase: (timebase) => BIOS.rpcCall('OSC::ConfigureTimebase('+timebase+');'),
   ConfigureInput: (input, couple, res, offset) => BIOS.rpcCall('OSC::ConfigureInput('+input+','+couple+','+res+','+offset+');'),
-  Ready: () => BIOS.rpcCall('OSC::Ready();').then( json => BIOS.safeeval(json).ret ),
+  Ready: () => BIOS.rpcCall('OSC::Ready();').then( json => BIOS.retval(json) ),
   Restart: () => BIOS.rpcCall('OSC::Restart();'),
-  GetPointer: () => BIOS.rpcCall('OSC::GetPointer();').then( json => BIOS.safeeval(json).ret ),
+  GetPointer: () => BIOS.rpcCall('OSC::GetPointer();').then( json => BIOS.retval(json) ),
   Transfer: (begin, len) => 
   {
     var requestNibbles = 0;
@@ -77,7 +77,7 @@ var OSC = {
 var GEN =
 {
   SetFrequency: (freq) => BIOS.rpcCall('GEN::SetFrequency('+freq+');'),
-  GetFrequency: () => BIOS.rpcCall('GEN::GetFrequency();').then( json => BIOS.safeeval(json).ret ),
+  GetFrequency: () => BIOS.rpcCall('GEN::GetFrequency();').then( json => BIOS.retval(json) ),
   SetDuty: (duty) => BIOS.rpcCall('GEN::SetDuty('+duty+');'),
   SetWave: (ptr, len) => BIOS.rpcCall('GEN::SetWave('+ptr+','+len+');'),
 };
@@ -88,7 +88,8 @@ var BIOS =
   biosSpiWrite: (addr, len) => BIOS.rpcCall('SPI::write('+addr+', '+len+');'),
   biosMemWrite: (addr, data) => BIOS.rpcCall('RPC::MemoryWrite(0x'+addr.toString(16)+', "'+data.map(i => ("0"+i.toString(16)).substr(-2) ).join("")+'");'),
   safeeval: (json) => { if (json[0] == "{") return eval("("+json+")") },
-  biosMemGetBufferPtr: () => BIOS.rpcCall('RPC::GetBufferPtr();').then( json => BIOS.safeeval(json).ret ), 
+  retval: (json) => { var j = BIOS.safeeval(json); if (j && typeof(j.ret) != "undefined") return j.ret },
+  biosMemGetBufferPtr: () => BIOS.rpcCall('RPC::GetBufferPtr();').then( json => BIOS.retval(json) ), 
   biosLcdBuffer: (x1, y1, x2, y2, pixels) =>
   {
     var numpix = pixels.length / 2;

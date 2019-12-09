@@ -9,6 +9,7 @@ class Controls
 .controlsContainer {
 width:1200px;
 height:180px;
+padding-top:8px;
 }
 
 .controlsBlock 
@@ -35,6 +36,7 @@ float:left;
 .blockCh2 { border: 2px solid #00ffff; }
 .blockTimeTrig { border: 2px solid #ffffff; }
 .blockGen { border: 2px solid #ff00ff; }
+.hidden {display:none;}
 </style>
 
 <div class="controlsContainer">
@@ -58,8 +60,8 @@ float:left;
      <option>5V</option>
      <option>10V</option>
     </select>&sol;div<br>
-    Offset:
-    <input id="ch1offset" size=5 type="text" value="20">
+    <div class="hidden">Offset:
+    <input id="ch1offset" size=5 type="text" value="20"></div>
   </div><div class="controlsSpacer"></div>
   <div class="controlsBlock blockCh2">
     CH2:<br><br>
@@ -81,8 +83,8 @@ float:left;
      <option>5V</option>
      <option>10V</option>
     </select>&sol;div<br>
-    Offset:
-    <input id="ch2offset" size=5 type="text" value="20">
+    <div class="hidden">Offset:
+    <input id="ch2offset" size=5 type="text" value="20"></div>
   </div><div class="controlsSpacer"></div>
   <div class="controlsBlock blockTimeTrig">
     Timebase:<br><br>
@@ -113,22 +115,22 @@ float:left;
     </select>&sol;div<br>
     Trigger:
     <select id="triggerMode">
-      <option>EdgeHL</option>
-      <option>EdgeLH</option>
+      <option value="EdgeHL">Edge &#x21A7;</option>
+      <option value="EdgeLH">Edge &#x21A5;</option>
       <option>LevelLow</option>
       <option>LevelHigh</option>
       <option>LowerDTLow</option>
       <option>GreaterDTLow</option>
       <option>LowerDTHigh</option>
       <option>GreaterDTHigh</option>
-      <option>Scan</option>
+      <option value="None">Scan</option>
     </select><br>
     TrigSource:
     <select id="triggerSource">
       <option>CH1</option>
       <option>CH2</option>
     </select><br>
-    Threshold:<input size=5 type="text" value="128" id="triggerThreshold">, 
+    <div class="hidden">Threshold:<input size=5 type="text" value="128" id="triggerThreshold">,</div> 
     Time:<input size=5 type="text" value="128" id="triggerTime">
 
   </div><div class="controlsSpacer"></div>

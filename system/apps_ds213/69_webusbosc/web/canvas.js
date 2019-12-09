@@ -20,7 +20,7 @@ class Renderer
     this.container.appendChild(this.scrollContainer);
 
     this.elem = document.createElement("canvas");
-    this.elem.width = 4096-25;
+    this.elem.width = 4096-30;
     this.elem.height = h;
     this.ctx = this.elem.getContext("2d");
     this.scrollContainer.appendChild(this.elem);
@@ -68,15 +68,54 @@ class Renderer
   background:rgba(255, 255, 255, 0.8);
 }
 
+.button {
+  position:absolute;
+  top:20px;
+  right:20px;
+  width:100px;
+  height:80px;
+
+  background-color: #202020; /* Green */
+  border-radius: 10px;
+  border: none;
+  color: white;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 60px;
+  -webkit-transition-duration: 0.4s; /* Safari */
+  transition-duration: 0.4s;
+  cursor: pointer;
+  opacity: 0.8;
+}
+
+.button1 {
+  background-color: white; 
+  color: black; 
+  border: 2px solid #202020;
+}
+
+.button1:hover {
+  background-color: #202020;
+  color: white;
+}
 </style>
 <div class="label" id="ch1pos">CH1</div>
 <div class="label" id="ch2pos">CH2</div>
 <div class="label" id="trigpos">TRIG</div>
+<button class="button button1" id="mode">&#9899;<!--&#9724; &#10073;&#10073; &#9658;--></button>
 `;
 
     dragElement(document.querySelector("#ch1pos"), this.updateCh1Pos.bind(this) );
     dragElement(document.querySelector("#ch2pos"), this.updateCh2Pos.bind(this));
     dragElement(document.querySelector("#trigpos"), this.updateTrigPos.bind(this));
+
+    document.querySelector("#mode").addEventListener('click', 
+      (o) => 
+    {
+      INTERFACE.toggleTriggerState();
+      o.target.innerHTML = INTERFACE.trigState == "run" ? "&#9899;" : "&#9724;" 
+    });
+
   }
   Clear()
   {
@@ -154,6 +193,7 @@ class Renderer
   { 
     return this.scrollContainer.scrollLeft;
   }
+
 }
 
 

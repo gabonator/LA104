@@ -33,15 +33,11 @@
       canvas.Poly([{x:0, y:canvas.height*y/8}, {x:width, y:canvas.height*y/8}], "rgba(0, 0, 0, 0.8)", 1);
 
     canvas.Poly([{x:0, y:trig}, {x:width, y:trig}], "rgba(255, 255, 255, 0.6)", 1)
-    canvas.Poly([{x:150-25, y:0}, {x:150-25, y:canvas.height}], "rgba(255, 255, 255, 0.6)", 1)
+    canvas.Poly([{x:150-30, y:0}, {x:150-30, y:canvas.height}], "rgba(255, 255, 255, 0.6)", 1)
 
 
     canvas.Poly(path1, "#ffff00");
     canvas.Poly(path2, "#00ffff");
-
-
-//    canvas.Poly(path1, "rgba(255, 255, 0, 0.8)");
-//    canvas.Poly(path2, "rgba(0, 255, 255, 0.8)");
   }
 
   var init = false;
@@ -65,6 +61,7 @@ INTERFACE = {
   trigTime:150,
   trigThreshold:128,
   trigSource:"CH1",
+  trigState:"run",
 
   genFlavour: "Sine",
   genFrequency: 1000,
@@ -148,6 +145,12 @@ INTERFACE = {
     INTERFACE.restart();
   },
 
+  configureTimebase: () =>
+  {    
+    INTERFACE.process( () => OSC.ConfigureTimebase(OSC.Enums[INTERFACE.timebase]) )
+    INTERFACE.process( () => OSC.ConfigureTimebase(OSC.Enums[INTERFACE.timebase]) )
+  },
+
   // TRIGGER
   setTriggerMode: (m) =>
   {
@@ -176,6 +179,14 @@ INTERFACE = {
     INTERFACE.trigSource = source;
     console.log("triggerSource: "+INTERFACE.trigSource);
     INTERFACE.configureTrigger();
+  },
+
+  toggleTriggerState()
+  {
+    if (INTERFACE.trigState == "run")
+      INTERFACE.trigState = "paused"
+    else
+      INTERFACE.trigState = "run"
   },
 
   configureTrigger: () =>
@@ -218,31 +229,21 @@ INTERFACE = {
   },
   // COMMON
 
+  setAll: () =>
+  {
+    canvas.setCh1Pos(INTERFACE.ch1offset);
+    canvas.setCh2Pos(INTERFACE.ch2offset);
+    canvas.setTrigPos(INTERFACE.trigThreshold);
+    INTERFACE.configureInput("CH1");
+    INTERFACE.configureInput("CH2");
+    INTERFACE.configureTrigger();
+    INTERFACE.configureTimebase()
+    INTERFACE.restart();
+  },
   process: (proc) => promises.push(proc),
   restart: () => promises.push(() => OSC.Restart())
 };
 
-
-canvas.setTrigPos(INTERFACE.trigThreshold);
-canvas.setCh1Pos(INTERFACE.ch1offset);
-canvas.setCh2Pos(INTERFACE.ch2offset);
-
-/*
-  function setScan()
-  {
-    promises.push(() => OSC.ConfigureTrigger(150, 100, OSC.Enums["None"], OSC.Enums["CH1"]) );
-
-  }
-  function setTimebase(t)
-  {
-    promises.push(() => Promise.resolve()
-//            .then(() => OSC.Enable(1))
-//            .then(() => OSC.ConfigureTimebase(OSC.Enums[t]))
-            .then(() => OSC.ConfigureTimebase(OSC.Enums[t]))
-//            .then(() => OSC.Restart() )
-    );
-  }
-*/
   function setSquareWave(freq, duty)
   {
     promises.push(() => 
@@ -287,18 +288,12 @@ canvas.setCh2Pos(INTERFACE.ch2offset);
     promises.push(() => 
       Promise.resolve()
       .then( ()=>BIOS.biosMemBulk(bufferPtr, buf) )
-      .then( ()=>GEN.SetWave(bufferPtr, n-1) )
+      .then( ()=>GEN.SetWave(bufferPtr, n-1) ) // WTF??? bios error, wont configure DMA without changing buffer length
       .then( ()=>GEN.SetWave(bufferPtr, n) )
-//      .then( ()=>GEN.SetWave(0, 0) )
       .then( ()=>GEN.SetFrequency(freq) )
-//      .then( ()=>GEN.GetFrequency() )
-//      .then( (f)=>console.log("Frequency="+f) )
+      .then( ()=>GEN.GetFrequency() )
+      .then( (f)=>console.log("Playing frequency="+f + ", frequency="+Math.floor(f/n)) )
     );
-  }
-
-  function setCh1(resol)
-  {
-    promises.push(() => OSC.ConfigureInput(OSC.Enums["CH1"], OSC.Enums["DC"], OSC.Enums[resol], 50) );
   }
 
   setInterval(() =>
@@ -327,12 +322,15 @@ canvas.setCh2Pos(INTERFACE.ch2offset);
           .then( () => BIOS.biosMemGetBufferPtr() )
           .then( ptr => bufferPtr = ptr)
           .then( () => OSC.Enable(1) )
+          .then( () => INTERFACE.setAll() )
+/*
           .then( () => OSC.ConfigureTimebase(OSC.Enums[INTERFACE.timebase]) )
           .then( () => OSC.ConfigureTimebase(OSC.Enums[INTERFACE.timebase]) )
           .then( () => OSC.ConfigureTrigger(150, 100, OSC.Enums["EdgeHL"], OSC.Enums["CH1"]) )
           .then( () => OSC.ConfigureInput(OSC.Enums["CH1"], OSC.Enums[INTERFACE.ch1coupling], OSC.Enums[INTERFACE.ch1range], INTERFACE.ch1offset) )
           .then( () => OSC.ConfigureInput(OSC.Enums["CH2"], OSC.Enums[INTERFACE.ch2coupling], OSC.Enums[INTERFACE.ch2range], INTERFACE.ch2offset) )
           .then( () => OSC.Restart() )
+*/
         );
 
         setSineWave(10000);
@@ -347,28 +345,29 @@ canvas.setCh2Pos(INTERFACE.ch2offset);
         return;
       }
 
-      promise = Promise.resolve()
-        .then( () => OSC.Ready() )
-//        .then( console.log )
-//        .then( () => true )
-        .then( (ready) =>  
-        { 
-          var now = (new Date()).getTime();
-          if (ready || now - last > 2000)
-          {
-            last = now;
-            var scroll = canvas.getScrollOffset();
+//      if (INTERFACE.trigState == "run")
+      {
+        promise = Promise.resolve()
+          .then( () => OSC.Ready() )
+          .then( (ready) =>  
+          { 
+            var now = (new Date()).getTime();
+            if (ready || now - last > 2000 || (INTERFACE.trigMode == "None" && now-last > 500))
+            {
+              last = now;
+              var scroll = canvas.getScrollOffset();
 
-            return Promise.resolve()
-            .then( () => OSC.Transfer(150*0+4+21 + scroll, 256*4+180) )
-            .then( data => Redraw(scroll, data) )
-            .then( () => { if (ready) return OSC.Restart(); else return Promise.resolve();} )
-            .then( () => Promise.resolve() )
-            .catch( () => { console.log("err"); return Promise.resolve()} );
-          }
-          return Promise.resolve();
-        })
-        .then( () => promise = false );
+              return Promise.resolve()
+              .then( () => OSC.Transfer(150*0+30 + scroll, 256*4+180) )
+              .then( data => Redraw(scroll, data) )
+              .then( () => { if (ready && INTERFACE.trigState == "run") return OSC.Restart(); else return Promise.resolve();} )
+              .then( () => Promise.resolve() )
+              .catch( () => { console.log("err"); return Promise.resolve()} );
+            }
+            return Promise.resolve();
+          })
+          .then( () => promise = false );
+      }
     }
   }, 100);
 

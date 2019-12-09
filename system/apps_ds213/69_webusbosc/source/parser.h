@@ -15,9 +15,9 @@ public:
       strcat(buffer, add);
     } else
     {
-      BIOS::DBG::Print("ERROR: Discarding buffers:\n");
-      BIOS::DBG::Print("'%s'\n", buffer);
-      BIOS::DBG::Print("'%s'\n", add);
+      BIOS::DBG::Print("ERROR: Discarding buffers!\n");
+//      BIOS::DBG::Print("'%s'\n", buffer);
+//      BIOS::DBG::Print("'%s'\n", add);
       buffer[0] = 0;
     }
   }
