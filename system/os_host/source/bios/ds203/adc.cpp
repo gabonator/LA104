@@ -162,10 +162,10 @@ namespace BIOS
     {
       gEnabled = bEnable;
       __Set(ADC_CTRL, bEnable ? EN : DN );
-if (bEnable)
-{
-          __Set(ADC_MODE, SEPARATE);
-}
+      if (bEnable)
+      {     
+        __Set(ADC_MODE, SEPARATE);
+      }
     }
 
     bool Enabled()
@@ -209,6 +209,8 @@ if (bEnable)
 		{ 1-1, 1-1, 2-1, 3-1, 5-1, 12-1, 24-1, 48-1, 120-1, 240-1, 480-1, 120-1, 240-1, 480-1,
 		120-1, 240-1, 480-1, 120-1, 240-1, 480-1, 1200-1, 1000-1};
 
+	// TODO: rewrite T intervals into frequency, get rid of float operations
+
 	const static float arrTime[] =
 		{100e-9f, 200e-9f, 500e-9f,
 		1e-6f, 2e-6f, 5e-6f,
@@ -217,9 +219,19 @@ if (bEnable)
 		10e-3f, 20e-3f, 50e-3f, 100e-3f, 200e-3f, 500e-3f,
 		1.0f};
 
+/*
+	const static uint32_t arrTimeInv[] =
+		{(uint32_t)1/100e-9f, (uint32_t)1/200e-9f, (uint32_t)1/500e-9f,
+		(uint32_t)1/1e-6f, (uint32_t)1/2e-6f, (uint32_t)1/5e-6f,
+		(uint32_t)1/10e-6f, (uint32_t)1/20e-6f, (uint32_t)1/50e-6f, (uint32_t)1/100e-6f, (uint32_t)1/200e-6f, (uint32_t)1/500e-6f,
+		(uint32_t)1/1e-3f, (uint32_t)1/2e-3f, (uint32_t)1/5e-3f,
+		1/10e-3f, 1/20e-3f, 1/50e-3f, 1/100e-3f, 1/200e-3f, 1/500e-3f,
+		1/1.0f};
+*/
+
 	// positive floats can be treated as dwords when compared
 	void* pArray = (void*)arrTime; // prevent gcc error "strict alignment rules"
-	void* pValue = (void*)&gTimePerDiv;
+	void* pValue = (void*)&timePerDiv;
 	int nI = _binary_search( (ui32*)pArray, *(ui32*)pValue, 0, (int)COUNT(arrTime)-1 );
 
 	_ASSERT( nI >= 0 || nI < (int)COUNT(arrPsc) );

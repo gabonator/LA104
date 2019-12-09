@@ -3,7 +3,7 @@ class Controls
   constructor()
   {
     this.elem = document.createElement("div");
-    this.elem.style = "border:1px gray solid; width:1200px; height:160px;";
+    this.elem.style = "border:1px gray solid; width:1200px; height:160px; position:absolute; top:420px;";
     this.elem.innerHTML = `
 <style>
 .controlsContainer {
@@ -30,10 +30,15 @@ float:left;
   width:50px;
   height:50px;
 }
+
+.blockCh1 { border: 2px solid #ffff00; }
+.blockCh2 { border: 2px solid #00ffff; }
+.blockTimeTrig { border: 2px solid #ffffff; }
+.blockGen { border: 2px solid #ff00ff; }
 </style>
 
 <div class="controlsContainer">
-  <div class="controlsBlock">
+  <div class="controlsBlock blockCh1">
     CH1:<br><br>
     Coupling: 
     <select id="ch1coupling">
@@ -56,7 +61,7 @@ float:left;
     Offset:
     <input id="ch1offset" size=5 type="text" value="20">
   </div><div class="controlsSpacer"></div>
-  <div class="controlsBlock">
+  <div class="controlsBlock blockCh2">
     CH2:<br><br>
     Coupling: 
     <select id="ch2coupling">
@@ -79,7 +84,7 @@ float:left;
     Offset:
     <input id="ch2offset" size=5 type="text" value="20">
   </div><div class="controlsSpacer"></div>
-  <div class="controlsBlock">
+  <div class="controlsBlock blockTimeTrig">
     Timebase:<br><br>
     T:
     <select id="timebase">
@@ -107,7 +112,7 @@ float:left;
       <option>1s</option>
     </select>&sol;div<br>
     Trigger:
-    <select>
+    <select id="triggerMode">
       <option>EdgeHL</option>
       <option>EdgeLH</option>
       <option>LevelLow</option>
@@ -118,22 +123,23 @@ float:left;
       <option>GreaterDTHigh</option>
       <option>Scan</option>
     </select><br>
-    TrigSource:<select>
+    TrigSource:
+    <select id="triggerSource">
       <option>CH1</option>
       <option>CH2</option>
     </select><br>
-    Y-Offset:<input size=5 type="text" value="128">, 
-    T-Value:<input size=5 type="text" value="128">
+    Threshold:<input size=5 type="text" value="128" id="triggerThreshold">, 
+    Time:<input size=5 type="text" value="128" id="triggerTime">
 
   </div><div class="controlsSpacer"></div>
-  <div class="controlsBlock">
+  <div class="controlsBlock blockGen">
     Generator:<br><br>
-    Flavour:<select>
+    Flavour:<select id="genFlavour">
       <option>Sine</option>
       <option>Square</option>
     </select><br>
-    Frequency:<input size=8 type="text" value="1000"><br>
-    Duty:<input size=8 type="text" value="50%" disabled><br>
+    Frequency:<input size=8 type="text" value="1000" id="genFrequency"><br>
+    Duty:<input size=8 type="text" value="50" disabled id="genDuty">%<br>
     <br>
   </div>
 
@@ -151,8 +157,55 @@ float:left;
     document.querySelector("#ch1offset").addEventListener('change', 
       (o) => INTERFACE.setChannel1Offset(o.target.value));
 
+    document.querySelector("#ch2res").addEventListener('change', 
+      (o) => INTERFACE.setChannel2Range(o.target.value));
+
+    document.querySelector("#ch2coupling").addEventListener('change', 
+      (o) => INTERFACE.setChannel2Coupling(o.target.value));
+
+    document.querySelector("#ch2offset").addEventListener('change', 
+      (o) => INTERFACE.setChannel2Offset(o.target.value));
+
     document.querySelector("#timebase").addEventListener('change', 
       (o) => INTERFACE.setTimebase(o.target.value));
 
+    document.querySelector("#triggerMode").addEventListener('change', 
+      (o) => INTERFACE.setTriggerMode(o.target.value));
+
+    document.querySelector("#triggerSource").addEventListener('change', 
+      (o) => INTERFACE.setTriggerSource(o.target.value));
+
+    document.querySelector("#triggerThreshold").addEventListener('change', 
+      (o) => INTERFACE.setTriggerThreshold(o.target.value));
+
+    document.querySelector("#triggerTime").addEventListener('change', 
+      (o) => INTERFACE.setTriggerTime(o.target.value));
+
+    document.querySelector("#genFlavour").addEventListener('change', 
+      (o) => {
+        INTERFACE.setGeneratorFlavour(o.target.value)
+        document.querySelector("#genDuty").disabled = o.target.value != "Square";
+      });
+
+    document.querySelector("#genFrequency").addEventListener('change', 
+      (o) => INTERFACE.setGeneratorFrequency(o.target.value));
+
+    document.querySelector("#genDuty").addEventListener('change', 
+      (o) => INTERFACE.setGeneratorDuty(o.target.value));
+  }
+
+  setChannel1Offset(v)
+  {
+    document.querySelector("#ch1offset").value = v;
+  }
+
+  setChannel2Offset(v)
+  {
+    document.querySelector("#ch2offset").value = v;
+  }
+
+  setTriggerThreshold(v)
+  {
+    document.querySelector("#triggerThreshold").value = v;
   }
 }
