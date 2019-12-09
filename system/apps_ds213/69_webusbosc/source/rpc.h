@@ -131,9 +131,17 @@ SPI::write(p, 32);
 #endif
 
     if (strcmp(command, "LCD::BufferBegin")==0)
-      return (uint32_t)(uint32_t)static_cast<void(*)(CRect const&)>(BIOS::LCD::BufferBegin);
+      return (uint32_t)static_cast<void(*)(CRect const&)>(BIOS::LCD::BufferBegin);
     if (strcmp(command, "LCD::BufferWrite")==0)
       return (uint32_t)static_cast<void(*)(unsigned short*, int)>(BIOS::LCD::BufferWrite);
+    if (strcmp(command, "LCD::Background")==0)
+      return (uint32_t)static_cast<void(*)(CRect const&, uint32_t, uint32_t)>(GUI::Background);
+    if (strcmp(command, "LCD::Bar")==0)
+      return (uint32_t)static_cast<void(*)(CRect const&, uint16_t)>(BIOS::LCD::Bar);
+    if (strcmp(command, "LCD::DrawSymbol")==0)
+      return (uint32_t)static_cast<int(*)(int, int, uint16_t, uint16_t, const char*)>(BIOS::LCD::Draw);
+    if (strcmp(command, "LCD::Print")==0)
+      return (uint32_t)static_cast<int(*)(int, int, uint16_t, uint16_t, const char*)>(BIOS::LCD::Print);
 
     return 0;
   }

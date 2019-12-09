@@ -307,6 +307,11 @@ public:
       CRect a = TakeRect(args); int b = TakeInt(args);
       return ((int(*)(CRect&, int))(function)) (a, b);
     }
+    if (strcmp(argInterface, "Riii") == 0)
+    {
+      CRect a = TakeRect(args); int b = TakeInt(args), c = TakeInt(args), d = TakeInt(args);
+      return ((int(*)(CRect&, int, int, int))(function)) (a, b, c, d);
+    }
     if (strcmp(argInterface, "Rii") == 0)
     {
       CRect a = TakeRect(args); int b = TakeInt(args), c = TakeInt(args);

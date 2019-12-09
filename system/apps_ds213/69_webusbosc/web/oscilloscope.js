@@ -1,6 +1,7 @@
 
   var canvas = new Renderer(1200, 400);
   var controls = new Controls();
+  var gui = new RemoteGui();
 
   function Redraw(ofs, rawdata)
   {
@@ -64,7 +65,7 @@ INTERFACE = {
   trigState:"run",
 
   genFlavour: "Sine",
-  genFrequency: 1000,
+  genFrequency: 10000,
   genDuty: 50,
 
   // CH1          	
@@ -73,6 +74,7 @@ INTERFACE = {
     INTERFACE.ch1range = range;
     console.log("ch1range: "+INTERFACE.ch1range);
     INTERFACE.configureInput("CH1");
+    gui.drawChannel1();
   },
 
   setChannel1Coupling: (coupling) => 
@@ -80,6 +82,7 @@ INTERFACE = {
     INTERFACE.ch1coupling = coupling;
     console.log("ch1coupling: "+INTERFACE.ch1coupling);
     INTERFACE.configureInput("CH1");
+    gui.drawChannel1();
   },
 
   setChannel1Offset: (offset) => 
@@ -102,6 +105,7 @@ INTERFACE = {
     INTERFACE.ch2range = range;
     console.log("ch2range: "+INTERFACE.ch2range);
     INTERFACE.configureInput("CH2");
+    gui.drawChannel2();
   },
 
   setChannel2Coupling: (coupling) => 
@@ -109,6 +113,7 @@ INTERFACE = {
     INTERFACE.ch2coupling = coupling;
     console.log("ch2coupling: "+INTERFACE.ch2coupling);
     INTERFACE.configureInput("CH2");
+    gui.drawChannel2();
   },
 
   setChannel2Offset: (offset) => 
@@ -140,15 +145,14 @@ INTERFACE = {
   {
     INTERFACE.timebase = t;
     console.log("timebase: "+INTERFACE.timebase);
-    INTERFACE.process( () => OSC.ConfigureTimebase(OSC.Enums[INTERFACE.timebase]) )
-    INTERFACE.process( () => OSC.ConfigureTimebase(OSC.Enums[INTERFACE.timebase]) )
-    INTERFACE.restart();
+    INTERFACE.configureTimebase();
   },
 
   configureTimebase: () =>
   {    
     INTERFACE.process( () => OSC.ConfigureTimebase(OSC.Enums[INTERFACE.timebase]) )
     INTERFACE.process( () => OSC.ConfigureTimebase(OSC.Enums[INTERFACE.timebase]) )
+    gui.drawTimebase();
   },
 
   // TRIGGER
@@ -157,6 +161,7 @@ INTERFACE = {
     INTERFACE.trigMode = m;
     console.log("triggerMode: "+INTERFACE.trigMode);
     INTERFACE.configureTrigger();
+    gui.drawTrigger();
   },
 
   setTriggerThreshold: (thr) =>
@@ -179,6 +184,7 @@ INTERFACE = {
     INTERFACE.trigSource = source;
     console.log("triggerSource: "+INTERFACE.trigSource);
     INTERFACE.configureTrigger();
+    gui.drawTrigger();
   },
 
   toggleTriggerState()
@@ -187,6 +193,7 @@ INTERFACE = {
       INTERFACE.trigState = "paused"
     else
       INTERFACE.trigState = "run"
+    gui.drawTrigger();
   },
 
   configureTrigger: () =>
@@ -200,6 +207,11 @@ INTERFACE = {
   setGeneratorFlavour(flav)
   {
     INTERFACE.genFlavour = flav;
+    INTERFACE.updateGenerator()
+  },
+
+  updateGenerator()
+  {
     if (INTERFACE.genFlavour == "Sine")
     {
       setSineWave(INTERFACE.genFrequency);
@@ -208,29 +220,26 @@ INTERFACE = {
     {
       setSquareWave(INTERFACE.genFrequency);
     }
+    gui.drawGenerator();
   },
 
   setGeneratorFrequency(freq)
   {
     INTERFACE.genFrequency = freq;
-    if (INTERFACE.genFlavour == "Sine")
-    {
-      setSineWave(INTERFACE.genFrequency);
-    }
-    if (INTERFACE.genFlavour == "Square")
-    {
-      setSquareWave(INTERFACE.genFrequency);
-    }
+    INTERFACE.updateGenerator();
   },
 
   setGeneratorDuty(duty)
   {
-    INTERFACE.process(() => GEN.SetDuty(duty));
+    INTERFACE.genDuty = duty;
+    INTERFACE.process(() => GEN.SetDuty(INTERFACE.genDuty));
+    gui.drawGenerator();
   },
   // COMMON
 
   setAll: () =>
   {
+    gui.redraw();
     canvas.setCh1Pos(INTERFACE.ch1offset);
     canvas.setCh2Pos(INTERFACE.ch2offset);
     canvas.setTrigPos(INTERFACE.trigThreshold);
@@ -239,6 +248,7 @@ INTERFACE = {
     INTERFACE.configureTrigger();
     INTERFACE.configureTimebase()
     INTERFACE.restart();
+    INTERFACE.updateGenerator();
   },
   process: (proc) => promises.push(proc),
   restart: () => promises.push(() => OSC.Restart())
@@ -292,7 +302,7 @@ INTERFACE = {
       .then( ()=>GEN.SetWave(bufferPtr, n) )
       .then( ()=>GEN.SetFrequency(freq) )
       .then( ()=>GEN.GetFrequency() )
-      .then( (f)=>console.log("Playing frequency="+f + ", frequency="+Math.floor(f/n)) )
+      .then( (f)=>console.log("Sample playing frequency="+f + ", sequence frequency="+Math.floor(f/n)) )
     );
   }
 
@@ -333,8 +343,6 @@ INTERFACE = {
 */
         );
 
-        setSineWave(10000);
-
         init = true;
         return;
       }
@@ -369,7 +377,7 @@ INTERFACE = {
           .then( () => promise = false );
       }
     }
-  }, 100);
+  }, 10);
 
 
 

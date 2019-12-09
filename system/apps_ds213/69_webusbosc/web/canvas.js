@@ -20,7 +20,7 @@ class Renderer
     this.container.appendChild(this.scrollContainer);
 
     this.elem = document.createElement("canvas");
-    this.elem.width = 4096-30;
+    this.elem.width = 4096-30-15;
     this.elem.height = h;
     this.ctx = this.elem.getContext("2d");
     this.scrollContainer.appendChild(this.elem);

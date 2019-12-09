@@ -1,3 +1,5 @@
+extern "C" void dbg(const char*id);
+
 class CLineParser
 {
   char buffer[256];
@@ -15,9 +17,7 @@ public:
       strcat(buffer, add);
     } else
     {
-      BIOS::DBG::Print("ERROR: Discarding buffers!\n");
-//      BIOS::DBG::Print("'%s'\n", buffer);
-//      BIOS::DBG::Print("'%s'\n", add);
+      dbg("Discarding buffers!");
       buffer[0] = 0;
     }
   }

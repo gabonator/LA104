@@ -11,27 +11,25 @@ extern "C"
 #include "webusb.h"
 }
 
-char buffer[256];
+char buffer[128];
+const char anim[] = "|/-\\|/-\\";
+int animphase = 0;
+
 extern "C" void dbg(const char*id)
 {
-  strcat(buffer, id);
-/*
-return;
-  char tmp[20];
-  sprintf(tmp, "%d:%s%02x ", BIOS::SYS::GetTick(), id, n);
-  strcat(buffer, tmp);
-  if (strlen(buffer)>100)
+  if (strlen(buffer) < 40)
   {
-   BIOS::DBG::Print("~");
-   BIOS::DBG::Print(buffer);
-   buffer[0] = 0;
-  }*/
+    strcat(buffer, id);
+    if (strlen(buffer) >= 40)
+      strcat(buffer, "...");
+  }
 }
+
 extern "C" void __yield()
 {
   EVERY(1000)
   {
-    BIOS::DBG::Print("#");
+    BIOS::LCD::Printf(BIOS::LCD::Width-16, BIOS::LCD::Height-14, RGB565(00ff00), RGB565(404040), "%c", anim[animphase++&7]);
   }
 }
 
@@ -47,7 +45,22 @@ int main(void)
 
   BIOS::OS::TInterruptHandler isrOld = BIOS::OS::GetInterruptVector(BIOS::OS::IUSB_LP_CAN_RX0_IRQ);
   BIOS::OS::SetInterruptVector(BIOS::OS::IUSB_LP_CAN_RX0_IRQ, []() {});
-  BIOS::DBG::Print("USB begin\n");
+
+  CRect rcClient(0, 0, BIOS::LCD::Width, BIOS::LCD::Height);
+  GUI::Background(rcClient, RGB565(404040), RGB565(101010));
+
+  rcClient.bottom = 14;
+  GUI::Background(rcClient, RGB565(4040b0), RGB565(404040));
+  BIOS::LCD::Print(8, rcClient.top, RGB565(ffffff), RGBTRANS, "WebUsb oscilloscope");
+
+  rcClient.bottom = BIOS::LCD::Height;
+  rcClient.top = BIOS::LCD::Height-14;
+  BIOS::LCD::Bar(rcClient, RGB565(404040));
+
+  CRect rcWindow(40, 14+80, BIOS::LCD::Width-40, BIOS::LCD::Height-80);
+  GUI::Window(rcWindow, RGB565(ffffff));
+  BIOS::LCD::Print(rcWindow.left+8, rcWindow.top+2, RGB565(000000), RGBTRANS, "Info");
+  BIOS::LCD::Print(rcWindow.left+8, rcWindow.top+30, RGB565(000000), RGBTRANS, "Connect the device to computer");
 
   _usbd_dev = usb_setup();
   cdc_set_receive_callback([](uint8_t* buf, int len)
@@ -69,11 +82,9 @@ int main(void)
   {
     if (buffer[0])
     {
-      BIOS::DBG::Print(buffer);
-      BIOS::DBG::Print("\n");
+      BIOS::LCD::Print(8, BIOS::LCD::Height-14, RGB565(b0b0b0), RGB565(404040), buffer);
       buffer[0] = 0;
     }
-//    BIOS::SYS::DelayMs(100);
 
     if (parser.isFull())
     {
@@ -83,7 +94,7 @@ int main(void)
     }
     EVERY(1000)
     {
-      BIOS::DBG::Print(".");
+      BIOS::LCD::Printf(BIOS::LCD::Width-16, BIOS::LCD::Height-14, RGB565(b0b0b0), RGB565(404040), "%c", anim[animphase++&7]);
     }
   }
 
