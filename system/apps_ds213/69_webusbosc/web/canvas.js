@@ -90,7 +90,7 @@ class Renderer
 
 .button1 {
   background-color: white; 
-  color: black; 
+  color: red; 
   border: 2px solid #202020;
 }
 
@@ -98,11 +98,25 @@ class Renderer
   background-color: #202020;
   color: white;
 }
+
+.button2 {
+  right: 140px;
+  background-color: white; 
+  color: black; 
+  border: 2px solid #202020;
+}
+
+.button2:hover {
+  background-color: #202020;
+  color: white;
+}
+
 </style>
 <div class="label" id="ch1pos">CH1</div>
 <div class="label" id="ch2pos">CH2</div>
 <div class="label" id="trigpos">TRIG</div>
-<button class="button button1" id="mode">&#9899;<!--&#9724; &#10073;&#10073; &#9658;--></button>
+<button class="button button1" id="mode">&#x25cf;</button>
+<button class="button button2" id="single">&#9658;&#10073;</button>
 `;
 
     dragElement(document.querySelector("#ch1pos"), this.updateCh1Pos.bind(this) );
@@ -110,11 +124,31 @@ class Renderer
     dragElement(document.querySelector("#trigpos"), this.updateTrigPos.bind(this));
 
     document.querySelector("#mode").addEventListener('click', 
-      (o) => 
+      ((o) => 
     {
       INTERFACE.toggleTriggerState();
-      o.target.innerHTML = INTERFACE.trigState == "run" ? "&#9899;" : "&#9724;" 
-    });
+      this.onStop();
+      o.target.innerHTML = INTERFACE.trigState == "run" ? "&#x25CF;" : "&#9724;" 
+      document.querySelector("#mode").style.color = INTERFACE.trigState == "run" ? "rgb(255, 0, 0)" : "rgb(0, 0, 0)";
+    }).bind(this));
+
+    document.querySelector("#single").addEventListener('click', 
+      ((o) => 
+    {
+      this.onStop();
+      if (INTERFACE.trigState != "single")
+      {
+        INTERFACE.restart();
+        INTERFACE.trigState = "single";
+        this.waitingTimer = setInterval(() => 
+        {
+          o.target.style.color = (o.target.style.color == "rgb(255, 0, 0)") ? "rgb(0, 0, 0)" : "rgb(255, 0, 0)"; //innerHTML = INTERFACE.trigState == "run" ? "&#9899;" : "&#9724;" 
+        }, 500);
+      } else
+      {
+        INTERFACE.trigState = "stop";
+      }
+    }).bind(this));
 
   }
   Clear()
@@ -192,6 +226,18 @@ class Renderer
   getScrollOffset()
   { 
     return this.scrollContainer.scrollLeft;
+  }
+
+  onStop()
+  {
+    document.querySelector("#mode").innerHTML = "&#9724;";
+    document.querySelector("#mode").style.color = "rgb(0, 0, 0)";
+    document.querySelector("#single").style.color = "rgb(0, 0, 0)";
+    if (this.waitingTimer)                 	
+    {
+      clearInterval(this.waitingTimer);
+      this.waitingTimer = null;
+    }
   }
 
 }

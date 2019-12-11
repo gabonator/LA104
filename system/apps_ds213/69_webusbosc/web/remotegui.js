@@ -16,7 +16,7 @@ class RemoteGui
     // 400x240
     this.Background([0, 14, 400, 240-14], 0x404040, 0x202020);
     this.Bar([0, 240-14, 400, 240], 0x404040);
-    this.Print(4, 240-14, 0xb0b0b0, 0x404040, "Connected!");
+    this.Print(8, 240-14, 0xb0b0b0, 0x404040, "Connected!");
 
     var paddingx = 20;
     var spacingx = 20;

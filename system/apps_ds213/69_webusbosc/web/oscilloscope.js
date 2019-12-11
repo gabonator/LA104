@@ -2,6 +2,7 @@
   var canvas = new Renderer(1200, 400);
   var controls = new Controls();
   var gui = new RemoteGui();
+  var meas = new Measure();
 
   function Redraw(ofs, rawdata)
   {
@@ -69,6 +70,28 @@ INTERFACE = {
   genDuty: 50,
 
   // CH1          	
+  save()
+  {
+    var data = {};
+    for (var i in this)
+    {
+      if (typeof(this[i]) == "string" || typeof(this[i]) == "number")
+        data[i] = this[i];
+    }
+    var settings = JSON.stringify(data);
+    localStorage.setItem('settings', settings);
+  },
+
+  load()
+  {
+    var settings = localStorage.getItem('settings');
+    var objs = JSON.parse(settings);
+    for (var i in objs)
+    {
+      this[i] = objs[i];
+    }
+  },
+
   setChannel1Range: (range) => 
   {
     INTERFACE.ch1range = range;
@@ -138,6 +161,7 @@ INTERFACE = {
       INTERFACE.process( () => OSC.ConfigureInput(OSC.Enums["CH2"], OSC.Enums[INTERFACE.ch2coupling], OSC.Enums[INTERFACE.ch2range], INTERFACE.ch2offset) )
 
     INTERFACE.restart();
+    INTERFACE.save();
   },
 
   // TIMEBASE
@@ -153,6 +177,7 @@ INTERFACE = {
     INTERFACE.process( () => OSC.ConfigureTimebase(OSC.Enums[INTERFACE.timebase]) )
     INTERFACE.process( () => OSC.ConfigureTimebase(OSC.Enums[INTERFACE.timebase]) )
     gui.drawTimebase();
+    INTERFACE.save();
   },
 
   // TRIGGER
@@ -201,6 +226,7 @@ INTERFACE = {
     INTERFACE.process( () => OSC.ConfigureTrigger(INTERFACE.trigTime, INTERFACE.trigThreshold, 
       OSC.Enums[INTERFACE.trigMode], OSC.Enums[INTERFACE.trigSource]) );
     INTERFACE.restart();
+    INTERFACE.save();
   },
 
   // GENERATOR
@@ -220,7 +246,16 @@ INTERFACE = {
     {
       setSquareWave(INTERFACE.genFrequency);
     }
+    if (INTERFACE.genFlavour == "Triangle")
+    {
+      setTriangleWave(INTERFACE.genFrequency);
+    }
+    if (INTERFACE.genFlavour == "Sawtooth")
+    {
+      setSawtoothWave(INTERFACE.genFrequency);
+    }
     gui.drawGenerator();
+    INTERFACE.save();
   },
 
   setGeneratorFrequency(freq)
@@ -234,6 +269,7 @@ INTERFACE = {
     INTERFACE.genDuty = duty;
     INTERFACE.process(() => GEN.SetDuty(INTERFACE.genDuty));
     gui.drawGenerator();
+    INTERFACE.save();
   },
   // COMMON
 
@@ -249,6 +285,11 @@ INTERFACE = {
     INTERFACE.configureTimebase()
     INTERFACE.restart();
     INTERFACE.updateGenerator();
+  },
+
+  onTrigger:()=> 
+  {
+    canvas.onStop();
   },
   process: (proc) => promises.push(proc),
   restart: () => promises.push(() => OSC.Restart())
@@ -268,41 +309,65 @@ INTERFACE = {
 
   function setSineWave(freq)
   {
-/*
-    var pSineWave = [0x000,0x027,0x08E,0x130,0x209,0x311,0x441,0x58F,0x6F0,    // 90
-			0x85A,0x9C0,0xB19,0xC59,0xD76,0xE68,0xF26,0xFAB,0xFF3,    // 180
-			0xFFF,0xFD7,0xF70,0xECE,0xDF5,0xCED,0xBBD,0xA6F,0x90E,    // 270
-			0x7A4,0x63E,0x4E5,0x3A5,0x288,0x196,0x0D8,0x053,0x00B];   // 360   
-    var buf = [];
-    var freq = f;//1000;
-    for (var i=0; i<pSineWave.length; i++)
-    {
-      var sample = pSineWave[i];
-//      sample = Math.floor(0xfff * i / pSineWave.length);
-      buf.push(sample & 255);
-      buf.push(sample >> 8);
-    }
-*/
     var n = 38*4;       
-    var buf = [];
+    var samples = [];
     for (var i=0; i<n; i++)
     {
       var sample = Math.sin(Math.PI*2*i/n);
       sample = (sample * (0x1000/2-20)) + 0x1000/2;
-      sample = Math.floor(sample);
+      samples.push(sample);
+    }
+    return transferWave(samples, freq);
+  }
+                                     	
+  function setTriangleWave(freq)
+  {
+    var n = 38*4;       
+    var samples = [];
+    for (var i=0; i<n; i++)
+    {
+      var sample = 0;
+      if (i<n/2)
+        sample = i*0x1000/(n/2);
+      else
+        sample = (n-i)*0x1000/(n/2);
+      samples.push(sample);
+    }
+    return transferWave(samples, freq);
+  }
+
+  function setSawtoothWave(freq)
+  {
+    var n = 38*4;       
+    var samples = [];
+    for (var i=0; i<n; i++)
+    {
+      var sample = i*0x1000/n;
+      samples.push(sample);
+    }
+    return transferWave(samples, freq);
+  }
+
+  function transferWave(samples, freq)
+  {
+    var buf = [];
+    for (var i=0; i<samples.length; i++)
+    {
+      sample = Math.floor(samples[i]);
       if (sample < 0) sample = 0;
       if (sample > 0xfff) sample = 0xfff;
       buf.push(sample & 255);
       buf.push(sample >> 8);
     }
+
     promises.push(() => 
       Promise.resolve()
       .then( ()=>BIOS.biosMemBulk(bufferPtr, buf) )
-      .then( ()=>GEN.SetWave(bufferPtr, n-1) ) // WTF??? bios error, wont configure DMA without changing buffer length
-      .then( ()=>GEN.SetWave(bufferPtr, n) )
+      .then( ()=>GEN.SetWave(bufferPtr, samples.length-1) ) // WTF??? bios error, wont configure DMA without changing buffer length
+      .then( ()=>GEN.SetWave(bufferPtr, samples.length) )
       .then( ()=>GEN.SetFrequency(freq) )
       .then( ()=>GEN.GetFrequency() )
-      .then( (f)=>console.log("Sample playing frequency="+f + ", sequence frequency="+Math.floor(f/n)) )
+      .then( (f)=>console.log("Sample playing frequency="+f + ", sequence frequency="+Math.floor(f/samples.length)) )
     );
   }
 
@@ -333,14 +398,6 @@ INTERFACE = {
           .then( ptr => bufferPtr = ptr)
           .then( () => OSC.Enable(1) )
           .then( () => INTERFACE.setAll() )
-/*
-          .then( () => OSC.ConfigureTimebase(OSC.Enums[INTERFACE.timebase]) )
-          .then( () => OSC.ConfigureTimebase(OSC.Enums[INTERFACE.timebase]) )
-          .then( () => OSC.ConfigureTrigger(150, 100, OSC.Enums["EdgeHL"], OSC.Enums["CH1"]) )
-          .then( () => OSC.ConfigureInput(OSC.Enums["CH1"], OSC.Enums[INTERFACE.ch1coupling], OSC.Enums[INTERFACE.ch1range], INTERFACE.ch1offset) )
-          .then( () => OSC.ConfigureInput(OSC.Enums["CH2"], OSC.Enums[INTERFACE.ch2coupling], OSC.Enums[INTERFACE.ch2range], INTERFACE.ch2offset) )
-          .then( () => OSC.Restart() )
-*/
         );
 
         init = true;
@@ -353,22 +410,50 @@ INTERFACE = {
         return;
       }
 
-//      if (INTERFACE.trigState == "run")
+      if (INTERFACE.trigState != "stop")
       {
+        var dt = parseFloat(OSC.Enums[INTERFACE.timebase]);
+        var dv = [50e-3, 100e-3, 200e-3, 500e-3, 1, 2, 5, 10][OSC.Enums[INTERFACE.ch1range]];
+
         promise = Promise.resolve()
           .then( () => OSC.Ready() )
           .then( (ready) =>  
           { 
             var now = (new Date()).getTime();
-            if (ready || now - last > 2000 || (INTERFACE.trigMode == "None" && now-last > 500))
+            var forceAutoRedraw = INTERFACE.trigState == "run" && now - last > 2000;
+            var forceFreerunRedraw = INTERFACE.trigMode == "None" && now-last > 500;
+
+            if (INTERFACE.trigState == "stop") 
+            {
+            } else
+            if (INTERFACE.trigState == "single") 
+            {
+                if (ready) 
+                {
+                  INTERFACE.onTrigger();
+                  INTERFACE.trigState = "stop";
+
+                  return Promise.resolve()
+                  .then( () => OSC.Transfer(30, 4096-30) )
+                  .then( data => { controls.setMeasData(meas.Calculate("CH1", dt, dv, data))	; return data;} )
+                  .then( data => Redraw(0, data) )
+                  .catch( () => { console.log("err"); return Promise.resolve()} );
+                }
+            } else
+//            if (ready || forceAutoRedraw || forceFreerunRedraw)
             {
               last = now;
               var scroll = canvas.getScrollOffset();
 
               return Promise.resolve()
               .then( () => OSC.Transfer(150*0+30 + scroll, 256*4+180) )
+              .then( data => { controls.setMeasData(meas.Calculate("CH1", dt, dv, data)); return Promise.resolve(data);} )
               .then( data => Redraw(scroll, data) )
-              .then( () => { if (ready && INTERFACE.trigState == "run") return OSC.Restart(); else return Promise.resolve();} )
+              .then( () => 
+              { 
+                if ((ready && INTERFACE.trigState == "run") || forceAutoRedraw) 
+                  return OSC.Restart(); 
+              } )
               .then( () => Promise.resolve() )
               .catch( () => { console.log("err"); return Promise.resolve()} );
             }
@@ -380,8 +465,8 @@ INTERFACE = {
   }, 10);
 
 
-
-
+INTERFACE.load();
+controls.load();
 
 
 

@@ -19,7 +19,7 @@ border: 2px solid #73AD21;
 
 color:#ffffff;
 background:#202020;
-width:220px;                  
+width:180px;                  
 height:120px;
 padding:10px;
 float:left;
@@ -28,14 +28,15 @@ float:left;
 .controlsSpacer
 {
   float:left;
-  width:50px;
-  height:50px;
+  width:42px;
+  height:20px;
 }
 
 .blockCh1 { border: 2px solid #ffff00; }
 .blockCh2 { border: 2px solid #00ffff; }
 .blockTimeTrig { border: 2px solid #ffffff; }
 .blockGen { border: 2px solid #ff00ff; }
+.blockMeas { border: 2px solid #b0b0b0; }
 .hidden {display:none;}
 </style>
 
@@ -46,7 +47,7 @@ float:left;
     <select id="ch1coupling">
      <option>AC</option>
      <option selected>DC</option>
-     <option>GND</option>
+<!--     <option>GND</option> -->
     </select><br>
 
     Range:
@@ -90,7 +91,7 @@ float:left;
     Timebase:<br><br>
     T:
     <select id="timebase">
-      <option>100ns</option>
+<!--      <option>100ns</option> -->
       <option>200ns</option>
       <option>500ns</option>
       <option>1us</option>
@@ -138,10 +139,25 @@ float:left;
     Generator:<br><br>
     Flavour:<select id="genFlavour">
       <option>Sine</option>
+      <option>Triangle</option>
+      <option>Sawtooth</option>
       <option>Square</option>
     </select><br>
     Frequency:<input size=8 type="text" value="1000" id="genFrequency"><br>
     Duty:<input size=8 type="text" value="50" disabled id="genDuty">%<br>
+    <br>
+  </div>
+
+  <div class="controlsSpacer"></div>
+  <div class="controlsBlock blockMeas">
+    Measure:<br><br>
+    Source:<select id="measSource">
+      <option>CH1</option>
+      <option>CH2</option>
+    </select><br>
+    Frequency:<input size=8 type="text" value="" id="measFrequency" disabled><br>
+    Amplitude pk-pk:<input size=8 type="text" value="" id="measAmplitude" disabled><br>
+    Average:<input size=8 type="text" value="" id="measAverage" disabled><br>
     <br>
   </div>
 
@@ -209,5 +225,30 @@ float:left;
   setTriggerThreshold(v)
   {
     document.querySelector("#triggerThreshold").value = v;
+  }
+
+  setMeasData(data)
+  {
+    document.querySelector("#measFrequency").value = data.frequency;
+    document.querySelector("#measAmplitude").value = data.amplitude;
+    document.querySelector("#measAverage").value = data.average;
+  }
+
+  load()
+  {
+    document.querySelector("#ch1res").value = INTERFACE.ch1range;
+    document.querySelector("#ch1coupling").value = INTERFACE.ch1coupling;
+    document.querySelector("#ch1offset").value = INTERFACE.ch1offset;
+    document.querySelector("#ch2res").value = INTERFACE.ch2range;
+    document.querySelector("#ch2coupling").value = INTERFACE.ch2coupling;
+    document.querySelector("#ch2offset").value = INTERFACE.ch2offset;
+    document.querySelector("#timebase").value = INTERFACE.timebase;
+    document.querySelector("#triggerMode").value = INTERFACE.trigMode;
+    document.querySelector("#triggerSource").value = INTERFACE.trigSource;
+    document.querySelector("#triggerThreshold").value = INTERFACE.trigThreshold; 
+    document.querySelector("#triggerTime").value = INTERFACE.trigTime;
+    document.querySelector("#genFlavour").value = INTERFACE.genFlavour;
+    document.querySelector("#genFrequency").value = INTERFACE.genFrequency;
+    document.querySelector("#genDuty").value = INTERFACE.genDuty;
   }
 }
