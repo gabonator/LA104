@@ -1,4 +1,6 @@
 
+  //serial.ilovebill = true;  //20% cpu with free cycles, 44% with intensive communication
+
   var canvas = new Renderer(1200, 400);
   var controls = new Controls();
   var gui = new RemoteGui();
@@ -48,6 +50,8 @@
   var promises = [];
   var bufferPtr = 0;
   var last = 0;
+  var lastRequest = 0;
+  var lastAsk = 0;
 
 INTERFACE = {
   ch1range:"500mV",
@@ -90,6 +94,7 @@ INTERFACE = {
     {
       this[i] = objs[i];
     }
+    this.trigState = "run";
   },
 
   setChannel1Range: (range) => 
@@ -415,13 +420,22 @@ INTERFACE = {
         var dt = parseFloat(OSC.Enums[INTERFACE.timebase]);
         var dv = [50e-3, 100e-3, 200e-3, 500e-3, 1, 2, 5, 10][OSC.Enums[INTERFACE.ch1range]];
 
+        var scroll = canvas.getScrollOffset();
+        var now = (new Date()).getTime();
+        var forceFreerunRedraw = INTERFACE.trigMode == "None" && now - last > 500;
+        var forceAutoRedraw = INTERFACE.trigState == "run" && now - last > 2000;
+        var forcePausedRedraw = INTERFACE.trigState == "paused" && lastRequest != scroll && now - last > 100;
+
+        if (INTERFACE.trigState == "paused" && !forcePausedRedraw)
+          return;
+        if (now-lastAsk < 50)
+          return;
+        lastAsk = now;
         promise = Promise.resolve()
           .then( () => OSC.Ready() )
           .then( (ready) =>  
           { 
-            var now = (new Date()).getTime();
-            var forceAutoRedraw = INTERFACE.trigState == "run" && now - last > 2000;
-            var forceFreerunRedraw = INTERFACE.trigMode == "None" && now-last > 500;
+            var forceFinishedRedraw = INTERFACE.trigState == "run" && ready;
 
             if (INTERFACE.trigState == "stop") 
             {
@@ -440,10 +454,10 @@ INTERFACE = {
                   .catch( () => { console.log("err"); return Promise.resolve()} );
                 }
             } else
-//            if (ready || forceAutoRedraw || forceFreerunRedraw)
+            if (forceFinishedRedraw || forceAutoRedraw || forceFreerunRedraw || forcePausedRedraw)
             {
               last = now;
-              var scroll = canvas.getScrollOffset();
+              lastRequest = scroll;
 
               return Promise.resolve()
               .then( () => OSC.Transfer(150*0+30 + scroll, 256*4+180) )

@@ -1,26 +1,14 @@
 MEMORY
 {
-/*
-  rom (rx)  : ORIGIN = 0x0801ee00, LENGTH = 163K
-  ram (rwx) : ORIGIN = 0x20004400, LENGTH = 110K
-*/
-  null (rwx): ORIGIN = 0x00001000, LENGTH = 4K
-/*
-  rom (rx) : ORIGIN = 0x08014000, LENGTH = 112K
-  ram (rwx) : ORIGIN = 0x20003000, LENGTH = 28K
-*/
-  rom (rx) : ORIGIN = 0x08017000, LENGTH = 70K
-  ram (rwx) : ORIGIN = 0x20005000, LENGTH = 28K
+/*  rom (rx)  : ORIGIN = 0x0801ed00, LENGTH = 60K*/
+  rom (rx) : ORIGIN = 0x08040000, LENGTH = 256K
 
+  ram (rwx) : ORIGIN = 0x20004300, LENGTH = 27K
+  null (rwx): ORIGIN = 0x00001000, LENGTH = 8K
 }
 
-/*
-failed 648 bytes at 0801f648
-                    0801f7f4
-                    0802af30
-                    08029f30
-                    0801f050
-*/
+/* _estack = ORIGIN(ram)+LENGTH(ram)-0x100; */
+
 SECTIONS
   {
     .text : {
@@ -31,7 +19,7 @@ SECTIONS
 
     .data : {
       *(.data*)        /* Data memory */
-      *(.dynamic)
+/*      *(.dynamic*) */
     } >ram AT >rom
 
   .bss : {

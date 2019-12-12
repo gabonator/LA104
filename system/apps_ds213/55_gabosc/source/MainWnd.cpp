@@ -2,6 +2,7 @@
 
 CMainWnd* CMainWnd::m_pInstance = nullptr;
 CSettings m_Settings; // TODO:!
+long m_lLastAcquired = 0;
 
 void CMainWnd::Create()
 {
@@ -73,6 +74,50 @@ bool CMainWnd::IsRunning()
 {
 	if ( nMsg == WmTick )
 	{
+		long now = BIOS::SYS::GetTick();
+
+		if ( (Settings.Trig.Sync != CSettings::Trigger::_None) && BIOS::ADC::Enabled() && BIOS::ADC::Ready() )
+		{
+			Sampler::Copy();
+			BIOS::ADC::Restart();
+			CWnd::WindowMessage( CWnd::WmBroadcast, ToWord('d', 'g') );
+                        m_lLastAcquired = now;
+			return;
+		}
+
+	if ( BIOS::ADC::Enabled() && Settings.Trig.Sync == CSettings::Trigger::_Auto )
+	{
+		if ( m_lLastAcquired != -1 && now - m_lLastAcquired > 300 )
+		{
+			bool bScreenReady = BIOS::ADC::GetPointer() > (300 + Settings.Time.InvalidFirst);
+			Sampler::Copy();
+
+			// trig stuff
+			m_lLastAcquired = now;
+			if ( BIOS::ADC::Enabled() && Settings.Trig.Sync == CSettings::Trigger::_Single )
+			{
+				BIOS::ADC::Enable( false );
+				Settings.Trig.State = CSettings::Trigger::_Stop;
+				if ( m_wndMenuInput.m_itmTrig.IsVisible() )
+					m_wndMenuInput.m_itmTrig.Invalidate();
+                        }
+
+
+
+			// redraw the screen even when the sampler is not full
+			WindowMessage( CWnd::WmBroadcast, ToWord('d', 'g') );
+		
+			// force restart if the write pointer is behind current window
+			if ( BIOS::ADC::Enabled() && bScreenReady )
+			{
+				BIOS::ADC::Restart();
+			} 
+		}
+	}
+
+
+#if 0
+/*
 		static long l = 0;
 		long n = BIOS::SYS::GetTick();
 		if (n-l > 100)
@@ -81,7 +126,7 @@ bool CMainWnd::IsRunning()
 			CWnd::WindowMessage( CWnd::WmBroadcast, ToWord('d', 'g') );
 			l = n;
 		}
-/*
+*/
 		if ( (Settings.Trig.Sync != CSettings::Trigger::_None) && BIOS::ADC::Enabled() && BIOS::ADC::Ready() )
 		{
 			// ADC::Ready means that the write pointer is at the end of buffer, we can restart sampler
@@ -101,7 +146,8 @@ bool CMainWnd::IsRunning()
 		
 			// broadcast message for windows that process waveform data
 			WindowMessage( CWnd::WmBroadcast, ToWord('d', 'g') );
-		}*/
+		}
+#endif
 	}
 	CWnd::WindowMessage(nMsg, nParam);
 }

@@ -2,7 +2,7 @@ var serial = {};
 
   serial.getPorts = function() {
     return navigator.usb.getDevices().then(devices => {
-      return devices.map(device => new serial.Port(device));
+      return devices.map(device => new serial.Port(device, this.ilovebill));
     });
   };
 
@@ -11,22 +11,26 @@ var serial = {};
       { 'vendorId': 0x1209, 'productId': 0xdb42 }
     ];
     return navigator.usb.requestDevice({ 'filters': filters }).then(
-      device => new serial.Port(device)
+      device => new serial.Port(device, this.ilovebill)
     );
   }
 
-  serial.Port = function(device) {
+  serial.Port = function(device, ilovebill) {
     this.device_ = device;
     this.interfaceNumber_ = 3;  // original interface number of WebUSB Arduino demo
     this.endpointIn_ = 4;       // original in endpoint ID of WebUSB Arduino demo
     this.endpointOut_ = 3;      // original out endpoint ID of WebUSB Arduino demo
+    this.ilovebill = ilovebill;
   };
 
   serial.Port.prototype.connect = function() {
     let readLoop = () => {
       this.device_.transferIn(this.endpointIn_, 64).then(result => {
         this.onReceive(result.data);
-        setTimeout(readLoop, 0); 
+        if (this.ilovebill)
+          setTimeout(readLoop, 0); 
+        else
+          readLoop();
       }, error => {
         this.onReceiveError(error);
       });

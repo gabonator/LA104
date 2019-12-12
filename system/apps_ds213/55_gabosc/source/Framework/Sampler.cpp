@@ -7,7 +7,6 @@ namespace Sampler
 	
 	void Copy()
 	{
-		BIOS::ADC::Restart();
 		for (int i=0; i<Samples; i++)
 		{
 			memory[i] &= 0xff000000;
