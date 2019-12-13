@@ -19,7 +19,6 @@
 #include <string.h>
 #include <libopencm3/cm3/vector.h>
 #include <libopencm3/usb/usbd.h>
-#include <libopencm3/usb/msc.h>
 #include <libopencm3/stm32/gpio.h>
 #include <bluepill.h>
 #include <logger.h>

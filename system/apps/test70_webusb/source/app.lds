@@ -1,7 +1,9 @@
 MEMORY
 {
-  rom (rx) : ORIGIN = 0x08040000, LENGTH = 256K
-  ram (rwx) : ORIGIN = 0x20002600, LENGTH = 30K
+/*  rom (rx)  : ORIGIN = 0x0801ed00, LENGTH = 60K*/
+  rom (rx) : ORIGIN = 0x08064800, LENGTH = 80K
+
+  ram (rwx) : ORIGIN = 0x20004800, LENGTH = 16K
   null (rwx): ORIGIN = 0x00001000, LENGTH = 8K
 }
 
@@ -9,11 +11,6 @@ MEMORY
 
 SECTIONS
   {
-
-  .bios 0x08000100 (NOLOAD) : {
-    *(.biosfunc) 
-  }
-
     .text : {
       *(.entry)
       *(.text*)        /* Program code */

@@ -1,0 +1,322 @@
+#include "atof.h"
+
+class CEvaluator 
+{
+public:
+  uint32_t Evaluate(char* command)
+  {
+    char* args = strchr(command, '(');
+    *args++ = 0;
+
+    uint32_t functionPtr = RPC::GetProcAddress(command);
+
+    if (!functionPtr)
+    {
+      BIOS::DBG::Print("Function '%s' not found.\n", command);
+      return 0;
+    }
+
+    void* function = (void*)(functionPtr|1);
+    char* argInterface = GetArgumentsSignature(args);
+
+    // foreign function interface
+    if (strcmp(argInterface, "") == 0)
+      return ((int(*)())(function)) ();
+    if (strcmp(argInterface, "i") == 0)
+    {
+      int a = TakeInt(args);
+      return ((int(*)(int))(function)) (a);
+    }
+    if (strcmp(argInterface, "ii") == 0)
+    {
+      int a = TakeInt(args), b = TakeInt(args);
+      return ((int(*)(int, int))(function)) (a, b);
+    }
+    if (strcmp(argInterface, "iii") == 0)
+    {
+      int a = TakeInt(args), b = TakeInt(args), c = TakeInt(args);
+      return ((int(*)(int, int, int))(function)) (a, b, c);
+    }
+    if (strcmp(argInterface, "iiii") == 0)
+    {
+      int a = TakeInt(args), b = TakeInt(args), c = TakeInt(args), d = TakeInt(args);
+      return ((int(*)(int, int, int, int))(function)) (a, b, c, d);
+    }
+    if (strcmp(argInterface, "iiiii") == 0)
+    {
+      int a = TakeInt(args), b = TakeInt(args), c = TakeInt(args), d = TakeInt(args), e = TakeInt(args);
+      return ((int(*)(int, int, int, int, int))(function)) (a, b, c, d, e);
+    }
+    if (strcmp(argInterface, "si") == 0)
+    {
+      char* a = TakeString(args); int b = TakeInt(args);
+      return ((int(*)(void*, int))(function)) (a, b);
+    }
+    if (strcmp(argInterface, "f") == 0)
+    {
+      float a = TakeFloat(args);
+      return ((int(*)(float))(function)) (a);
+    }
+    if (strcmp(argInterface, "s") == 0)
+    {
+      char* a = TakeString(args);
+      return ((int(*)(char*))(function)) (a);
+    }
+    if (strcmp(argInterface, "is") == 0)
+    {
+      int a = TakeInt(args); char* b = TakeString(args);
+      return ((int(*)(int, char*))(function)) (a, b);
+    }
+    if (strcmp(argInterface, "R") == 0)
+    {
+      CRect a = TakeRect(args);
+      return ((int(*)(CRect&))(function)) (a);
+    }
+    if (strcmp(argInterface, "Ri") == 0)
+    {
+      CRect a = TakeRect(args); int b = TakeInt(args);
+      return ((int(*)(CRect&, int))(function)) (a, b);
+    }
+    if (strcmp(argInterface, "Riii") == 0)
+    {
+      CRect a = TakeRect(args); int b = TakeInt(args), c = TakeInt(args), d = TakeInt(args);
+      return ((int(*)(CRect&, int, int, int))(function)) (a, b, c, d);
+    }
+    if (strcmp(argInterface, "Rii") == 0)
+    {
+      CRect a = TakeRect(args); int b = TakeInt(args), c = TakeInt(args);
+      return ((int(*)(CRect&, int, int))(function)) (a, b, c);
+    }
+    if (strcmp(argInterface, "iiiis") == 0)
+    {
+      int a = TakeInt(args); int b = TakeInt(args); int c = TakeInt(args); int d = TakeInt(args); char* e = TakeString(args);
+      return ((int(*)(int, int, int, int, char*))(function))(a, b, c, d, e);
+    }
+    if (strcmp(argInterface, "f") == 0)
+    {
+      float a = TakeFloat(args);
+      return ((int(*)(float))(function)) (a);
+    }
+ 
+    BIOS::DBG::Print("Calling interface '%s' not supported.\n", argInterface);
+    return 0;
+  }
+
+private:
+  CRect mInternalRect;
+
+  CRect& TakeRect(char*& s)
+  {     
+    CRect& rc = mInternalRect;
+
+    s = strchr(s, '(');
+    _ASSERT(s);
+    s++;
+    rc.left = TakeInt(s);
+    rc.top = TakeInt(s);
+    rc.right = TakeInt(s);
+    rc.bottom = TakeInt(s);
+    s = strchr(s, ')');
+    _ASSERT(s);
+    s++;
+
+      while (*s == ' ' || *s == ',')
+        s++;
+
+    return rc;
+  }
+
+  uint32_t TakeHex(char*& s)
+  {
+    uint32_t value = 0;
+    do {
+      char c = *s;
+      if (c >= '0' && c <= '9')
+      {
+        value *= 16;
+        value += c - '0';
+        s++;
+        continue;
+      }
+      if (c >= 'a' && c <= 'f')
+      {
+        value *= 16;
+        value += c - 'a' + 10;
+        s++;
+        continue;
+      }
+      if (c >= 'A' && c <= 'F')
+      {
+        value *= 16;
+        value += c - 'a' + 10;
+        s++;
+        continue;
+      }
+      break;
+    } while (1);
+
+    _ASSERT(s[0] == ' ' || s[0] == ',' || s[0] == ')');
+      while (*s == ' ' || *s == ',')
+        s++;
+
+    return value;
+  }
+
+  uint32_t TakeInt(char*& s)
+  {
+    while (*s == ' ')
+      s++;
+
+    if (s[0] == '0' && s[1] == 'x')
+    {
+      s+=2;
+      return TakeHex(s);
+    }
+
+    uint32_t value = 0;
+    while (s[0] >= '0' & s[0] <= '9')
+    {
+      value *= 10;
+      value += *s++ - '0';
+    }
+    _ASSERT(s[0] == ' ' || s[0] == ',' || s[0] == ')');
+
+      while (*s == ' ' || *s == ',')
+        s++;
+
+    return value;
+  }
+
+  float TakeFloat(char*& s)
+  {
+    while (*s == ' ')
+     s++;
+
+    float f = _atof(s);
+
+    _ASSERT(s[0] == ' ' || s[0] == ',' || s[0] == ')');
+
+    while (*s == ' ' || *s == ',')
+      s++;
+
+    return f;
+  }
+
+  char* TakeString(char*& s)
+  {
+    while (*s == ' ')
+     s++;
+
+    _ASSERT(*s == '\"');
+
+    s++;
+
+    char* ptr = s;
+    while (*s != '\"' && *s)
+      s++;
+
+    _ASSERT(*s == '\"');
+    *s = 0;
+    s++;
+
+    _ASSERT(s[0] == ' ' || s[0] == ',' || s[0] == ')');
+
+      while (*s == ' ' || *s == ',')
+        s++;
+
+    return ptr;
+  }
+
+  char GetArgumentSignature(char*& s)
+  {
+    if (!*s || *s == ')')
+      return 0;
+
+    while (*s == ' ')
+     s++;
+
+    if (s[0] == 'C' && s[1] == 'R' && s[2] == 'e' && s[3] == 'c' && s[4] == 't')
+    {   
+      s = strchr(s, ')');
+      _ASSERT(s);
+      s++;
+      return 'R'; 
+    }
+
+    if (*s == '\"')
+    {
+      s++;
+      while (*s != '\"' && *s)
+        s++;
+      _ASSERT(s[0] == '\"');
+      s++;
+      _ASSERT(s[0] == ' ' || s[0] == ',' || s[0] == ')');
+
+      while (*s == ' ' || *s == ',')
+        s++;
+
+      return 's';
+    }
+
+    if (s[0] == '0' && s[1] == 'x')
+    {
+      s += 2;
+      TakeHex(s);
+      return 'i';
+    }
+
+    // int or float
+    do 
+    {
+      if (*s == '.' || *s == 'e' || *s == 'E')
+      {
+        s++;
+        while ((*s >= '0' && *s <= '9') || *s == '+' || *s == '-' || *s == 'e' || *s == 'E')
+          s++;
+
+        if (s[0] == ' ' || s[0] == ',' || s[0] == ')')
+        {
+          while (*s == ' ' || *s == ',')
+           s++;
+        }
+
+        return 'f';
+      }
+      if (*s >= '0' && *s <= '9')
+      {
+        s++;
+        continue;
+      }
+      break;
+    } while (1);
+
+    if (s[0] == ' ' || s[0] == ',' || s[0] == ')')
+    {
+      while (*s == ' ' || *s == ',')
+        s++;
+
+      return 'i';
+    }
+
+    _ASSERT(0);
+    return 0; 
+  }
+
+  char* GetArgumentsSignature(char* s)
+  {
+    static char signature[16] = {0};
+    int sigI = 0;
+
+    char argSig;
+    do {
+      argSig = GetArgumentSignature(s);
+      signature[sigI++] = argSig;
+
+      _ASSERT(sigI < 10);
+    } while (argSig);
+
+    signature[sigI] = 0;
+
+    return signature;
+  }
+};

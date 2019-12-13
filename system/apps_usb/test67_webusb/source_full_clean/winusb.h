@@ -16,20 +16,15 @@
  * CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef WEBUSB_H_INCLUDED
-#define WEBUSB_H_INCLUDED
+#ifndef WINUSB_H_INCLUDED
+#define WINUSB_H_INCLUDED
 
-#include <libopencm3/usb/usbd.h>
-#include "webusb_defs.h"
 #include "winusb_defs.h"
 
-// Arbitrary
-#define WEBUSB_VENDOR_CODE 0x22  //  Don't use 0x21, reserved for WinUSB.
+// Arbitrary, but must be equivalent to the last character in extra string
+#define WINUSB_MS_VENDOR_CODE '!'  //  0x21
+#define WINUSB_EXTRA_STRING {'M', 'S', 'F', 'T', '1', '0', '0', WINUSB_MS_VENDOR_CODE}
 
-extern const struct webusb_platform_descriptor webusb_platform_capability_descriptor;
-extern const struct webusb_platform_descriptor webusb_platform_capability_descriptor_no_landing_page;
-extern const struct microsoft_platform_descriptor microsoft_platform_capability_descriptor;
-
-extern void webusb_setup(usbd_device* usbd_dev, const char* https_url);
+extern void winusb_setup(usbd_device* usbd_dev, uint8_t interface);
 
 #endif

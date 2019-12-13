@@ -118,7 +118,7 @@ typedef struct
 
 //#define RECORD_DEPTH    3584   // gabo
 #define RECORD_DEPTH    500
-#define CNTx4K          1 // gabo
+#define CNTx4K          4 // gabo
 #define PSMP_NUM        2
 //----------------------USB DISK 
 

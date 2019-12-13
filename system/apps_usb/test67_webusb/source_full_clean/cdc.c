@@ -1,6 +1,7 @@
 //  CDC code from https://github.com/Apress/Beg-STM32-Devel-FreeRTOS-libopencm3-GCC/blob/master/rtos/usbcdcdemo/usbcdc.c
 #include <libopencm3/usb/usbd.h>
 #include <libopencm3/usb/cdc.h>
+#include <logger.h>
 #include "usb_conf.h"
 #include "cdc.h"
 
@@ -16,9 +17,6 @@ static const struct usb_cdc_line_coding line_coding = {
 	.bDataBits = 0x08
 };
 
-cdc_receive_callback receive_callback = NULL;
-usbd_device* transmit_device = NULL;
-volatile bool cdc_sending = false;
 
 int cdcacm_control_request(
   usbd_device *usbd_dev __attribute__((unused)),
@@ -99,25 +97,21 @@ cdcacm_data_rx_cb(
     uint16_t pos = (len < MAX_USB_PACKET_SIZE) ? len : MAX_USB_PACKET_SIZE;
     cdcbuf[pos] = 0;
 
-//	usbd_ep_write_packet(usbd_dev, DATA_IN, cdcbuf, pos); ////  Echo the packet.
+	usbd_ep_write_packet(usbd_dev, DATA_IN, cdcbuf, pos); ////  Echo the packet.
 	
-//    debug_print("["); debug_println(cdcbuf); debug_print("]"); // debug_flush(); ////
-//dbg(cdcbuf);
-  if (receive_callback)
-    receive_callback((uint8_t*)cdcbuf, pos);
-}
+    debug_print("["); debug_println(cdcbuf); debug_print("]"); // debug_flush(); ////
+dbg(cdcbuf);
 
-static void cdcacm_data_tx_cb(usbd_device *usbd_dev, uint8_t ep)
-{
-  cdc_sending = false;
 }
 
 static void
 cdcacm_comm_cb(
   usbd_device *usbd_dev,
-  uint8_t ep __attribute__((unused))) 
-{
-  cdc_sending = false;
+  uint8_t ep __attribute__((unused))
+) {
+
+dbg("comm2");
+	debug_println("comm"); debug_flush();
 }
 
 /*
@@ -131,13 +125,25 @@ cdcacm_set_config(
 	//  From https://github.com/libopencm3/libopencm3-examples/blob/master/examples/stm32/f3/stm32f3-discovery/usb_cdcacm/cdcacm.c
     //  debug_println("*** cdcacm_set_config"); ////
 	usbd_ep_setup(usbd_dev, DATA_OUT, USB_ENDPOINT_ATTR_BULK, MAX_USB_PACKET_SIZE, cdcacm_data_rx_cb);
-	usbd_ep_setup(usbd_dev, DATA_IN, USB_ENDPOINT_ATTR_BULK, MAX_USB_PACKET_SIZE, cdcacm_data_tx_cb);
+	usbd_ep_setup(usbd_dev, DATA_IN, USB_ENDPOINT_ATTR_BULK, MAX_USB_PACKET_SIZE, NULL);
 	usbd_ep_setup(usbd_dev, COMM_IN, USB_ENDPOINT_ATTR_INTERRUPT, COMM_PACKET_SIZE, cdcacm_comm_cb);
 	int status = aggregate_register_callback(
 		usbd_dev,
 		CONTROL_CALLBACK_TYPE,
 		CONTROL_CALLBACK_MASK,
 		cdcacm_control_request);
+/*
+int aggregate_register_callback(
+    usbd_device *usbd_dev, 
+    uint8_t type,
+    uint8_t type_mask,
+    usbd_control_callback callback) {
+
+typedef int (*usbd_control_callback)(usbd_device *usbd_dev,
+		struct usb_setup_data *req, uint8_t **buf, uint16_t *len,
+		usbd_control_complete_callback *complete);
+
+*/
 
 	if (status < 0) { debug_println("*** cdcacm_set_config failed"); debug_flush(); }
 }
@@ -146,38 +152,4 @@ void cdc_setup(usbd_device* usbd_dev) {
     //  debug_println("*** cdc_setup"); ////
 	int status = aggregate_register_config_callback(usbd_dev, cdcacm_set_config);
 	if (status < 0) { debug_println("*** cdc_setup failed"); debug_flush(); }
-  transmit_device = usbd_dev;
-}
-
-void cdc_set_receive_callback(cdc_receive_callback callback)
-{
-  receive_callback = callback;
-}
-
-void cdc_yield()
-{
-}
-
-bool cdc_waitSync()
-{
-  for (uint32_t i=0; i<100000; i++) 
-  {
-    if (!cdc_sending)
-      return true;
-    cdc_yield();
-  }
-  return false;
-}
-
-bool cdc_transmit(uint8_t* buffer, int len)
-{
-  if (!cdc_waitSync())
-  {
-    // handle unreceived transmission
-    return false;
-  }
-
-  cdc_sending = true;
-  usbd_ep_write_packet(transmit_device, DATA_IN, buffer, len);
-  return true;
 }

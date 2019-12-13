@@ -28,6 +28,10 @@ void CMainWnd::Create()
 	constexpr int nMenuItem = 1;
 	SendMessage( &mWndToolBar, ToWord('g', 'i'), nMenuItem);
 	m_wndMenuInput.SetFocus();
+
+		CCoreOscilloscope::ConfigureAdc();
+		CCoreOscilloscope::ConfigureTrigger();
+
 }
 
 /*virtual*/ void CMainWnd::OnMessage(CWnd* pSender, int code, uintptr_t data)

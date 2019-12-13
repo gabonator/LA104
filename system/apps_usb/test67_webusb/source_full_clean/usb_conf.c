@@ -469,14 +469,6 @@ int aggregate_register_callback(
 	return -1;
 }
 
-static uint8_t usb_descriptor_type(uint16_t wValue) {
-	return wValue >> 8;
-}
-
-static uint8_t usb_descriptor_index(uint16_t wValue) {
-	return wValue & 0xFF;
-}
-
 uint16_t device_address = (uint16_t) -1;
 
 static int aggregate_callback(
@@ -542,6 +534,7 @@ void usb_set_serial_number(const char* serial) {
 }
 
 void dump_usb_request(const char *msg, struct usb_setup_data *req) {
+/*
     uint8_t desc_type = usb_descriptor_type(req->wValue);
     uint8_t desc_index = usb_descriptor_index(req->wValue);
     debug_print(msg);
@@ -578,6 +571,7 @@ void dump_usb_request(const char *msg, struct usb_setup_data *req) {
         debug_print(" i "); debug_printhex(desc_index); 	
     }
     debug_println("");
+*/
 }
 
 /* CDC, MSC and DFU OK.  WebUSB failed.

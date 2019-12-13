@@ -17,4 +17,9 @@ find . -type f -name '*.d' -delete
 
 ../../../../tools/elfstrip/elfstrip output.elf 17analys.elf
 #../../../elfdump/elfdump snake.elf
+
+nm --print-size --size-sort -gC output.elf | grep " B " > symbols_ram.txt
+nm --print-size --size-sort -gC output.elf | grep " T " > symbols_rom.txt
+nm --print-size --size-sort -gC output.elf > symbols_all.txt
+
 rm output.elf
