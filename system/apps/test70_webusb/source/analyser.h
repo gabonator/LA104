@@ -206,9 +206,9 @@ int Get()
     uint32_t value = FPGA_RW_4Byte(MEM_READ, 3, 0);
     TERMINAL::Print("{hex:0x%08x}", value);
 */
-    uint32_t buf[16];
+    uint32_t buf[14];
 
-    for (int i=0; i<16; i++)
+    for (int i=0; i<14; i++)
       buf[i] = FPGA_RW_4Byte(MEM_READ, 3, 0);
 
     TERMINAL::Write((uint8_t*)buf, sizeof(buf));

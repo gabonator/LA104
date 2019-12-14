@@ -2,8 +2,8 @@ var ANAL = {
   Configure: () => BIOS.rpcCall("ANAL::Configure();"),
   Restart: () => BIOS.rpcCall("ANAL::Restart();"),
   Status: () => BIOS.rpcCall("ANAL::Status();").then( json => BIOS.retval(json) ),
-  Get: () => BIOS.rpcCallBinary("ANAL::Get();").then( (data) => { 
-    COMM.onReceive = () => {COMM.onReceive = null;}; 
+  Get: () => BIOS.rpcCallBinary("ANAL::Get();").then( (data) => new Promise((resolve, reject) =>
+  { 
     var arr = [];
     for (var i=0; i<data.byteLength; i+=4)
     {
@@ -17,8 +17,9 @@ var ANAL = {
       };
       arr.push(record);
     }
-    return arr; 
-  } ),
+    COMM.onReceive = () => {COMM.onReceive = null; resolve(arr);}; 
+//    return arr; 
+  }) ),
 };
 
 var LCD = {

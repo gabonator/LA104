@@ -14,17 +14,17 @@ var COMM = {
     
     function connect() {
 
-COMM.send = function(msg)
-{
-  if (COMM.debug)
-    console.log("> " + msg);
-  if (msg.indexOf("undefined") != -1) 
-  { 
-    console.log(">>>> ignoring command >>>> " + msg);
-    return;
-  }
-  port.send(Uint8Array.from(ascii(msg)));
-}
+      COMM.send = function(msg)
+      {
+        if (COMM.debug)
+          console.log("> " + msg);
+        if (msg.indexOf("undefined") != -1) 
+        { 
+          console.log(">>>> ignoring command >>>> " + msg);
+          return;
+        }
+        port.send(Uint8Array.from(ascii(msg)));
+      }
 
       port.connect().then(() => {
         COMM.open = true;
@@ -33,9 +33,6 @@ COMM.send = function(msg)
         connectButton.textContent = 'Disconnect';
 
         port.onReceive = data => {
-//          let textDecoder = new TextDecoder("ascii");
-//          let msg= textDecoder.decode(data)
-
           if (COMM.debug)
             console.log("< " + new TextDecoder().decode(data));
 

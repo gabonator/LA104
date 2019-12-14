@@ -2,8 +2,13 @@ namespace TERMINAL
 {
   void Write(uint8_t* p, int n)
   {
-    if (!cdc_transmit(p, n))
-      BIOS::DBG::Print("TX-Fail ");
+    for (int i=0; i<10; i++)
+    {
+      if (cdc_transmit(p, n))
+        return;
+      BIOS::SYS::DelayMs(5);
+    }
+    BIOS::DBG::Print("TX-Fail");
   }
 
   void Print(const char* msg, ...)
