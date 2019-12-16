@@ -6,24 +6,66 @@
   var gui = new RemoteGui();
   var meas = new Measure();
 
+
+  function ResampleNum(ofs)
+  {
+    var k = OSC.ResampleTable[INTERFACE.timebase];
+    if (k==1)
+      return ofs;
+    return Math.floor(ofs*k);
+  }
+
+  function Resample(data)
+  {
+    var k = OSC.ResampleTable[INTERFACE.timebase];
+    if (k==1)
+      return data;
+
+    var Interpolate = (i) =>
+    {
+      var base = Math.floor(i);
+      var part = i - base;
+      var s0 = data[base];
+      var s1 = data[base+1];
+      var s = s0 + (s1-s0)*part;
+      return s;
+    };
+
+    var aux = [];
+    for (var i = 0; i<Math.floor(data.length*k); i++)
+      aux.push(Interpolate(i*k));
+    return aux;
+  }
+
   function Redraw(ofs, rawdata)
   {
     var ypos = (v) => canvas.height-v*(canvas.height/256);
 
-    var data = [];
+    var data1 = [], data2 = [], data3 = [], data4 = [];
     for (var i =0; i<rawdata.length; i+=5)
     {
       var s = parseInt("0x" + rawdata.substr(i, 5));
-      data.push([s&255, (s>>8)&255, (s>>16)&1, (s>>17)&1]);
+      data1.push(s&255);
+      data2.push((s>>8)&255);
+      data3.push((s>>16)&1);
+      data4.push((s>>17)&1);
     }
 
+    var trigx = 120/OSC.ResampleTable[INTERFACE.timebase];
+    var ofsx = 120 - trigx;
+    ofs += ofsx;
+    trigx = 120;
+
+    data1 = Resample(data1);
+    data2 = Resample(data2);
+
     var path1 = [];
-    for (var i=0; i<data.length; i++)
-      path1.push({x:ofs+i, y:ypos(data[i][0])});
+    for (var i=0; i<data1.length; i++)
+      path1.push({x:ofs+i, y:ypos(data1[i])});
 
     var path2 = [];
-    for (var i=0; i<data.length; i++)
-      path2.push({x:ofs+i, y:ypos(data[i][1])});
+    for (var i=0; i<data2.length; i++)
+      path2.push({x:ofs+i, y:ypos(data2[i])});
 
     canvas.Clear();
 
@@ -37,7 +79,7 @@
       canvas.Poly([{x:0, y:canvas.height*y/8}, {x:width, y:canvas.height*y/8}], "rgba(0, 0, 0, 0.8)", 1);
 
     canvas.Poly([{x:0, y:trig}, {x:width, y:trig}], "rgba(255, 255, 255, 0.6)", 1)
-    canvas.Poly([{x:150-30, y:0}, {x:150-30, y:canvas.height}], "rgba(255, 255, 255, 0.6)", 1)
+    canvas.Poly([{x:trigx, y:0}, {x:trigx, y:canvas.height}], "rgba(255, 255, 255, 0.6)", 1)
 
 
     canvas.Poly(path1, "#ffff00");
@@ -175,6 +217,8 @@ INTERFACE = {
     INTERFACE.timebase = t;
     console.log("timebase: "+INTERFACE.timebase);
     INTERFACE.configureTimebase();
+    console.log("resample="+OSC.ResampleTable[INTERFACE.timebase]);
+
   },
 
   configureTimebase: () =>
@@ -250,6 +294,7 @@ INTERFACE = {
     if (INTERFACE.genFlavour == "Square")
     {
       setSquareWave(INTERFACE.genFrequency);
+      INTERFACE.setGeneratorDuty(INTERFACE.genDuty);
     }
     if (INTERFACE.genFlavour == "Triangle")
     {
@@ -459,8 +504,16 @@ INTERFACE = {
               last = now;
               lastRequest = scroll;
 
+              var maxSafe = 4096-30-15;
+              var reqStart = ResampleNum(scroll)+30;
+              var reqLen = 256*4+180*1; // screen width, ignore resampling, always take 1k
+              if (reqStart > maxSafe - 128)
+                reqStart = maxSafe - 128;
+              if (reqLen+reqStart > maxSafe)
+                reqLen = maxSafe - reqStart;
+
               return Promise.resolve()
-              .then( () => OSC.Transfer(150*0+30 + scroll, 256*4+180) )
+              .then( () => OSC.Transfer(reqStart, reqLen) )
               .then( data => { controls.setMeasData(meas.Calculate("CH1", dt, dv, data)); return Promise.resolve(data);} )
               .then( data => Redraw(scroll, data) )
               .then( () => 

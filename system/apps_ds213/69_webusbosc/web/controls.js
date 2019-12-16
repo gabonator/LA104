@@ -250,5 +250,6 @@ float:left;
     document.querySelector("#genFlavour").value = INTERFACE.genFlavour;
     document.querySelector("#genFrequency").value = INTERFACE.genFrequency;
     document.querySelector("#genDuty").value = INTERFACE.genDuty;
+    document.querySelector("#genDuty").disabled = INTERFACE.genFlavour != "Square";
   }
 }

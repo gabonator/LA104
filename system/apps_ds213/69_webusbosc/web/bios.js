@@ -39,6 +39,13 @@ var OSC = {
     "10ms":"10e-3", "20ms":"20e-3", "50ms":"50e-3", "100ms":"100e-3", "200ms":"200e-3", "500ms":"500e-3", 
     "1s":"1.0"
   },
+  ResampleTable:// florian
+  {
+    "100ns":1, "200ns":492/1024, "500ns":614/1024, 
+    "1us":819/1024, "2us":983/1024, 
+    "5us":2.4, "10us":1, "20us":1, "50us":1, "100us":1, "200us":1, "500us":1,
+    "1ms":1, "2ms":1, "5ms":1, "10ms":1, "20ms":1, "50ms":1, "100ms":1, "200ms":1, "500ms":1, "1s":1
+  },
 
   Enable: (enable) => BIOS.rpcCall('OSC::Enable('+enable+');'),
   ConfigureTrigger: (time, value, type, source) => BIOS.rpcCall('OSC::ConfigureTrigger('+time+','+value+','+type+','+source+');'),
