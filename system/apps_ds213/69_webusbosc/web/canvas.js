@@ -119,7 +119,7 @@ class Renderer
 <button class="button button2" id="single">&#9658;&#10073;</button>
 `;
 
-    dragElement(document.querySelector("#ch1pos"), this.updateCh1Pos.bind(this) );
+    dragElement(document.querySelector("#ch1pos"), this.updateCh1Pos.bind(this));
     dragElement(document.querySelector("#ch2pos"), this.updateCh2Pos.bind(this));
     dragElement(document.querySelector("#trigpos"), this.updateTrigPos.bind(this));
 
@@ -182,12 +182,12 @@ class Renderer
 
   setCh1Pos(p)
   {
-    p = p/255*(255-28+5)+28;
+//    p = p*CALIBRATION.ch1ZeroK+CALIBRATION.ch1ZeroQ;
     document.querySelector("#ch1pos").style.top = ((255-p)/255*this.height-10) + "px";
   }
   setCh2Pos(p)
   {
-    p = p/255*(255-28+10)+20;
+//    p = p*CALIBRATION.ch2ZeroK+CALIBRATION.ch2ZeroQ;
     document.querySelector("#ch2pos").style.top = ((255-p)/255*this.height-10) + "px";
   }
   setTrigPos(p)
@@ -200,7 +200,8 @@ class Renderer
   {
     var y = parseInt(y);
     var p = 255-(y+10)*255/this.height;
-    var p0 = (p-28)*255/(255-28+5);
+//    var p0 = (p-28)*255/(255-28+5);
+    var p0 = p;
     INTERFACE.setChannel1Offset(Math.floor(p0));
     controls.setChannel1Offset(Math.floor(p0))
   }
@@ -209,7 +210,8 @@ class Renderer
   {
     var y = parseInt(y);
     var p = 255-(y+10)*255/this.height;
-    var p0 = (p-20)*255/(255-28+10);
+//    var p0 = (p-20)*255/(255-28+10);
+    var p0 = p;
     INTERFACE.setChannel2Offset(Math.floor(p0));
     controls.setChannel2Offset(Math.floor(p0))
   }
@@ -240,9 +242,95 @@ class Renderer
     }
   }
 
+
+  // osc graph
+  OscilloscopeResampleNum(ofs)
+  {
+    var k = OSC.ResampleTable[INTERFACE.timebase];
+    if (k==1)
+      return ofs;
+    return Math.floor(ofs*k);
+  }
+
+  OscilloscopeResample(data)
+  {
+    var k = OSC.ResampleTable[INTERFACE.timebase];
+    if (k==1)
+      return data;
+
+    var Interpolate = (i) =>
+    {
+      var base = Math.floor(i);
+      var part = i - base;
+      var s0 = data[base];
+      var s1 = data[base+1];
+      var s = s0 + (s1-s0)*part;
+      return s;
+    };
+
+    var aux = [];
+    for (var i = 0; i<Math.floor(data.length*k); i++)
+      aux.push(Interpolate(i*k));
+    return aux;
+  }
+
+  OscilloscopeRedraw(ofs, rawdata)
+  {
+    var ypos = (v) => canvas.height-v*(canvas.height/256);
+
+    var data1 = [], data2 = [], data3 = [], data4 = [];
+    for (var i =0; i<rawdata.length; i+=5)
+    {
+      var s = parseInt("0x" + rawdata.substr(i, 5));
+      data1.push(s&255);
+      data2.push((s>>8)&255);
+      data3.push((s>>16)&1);
+      data4.push((s>>17)&1);
+    }
+
+    var trigx = 120/OSC.ResampleTable[INTERFACE.timebase];
+    var ofsx = 120 - trigx;
+    ofs += ofsx;
+    trigx = 120;
+
+    data1 = this.OscilloscopeResample(data1);
+    data2 = this.OscilloscopeResample(data2);
+
+    for (var i=0; i<data1.length; i++)
+      data1[i] = CALIBRATION.getCh1(data1[i]);
+
+    for (var i=0; i<data2.length; i++)
+      data2[i] = CALIBRATION.getCh2(data2[i]);
+
+    var path1 = [];
+    for (var i=0; i<data1.length; i++)
+      path1.push({x:ofs+i, y:ypos(data1[i])});
+
+    var path2 = [];
+    for (var i=0; i<data2.length; i++)
+      path2.push({x:ofs+i, y:ypos(data2[i])});
+
+    this.Clear();
+
+    var trig = ypos(INTERFACE.trigThreshold);
+    var width = 4096;
+
+    for (var x=0; x</*canvas.width*/ width; x+=30)
+      canvas.Poly([{x:x, y:0}, {x:x, y:canvas.height}], "rgba(0, 0, 0, 0.8)", 1);
+
+    for (var y=0; y<9; y++)
+      canvas.Poly([{x:0, y:canvas.height*y/8}, {x:width, y:canvas.height*y/8}], "rgba(0, 0, 0, 0.8)", 1);
+
+    this.Poly([{x:0, y:trig}, {x:width, y:trig}], "rgba(255, 255, 255, 0.6)", 1)
+    this.Poly([{x:trigx, y:0}, {x:trigx, y:canvas.height}], "rgba(255, 255, 255, 0.6)", 1)
+
+    this.Poly(path1, "#ffff00");
+    this.Poly(path2, "#00ffff");
+  }
+
 }
 
-
+   	
 
 function dragElement(elmnt, onFinish) {
   var pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;

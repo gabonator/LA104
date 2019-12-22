@@ -3,12 +3,12 @@ class Controls
   constructor()
   {
     this.elem = document.createElement("div");
-    this.elem.style = "border:1px gray solid; width:1200px; height:160px; position:absolute; top:420px;";
+    this.elem.style = "border:1px gray solid; width:1200px; height:360px; position:absolute; top:420px;";
     this.elem.innerHTML = `
 <style>
 .controlsContainer {
 width:1200px;
-height:180px;
+height:160px;
 padding-top:8px;
 }
 
@@ -38,6 +38,8 @@ float:left;
 .blockGen { border: 2px solid #ff00ff; }
 .blockMeas { border: 2px solid #b0b0b0; }
 .hidden {display:none;}
+.blockConn { border: 2px solid #b0b0b0; }
+.blockCalib { border: 2px solid #b0b0b0; }
 </style>
 
 <div class="controlsContainer">
@@ -142,12 +144,15 @@ float:left;
       <option>Triangle</option>
       <option>Sawtooth</option>
       <option>Square</option>
+      <option>DC</option>
+      <option>Equation</option>
     </select><br>
-    Frequency:<input size=8 type="text" value="1000" id="genFrequency"><br>
-    Duty:<input size=8 type="text" value="50" disabled id="genDuty">%<br>
+    <span id="genCondEquation"><textarea cols=25 rows=3 id="genEquation"></textarea><br></span>
+    <span id="genCondFreq">Frequency:<input size=8 type="text" value="1000" id="genFrequency"><br></span>
+    <span id="genCondDuty">Duty:<input size=8 type="text" value="50" id="genDuty">%<br></span>
+    <span id="genCondVolt">DC:<input size=8 type="text" value="1.000" id="genDc">V<br></span>
     <br>
   </div>
-
   <div class="controlsSpacer"></div>
   <div class="controlsBlock blockMeas">
     Measure:<br><br>
@@ -159,6 +164,23 @@ float:left;
     Amplitude pk-pk:<input size=8 type="text" value="" id="measAmplitude" disabled><br>
     Average:<input size=8 type="text" value="" id="measAverage" disabled><br>
     <br>
+  </div>
+</div>
+<div class="controlsContainer">
+  <div class="controlsBlock blockCalib">
+    Calibration:<input type="button" value="?" id="calibHelp"><br>
+    <input type="button" value="Zero offset CH1" id="calibZeroCh1"><br>
+    <input type="button" value="Zero offset CH2" id="calibZeroCh2"><br>
+    Scale constants:<br>
+    CH1: K[<span id="calibCh1Range"></span>]=<input size=6 type="text" value="" id="calibCh1K"><br>
+    CH2: K[<span id="calibCh2Range"></span>]=<input size=6 type="text" value="" id="calibCh2K"><br>
+    <br>
+  </div>
+  <div class="controlsSpacer"></div>
+  <div class="controlsBlock blockConn">
+    Connection:<br>
+    <button id="connect">Connect</button><br>
+    <div id="status"></div
   </div>
 
 
@@ -202,7 +224,10 @@ float:left;
     document.querySelector("#genFlavour").addEventListener('change', 
       (o) => {
         INTERFACE.setGeneratorFlavour(o.target.value)
-        document.querySelector("#genDuty").disabled = o.target.value != "Square";
+        document.querySelector("#genCondDuty").style.display = o.target.value == "Square" ? "block" : "none";
+        document.querySelector("#genCondFreq").style.display = o.target.value != "DC" ? "block" : "none";
+        document.querySelector("#genCondVolt").style.display = o.target.value == "DC" ? "block" : "none";
+        document.querySelector("#genCondEquation").style.display = o.target.value == "Equation" ? "block" : "none";
       });
 
     document.querySelector("#genFrequency").addEventListener('change', 
@@ -210,6 +235,40 @@ float:left;
 
     document.querySelector("#genDuty").addEventListener('change', 
       (o) => INTERFACE.setGeneratorDuty(o.target.value));
+
+    document.querySelector("#genDc").addEventListener('change', 
+      (o) => INTERFACE.setGeneratorDc(o.target.value));
+
+    document.querySelector("#measSource").addEventListener('change', 
+      (o) => INTERFACE.setMeasSource(o.target.value));
+
+    document.querySelector("#calibZeroCh1").addEventListener('click', 
+      (o) => calibration.startOffsetCalibration("CH1"));
+
+    document.querySelector("#calibZeroCh2").addEventListener('click', 
+      (o) => calibration.startOffsetCalibration("CH2"));
+
+    document.querySelector("#calibCh1K").addEventListener('change', 
+      (o) => CALIBRATION.setCh1K(parseFloat(o.target.value)));
+
+    document.querySelector("#calibCh2K").addEventListener('change', 
+      (o) => CALIBRATION.setCh2K(parseFloat(o.target.value)));
+
+    document.querySelector("#calibHelp").addEventListener('click', 
+      (o) => alert("Connect CH1 to ground and run Zero offset calibration\nConnect known voltage to CH1 and finetune the CH1 K constant to get accurate reading in Measure section\nYou can use Generator in DC mode for calibration (check CALIBRATION.gen1V/gen2V values to get precise voltage at output)"));
+
+    document.querySelector("#genEquation").addEventListener('change', 
+      (o) => INTERFACE.setGeneratorEquation(o.target.value));
+
+    document.querySelector("#genEquation").addEventListener('keypress', 
+      (o) => 
+      {
+        if (o.key == "Enter") 
+        {
+          o.preventDefault();
+          INTERFACE.setGeneratorEquation(o.target.value);
+        }
+      });
   }
 
   setChannel1Offset(v)
@@ -234,6 +293,18 @@ float:left;
     document.querySelector("#measAverage").value = data.average;
   }
 
+  setCh1Range()
+  {
+    document.querySelector("#calibCh1Range").innerHTML = INTERFACE.ch1range;
+    document.querySelector("#calibCh1K").value = CALIBRATION.ch1Scale[INTERFACE.ch1range];
+  }
+  
+  setCh2Range()
+  {
+    document.querySelector("#calibCh2Range").innerHTML = INTERFACE.ch2range;
+    document.querySelector("#calibCh2K").value = CALIBRATION.ch2Scale[INTERFACE.ch2range];
+  }
+
   load()
   {
     document.querySelector("#ch1res").value = INTERFACE.ch1range;
@@ -250,6 +321,13 @@ float:left;
     document.querySelector("#genFlavour").value = INTERFACE.genFlavour;
     document.querySelector("#genFrequency").value = INTERFACE.genFrequency;
     document.querySelector("#genDuty").value = INTERFACE.genDuty;
-    document.querySelector("#genDuty").disabled = INTERFACE.genFlavour != "Square";
+    document.querySelector("#genDc").value = INTERFACE.genDc;
+
+    document.querySelector("#genCondDuty").style.display = INTERFACE.genFlavour == "Square" ? "block" : "none";
+    document.querySelector("#genCondFreq").style.display = INTERFACE.genFlavour != "DC" ? "block" : "none";
+    document.querySelector("#genCondVolt").style.display = INTERFACE.genFlavour == "DC" ? "block" : "none";
+    document.querySelector("#genCondEquation").style.display = INTERFACE.genFlavour == "Equation" ? "block" : "none";
+
+    document.querySelector("#genEquation").value = INTERFACE.genEquation;
   }
 }

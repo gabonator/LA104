@@ -7,84 +7,6 @@
   var meas = new Measure();
 
 
-  function ResampleNum(ofs)
-  {
-    var k = OSC.ResampleTable[INTERFACE.timebase];
-    if (k==1)
-      return ofs;
-    return Math.floor(ofs*k);
-  }
-
-  function Resample(data)
-  {
-    var k = OSC.ResampleTable[INTERFACE.timebase];
-    if (k==1)
-      return data;
-
-    var Interpolate = (i) =>
-    {
-      var base = Math.floor(i);
-      var part = i - base;
-      var s0 = data[base];
-      var s1 = data[base+1];
-      var s = s0 + (s1-s0)*part;
-      return s;
-    };
-
-    var aux = [];
-    for (var i = 0; i<Math.floor(data.length*k); i++)
-      aux.push(Interpolate(i*k));
-    return aux;
-  }
-
-  function Redraw(ofs, rawdata)
-  {
-    var ypos = (v) => canvas.height-v*(canvas.height/256);
-
-    var data1 = [], data2 = [], data3 = [], data4 = [];
-    for (var i =0; i<rawdata.length; i+=5)
-    {
-      var s = parseInt("0x" + rawdata.substr(i, 5));
-      data1.push(s&255);
-      data2.push((s>>8)&255);
-      data3.push((s>>16)&1);
-      data4.push((s>>17)&1);
-    }
-
-    var trigx = 120/OSC.ResampleTable[INTERFACE.timebase];
-    var ofsx = 120 - trigx;
-    ofs += ofsx;
-    trigx = 120;
-
-    data1 = Resample(data1);
-    data2 = Resample(data2);
-
-    var path1 = [];
-    for (var i=0; i<data1.length; i++)
-      path1.push({x:ofs+i, y:ypos(data1[i])});
-
-    var path2 = [];
-    for (var i=0; i<data2.length; i++)
-      path2.push({x:ofs+i, y:ypos(data2[i])});
-
-    canvas.Clear();
-
-    var trig = ypos(INTERFACE.trigThreshold);
-    var width = 4096;
-
-    for (var x=0; x</*canvas.width*/ width; x+=30)
-      canvas.Poly([{x:x, y:0}, {x:x, y:canvas.height}], "rgba(0, 0, 0, 0.8)", 1);
-
-    for (var y=0; y<9; y++)
-      canvas.Poly([{x:0, y:canvas.height*y/8}, {x:width, y:canvas.height*y/8}], "rgba(0, 0, 0, 0.8)", 1);
-
-    canvas.Poly([{x:0, y:trig}, {x:width, y:trig}], "rgba(255, 255, 255, 0.6)", 1)
-    canvas.Poly([{x:trigx, y:0}, {x:trigx, y:canvas.height}], "rgba(255, 255, 255, 0.6)", 1)
-
-
-    canvas.Poly(path1, "#ffff00");
-    canvas.Poly(path2, "#00ffff");
-  }
 
   var init = false;
   var dummy = false;
@@ -114,6 +36,10 @@ INTERFACE = {
   genFlavour: "Sine",
   genFrequency: 10000,
   genDuty: 50,
+  genDc: 1.0,
+  genEquation: "Math.cos(x)",
+
+  measSource: "CH1",
 
   // CH1          	
   save()
@@ -145,6 +71,7 @@ INTERFACE = {
     console.log("ch1range: "+INTERFACE.ch1range);
     INTERFACE.configureInput("CH1");
     gui.drawChannel1();
+    controls.setCh1Range();
   },
 
   setChannel1Coupling: (coupling) => 
@@ -160,8 +87,8 @@ INTERFACE = {
     if (typeof(offset) == "string")
       offset = parseInt(offset);
     if (!Number.isInteger(offset)) offset = 0;
-    if (offset<0) offset = 0;
-    if (offset>255) offset = 255;
+    offset = Math.max(CALIBRATION.getCh1ZeroMin(), offset);
+    offset = Math.min(CALIBRATION.getCh1ZeroMax(), offset);
     
     INTERFACE.ch1offset = offset;
     console.log("ch1offset: "+INTERFACE.ch1offset);
@@ -176,6 +103,7 @@ INTERFACE = {
     console.log("ch2range: "+INTERFACE.ch2range);
     INTERFACE.configureInput("CH2");
     gui.drawChannel2();
+    controls.setCh2Range();
   },
 
   setChannel2Coupling: (coupling) => 
@@ -203,9 +131,9 @@ INTERFACE = {
   configureInput: (ch) =>
   {                             
     if (ch=="CH1")
-      INTERFACE.process( () => OSC.ConfigureInput(OSC.Enums["CH1"], OSC.Enums[INTERFACE.ch1coupling], OSC.Enums[INTERFACE.ch1range], INTERFACE.ch1offset) )
+      INTERFACE.process( () => OSC.ConfigureInput(OSC.Enums["CH1"], OSC.Enums[INTERFACE.ch1coupling], OSC.Enums[INTERFACE.ch1range], CALIBRATION.getCh1Zero(INTERFACE.ch1offset)) )
     if (ch=="CH2")
-      INTERFACE.process( () => OSC.ConfigureInput(OSC.Enums["CH2"], OSC.Enums[INTERFACE.ch2coupling], OSC.Enums[INTERFACE.ch2range], INTERFACE.ch2offset) )
+      INTERFACE.process( () => OSC.ConfigureInput(OSC.Enums["CH2"], OSC.Enums[INTERFACE.ch2coupling], OSC.Enums[INTERFACE.ch2range], CALIBRATION.getCh2Zero(INTERFACE.ch2offset)) )
 
     INTERFACE.restart();
     INTERFACE.save();
@@ -272,7 +200,14 @@ INTERFACE = {
 
   configureTrigger: () =>
   {
-    INTERFACE.process( () => OSC.ConfigureTrigger(INTERFACE.trigTime, INTERFACE.trigThreshold, 
+    var thresh = INTERFACE.trigThreshold;
+
+    if (INTERFACE.trigSource == "CH1")
+      thresh = Math.floor(CALIBRATION.getCh1Inv(thresh));
+    if (INTERFACE.trigSource == "CH2")
+      thresh = Math.floor(CALIBRATION.getCh2Inv(thresh));
+
+    INTERFACE.process( () => OSC.ConfigureTrigger(INTERFACE.trigTime, thresh, 
       OSC.Enums[INTERFACE.trigMode], OSC.Enums[INTERFACE.trigSource]) );
     INTERFACE.restart();
     INTERFACE.save();
@@ -304,6 +239,14 @@ INTERFACE = {
     {
       setSawtoothWave(INTERFACE.genFrequency);
     }
+    if (INTERFACE.genFlavour == "DC")
+    {
+      setDcWave(INTERFACE.genDc);
+    }
+    if (INTERFACE.genFlavour == "Equation")
+    {
+      setEquationWave(INTERFACE.genEquation, INTERFACE.genFrequency);
+    }
     gui.drawGenerator();
     INTERFACE.save();
   },
@@ -321,6 +264,28 @@ INTERFACE = {
     gui.drawGenerator();
     INTERFACE.save();
   },
+
+  setGeneratorDc(dc)
+  {
+    INTERFACE.genDc = dc;
+    setDcWave(INTERFACE.genDc);
+    gui.drawGenerator();
+    INTERFACE.save();
+  },
+
+  setGeneratorEquation(eq)
+  {
+    INTERFACE.genEquation = eq;
+    setEquationWave(INTERFACE.genEquation, INTERFACE.genFrequency);
+    INTERFACE.save();
+  },
+
+  // MEASURE
+  setMeasSource(src)
+  {
+    INTERFACE.measSource = src;
+  },
+
   // COMMON
 
   setAll: () =>
@@ -335,6 +300,8 @@ INTERFACE = {
     INTERFACE.configureTimebase()
     INTERFACE.restart();
     INTERFACE.updateGenerator();
+    controls.setCh1Range();
+    controls.setCh2Range();
   },
 
   onTrigger:()=> 
@@ -345,81 +312,6 @@ INTERFACE = {
   restart: () => promises.push(() => OSC.Restart())
 };
 
-  function setSquareWave(freq, duty)
-  {
-    promises.push(() => 
-      Promise.resolve()
-      .then( ()=>GEN.SetWave(0, 0) )
-      .then( ()=>GEN.SetFrequency(freq) )
-      .then( ()=>{ if (duty) return GEN.SetDuty(duty); } )
-      .then( ()=>GEN.GetFrequency() )
-      .then( (f)=>console.log("Frequency="+f) )
-    );
-  }
-
-  function setSineWave(freq)
-  {
-    var n = 38*4;       
-    var samples = [];
-    for (var i=0; i<n; i++)
-    {
-      var sample = Math.sin(Math.PI*2*i/n);
-      sample = (sample * (0x1000/2-20)) + 0x1000/2;
-      samples.push(sample);
-    }
-    return transferWave(samples, freq);
-  }
-                                     	
-  function setTriangleWave(freq)
-  {
-    var n = 38*4;       
-    var samples = [];
-    for (var i=0; i<n; i++)
-    {
-      var sample = 0;
-      if (i<n/2)
-        sample = i*0x1000/(n/2);
-      else
-        sample = (n-i)*0x1000/(n/2);
-      samples.push(sample);
-    }
-    return transferWave(samples, freq);
-  }
-
-  function setSawtoothWave(freq)
-  {
-    var n = 38*4;       
-    var samples = [];
-    for (var i=0; i<n; i++)
-    {
-      var sample = i*0x1000/n;
-      samples.push(sample);
-    }
-    return transferWave(samples, freq);
-  }
-
-  function transferWave(samples, freq)
-  {
-    var buf = [];
-    for (var i=0; i<samples.length; i++)
-    {
-      sample = Math.floor(samples[i]);
-      if (sample < 0) sample = 0;
-      if (sample > 0xfff) sample = 0xfff;
-      buf.push(sample & 255);
-      buf.push(sample >> 8);
-    }
-
-    promises.push(() => 
-      Promise.resolve()
-      .then( ()=>BIOS.biosMemBulk(bufferPtr, buf) )
-      .then( ()=>GEN.SetWave(bufferPtr, samples.length-1) ) // WTF??? bios error, wont configure DMA without changing buffer length
-      .then( ()=>GEN.SetWave(bufferPtr, samples.length) )
-      .then( ()=>GEN.SetFrequency(freq) )
-      .then( ()=>GEN.GetFrequency() )
-      .then( (f)=>console.log("Sample playing frequency="+f + ", sequence frequency="+Math.floor(f/samples.length)) )
-    );
-  }
 
   setInterval(() =>
   {
@@ -475,6 +367,7 @@ INTERFACE = {
           return;
         if (now-lastAsk < 50)
           return;
+
         lastAsk = now;
         promise = Promise.resolve()
           .then( () => OSC.Ready() )
@@ -494,8 +387,8 @@ INTERFACE = {
 
                   return Promise.resolve()
                   .then( () => OSC.Transfer(30, 4096-30) )
-                  .then( data => { controls.setMeasData(meas.Calculate("CH1", dt, dv, data))	; return data;} )
-                  .then( data => Redraw(0, data) )
+                  .then( data => { INTERFACE.measure = meas.Calculate(INTERFACE.measSource, dt, dv, data); controls.setMeasData(INTERFACE.measure); return data;} )
+                  .then( data => canvas.OscilloscopeRedraw(0, data) )
                   .catch( () => { console.log("err"); return Promise.resolve()} );
                 }
             } else
@@ -505,7 +398,7 @@ INTERFACE = {
               lastRequest = scroll;
 
               var maxSafe = 4096-30-15;
-              var reqStart = ResampleNum(scroll)+30;
+              var reqStart = canvas.OscilloscopeResampleNum(scroll)+30;
               var reqLen = 256*4+180*1; // screen width, ignore resampling, always take 1k
               if (reqStart > maxSafe - 128)
                 reqStart = maxSafe - 128;
@@ -514,15 +407,15 @@ INTERFACE = {
 
               return Promise.resolve()
               .then( () => OSC.Transfer(reqStart, reqLen) )
-              .then( data => { controls.setMeasData(meas.Calculate("CH1", dt, dv, data)); return Promise.resolve(data);} )
-              .then( data => Redraw(scroll, data) )
+              .then( data => { INTERFACE.measure = meas.Calculate(INTERFACE.measSource, dt, dv, data); controls.setMeasData(INTERFACE.measure); return Promise.resolve(data);} )
+              .then( data => canvas.OscilloscopeRedraw(scroll, data) )
               .then( () => 
               { 
                 if ((ready && INTERFACE.trigState == "run") || forceAutoRedraw) 
                   return OSC.Restart(); 
               } )
               .then( () => Promise.resolve() )
-              .catch( () => { console.log("err"); return Promise.resolve()} );
+//              .catch( () => { console.log("err"); return Promise.resolve()} );
             }
             return Promise.resolve();
           })
@@ -534,88 +427,5 @@ INTERFACE = {
 
 INTERFACE.load();
 controls.load();
+CALIBRATION.load();
 
-
-
-
-///////////
-
-
-  document.addEventListener('DOMContentLoaded', event => {
-    let connectButton = document.querySelector("#connect");
-    let statusDisplay = document.querySelector('#status');
-    let port;
-
-    let ascii = (s => s.split('').map(c=>c.charCodeAt(0)) );
-    
-    function connect() {
-
-COMM._send = function(msg)
-{
-  if (COMM.debug)
-    console.log("> " + msg);
-  if (msg.indexOf("undefined") != -1) 
-  { 
-    console.log(">>>> ignoring command >>>> " + msg);
-    return;
-  }
-  port.send(Uint8Array.from(ascii(msg)));
-}
-
-      port.connect().then(() => {
-        COMM._open = true;
-
-        statusDisplay.textContent = '';
-        connectButton.textContent = 'Disconnect';
-
-        port.onReceive = data => {
-          let textDecoder = new TextDecoder();
-          let msg= textDecoder.decode(data)
-
-          if (COMM.debug)
-            console.log("< " + msg);
-
-          COMM._onReceive(msg);
-        }
-        port.onReceiveError = error => {
-          console.error(error);
-        };
-      }/*, error => {
-        statusDisplay.textContent = error;
-      }*/);
-    }
-
-    function onUpdateLed() {
-      if (!port) {
-        return;
-      }
-      toggle();     
-    };
-
-    connectButton.addEventListener('click', function() {
-      if (port) {
-        port.disconnect();
-        COMM._open = false;
-        connectButton.textContent = 'Connect';
-        statusDisplay.textContent = '';
-        port = null;
-      } else {
-        serial.requestPort().then(selectedPort => {
-          port = selectedPort;
-          connect();
-        }).catch(error => {
-          statusDisplay.textContent = error;
-        });
-      }
-    });
-
-    serial.getPorts().then(ports => {
-      if (ports.length == 0) {
-        statusDisplay.textContent = 'No device found.';
-      } else {
-        statusDisplay.textContent = 'Connecting...';
-        port = ports[0];
-        connect();
-      }
-    });
-  });

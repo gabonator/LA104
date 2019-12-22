@@ -53,14 +53,14 @@ class RemoteGui
   {
     var rect = this.sections[0].rect;
     this.Print(rect[0] + 4, rect[1] + 4 + 16*0, 0xffffff, 0x404040, INTERFACE.ch1coupling + "  ");
-    this.Print(rect[0] + 4, rect[1] + 4 + 16*1, 0xffffff, 0x404040, INTERFACE.ch1range + " /div   ");
+    this.Print(rect[0] + 4, rect[1] + 4 + 16*1, 0xffffff, 0x404040, (INTERFACE.ch1range + " /div     ").substr(0, 10));
   }                                                                                       
 
   drawChannel2()
   {
     var rect = this.sections[1].rect;
     this.Print(rect[0] + 4, rect[1] + 4 + 16*0, 0xffffff, 0x404040, INTERFACE.ch2coupling + "  ");
-    this.Print(rect[0] + 4, rect[1] + 4 + 16*1, 0xffffff, 0x404040, INTERFACE.ch2range + " /div   ");
+    this.Print(rect[0] + 4, rect[1] + 4 + 16*1, 0xffffff, 0x404040, (INTERFACE.ch2range + " /div   ").substr(0, 10));
   }
 
   drawTimebase()
@@ -80,9 +80,15 @@ class RemoteGui
   drawGenerator()
   {
     var rect = this.sections[4].rect;
-    this.Print(rect[0] + 4, rect[1] + 4 + 16*0, 0xffffff, 0x404040, INTERFACE.genFlavour+"   ");
-    this.Print(rect[0] + 4, rect[1] + 4 + 16*1, 0xffffff, 0x404040, INTERFACE.genFrequency+" Hz   ");
-    if (INTERFACE.genFlavour == "Square")
+    this.Print(rect[0] + 4, rect[1] + 4 + 16*0, 0xffffff, 0x404040, (INTERFACE.genFlavour+"      ").substr(0, 10));
+    if (INTERFACE.genFlavour != "DC")
+      this.Print(rect[0] + 4, rect[1] + 4 + 16*1, 0xffffff, 0x404040, INTERFACE.genFrequency+" Hz   ");
+    else
+      this.Print(rect[0] + 4, rect[1] + 4 + 16*1, 0xffffff, 0x404040, "           ");
+
+    if (INTERFACE.genFlavour == "DC")
+      this.Print(rect[0] + 4, rect[1] + 4 + 16*2, 0xffffff, 0x404040, "DC: "+INTERFACE.genDc+"V  ");
+    else if (INTERFACE.genFlavour == "Square")
       this.Print(rect[0] + 4, rect[1] + 4 + 16*2, 0xffffff, 0x404040, "Duty: "+INTERFACE.genDuty+"%  ");
     else
       this.Print(rect[0] + 4, rect[1] + 4 + 16*2, 0xffffff, 0x404040, "           ");
@@ -92,13 +98,14 @@ class RemoteGui
   {
     INTERFACE.process(() => LCD.Background(rect, c0, c1));
   }
+
   Bar(rect, c)
   {
     INTERFACE.process(() => LCD.Bar(rect, c));
   }
+
   Print(x, y, cfront, cback, text)
   {
     INTERFACE.process(() => LCD.Print(x, y, cfront, cback, text));
   }
-//9.12. 1530 projektor zapnuty
 }

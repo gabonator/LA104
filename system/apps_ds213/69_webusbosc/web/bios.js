@@ -1,10 +1,3 @@
-var COMM = {
-  debug: false,
-  _open: false,
-  _send: () => 0,
-  _onReceive: () => 0
-};
-
 var LCD = {
   Background: (rect, c0, c1) => BIOS.rpcCall("LCD::Background("+LCD.CRect(rect)+","+LCD.rgb565(c0)+","+LCD.rgb565(c1)+");"),
   Bar: (rect, c) => BIOS.rpcCall("LCD::Bar("+LCD.CRect(rect)+","+LCD.rgb565(c)+");"),

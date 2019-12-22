@@ -7,7 +7,10 @@ class Measure
     {
       var s = parseInt("0x" + rawdata.substr(i, 5));
       var bundle = [s&255, (s>>8)&255, (s>>16)&1, (s>>17)&1];
-      data.push(bundle[0]);
+      if (ch == "CH1")
+        data.push(bundle[0]);
+      if (ch == "CH2")
+        data.push(bundle[1]);
     }
 
     var smin, smax, savg = 0;
@@ -69,11 +72,30 @@ class Measure
          }
 
     }
-    return {frequency:this.frequency(frequency), average:this.voltage(savg*dv), amplitude:this.voltage(range*dv), min:this.voltage(smin*dv), max:this.voltage(smax*dv)};
+    var rawavg = savg, rawmin = smin, rawmax = smax;
+    savg = this.voltageCalib(ch, savg);
+    smin = this.voltageCalib(ch, smin);
+    smax = this.voltageCalib(ch, smax);
+
+    range = smax - smin;
+
+    return {frequency:this.frequency(frequency), 
+      average:this.voltage(savg, dv), amplitude:this.voltage(range, dv), min:this.voltage(smin, dv), max:this.voltage(smax, dv), 
+      rawAverage:rawavg, rawMin:rawmin, rawMax:rawmax};
   }
 
-  voltage(v)
+  voltageCalib(ch, v)
   {
+    if (ch == "CH1")
+      v = CALIBRATION.getCh1(v) - INTERFACE.ch1offset;
+    if (ch == "CH2")
+      v = CALIBRATION.getCh2(v) - INTERFACE.ch2offset;
+    return v;
+  }
+
+  voltage(v, mul)
+  {
+    v = v * mul;
     if (v < 1.0)
       return Math.floor(v*1000) + " mV";
     return v.toFixed(2) + " V";
