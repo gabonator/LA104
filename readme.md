@@ -68,7 +68,7 @@ Addressable LED tester with advanced functions. Supports up to 32x WS2812/WS2812
 
 ##### Temperature grapher
 
-Shows temperature of up to 8 DS1820 sensors in form of graph. Automatic export of measured values into [html](system/apps/test33_temper/visualize/TEMPER01.HTM).
+Shows temperature of up to 8 DS1820 sensors in form of graph. Automatic export of measured values into [html](https://rawgit.valky.eu/gabonator/LA104/master/system/apps/test33_temper/visualize/TEMPER01.HTM), [source code](system/apps/test33_temper/visualize/TEMPER01.HTM).
 
 ![temperature measure tool 1](resources/imgTempMeas1.jpg)
 ![temperature measure tool 2](resources/imgTempMeas2.png)
