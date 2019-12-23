@@ -53,14 +53,14 @@ class RemoteGui
   {
     var rect = this.sections[0].rect;
     this.Print(rect[0] + 4, rect[1] + 4 + 16*0, 0xffffff, 0x404040, INTERFACE.ch1coupling + "  ");
-    this.Print(rect[0] + 4, rect[1] + 4 + 16*1, 0xffffff, 0x404040, (INTERFACE.ch1range + " /div     ").substr(0, 10));
+    this.Print(rect[0] + 4, rect[1] + 4 + 16*1, 0xffffff, 0x404040, (INTERFACE.ch1range + " /div     ").substr(0, 12));
   }                                                                                       
 
   drawChannel2()
   {
     var rect = this.sections[1].rect;
     this.Print(rect[0] + 4, rect[1] + 4 + 16*0, 0xffffff, 0x404040, INTERFACE.ch2coupling + "  ");
-    this.Print(rect[0] + 4, rect[1] + 4 + 16*1, 0xffffff, 0x404040, (INTERFACE.ch2range + " /div   ").substr(0, 10));
+    this.Print(rect[0] + 4, rect[1] + 4 + 16*1, 0xffffff, 0x404040, (INTERFACE.ch2range + " /div   ").substr(0, 12));
   }
 
   drawTimebase()
@@ -72,15 +72,15 @@ class RemoteGui
   drawTrigger()
   {
     var rect = this.sections[3].rect;
-    this.Print(rect[0] + 4, rect[1] + 4 + 16*0, 0xffffff, 0x404040, INTERFACE.trigState+"   ");
-    this.Print(rect[0] + 4, rect[1] + 4 + 16*1, 0xffffff, 0x404040, INTERFACE.trigMode+"   ");
+    this.Print(rect[0] + 4, rect[1] + 4 + 16*0, 0xffffff, 0x404040, (INTERFACE.trigState+"   ").substr(0, 12));
+    this.Print(rect[0] + 4, rect[1] + 4 + 16*1, 0xffffff, 0x404040, (INTERFACE.trigMode+"     ").substr(0, 12));
     this.Print(rect[0] + 4, rect[1] + 4 + 16*2, 0xffffff, 0x404040, INTERFACE.trigSource+"   ");
   }
 
   drawGenerator()
   {
     var rect = this.sections[4].rect;
-    this.Print(rect[0] + 4, rect[1] + 4 + 16*0, 0xffffff, 0x404040, (INTERFACE.genFlavour+"      ").substr(0, 10));
+    this.Print(rect[0] + 4, rect[1] + 4 + 16*0, 0xffffff, 0x404040, (INTERFACE.genFlavour+"      ").substr(0, 12));
     if (INTERFACE.genFlavour != "DC")
       this.Print(rect[0] + 4, rect[1] + 4 + 16*1, 0xffffff, 0x404040, INTERFACE.genFrequency+" Hz   ");
     else

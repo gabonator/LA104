@@ -5,6 +5,7 @@
   var controls = new Controls();
   var gui = new RemoteGui();
   var meas = new Measure();
+  var analyser = new Analyser();
 
 
 
@@ -37,9 +38,20 @@ INTERFACE = {
   genFrequency: 10000,
   genDuty: 50,
   genDc: 1.0,
-  genEquation: "Math.cos(x)",
+  genEquation: "(sin(x)+abs(sin(x*2))*0.5)*0.6",
+  // i/n*2-1
+  // (sin(x)+sin(x*2)/2+sin(x*3)/3+sin(x*4)/4+sin(x*5)/5)*0.5
+  // (0b111100001100110010101010 >> Math.floor(i/n*24))&1
+  // (0b000000000001111000011001 >> Math.floor(24-i/n*24))&1
+  // (0b111111110000000010101010 >> Math.floor(24-i/n*24))&1      // GreaterDTHigh, Time=100
+  // (0b111100001111000011100010 >> Math.floor(24-i/n*24))&1      // LowerDTLow, Time=50
+  // (0b11101110001011111111111111111111 >>> Math.floor(32-i/n*32))&1   // 'G' UART 0b01000111
+  // (0b11101110001010011010101111111111 >>> Math.floor(32-i/n*32))&1   // 'GV' UART 0b01000111, 0b01010110
+  // "11110111000101001101010111111111"[floor(i/n*32)]
 
   measSource: "CH1",
+
+  analyse:false,
 
   // CH1          	
   save()
@@ -47,7 +59,7 @@ INTERFACE = {
     var data = {};
     for (var i in this)
     {
-      if (typeof(this[i]) == "string" || typeof(this[i]) == "number")
+      if (typeof(this[i]) == "string" || typeof(this[i]) == "number" || typeof(this[i]) == "boolean")
         data[i] = this[i];
     }
     var settings = JSON.stringify(data);
@@ -286,6 +298,12 @@ INTERFACE = {
     INTERFACE.measSource = src;
   },
 
+  // ANALYSER
+  setAnalyserMode(mode)
+  {
+    INTERFACE.analyse = mode == "UART";
+  },
+
   // COMMON
 
   setAll: () =>
@@ -384,6 +402,7 @@ INTERFACE = {
                 {
                   INTERFACE.onTrigger();
                   INTERFACE.trigState = "stop";
+                  gui.drawTrigger();
 
                   return Promise.resolve()
                   .then( () => OSC.Transfer(30, 4096-30) )
@@ -407,8 +426,14 @@ INTERFACE = {
 
               return Promise.resolve()
               .then( () => OSC.Transfer(reqStart, reqLen) )
-              .then( data => { INTERFACE.measure = meas.Calculate(INTERFACE.measSource, dt, dv, data); controls.setMeasData(INTERFACE.measure); return Promise.resolve(data);} )
-              .then( data => canvas.OscilloscopeRedraw(scroll, data) )
+              .then( data => 
+              { 
+                INTERFACE.measure = meas.Calculate(INTERFACE.measSource, dt, dv, data); 
+                controls.setMeasData(INTERFACE.measure); 
+                return data;
+              } )
+              .then( data => { canvas.OscilloscopeRedraw(scroll, data); return data; } )
+              .then( data => { if (INTERFACE.analyse) analyser.analyse(data); } )
               .then( () => 
               { 
                 if ((ready && INTERFACE.trigState == "run") || forceAutoRedraw) 

@@ -140,6 +140,7 @@ class Renderer
       {
         INTERFACE.restart();
         INTERFACE.trigState = "single";
+
         this.waitingTimer = setInterval(() => 
         {
           o.target.style.color = (o.target.style.color == "rgb(255, 0, 0)") ? "rgb(0, 0, 0)" : "rgb(255, 0, 0)"; //innerHTML = INTERFACE.trigState == "run" ? "&#9899;" : "&#9724;" 
@@ -148,8 +149,8 @@ class Renderer
       {
         INTERFACE.trigState = "stop";
       }
+      gui.drawTrigger();
     }).bind(this));
-
   }
   Clear()
   {
@@ -293,6 +294,8 @@ class Renderer
     ofs += ofsx;
     trigx = 120;
 
+    this.lastOfs = ofs;
+
     data1 = this.OscilloscopeResample(data1);
     data2 = this.OscilloscopeResample(data2);
 
@@ -328,6 +331,17 @@ class Renderer
     this.Poly(path2, "#00ffff");
   }
 
+  annotate(x, y, text)
+  {
+    var ypos = (v) => canvas.height-v*(canvas.height/256);
+    var xpos = (x) => this.lastOfs + x; // resampling!!!
+    this.ctx.font = "20px Arial";
+    this.ctx.fillStyle = "white";
+    this.ctx.strokeStyle = "#404040";
+    this.ctx.textAlign = "center";
+    this.ctx.strokeText(text, xpos(x), ypos(y)+32);
+    this.ctx.fillText(text, xpos(x), ypos(y)+32);
+  }
 }
 
    	

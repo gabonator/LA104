@@ -82,7 +82,7 @@
       }
     }
 
-    ["abs", "sin", "cos"].forEach(f => fixMath(f));
+    ["abs", "sin", "cos", "floor"].forEach(f => fixMath(f));
     console.log(eq);
 
     var n = 38*4;       

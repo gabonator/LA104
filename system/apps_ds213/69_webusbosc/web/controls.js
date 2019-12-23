@@ -90,7 +90,7 @@ float:left;
     <input id="ch2offset" size=5 type="text" value="20"></div>
   </div><div class="controlsSpacer"></div>
   <div class="controlsBlock blockTimeTrig">
-    Timebase:<br><br>
+    Timebase/Trigger:<br><br>
     T:
     <select id="timebase">
 <!--      <option>100ns</option> -->
@@ -145,7 +145,7 @@ float:left;
       <option>Sawtooth</option>
       <option>Square</option>
       <option>DC</option>
-      <option>Equation</option>
+      <option value ="Equation">Expression</option>
     </select><br>
     <span id="genCondEquation"><textarea cols=25 rows=3 id="genEquation"></textarea><br></span>
     <span id="genCondFreq">Frequency:<input size=8 type="text" value="1000" id="genFrequency"><br></span>
@@ -178,12 +178,18 @@ float:left;
   </div>
   <div class="controlsSpacer"></div>
   <div class="controlsBlock blockConn">
+    Analysis:<br>
+    <select id="analyserMode">
+      <option>Off</option>
+      <option>UART</option>
+    </select><br>
+  </div>
+  <div class="controlsSpacer"></div>
+  <div class="controlsBlock blockConn">
     Connection:<br>
     <button id="connect">Connect</button><br>
     <div id="status"></div
   </div>
-
-
 </div>
 `;
     document.documentElement.appendChild(this.elem);
@@ -269,6 +275,9 @@ float:left;
           INTERFACE.setGeneratorEquation(o.target.value);
         }
       });
+
+    document.querySelector("#analyserMode").addEventListener('change', 
+      (o) => INTERFACE.setAnalyserMode(o.target.value));
   }
 
   setChannel1Offset(v)
@@ -329,5 +338,6 @@ float:left;
     document.querySelector("#genCondEquation").style.display = INTERFACE.genFlavour == "Equation" ? "block" : "none";
 
     document.querySelector("#genEquation").value = INTERFACE.genEquation;
+    document.querySelector("#analyserMode").value = INTERFACE.analyse ? "UART" : "Off";
   }
 }
