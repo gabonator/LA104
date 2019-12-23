@@ -17,11 +17,44 @@ Go to release section on top of this page, download *system.hex*. Power on the L
 
 #### News
 
-##### Addressable RGB led strip tester
+##### Web USB Oscilloscope
 
-Proud to announce the first oscilloscope in the world using the WebUsb technology (correct me if I am wrong)!
+Proud to announce the first oscilloscope in the world using the WebUsb technology (correct me if I am wrong)! Just run the 69webusb.elf, connect the USB cable and click on system notification to open the oscilloscope interface. No application installation is required. Prebuilt binaries can be found here: [apps_ds213/69_webusbosc/release](system/apps_ds213/69_webusbosc/release)
 
 ![WebUsb oscilloscope](resources/imgWebusb.png)
+
+How to install:
+
+  - First you need to flash new firmware to your DS203: keep pressed first button when powering the device on, copy the "ds203.hex" into the DFU drive.
+  - If you have problem copying new firmware, use Windows PC for copying (or virtual machine).
+  - If the copying fails in the middle (if the version of DFU is V3.11C), downgrade to DFU V3.10 using stm32flash utility [stm32flash](tools/stm32flash), you will need to open your device and solder few wires into the CN6 connector
+  - When the firmware is flashed, it will ask for "shell.elf", copy all the elf files from [69_webusbosc/release](system/apps_ds213/69_webusbosc/release) to your device, and turn off/on
+  - If the firmware is stuck and the last thing you see "Image loaded at 0x........", you will need to rebuild the application for different address (contact me)
+  - For linux users: If the web application cannot communicate with your DS203 ("Unable to claim interface in developer console" in Chrome developer console), run `sudo rmmod cdc_acm`
+
+Video:
+
+[![WebUsb Oscilloscope video](https://img.youtube.com/vi/aghTg4Pggv4/0.jpg)](https://www.youtube.com/watch?v=aghTg4Pggv4 "WebUsb Oscilloscope")
+
+Features:
+
+  - Fast realtime view of analog signals
+  - Full control over trigger/timebase/analog input channel settings
+  - Drag the signal label/trigger level to alter the signal position
+  - Basic signal statistics (frequency, amplitude, average value)
+  - Signal generator with predefined signal shapes (Square with duty cycle, sine, saw, triangle, DC, js/algebraic expression)
+  - DC generator for calibration of analog channels (0.3V .. 2.7V)
+  - Semi automatic calibration
+  - Expression evaluator for signal generator (set your own formula, ability to generate UART signals)
+    - *i* - sample index, *n* - count of samples, *x* - angle 0..2pi
+    - `i/n*2-1` - sawtooth signal
+    - `(sin(x)+sin(x*2)/2+sin(x*3)/3+sin(x*4)/4+sin(x*5)/5)*0.5` - first harmonics of sawtooth signal 
+    - `(0b111111110000000010101010 >> Math.floor(24-i/n*24))&1` - for testing timed triggers (GreaterDTHigh, Time=100)
+    - `(0b11101110001011111111111111111111 >>> Math.floor(32-i/n*32))&1` - generates uart signal for letter 'G'
+    - `"11110111000101001101010111111111"[floor(i/n*32)]` - generates uart signal for letters 'GV'
+  - UART decoder - shows stream bits, and decoded values in hexadecimal and decimal form and ascii characters
+
+![WebUsb oscilloscope](resources/imgWebusb2.png)
 
 ##### Addressable RGB led strip tester
 
