@@ -199,7 +199,7 @@ class Calibration
       .then( () => this.transfer() )
       .then( () => this.delay(100) )
       .then( () => this.transfer("CH1") )
-      .then( () => INTERFACE.measure.rawAverage )
+      .then( (measure) => measure.rawAverage )
   }
 
   getCh2Statistics()
@@ -212,16 +212,18 @@ class Calibration
       .then( () => this.transfer() )
       .then( () => this.delay(100) )
       .then( () => this.transfer("CH2") )
-      .then( () => INTERFACE.measure.rawAverage )
+      .then( (measure) => measure.rawAverage )
   }
 
   transfer(ch)
   {
+    var measure; 
     return Promise.resolve()
     .then( () => OSC.Transfer(30+120, 1024) )
-    .then( data => { if (ch) {INTERFACE.measure = meas.Calculate(ch, 1, 1, data);} return data;} )
+    .then( data => { if (ch) {measure = meas.Calculate(ch, 1, 1, data);} return data;} )
     .then( data => canvas.OscilloscopeRedraw(0, data) )
     .then( () => OSC.Restart() )
+    .then( () => measure );
   }
  
   delay(interval)

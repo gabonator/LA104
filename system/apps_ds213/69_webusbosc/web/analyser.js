@@ -3,7 +3,9 @@ class Analyser
   analyse(rawdata)
   {
     var data = this.getData(rawdata, "CH1");
-    this.threshold(data);
+    if (!this.threshold(data))
+      return;
+
     this.idlePolarity = 1;
 
     // find smallest
@@ -151,18 +153,32 @@ class Analyser
     }
     
     var range = dmax - dmin;
+    if (range < 30)
+      return;
+
     var trigMin = dmin + range/4;
     var trigMax = dmax - range/4;
 
     var oldState = data[0] > (dmin+dmax)/2;
+    var middle = 0;
     for (var i=0; i<data.length; i++)
     {
       var newState = oldState;
       if (data[i] > trigMax)
+      {
         newState = 1;
-      if (data[i] < trigMin)
+        middle = 0;
+      }
+      else if (data[i] < trigMin)
+      {
         newState = 0;
-
+        middle = 0;
+      }
+      else
+      {
+        if (middle++ > 10)
+          return;
+      }
       data[i] = newState;
       oldState = newState;
     }

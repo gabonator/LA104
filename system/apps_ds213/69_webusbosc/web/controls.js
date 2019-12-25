@@ -28,7 +28,14 @@ float:left;
 .controlsSpacer
 {
   float:left;
-  width:42px;
+  width:35px;
+  height:20px;
+}
+
+.controlsSpacerHalf
+{
+  float:left;
+  width:21px;
   height:20px;
 }
 
@@ -40,9 +47,11 @@ float:left;
 .hidden {display:none;}
 .blockConn { border: 2px solid #b0b0b0; }
 .blockCalib { border: 2px solid #b0b0b0; }
+.blockMemory { border: 2px solid #b0b0b0; }
 </style>
 
 <div class="controlsContainer">
+  <div class="controlsSpacerHalf"></div>
   <div class="controlsBlock blockCh1">
     CH1:<br><br>
     Coupling: 
@@ -133,8 +142,8 @@ float:left;
       <option>CH1</option>
       <option>CH2</option>
     </select><br>
-    <div class="hidden">Threshold:<input size=5 type="text" value="128" id="triggerThreshold">,</div> 
-    Time:<input size=5 type="text" value="128" id="triggerTime">
+    <div class="hidden">Threshold:<input size=5 type="text" value="128" id="triggerThreshold"></div> 
+    <span id="genTrigTime">Time:<input size=5 type="text" value="128" id="triggerTime"></span>
 
   </div><div class="controlsSpacer"></div>
   <div class="controlsBlock blockGen">
@@ -167,6 +176,7 @@ float:left;
   </div>
 </div>
 <div class="controlsContainer">
+  <div class="controlsSpacerHalf"></div>
   <div class="controlsBlock blockCalib">
     Calibration:<input type="button" value="?" id="calibHelp"><br>
     <input type="button" value="Zero offset CH1" id="calibZeroCh1"><br>
@@ -179,14 +189,34 @@ float:left;
   <div class="controlsSpacer"></div>
   <div class="controlsBlock blockConn">
     Analysis:<br>
+    <br>
     <select id="analyserMode">
       <option>Off</option>
       <option>UART</option>
     </select><br>
   </div>
   <div class="controlsSpacer"></div>
+  <div class="controlsBlock blockMemory">
+    Memory:<br><br>
+    <canvas id="memPreview" width="180" height="60" style="background:#404040;"></canvas>
+    <select id="memSlot">
+      <option value="0">Slot1</option>
+      <option value="1">Slot2</option>
+      <option value="2">Slot3</option>
+      <option value="3">Slot4</option>
+      <option value="4">Slot5</option>
+      <option value="5">Slot6</option>
+      <option value="6">Slot7</option>
+      <option value="7">Slot8</option>
+    </select>
+    <button id="memLoad">Load</button>
+    <button id="memSave">Save</button>
+<!--    <br><button id="memExport">Export</button> -->
+  </div>
+  <div class="controlsSpacer"></div>
   <div class="controlsBlock blockConn">
     Connection:<br>
+    <br>
     <button id="connect">Connect</button><br>
     <div id="status"></div
   </div>
@@ -216,7 +246,10 @@ float:left;
       (o) => INTERFACE.setTimebase(o.target.value));
 
     document.querySelector("#triggerMode").addEventListener('change', 
-      (o) => INTERFACE.setTriggerMode(o.target.value));
+      (o) => {
+        INTERFACE.setTriggerMode(o.target.value);
+        document.querySelector("#genTrigTime").style.display = o.target.value.indexOf("DT") != -1 ? "block" : "none";
+      });
 
     document.querySelector("#triggerSource").addEventListener('change', 
       (o) => INTERFACE.setTriggerSource(o.target.value));
@@ -278,6 +311,15 @@ float:left;
 
     document.querySelector("#analyserMode").addEventListener('change', 
       (o) => INTERFACE.setAnalyserMode(o.target.value));
+
+    document.querySelector("#memSlot").addEventListener('change', 
+      (o) => INTERFACE.memoryPreview(o.target.value));
+    document.querySelector("#memLoad").addEventListener('click', 
+      (o) => INTERFACE.memoryLoad());
+    document.querySelector("#memSave").addEventListener('click', 
+      (o) => INTERFACE.memorySave());
+//    document.querySelector("#memExport").addEventListener('click', 
+//      (o) => INTERFACE.memoryExport());
   }
 
   setChannel1Offset(v)
@@ -327,6 +369,8 @@ float:left;
     document.querySelector("#triggerSource").value = INTERFACE.trigSource;
     document.querySelector("#triggerThreshold").value = INTERFACE.trigThreshold; 
     document.querySelector("#triggerTime").value = INTERFACE.trigTime;
+    document.querySelector("#genTrigTime").style.display = INTERFACE.trigMode.indexOf("DT") != -1 ? "block" : "none";
+
     document.querySelector("#genFlavour").value = INTERFACE.genFlavour;
     document.querySelector("#genFrequency").value = INTERFACE.genFrequency;
     document.querySelector("#genDuty").value = INTERFACE.genDuty;
@@ -339,5 +383,39 @@ float:left;
 
     document.querySelector("#genEquation").value = INTERFACE.genEquation;
     document.querySelector("#analyserMode").value = INTERFACE.analyse ? "UART" : "Off";
+  }
+
+  memPreview(rawdata)
+  {
+    var canvas = document.querySelector("#memPreview");
+    var ctx = canvas.getContext("2d");
+
+    var ypos = (v) => canvas.height-v*(canvas.height/256);
+
+    var data1 = [], data2 = [];
+    for (var i =0, x=0; i<rawdata.length && x < canvas.width; i+=5, x+=0.1)
+    {
+      var s = parseInt("0x" + rawdata.substr(i, 5));
+      data1.push({x:x, y:ypos(s&255)});
+      data2.push({x:x, y:ypos((s>>8)&255)});
+    }
+
+    var Poly = (p, c) =>
+    {
+      ctx.strokeStyle =c;
+      ctx.lineJoin="round";
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(p[0].x, p[0].y);
+      for (var i=0; i<p.length; i++)
+        ctx.lineTo(p[i].x, p[i].y);
+      ctx.stroke();
+    }
+
+    canvas.width = canvas.width;
+    if (data1.length)
+      Poly(data1, "#ffff00")
+    if (data2.length)
+      Poly(data2, "#00ffff");
   }
 }

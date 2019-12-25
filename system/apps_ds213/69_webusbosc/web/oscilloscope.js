@@ -53,15 +53,21 @@ INTERFACE = {
 
   analyse:false,
 
+  memSlot:"0",
+
   // CH1          	
   save()
   {
     var data = {};
     for (var i in this)
     {
+      if (i.substr(0, 1) == "_")
+        continue;
+
       if (typeof(this[i]) == "string" || typeof(this[i]) == "number" || typeof(this[i]) == "boolean")
         data[i] = this[i];
     }
+
     var settings = JSON.stringify(data);
     localStorage.setItem('settings', settings);
   },
@@ -304,6 +310,91 @@ INTERFACE = {
     INTERFACE.analyse = mode == "UART";
   },
 
+  // MEMORY/FILE
+  memorySave()
+  {
+    INTERFACE._wave.oscSettings = {
+      ch1range:INTERFACE.ch1range,
+      ch1coupling:INTERFACE.ch1coupling,
+      ch1offset:INTERFACE.ch1offset,
+      ch2range:INTERFACE.ch2range,
+      ch2coupling:INTERFACE.ch2coupling,
+      ch2offset:INTERFACE.ch2offset,
+      timebase:INTERFACE.timebase,
+      trigMode:INTERFACE.trigMode,
+      trigTime:INTERFACE.trigTime,
+      trigThreshold:INTERFACE.trigThreshold,
+      trigSource:INTERFACE.trigSource,
+
+      genFlavour: INTERFACE.genFlavour,
+      genFrequency: INTERFACE.genFrequency,
+      genDuty: INTERFACE.genDuty,
+      genDc: INTERFACE.genDc,
+      genEquation: INTERFACE.genEquation
+    };
+
+    localStorage.setItem('wave' + INTERFACE.memSlot, JSON.stringify(INTERFACE._wave));
+
+    INTERFACE.memoryPreview(INTERFACE.memSlot);
+  },
+
+  memoryLoad()
+  {
+    var _wave = localStorage.getItem('wave' + INTERFACE.memSlot);
+    if (_wave)
+    {
+      INTERFACE.trigState = "stop";
+      gui.drawTrigger();
+      canvas.onStop();
+
+      _wave = JSON.parse(_wave);
+      for (var i in _wave.oscSettings)
+        INTERFACE[i] = _wave.oscSettings[i];
+
+      controls.load();
+      INTERFACE.configureInput("CH1");
+      INTERFACE.configureInput("CH2");
+      INTERFACE.configureTimebase();
+      INTERFACE.configureTrigger();
+      INTERFACE.updateGenerator();
+
+      delete _wave.oscSettings;
+
+      var dt = parseFloat(OSC.Enums[INTERFACE.timebase]);
+      var dv = [50e-3, 100e-3, 200e-3, 500e-3, 1, 2, 5, 10][OSC.Enums[INTERFACE.ch1range]];
+
+      INTERFACE.process( () =>
+        Promise.resolve()
+//          .then( () => new Promise( (resolve) => setTimeout(resolve, 50) ) )  // finish previous transfer
+          .then( () => INTERFACE._wave = _wave )
+          .then( () => meas.Calculate(INTERFACE.measSource, dt, dv, INTERFACE._wave.data) )
+          .then( (measure) => controls.setMeasData(measure) ) 
+          .then( () => canvas.OscilloscopeRedraw(INTERFACE._wave.scroll, INTERFACE._wave.data) )
+          .then( () => { if (INTERFACE.analyse) analyser.analyse(INTERFACE._wave.data); } )
+          .then( () => OSC.Restart() )
+      );
+
+    }
+  },
+
+  memoryPreview(id)
+  {
+    INTERFACE.memSlot = id;
+    var _wave = localStorage.getItem('wave' + INTERFACE.memSlot);
+    if (_wave)
+    {
+      _wave = JSON.parse(_wave);
+      controls.memPreview(_wave.data);
+    } else
+    {
+      controls.memPreview("");
+    }
+  },
+
+  memoryExport()
+  {
+  },
+
   // COMMON
 
   setAll: () =>
@@ -406,9 +497,13 @@ INTERFACE = {
 
                   return Promise.resolve()
                   .then( () => OSC.Transfer(30, 4096-30) )
-                  .then( data => { INTERFACE.measure = meas.Calculate(INTERFACE.measSource, dt, dv, data); controls.setMeasData(INTERFACE.measure); return data;} )
-                  .then( data => canvas.OscilloscopeRedraw(0, data) )
-                  .catch( () => { console.log("err"); return Promise.resolve()} );
+//!!!!                  .then( (data) => {if (INTERFACE.trigState == "stop") throw "cancelled"; return data; } )
+                  .then( (data) => INTERFACE._wave = {scroll:0, start:reqStart, len:reqLen, data:data} )
+
+                  .then( () => meas.Calculate(INTERFACE.measSource, dt, dv, INTERFACE._wave.data) )
+                  .then( (measure) => controls.setMeasData(measure) ) 
+                  .then( () => canvas.OscilloscopeRedraw(INTERFACE._wave.scroll, INTERFACE._wave.data) )
+                  .catch( (e) => { if (e=="cancelled") return; console.log("err"); return Promise.resolve()} );
                 }
             } else
             if (forceFinishedRedraw || forceAutoRedraw || forceFreerunRedraw || forcePausedRedraw)
@@ -418,6 +513,13 @@ INTERFACE = {
 
               var maxSafe = 4096-30-15;
               var reqStart = canvas.OscilloscopeResampleNum(scroll)+30;
+
+              if (INTERFACE.trigMode == "None")
+              {
+                reqStart = Math.max(150, reqStart);
+                scroll = Math.max(120, scroll);
+              }
+
               var reqLen = 256*4+180*1; // screen width, ignore resampling, always take 1k
               if (reqStart > maxSafe - 128)
                 reqStart = maxSafe - 128;
@@ -426,14 +528,13 @@ INTERFACE = {
 
               return Promise.resolve()
               .then( () => OSC.Transfer(reqStart, reqLen) )
-              .then( data => 
-              { 
-                INTERFACE.measure = meas.Calculate(INTERFACE.measSource, dt, dv, data); 
-                controls.setMeasData(INTERFACE.measure); 
-                return data;
-              } )
-              .then( data => { canvas.OscilloscopeRedraw(scroll, data); return data; } )
-              .then( data => { if (INTERFACE.analyse) analyser.analyse(data); } )
+              .then( (data) => INTERFACE._wave = {scroll:scroll, start:reqStart, len:reqLen, data:data} )
+
+              .then( () => meas.Calculate(INTERFACE.measSource, dt, dv, INTERFACE._wave.data) )
+              .then( (measure) => controls.setMeasData(measure) ) 
+              .then( () => canvas.OscilloscopeRedraw(INTERFACE._wave.scroll, INTERFACE._wave.data) )
+              .then( () => { if (INTERFACE.analyse) analyser.analyse(INTERFACE._wave.data); } )
+
               .then( () => 
               { 
                 if ((ready && INTERFACE.trigState == "run") || forceAutoRedraw) 
@@ -453,4 +554,4 @@ INTERFACE = {
 INTERFACE.load();
 controls.load();
 CALIBRATION.load();
-
+INTERFACE.memoryPreview(INTERFACE.memSlot);
