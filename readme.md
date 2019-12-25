@@ -19,7 +19,7 @@ Go to release section on top of this page, download *system.hex*. Power on the L
 
 ##### Web USB Oscilloscope
 
-Proud to announce the first oscilloscope in the world using the WebUsb technology (correct me if I am wrong)! Just run the 69webusb.elf, connect the USB cable and click on system notification to open the oscilloscope interface. No application installation is required. Prebuilt binaries can be found here: [apps_ds213/69_webusbosc/release](system/apps_ds213/69_webusbosc/release)
+Proud to announce the first oscilloscope in the world using the WebUsb technology (correct me if I am wrong)! Read about the webusb technology and the evolution of connection between [microcontroller and web browser](https://github.com/gabonator/Education/blob/master/2019/WebUsb/readme.md). Just run the 69webusb.elf, connect the USB cable and click on system notification to open the oscilloscope interface. No application installation is required. Prebuilt binaries can be found here: [apps_ds213/69_webusbosc/release](system/apps_ds213/69_webusbosc/release)
 
 ![WebUsb oscilloscope](resources/imgWebusb.png)
 
@@ -55,6 +55,7 @@ Features:
     - `(0b11101110001011111111111111111111 >>> Math.floor(32-i/n*32))&1` - generates uart signal for letter 'G'
     - `"11110111000101001101010111111111"[floor(i/n*32)]` - generates uart signal for letters 'GV'
   - UART decoder - shows stream bits, and decoded values in hexadecimal and decimal form and as ascii characters
+  - Memory slots - store and restore your waveform and channel settings, including preview
 
 ![WebUsb oscilloscope](resources/imgWebusb2.png)
 
