@@ -1,4 +1,6 @@
 #pragma once
+#include <library.h>
+
 class CHal
 {
 public:

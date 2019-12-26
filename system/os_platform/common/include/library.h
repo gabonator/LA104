@@ -1,9 +1,9 @@
 #pragma once
 
-#include <bios/Bios.h>
-#include <gui/Gui.h>
-#include <framework/Wnd.h>
-#include <../library/spf/spf.h>
+#include <../../../os_host/source/bios/Bios.h>
+#include <../../../os_host/source/gui/Gui.h>
+#include <../../../os_host/source/framework/Wnd.h>
+#include <../../../os_host/library/spf/spf.h>
 
 
 
