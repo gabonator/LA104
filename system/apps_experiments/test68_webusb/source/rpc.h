@@ -91,12 +91,14 @@ SPI::write(p, 32);
     if (strcmp(command, "SPI::write")==0)
       return (uint32_t)static_cast<void(*)(uint8_t*, int)>(SPI::write); 
 
+#ifdef LA104
     if (strcmp(command, "IO::PinMode")==0)
       return (uint32_t)BIOS::GPIO::PinMode;
     if (strcmp(command, "IO::DigitalWrite")==0)
       return (uint32_t)BIOS::GPIO::DigitalWrite;
     if (strcmp(command, "IO::DigitalRead")==0)
       return (uint32_t)BIOS::GPIO::DigitalRead;
+#endif
 
     if (strcmp(command, "LCD::BufferBegin")==0)
       return (uint32_t)(uint32_t)static_cast<void(*)(CRect const&)>(BIOS::LCD::BufferBegin);

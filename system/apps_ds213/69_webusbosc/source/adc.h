@@ -1,6 +1,16 @@
 #if !defined(EMULATED) && defined(DS203)
 namespace BIOS
 {
+  namespace DAC
+  {
+    void SetWave(uint16_t* buffer, int length)
+    {
+      if (buffer)
+        BIOS::DAC::SetMode(BIOS::DAC::EMode::Buffer, buffer, length);
+      else 
+        BIOS::DAC::SetMode(BIOS::DAC::EMode::Square, nullptr, 0);
+    }
+  }
   namespace ADC
   {
     constexpr int maxBulkSamples = 12;

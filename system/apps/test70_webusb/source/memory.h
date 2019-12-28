@@ -45,5 +45,24 @@ namespace MEMORY
       TERMINAL::Print("%02x", *p++);
     }
   }
+
+  uint32_t Read32(uint32_t ptr)
+  {
+    uint32_t* p = (uint32_t*)ptr;
+    return *p;
+  }
+
+  uint32_t Write32(uint32_t ptr, uint32_t value)
+  {
+    uint32_t* p = (uint32_t*)ptr;
+    *p = value;
+  }
+
+  uint32_t Mask32(uint32_t ptr, uint32_t mask, uint32_t value)
+  {
+    uint32_t* p = (uint32_t*)ptr;
+    *p &= ~mask;
+    *p |= value;
+  }
 }
 

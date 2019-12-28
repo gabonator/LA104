@@ -104,6 +104,11 @@ var BIOS =
   biosSpiBegin: (baud) => BIOS.rpcCall('SPI::begin('+baud+');'),
   biosSpiWrite: (addr, len) => BIOS.rpcCall('SPI::write('+addr+', '+len+');'),
   biosMemWrite: (addr, data) => BIOS.rpcCall('RPC::MemoryWrite(0x'+addr.toString(16)+', "'+data.map(i => ("0"+i.toString(16)).substr(-2) ).join("")+'");'),
+
+  biosMemRead32: (addr) => BIOS.rpcCall('MEM::Read32(0x'+addr.toString(16)+');').then( json => BIOS.retval(json) ),
+  biosMemWrite32: (addr, value) => BIOS.rpcCall('MEM::Write32(0x'+addr.toString(16)+', 0x'+value.toString(16)+');').then( json => BIOS.retval(json) ),
+  biosMemMask32: (addr, mask, value) => BIOS.rpcCall('MEM::Mask32(0x'+addr.toString(16)+', 0x'+mask.toString(16)+', 0x'+value.toString(16)+');').then( json => BIOS.retval(json) ),
+
   safeeval: (json) => { if (json[0] == "{") return eval("("+json+")") },
   retval: (json) => { var j = BIOS.safeeval(json); if (j && typeof(j.ret) != "undefined") return j.ret },
   biosMemGetBufferPtr: () => BIOS.rpcCall('RPC::GetBufferPtr();').then( json => BIOS.retval(json) ), 
@@ -117,7 +122,7 @@ var BIOS =
   biosLcdBufferWrite: (ptr, count) => BIOS.rpcCall('LCD::BufferWrite(' + ptr + ',' + count +');'),
   biosMemBulk: (addr, data) =>
   {
-    var bulkLen = 40;
+    var bulkLen = 12;
     if (data.length < bulkLen)
       return BIOS.biosMemWrite(addr, data);
     else
@@ -136,4 +141,3 @@ var BIOS =
     });
   }
 };
-

@@ -19,7 +19,7 @@ Go to release section on top of this page, download *system.hex*. Power on the L
 
 ##### Web USB Oscilloscope
 
-Proud to announce the first oscilloscope in the world using the WebUsb technology (correct me if I am wrong)! Read about the webusb technology and the evolution of connection between [microcontroller and web browser](https://github.com/gabonator/Education/blob/master/2019/WebUsb/readme.md). Just run the 69webusb.elf, connect the USB cable and click on system notification to open the oscilloscope interface. No application installation is required. Prebuilt binaries can be found here: [apps_ds213/69_webusbosc/release](system/apps_ds213/69_webusbosc/release)
+Proud to announce the first oscilloscope in the world using the WebUsb technology (correct me if I am wrong)! Read about the webusb technology and the evolution of connection between [microcontroller and web browser](https://github.com/gabonator/Education/blob/master/2019/WebUsb/readme.md). Just run the 69webusb.elf, connect the USB cable and click on system notification to open the oscilloscope interface. No application installation is required. Prebuilt binaries can be found here: [release 2019.12](https://github.com/gabonator/LA104/releases/tag/2019.12)
 
 ![WebUsb oscilloscope](resources/imgWebusb.png)
 

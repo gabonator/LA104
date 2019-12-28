@@ -9,6 +9,28 @@ class RemoteGui
       {color:0xffffff, name:"Trigger", func:this.drawTrigger},
       {color:0xff00ff, name:"Generator", func:this.drawGenerator}
     ];
+
+
+    var paddingx = 20;
+    var spacingx = 20;
+    var paddingy = 30;
+    var spacingy = 20;
+    var width = 400;
+    var height = 240;
+
+    for (var y=0; y<2; y++)
+      for (var x=0; x<3; x++)
+      {
+        var section = this.sections[y*3+x];
+        if (!section)
+          continue;
+
+        section.rect = [
+          paddingx+((width-2*paddingx+spacingx)/3)*x,
+          paddingy+((height-2*paddingy+spacingy)/2)*y,
+          paddingx+((width-2*paddingx+spacingx)/3)*(x+1)-spacingx,
+          paddingy+((height-2*paddingy+spacingy)/2)*(y+1)-spacingy];
+       }
   }
 
   redraw()
@@ -18,12 +40,6 @@ class RemoteGui
     this.Bar([0, 240-14, 400, 240], 0x404040);
     this.Print(8, 240-14, 0xb0b0b0, 0x404040, "Connected!");
 
-    var paddingx = 20;
-    var spacingx = 20;
-    var paddingy = 30;
-    var spacingy = 20;
-    var width = 400;
-    var height = 240;
     for (var y=0; y<2; y++)
       for (var x=0; x<3; x++)
       {
@@ -31,12 +47,7 @@ class RemoteGui
         if (!section)
           continue;
 
-        var rect = [
-          paddingx+((width-2*paddingx+spacingx)/3)*x,
-          paddingy+((height-2*paddingy+spacingy)/2)*y,
-          paddingx+((width-2*paddingx+spacingx)/3)*(x+1)-spacingx,
-          paddingy+((height-2*paddingy+spacingy)/2)*(y+1)-spacingy];
-
+        var rect = section.rect;
         var recttop = [rect[0], rect[1], rect[2], rect[1]+16];
         var rectbtm = [rect[0], rect[1]+16, rect[2], rect[3]];
 

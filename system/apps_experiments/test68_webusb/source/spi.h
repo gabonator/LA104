@@ -81,7 +81,7 @@ namespace SPI
   void write(uint8_t)
   {
   }
-  void (uint8_t*, int)
+  void write(uint8_t*, int)
   {
   }
 #endif

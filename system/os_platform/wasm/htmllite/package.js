@@ -1,5 +1,5 @@
 var fs = require("fs");
-var prefix = `Module = Module ? Module : {}; Module['wasmBinary'] = (() => { var wasmcode="`;
+var prefix = `Module = typeof(Module) != "undefined" ? Module : {}; Module['wasmBinary'] = (() => { var wasmcode="`;
 var suffix = `"; return Uint8Array.from(atob(wasmcode), c => c.charCodeAt(0));})();`;
 
 fs.writeFileSync("app_wasm.js", prefix + fs.readFileSync("app.wasm").toString("base64") + suffix);

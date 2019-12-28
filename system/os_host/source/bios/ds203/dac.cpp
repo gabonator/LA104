@@ -44,6 +44,40 @@ void ConfigureWave(ui16* pData, ui16 cnt)
 #define CPUCLOCK (72 MHz)
 #define MHz *1000000.0f
 
+
+void SetLogic()
+{
+  #define Mask32(adr, mask, val) *((volatile uint32_t*)adr) &= ~mask; *((volatile uint32_t*)adr) |= val;
+  #define Write32(adr, val) *((volatile uint32_t*)adr) = val;
+
+  // Dac: SetGpioState<GPIOA_BASE, 4, InputFloating>();
+  Mask32(0x40010800, 0xf0000, 0x40000);
+
+  // Dac: TIM7_CR1 = 0x0084;
+  Write32(0x40001400, 0x84);
+
+  // Dac: DAC_CR = 0;
+  Write32(0x40007400, 0x0);
+
+  // Square: TIM4_CR1
+  Write32(0x40000800, 0x80);
+
+  // SetGpioState<GPIOB_BASE, 6, Output50MHz | OutputPushPull>();
+  Mask32(0x40010C00, 0xf000000, 0x3000000);
+}
+
+void SetLogicHigh()
+{
+  // SetGpioLevel<GPIOB_BASE, 6, true>();
+  Write32(0x40010C10, 1<<6);
+}
+
+void SetLogicLow()
+{
+  // SetGpioLevel<GPIOB_BASE, 6, false>();
+  Write32(0x40010C14, 1<<6);
+}
+
 namespace BIOS
 {
   namespace DAC
@@ -68,7 +102,10 @@ namespace BIOS
 				psc = 18;
 			//Settings.Gen.nPsc = nPsc - 1; ?????
 
-			arr = (int)((CPUCLOCK) / ( psc * freqHz )) - 1;
+			//arr = (int)((CPUCLOCK) / ( psc * freqHz )) - 1;
+			arr = 72000000UL / (psc + 1) / freqHz - 1;
+			if (arr<2)
+                          arr = 2;
                         ccr = arr * duty / 100;
 
 			__Set(DIGTAL_PSC, psc);
@@ -78,7 +115,10 @@ namespace BIOS
 		}
 
 		psc = 20;
-		arr = (int)((CPUCLOCK) / (psc * freqHz /* * samples*/)) - 1;
+//		arr = (int)((CPUCLOCK) / (psc * freqHz)) - 1;
+                arr = 72000000 / 20 / freqHz - 1;
+                if (arr<1)
+                  arr = 1;
 		__Set(ANALOG_ARR, arr);
     }
 
@@ -92,9 +132,9 @@ namespace BIOS
     {
 //TODO: verify calculation arr+1 / arr
       if (!wave) // square
-        return CPUCLOCK / (arr + 1) / (psc + 1);
+        return 72000000UL / (arr + 1) / (psc + 1);
 
-      return CPUCLOCK / 20 / ( arr + 1 ) /* / samples */; 
+      return 72000000UL / 20 / ( arr + 1 ); 
     }
 
     int GetDuty() 
@@ -102,16 +142,35 @@ namespace BIOS
       return ccr * 100 / arr;
     }
 
-    void SetWave(uint16_t* _wave, int length)
+    void SetMode(EMode mode, uint16_t* buffer, int length)
     {
-      if (wave)
+      switch (mode)
       {
-        if (wave == _wave && length == samples)
-          return;
-        ConfigureWave(_wave, length);
+        case EMode::Square:
+          wave = nullptr;
+          samples = 0;
+          break;
+        case EMode::Buffer:
+          if (wave != buffer || length != samples)
+          {
+            if (buffer)
+              ConfigureWave(buffer, length);
+
+            samples = length;
+            wave = buffer;
+          }
+        break;
+        case EMode::LogicHigh:
+          SetLogic();
+          SetLogicHigh();
+        break;
+        case EMode::LogicLow:
+          SetLogic();
+          SetLogicLow();
+        break;
+        default:
+          _ASSERT(!"Not supported");
       }
-      samples = length;
-      wave = _wave;
     }
   }
 }

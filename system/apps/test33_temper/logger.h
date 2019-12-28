@@ -33,9 +33,10 @@ public:
 		_ASSERT(mIsOpened);
 		mBaseTime = BIOS::SYS::GetTick();
 		
-		mWriter << "<script src=\"http://app.valky.eu/hw/la104-temperature-visualizer/?v=1\"></script>\n";
+		mWriter << "<script src=\"https://app.valky.eu/hw/la104-temperature-visualizer/?v=1\"></script>\n";
 		mWriter << "<script>\n";
-		mWriter << "_head({device:\"" << BIOS::SYS::GetDeviceType() << "\", file:\"" << (const char*) mLogName << "\"});\n";
+		mWriter << "_head({device:\"" << (const char*)BIOS::SYS::GetAttribute(BIOS::SYS::EAttribute::DeviceType) 
+		  << "\", file:\"" << (const char*) mLogName << "\"});\n";
 		mWriter << "_data([\n";
 	}
 	

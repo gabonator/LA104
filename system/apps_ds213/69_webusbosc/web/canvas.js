@@ -331,12 +331,50 @@ class Renderer
     this.Poly(path2, "#00ffff");
   }
 
-  annotate(x, y, text)
+  OscilloscopeRedrawGraphPart(ofs, rawdata, begin, end, channel, color)
+  {
+    var ypos = (v) => canvas.height-v*(canvas.height/256);
+
+    var data = [];
+    for (var i =0; i<rawdata.length; i+=5)
+    {
+      var s = parseInt("0x" + rawdata.substr(i, 5));
+      if (channel == "CH1")
+        data.push(s&255);
+      else if (channel == "CH2")
+        data.push((s>>8)&255);
+    }
+
+    var trigx = 120/OSC.ResampleTable[INTERFACE.timebase];
+    var ofsx = 120 - trigx;
+    ofs += ofsx;
+    trigx = 120;
+
+    data = this.OscilloscopeResample(data);
+
+
+    for (var i=0; i<data.length; i++)
+    {
+      if (channel == "CH1")
+        data[i] = CALIBRATION.getCh1(data[i]);
+      else
+      if (channel == "CH2")
+        data[i] = CALIBRATION.getCh2(data[i]);
+    }
+
+    var path = [];
+    for (var i=begin; i<end; i++)
+      path.push({x:ofs+i, y:ypos(data[i])});
+
+    this.Poly(path, color, 3);
+  }
+
+  annotate(x, y, text, color)
   {
     var ypos = (v) => canvas.height-v*(canvas.height/256);
     var xpos = (x) => this.lastOfs + x; // resampling!!!
     this.ctx.font = "20px Arial";
-    this.ctx.fillStyle = "white";
+    this.ctx.fillStyle = color ? color : "white";
     this.ctx.strokeStyle = "#404040";
     this.ctx.textAlign = "center";
     this.ctx.strokeText(text, xpos(x), ypos(y)+32);

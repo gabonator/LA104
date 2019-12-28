@@ -14,7 +14,8 @@ namespace BIOS
     int Execute(uint32_t addr) {return 0;}
     void Beep(int intervalMs) {}
     void DelayMs(int intervalMs) {}
-    char* GetDeviceType() {return nullptr;}
+    bool LoadFpga(char* path) {return true;}
+    uintptr_t GetAttribute(EAttribute eInternal) { return 0; }
   }
 
   namespace LCD
@@ -128,11 +129,6 @@ namespace BIOS
     void EnableInterrupts(uint32_t) {}
   }
 
-  namespace PRIVATE
-  {
-    uintptr_t GetInternal(EInternal eInternal) { return 0; }
-  }
-
 #if !defined(DISABLE_USB)
   namespace USB
   {
@@ -169,7 +165,7 @@ namespace BIOS
     void SetDuty(int duty) {}
     int GetFrequency() {return 0;}
     int GetDuty() {return 0;}
-    void SetWave(uint16_t* wave, int length) {}
+    void SetMode(EMode mode, uint16_t* buffer, int length) {}
   }
 #endif
 }

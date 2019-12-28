@@ -241,10 +241,10 @@ void EnableUsb(bool enable)
 {
   if (enable)
   {
-    __Bios(USBDEV, INIT);         // USB
+    __Bios(USBDEV, INIT);
   } else
   {
-    // TODO
+    __Bios(USBDEV, DSBL);
   }
 }
 

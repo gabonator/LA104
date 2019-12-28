@@ -14,7 +14,7 @@ cat ../source_minimal/cdc.c | grep -E -v "\#.*include" >> webusb.c
 
 
 echo "#ifdef __cplusplus" > webusb.h
-echo " extern \"C\" {" >> webusb.h
+echo "extern \"C\" {" >> webusb.h
 echo "#endif" >> webusb.h
 echo "" >> webusb.h
 echo "typedef void (*cdc_receive_callback)(uint8_t* buf, int len);" >> webusb.h
@@ -25,5 +25,5 @@ echo "extern void cdc_set_receive_callback(cdc_receive_callback callback);" >> w
 echo "extern bool cdc_transmit(uint8_t* buffer, int len);" >> webusb.h
 echo "" >> webusb.h
 echo "#ifdef __cplusplus" >> webusb.h
-echo " }" >> webusb.h
+echo "}" >> webusb.h
 echo "#endif" >> webusb.h

@@ -57,20 +57,27 @@ namespace BIOS
 
     void EnableInterrupts(uint32_t mask)
     {
+      __asm volatile ("cpsie i");
+/*
       __asm volatile (
       "	msr primask, %0\n"
       :: "r" (mask) 
       );
+*/
     }
 
     uint32_t DisableInterrupts()
     {
+      __asm volatile ("cpsid i");
+      return 0;
+/*
       uint32_t mask;
       __asm volatile (			   \
       "	mrs %0, primask\n"
       : "=r" (mask) 
       );
       return mask;
+*/
     }
   }
 }

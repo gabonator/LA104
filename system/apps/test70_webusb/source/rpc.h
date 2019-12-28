@@ -16,6 +16,13 @@ namespace RPC
     if (strcmp(command, "MEM::Read")==0)
       return (uint32_t)MEMORY::Read;
 
+    if (strcmp(command, "MEM::Read32")==0)
+      return (uint32_t)MEMORY::Read32;
+    if (strcmp(command, "MEM::Write32")==0)
+      return (uint32_t)MEMORY::Write32;
+    if (strcmp(command, "MEM::Mask32")==0)
+      return (uint32_t)MEMORY::Mask32;
+
     if (strcmp(command, "LCD::Width")==0)
       return (uint32_t)static_cast<int(*)()>([](){ return BIOS::LCD::Width; });
     if (strcmp(command, "LCD::Height")==0)

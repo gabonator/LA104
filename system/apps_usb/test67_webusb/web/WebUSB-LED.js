@@ -59,7 +59,6 @@
       }
     });
 
-if(0)
     serial.getPorts().then(ports => {
       if (ports.length == 0) {
         statusDisplay.textContent = 'No device found.';

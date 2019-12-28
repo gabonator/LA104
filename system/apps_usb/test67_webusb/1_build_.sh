@@ -53,8 +53,8 @@ arm-none-eabi-objdump -d -S output.elf > output.asm
 find . -type f -name '*.o' -delete
 find . -type f -name '*.d' -delete
 
-../../../../tools/elfstrip/elfstrip output.elf 66webusb.elf
+../../../../tools/elfstrip/elfstrip output.elf 67webusb.elf
 nm --print-size --size-sort -gC output.elf > symbols_all.txt
 cat symbols_all.txt | grep _address
 
-cp 66webusb.elf /Volumes/LA104/66webusb.elf
+cp 67webusb.elf /Volumes/LA104/66webusb.elf

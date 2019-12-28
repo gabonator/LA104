@@ -1562,7 +1562,7 @@ static void set_aggregate_callback(
   uint16_t wValue
 );
 
-static const char* origin_url = "l.valky.eu/webusbds2031";
+static const char* origin_url = "l.valky.eu/webusbds203v2";
 
 static char serial_number[USB_SERIAL_NUM_LENGTH+1];
 

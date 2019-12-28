@@ -4,11 +4,6 @@
 char gArgument[128] = "";
 bool hasArgument = false;
 
-void BIOS::SYS::DelayUs(int intervalUs)
-{
-  assert(0);
-}
-
 void BIOS::SYS::DelayMs(int intervalMs)
 {
   gHal->Delay(intervalMs);
@@ -56,11 +51,6 @@ bool BIOS::OS::HasArgument()
 	bool aux = hasArgument;
 	hasArgument = false;
 	return aux;
-}
-
-char* BIOS::SYS::GetDeviceType()
-{
-	return (char*)"EM104";
 }
 
 ///// TODO: move to adc.cpp

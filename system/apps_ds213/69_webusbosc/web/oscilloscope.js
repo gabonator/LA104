@@ -169,7 +169,7 @@ INTERFACE = {
 
   configureTimebase: () =>
   {    
-    INTERFACE.process( () => OSC.ConfigureTimebase(OSC.Enums[INTERFACE.timebase]) )
+//    INTERFACE.process( () => OSC.ConfigureTimebase(OSC.Enums[INTERFACE.timebase]) )
     INTERFACE.process( () => OSC.ConfigureTimebase(OSC.Enums[INTERFACE.timebase]) )
     gui.drawTimebase();
     INTERFACE.save();
@@ -363,16 +363,27 @@ INTERFACE = {
       var dt = parseFloat(OSC.Enums[INTERFACE.timebase]);
       var dv = [50e-3, 100e-3, 200e-3, 500e-3, 1, 2, 5, 10][OSC.Enums[INTERFACE.ch1range]];
 
-      INTERFACE.process( () =>
-        Promise.resolve()
-//          .then( () => new Promise( (resolve) => setTimeout(resolve, 50) ) )  // finish previous transfer
-          .then( () => INTERFACE._wave = _wave )
-          .then( () => meas.Calculate(INTERFACE.measSource, dt, dv, INTERFACE._wave.data) )
-          .then( (measure) => controls.setMeasData(measure) ) 
-          .then( () => canvas.OscilloscopeRedraw(INTERFACE._wave.scroll, INTERFACE._wave.data) )
-          .then( () => { if (INTERFACE.analyse) analyser.analyse(INTERFACE._wave.data); } )
-          .then( () => OSC.Restart() )
-      );
+      if (COMM._open)
+        INTERFACE.process( () =>
+          Promise.resolve()
+    //          .then( () => new Promise( (resolve) => setTimeout(resolve, 50) ) )  // finish previous transfer
+            .then( () => INTERFACE._wave = _wave )
+            .then( () => meas.Calculate(INTERFACE.measSource, dt, dv, INTERFACE._wave.data) )
+            .then( (measure) => controls.setMeasData(measure) ) 
+            .then( () => canvas.OscilloscopeRedraw(INTERFACE._wave.scroll, INTERFACE._wave.data) )
+            .then( () => { if (INTERFACE.analyse) analyser.analyse(INTERFACE._wave.data); } )
+            .then( () => OSC.Restart() )
+        );
+      else
+      {
+        // TODO!
+          Promise.resolve()
+            .then( () => INTERFACE._wave = _wave )
+            .then( () => meas.Calculate(INTERFACE.measSource, dt, dv, INTERFACE._wave.data) )
+            .then( (measure) => controls.setMeasData(measure) ) 
+            .then( () => canvas.OscilloscopeRedraw(INTERFACE._wave.scroll, INTERFACE._wave.data) )
+            .then( () => { if (INTERFACE.analyse) analyser.analyse(INTERFACE._wave.data); } )
+      }
 
     }
   },
@@ -424,129 +435,130 @@ INTERFACE = {
 
   setInterval(() =>
   {
-    if (COMM._open)
+    if (!COMM._open)
+      return;
+
+    if (promise)
+      return;
+
+    if (!dummy)
     {
-      if (promise)
+      /// first request is without response?
+      promise = true;
+      BIOS.biosMemGetBufferPtr();
+      COMM._onReceive = () => 0;
+
+      setTimeout(() => promise = false, 300);
+      dummy = true;
+      return;
+    }
+
+    if (!init)
+    {
+      promises.push(() => 
+        Promise.resolve()
+        .then( () => BIOS.biosMemGetBufferPtr() )
+        .then( ptr => bufferPtr = ptr)
+        .then( () => OSC.Enable(1) )
+        .then( () => INTERFACE.setAll() )
+      );
+
+      init = true;
+      return;
+    }
+
+    if (promises.length > 0)
+    {
+      promise = promises.shift()().then( () => promise = false );
+      return;
+    }
+
+    if (INTERFACE.trigState != "stop")
+    {
+      var dt = parseFloat(OSC.Enums[INTERFACE.timebase]);
+      var dv = [50e-3, 100e-3, 200e-3, 500e-3, 1, 2, 5, 10][OSC.Enums[INTERFACE.ch1range]];
+
+      var scroll = canvas.getScrollOffset();
+      var now = (new Date()).getTime();
+      var forceFreerunRedraw = INTERFACE.trigMode == "None" && now - last > 500;
+      var forceAutoRedraw = INTERFACE.trigState == "run" && now - last > 2000;
+      var forcePausedRedraw = INTERFACE.trigState == "paused" && lastRequest != scroll && now - last > 100;
+
+      if (INTERFACE.trigState == "paused" && !forcePausedRedraw)
+        return;
+      if (now-lastAsk < 50)
         return;
 
-      if (!dummy)
-      {
-        /// first request is without response?
-        promise = true;
-        BIOS.biosMemGetBufferPtr();
-        COMM._onReceive = () => 0;
+      lastAsk = now;
+      promise = Promise.resolve()
+        .then( () => OSC.Ready() )
+        .then( (ready) =>  
+        { 
+          var forceFinishedRedraw = INTERFACE.trigState == "run" && ready;
 
-        setTimeout(() => promise = false, 300);
-        dummy = true;
-        return;
-      }
-
-      if (!init)
-      {
-        promises.push(() => 
-          Promise.resolve()
-          .then( () => BIOS.biosMemGetBufferPtr() )
-          .then( ptr => bufferPtr = ptr)
-          .then( () => OSC.Enable(1) )
-          .then( () => INTERFACE.setAll() )
-        );
-
-        init = true;
-        return;
-      }
-
-      if (promises.length > 0)
-      {
-        promise = promises.shift()().then( () => promise = false );
-        return;
-      }
-
-      if (INTERFACE.trigState != "stop")
-      {
-        var dt = parseFloat(OSC.Enums[INTERFACE.timebase]);
-        var dv = [50e-3, 100e-3, 200e-3, 500e-3, 1, 2, 5, 10][OSC.Enums[INTERFACE.ch1range]];
-
-        var scroll = canvas.getScrollOffset();
-        var now = (new Date()).getTime();
-        var forceFreerunRedraw = INTERFACE.trigMode == "None" && now - last > 500;
-        var forceAutoRedraw = INTERFACE.trigState == "run" && now - last > 2000;
-        var forcePausedRedraw = INTERFACE.trigState == "paused" && lastRequest != scroll && now - last > 100;
-
-        if (INTERFACE.trigState == "paused" && !forcePausedRedraw)
-          return;
-        if (now-lastAsk < 50)
-          return;
-
-        lastAsk = now;
-        promise = Promise.resolve()
-          .then( () => OSC.Ready() )
-          .then( (ready) =>  
-          { 
-            var forceFinishedRedraw = INTERFACE.trigState == "run" && ready;
-
-            if (INTERFACE.trigState == "stop") 
-            {
-            } else
-            if (INTERFACE.trigState == "single") 
-            {
-                if (ready) 
-                {
-                  INTERFACE.onTrigger();
-                  INTERFACE.trigState = "stop";
-                  gui.drawTrigger();
-
-                  return Promise.resolve()
-                  .then( () => OSC.Transfer(30, 4096-30) )
-//!!!!                  .then( (data) => {if (INTERFACE.trigState == "stop") throw "cancelled"; return data; } )
-                  .then( (data) => INTERFACE._wave = {scroll:0, start:reqStart, len:reqLen, data:data} )
-
-                  .then( () => meas.Calculate(INTERFACE.measSource, dt, dv, INTERFACE._wave.data) )
-                  .then( (measure) => controls.setMeasData(measure) ) 
-                  .then( () => canvas.OscilloscopeRedraw(INTERFACE._wave.scroll, INTERFACE._wave.data) )
-                  .catch( (e) => { if (e=="cancelled") return; console.log("err"); return Promise.resolve()} );
-                }
-            } else
-            if (forceFinishedRedraw || forceAutoRedraw || forceFreerunRedraw || forcePausedRedraw)
-            {
-              last = now;
-              lastRequest = scroll;
-
-              var maxSafe = 4096-30-15;
-              var reqStart = canvas.OscilloscopeResampleNum(scroll)+30;
-
-              if (INTERFACE.trigMode == "None")
+          if (INTERFACE.trigState == "stop") 
+          {
+          } else
+          if (INTERFACE.trigState == "single") 
+          {
+              if (ready) 
               {
-                reqStart = Math.max(150, reqStart);
-                scroll = Math.max(120, scroll);
+                INTERFACE.onTrigger();
+                INTERFACE.trigState = "stop";
+                gui.drawTrigger();
+
+                return Promise.resolve()
+                .then( () => OSC.Transfer(30, 4096-30) )
+//!!!!                  .then( (data) => {if (INTERFACE.trigState == "stop") throw "cancelled"; return data; } )
+                .then( (data) => INTERFACE._wave = {scroll:0, start:reqStart, len:reqLen, data:data} )
+
+                .then( () => meas.Calculate(INTERFACE.measSource, dt, dv, INTERFACE._wave.data) )
+                .then( (measure) => controls.setMeasData(measure) ) 
+                .then( () => canvas.OscilloscopeRedraw(INTERFACE._wave.scroll, INTERFACE._wave.data) )
+                .then( () => { if (INTERFACE.analyse) analyser.analyse(INTERFACE._wave.data); } )
+                .catch( (e) => { if (e=="cancelled") return; console.log("err"); return Promise.resolve()} );
               }
+          } else
+          if (forceFinishedRedraw || forceAutoRedraw || forceFreerunRedraw || forcePausedRedraw)
+          {
+            last = now;
+            lastRequest = scroll;
 
-              var reqLen = 256*4+180*1; // screen width, ignore resampling, always take 1k
-              if (reqStart > maxSafe - 128)
-                reqStart = maxSafe - 128;
-              if (reqLen+reqStart > maxSafe)
-                reqLen = maxSafe - reqStart;
+            var maxSafe = 4096-30-15;
+            var reqStart = canvas.OscilloscopeResampleNum(scroll)+30;
 
-              return Promise.resolve()
-              .then( () => OSC.Transfer(reqStart, reqLen) )
-              .then( (data) => INTERFACE._wave = {scroll:scroll, start:reqStart, len:reqLen, data:data} )
-
-              .then( () => meas.Calculate(INTERFACE.measSource, dt, dv, INTERFACE._wave.data) )
-              .then( (measure) => controls.setMeasData(measure) ) 
-              .then( () => canvas.OscilloscopeRedraw(INTERFACE._wave.scroll, INTERFACE._wave.data) )
-              .then( () => { if (INTERFACE.analyse) analyser.analyse(INTERFACE._wave.data); } )
-
-              .then( () => 
-              { 
-                if ((ready && INTERFACE.trigState == "run") || forceAutoRedraw) 
-                  return OSC.Restart(); 
-              } )
-              .then( () => Promise.resolve() )
-//              .catch( () => { console.log("err"); return Promise.resolve()} );
+            if (INTERFACE.trigMode == "None")
+            {
+              reqStart = Math.max(150, reqStart);
+              scroll = Math.max(120, scroll);
             }
-            return Promise.resolve();
-          })
-          .then( () => promise = false );
-      }
+
+            var reqLen = 256*4+180*1; // screen width, ignore resampling, always take 1k
+            if (reqStart > maxSafe - 128)
+              reqStart = maxSafe - 128;
+            if (reqLen+reqStart > maxSafe)
+              reqLen = maxSafe - reqStart;
+
+            return Promise.resolve()
+            .then( () => OSC.Transfer(reqStart, reqLen) )
+            .then( (data) => INTERFACE._wave = {scroll:scroll, start:reqStart, len:reqLen, data:data} )
+
+            .then( () => meas.Calculate(INTERFACE.measSource, dt, dv, INTERFACE._wave.data) )
+            .then( (measure) => controls.setMeasData(measure) ) 
+            .then( () => canvas.OscilloscopeRedraw(INTERFACE._wave.scroll, INTERFACE._wave.data) )
+            .then( () => { if (INTERFACE.analyse) analyser.analyse(INTERFACE._wave.data); } )
+
+            .then( () => 
+            { 
+              if ((ready && INTERFACE.trigState == "run") || forceAutoRedraw) 
+                return OSC.Restart(); 
+            } )
+            .then( () => Promise.resolve() )
+//              .catch( () => { console.log("err"); return Promise.resolve()} );
+          }
+          return Promise.resolve();
+        })
+        .then( () => promise = false );
     }
   }, 10);
 

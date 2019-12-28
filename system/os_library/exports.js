@@ -142,6 +142,8 @@ uint32_t GetProcAddress(char* symbol)
   var wasGpio = false;
   var wasAdc = false;
   var wasUsb = false;
+  var wasMemory = false;
+
   for (var i = 0; i<demangled.length; i++)
   {
     var tokens = demangled[i].match("^(.*?)\\((.*)\\)$")
@@ -157,6 +159,7 @@ uint32_t GetProcAddress(char* symbol)
     var isGpio = tokens[1].indexOf("GPIO") != -1;
     var isAdc  = tokens[1].indexOf("ADC") != -1 || tokens[1].indexOf("DAC") != -1;
     var isUsb  = tokens[1].indexOf("USB") != -1;
+    var isMemory  = tokens[1].indexOf("MEMORY") != -1;
 
     if (!isGpio && wasGpio)
       console.log("#endif")
@@ -164,7 +167,11 @@ uint32_t GetProcAddress(char* symbol)
       console.log("#endif")
     if (!isUsb && wasUsb)
       console.log("#endif")
+    if (!isMemory && wasMemory)
+      console.log("#endif")
 
+    if (isMemory && !wasMemory)
+      console.log("#if defined(USE_FLASHING_SUPPORT)")
     if (isGpio && !wasGpio)
       console.log("#if defined(LA104)")
     if (isAdc && !wasAdc)
@@ -175,14 +182,26 @@ uint32_t GetProcAddress(char* symbol)
     wasGpio = isGpio;
     wasAdc = isAdc;
     wasUsb = isUsb;
+    wasMemory = isMemory;
 
     if (!retvalue)
       out += 'return (uint32_t)' + tokens[1] + ';';
     else
-      out += 'return (uint32_t)static_cast<'+retvalue+'(*)(' + tokens[2] + ')>(' + tokens[1] + '); ';
+      out += 'return (uint32_t)static_cast<'+retvalue+'(*)(' + tokens[2] + ')>(' + tokens[1] + '); //' + mname;
 //    console.log(out + " // " + mname);
     console.log(out);
   }           
+
+  isGpio = isAdc = isUsb = isMemory = false;
+  if (!isGpio && wasGpio)
+    console.log("#endif")
+  if (!isAdc && wasAdc)
+    console.log("#endif")
+  if (!isUsb && wasUsb)
+    console.log("#endif")
+  if (!isMemory && wasMemory)
+    console.log("#endif")
+
   console.log(`    default: return 0;
   }
 }

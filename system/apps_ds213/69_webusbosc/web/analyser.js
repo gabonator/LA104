@@ -30,7 +30,7 @@ class Analyser
       var bits = 0;
 //      var xx = (count)/minPeriod;
 //      console.log([count, Math.floor(xx), (xx - Math.floor(xx)).toFixed(2) ]);
-
+//      count += 2;
       if (count >= minPeriod*9 && risingEdge) 
       {
         return false;
@@ -101,25 +101,76 @@ class Analyser
       return true;
     };
 
-    var ok = this.OnEdge(data, (count, risingEdge, position) =>
+    var code = "";
+//    var lastLevel = 0;
+    var decodeOffsets = [];
+//    data = data.concat(new Array(minPeriod*7).fill(1-data[data.length-1])).concat(data[data.length-1]);
+    var ok = this.OnEdgeTrailing(data, minPeriod*3, (count, risingEdge, position) =>
     {
       if (count <= 2)
         return false;
 //      var bits = Math.floor((count-minPeriod*0.9+1)/(minPeriod)+1);
 
       var bits = Math.floor(count/minPeriod + 0.2);
-      if (bits > 10) 
-        bits = 10;
+      if (bits > 3) 
+        return false;
+//        bits = 10;
 
       decodePosition = position;
 
+//      lastLevel = 1-risingEdge;
       for (var i=0; i<bits; i++, decodePosition += minPeriod)
-        if (!decodeBit(this.idlePolarity ? 1-risingEdge : risingEdge))
-          return false;
+      {
+        decodeOffsets.push(decodePosition);
+        code += this.idlePolarity ? 1-risingEdge : risingEdge;
+      }
+//        if (!decodeBit(this.idlePolarity ? 1-risingEdge : risingEdge))
+//          return false;
       return true;
     });
-    
-    decodeBit(this.idlePolarity);
+
+var bites = "";
+for (var i=0; i<code.length; i+=3)
+{
+  var seq = code.substr(i, 3);
+  if (seq == "100")
+    bites += "0";
+  else
+  if (seq == "110")
+    bites += "1";
+  else
+  if (seq == "000")
+    break;
+  else
+    bites += "?";
+}
+
+var ledWords = []
+for (var i=0; i<bites.length; i+= 24)
+{
+  var ledWord = bites.substr(i, 24);
+  if (ledWord.length < 24 || ledWord.indexOf("?") != -1)
+    break;
+
+  var ledCode = eval("0b"+ledWord);
+  var red = ledCode & 0xff;
+  var blue = (ledCode >> 8) & 0xff;
+  var green = (ledCode >> 16) & 0xff;
+
+  ledWords.push({r:red, g:green, b:blue, raw:ledCode});
+  canvas.annotate(decodeOffsets[i*3 + 3*24/2] + minPeriod/2, INTERFACE.ch1offset, "LED-GBR: " + ("00000"+ledCode.toString(16)).substr(-6));
+  var clr = x => ("00" + x.toString(16)).substr(-2);
+  canvas.annotate(decodeOffsets[i*3 + 3*24/2] + minPeriod/2 + 120, INTERFACE.ch1offset, "\u2B24", "#" + clr(red) + clr(green) + clr(blue));
+
+  canvas.annotate(decodeOffsets[i*3] + minPeriod/2, INTERFACE.ch1offset, "<");
+  canvas.annotate(decodeOffsets[i*3+24*3-1] + minPeriod/2, INTERFACE.ch1offset, ">");
+
+  canvas.OscilloscopeRedrawGraphPart(INTERFACE._wave.scroll, INTERFACE._wave.data, decodeOffsets[i*3+8*3*0], decodeOffsets[i*3+8*3*1], "CH1", "#00ff00");
+  canvas.OscilloscopeRedrawGraphPart(INTERFACE._wave.scroll, INTERFACE._wave.data, decodeOffsets[i*3+8*3*1], decodeOffsets[i*3+8*3*2], "CH1", "#0000ff");
+  canvas.OscilloscopeRedrawGraphPart(INTERFACE._wave.scroll, INTERFACE._wave.data, decodeOffsets[i*3+8*3*2], decodeOffsets[i*3+8*3*3], "CH1", "#ff0000");
+}
+if (ledWords.length>0)
+  console.log(JSON.stringify(ledWords));
 
     if (!ok)
       return;
@@ -202,6 +253,26 @@ class Analyser
       }
     }
     return true;
+  }
+
+  OnEdgeTrailing(data, trailing, h)
+  {
+    var old = data[0];
+    var last = -1;
+
+    for (var i = 0; i < data.length; i++)
+    {
+      var cur = data[i];
+      if (cur != old)
+      {
+        if (last != -1)
+          if (!h(i-last, cur, last))
+            return false;
+        last = i;
+        old = cur;
+      }
+    }    
+    return h(trailing, 1-data[data.length-1], last);
   }
 
 

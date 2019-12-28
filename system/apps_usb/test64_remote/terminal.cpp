@@ -4,7 +4,7 @@ char* pLastChar = nullptr;
 
 void CTerminal::begin()
 {
-  pLastChar = (char*)BIOS::PRIVATE::GetInternal(BIOS::PRIVATE::EInternal::LastChar);
+  pLastChar = (char*)BIOS::SYS::GetAttribute(BIOS::SYS::EAttribute::LastChar);
 }
 
 void CTerminal::end()

@@ -114,7 +114,7 @@
     promises.push(() => 
       Promise.resolve()
       .then( ()=>BIOS.biosMemBulk(bufferPtr, buf) )
-      .then( ()=>GEN.SetWave(bufferPtr, samples.length-1) ) // WTF??? bios error, wont configure DMA without changing buffer length
+//      .then( ()=>GEN.SetWave(bufferPtr, samples.length-1) ) // WTF??? bios error, wont configure DMA without changing buffer length
       .then( ()=>GEN.SetWave(bufferPtr, samples.length) )
       .then( ()=>GEN.SetFrequency(freq*samples.length) )
       .then( ()=>GEN.GetFrequency() )

@@ -95,6 +95,8 @@ int main()
     uint32_t address = 0;
     char filename[64];
     {
+      // TODO: Will fit in stack?
+
       CTokenizer tok(BIOS::OS::GetArgument());
       tok.GetToken(filename, 63);
 

@@ -12,29 +12,9 @@ void Delay_mS(uint32_t mS)
     while(Dly_mS);
 }
 
-char* BIOS::SYS::GetDeviceType()
-{
-#ifdef LA104
-  return (char*)"LA104";
-#elif defined(DS213)
-  return (char*)"DS213";
-#elif defined(DS203)
-  return (char*)"DS203";
-#endif
-  return nullptr;
-}
-
 void BIOS::SYS::Init()
 {
   HardwareInit();
-}
-
-void BIOS::SYS::DelayUs(int intervalUs)
-{
-  // TODO: volatile?
-  intervalUs = 63 * intervalUs / 8;
-  while(intervalUs--)
-    __asm__("");
 }
 
 void BIOS::SYS::DelayMs(int intervalMs)
@@ -67,30 +47,7 @@ void BIOS::SYS::Beep(int intervalMs)
   gBeepCounter = intervalMs;
 }
 
-
-/*
-class CDelay
+bool BIOS::SYS::LoadFpga(char* path)
 {
-public:
-	static void DelayUs(ui32 us)
-	{
-		us = us*12;
-		while (us--)
-		{
-			__asm__("");
-		}
-	}
-
-	static void DelayMs(ui32 ms)
-	{
-		while (ms--)
-		{
-			ui32 us = 12000;
-			while (us--)
-			{
-				__asm__("");
-			}
-		}
-	}
-};
-*/
+  return false;
+}

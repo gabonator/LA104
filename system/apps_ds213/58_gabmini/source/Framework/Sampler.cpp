@@ -1,8 +1,8 @@
-#include <Library.h>
+#include <library.h>
 
 namespace Sampler
 {
-	constexpr INT Samples =  BIOS::ADC::NumSamples;
+	const int Samples =  BIOS::ADC::NumSamples;
 	BIOS::ADC::TSample::SampleType memory[Samples];
 	
 	void Copy()

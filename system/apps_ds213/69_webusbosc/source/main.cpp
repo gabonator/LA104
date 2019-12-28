@@ -3,6 +3,7 @@
 #include "terminal.h"
 #include "adc.h"
 #include "spi.h"
+#include "memory.h"
 #include "rpc.h"
 #include "evaluator.h"
 
@@ -75,9 +76,6 @@ int main(void)
   BIOS::KEY::EKey key;
   BIOS::LCD::BufferBegin(CRect(0, 0, 100, 100));
 
-//  parser.push((char*)"_ZN4BIOS3DBG5PrintEPKcz(\"Ready...\n\");");
-//  parser.push((char*)"RPC::Print(\"Ready...\n\");");
-
   while ((key = BIOS::KEY::GetKey()) != BIOS::KEY::Escape) 
   {
     if (buffer[0])
@@ -100,6 +98,7 @@ int main(void)
 
   BIOS::DBG::Print("USB end\n");
   BIOS::OS::SetInterruptVector(BIOS::OS::IUSB_LP_CAN_RX0_IRQ, isrOld);
+//  BIOS::USB::InitializeMass();
   return 0;
 }
 

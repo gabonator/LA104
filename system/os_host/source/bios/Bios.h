@@ -1,6 +1,6 @@
 #pragma once
 #include "../framework/Classes.h"
-//#define constexpr const
+
 namespace BIOS
 {
   namespace SYS
@@ -10,9 +10,14 @@ namespace BIOS
     int Execute(uint32_t addr);
     void Beep(int intervalMs);
     void DelayMs(int intervalMs);
-    void DelayUs(int intervalUs);  // TODO: remove?
-    char* GetDeviceType(); 
-    // TODO: GetDeviceId();
+    bool LoadFpga(char* path);
+
+    enum class EAttribute {BiosVersion, CharRom, LastChar, ScreenWidth, ScreenHeight, DeviceType,
+      BuildRevision, BuildDate, BuildUser, BuildSystem, 
+      VersionDfu, VersionHardware, VersionSystem, VersionFpga,
+      SerialNumber, DisplayType, DiskType};
+
+    uintptr_t GetAttribute(EAttribute eInternal);
   }
 
   namespace LCD
@@ -180,12 +185,6 @@ namespace BIOS
     void EnableInterrupts(uint32_t);
   }
 
-  namespace PRIVATE
-  {
-    enum class EInternal {CharRom, LastChar};
-    uintptr_t GetInternal(EInternal eInternal);
-  }
-
   namespace USB
   {
     typedef void (*THandler)(void);
@@ -312,13 +311,17 @@ namespace BIOS
 
   namespace DAC
   {
+    enum class EMode {
+      Off, Square, Buffer, LogicHigh, LogicLow, Noise, Triangle
+    };
+
     const int SampleMaxValue = 0xfff;
 
     void SetFrequency(int freqHz);
     void SetDuty(int duty);
     int GetFrequency();
     int GetDuty();
-    void SetWave(uint16_t* wave, int length);
+    void SetMode(EMode, uint16_t* buffer, int length);
   }
 
 #endif
