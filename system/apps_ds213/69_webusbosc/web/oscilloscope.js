@@ -51,7 +51,7 @@ INTERFACE = {
 
   measSource: "CH1",
 
-  analyse:false,
+  analyse:"",
 
   memSlot:"0",
 
@@ -307,7 +307,7 @@ INTERFACE = {
   // ANALYSER
   setAnalyserMode(mode)
   {
-    INTERFACE.analyse = mode == "UART";
+    INTERFACE.analyse = mode;
   },
 
   // MEMORY/FILE
@@ -371,7 +371,7 @@ INTERFACE = {
             .then( () => meas.Calculate(INTERFACE.measSource, dt, dv, INTERFACE._wave.data) )
             .then( (measure) => controls.setMeasData(measure) ) 
             .then( () => canvas.OscilloscopeRedraw(INTERFACE._wave.scroll, INTERFACE._wave.data) )
-            .then( () => { if (INTERFACE.analyse) analyser.analyse(INTERFACE._wave.data); } )
+            .then( () => { if (INTERFACE.analyse != "") analyser.analyse(INTERFACE._wave.data, "CH1", INTERFACE.analyse); } )
             .then( () => OSC.Restart() )
         );
       else
@@ -382,7 +382,7 @@ INTERFACE = {
             .then( () => meas.Calculate(INTERFACE.measSource, dt, dv, INTERFACE._wave.data) )
             .then( (measure) => controls.setMeasData(measure) ) 
             .then( () => canvas.OscilloscopeRedraw(INTERFACE._wave.scroll, INTERFACE._wave.data) )
-            .then( () => { if (INTERFACE.analyse) analyser.analyse(INTERFACE._wave.data); } )
+            .then( () => { if (INTERFACE.analyse != "") analyser.analyse(INTERFACE._wave.data, "CH1", INTERFACE.analyse); } )
       }
 
     }
@@ -515,7 +515,7 @@ INTERFACE = {
                 .then( () => meas.Calculate(INTERFACE.measSource, dt, dv, INTERFACE._wave.data) )
                 .then( (measure) => controls.setMeasData(measure) ) 
                 .then( () => canvas.OscilloscopeRedraw(INTERFACE._wave.scroll, INTERFACE._wave.data) )
-                .then( () => { if (INTERFACE.analyse) analyser.analyse(INTERFACE._wave.data); } )
+                .then( () => { if (INTERFACE.analyse != "") analyser.analyse(INTERFACE._wave.data, "CH1", INTERFACE.analyse); } )
                 .catch( (e) => { if (e=="cancelled") return; console.log("err"); return Promise.resolve()} );
               }
           } else
@@ -546,7 +546,7 @@ INTERFACE = {
             .then( () => meas.Calculate(INTERFACE.measSource, dt, dv, INTERFACE._wave.data) )
             .then( (measure) => controls.setMeasData(measure) ) 
             .then( () => canvas.OscilloscopeRedraw(INTERFACE._wave.scroll, INTERFACE._wave.data) )
-            .then( () => { if (INTERFACE.analyse) analyser.analyse(INTERFACE._wave.data); } )
+            .then( () => { if (INTERFACE.analyse != "") analyser.analyse(INTERFACE._wave.data, "CH1", INTERFACE.analyse); } )
 
             .then( () => 
             { 

@@ -20,5 +20,5 @@ find . -type f -name '*.d' -delete
 nm --print-size --size-sort -gC output.elf > symbols_all.txt
 cat symbols_all.txt | grep _address
 
-cp 69webosc.elf ../release
-cp 69webosc.elf /Volumes/LA104/69webosc.elf
+#cp 69webosc.elf ../release
+#cp 69webosc.elf /Volumes/LA104/69webosc.elf

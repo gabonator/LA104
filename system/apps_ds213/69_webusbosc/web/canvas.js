@@ -349,9 +349,10 @@ class Renderer
     var ofsx = 120 - trigx;
     ofs += ofsx;
     trigx = 120;
+    begin = Math.floor(begin / OSC.ResampleTable[INTERFACE.timebase]);
+    end = Math.floor(end / OSC.ResampleTable[INTERFACE.timebase]);
 
     data = this.OscilloscopeResample(data);
-
 
     for (var i=0; i<data.length; i++)
     {
@@ -363,7 +364,7 @@ class Renderer
     }
 
     var path = [];
-    for (var i=begin; i<end; i++)
+    for (var i=begin; i<=end; i++)
       path.push({x:ofs+i, y:ypos(data[i])});
 
     this.Poly(path, color, 3);
@@ -372,7 +373,8 @@ class Renderer
   annotate(x, y, text, color)
   {
     var ypos = (v) => canvas.height-v*(canvas.height/256);
-    var xpos = (x) => this.lastOfs + x; // resampling!!!
+    var xpos = (x) => this.lastOfs + x / OSC.ResampleTable[INTERFACE.timebase]; // resampling!!!
+
     this.ctx.font = "20px Arial";
     this.ctx.fillStyle = color ? color : "white";
     this.ctx.strokeStyle = "#404040";

@@ -1,6 +1,40 @@
 class Analyser
 {
-  analyse(rawdata)
+  constructor()
+  {
+    this.bitstreamAnal = new BitstreamAnalyser;
+    this.uartDecoder = new UartDecoder;
+    this.ledDecoder = new LedDecoder;
+  }
+
+  analyse(rawdata, ch, mode)
+  {
+    if (mode == "UART")
+    {
+      var bitstream = this.bitstreamAnal.analyse(rawdata, ch, 10, 1000, 10);
+      if (bitstream)
+      {
+        var result = this.uartDecoder.decode(bitstream, ch);
+        if (result)
+          console.log("UART: " + result.map(x => String.fromCharCode(x)).join(""));
+      }
+    }
+    if (mode == "LED-RGB")
+    {
+      var bitstream = this.bitstreamAnal.analyse(rawdata, ch, 3, 3, 3);
+      if (bitstream)
+      { 
+        var result = this.ledDecoder.decode(bitstream, ch);
+        if (result)
+          console.log("LED-RGB: " + JSON.stringify(result));
+      }
+    }
+  }
+}
+
+class BitstreamAnalyser
+{
+  analyse(rawdata, ch, maxBitsLow, maxBitsHigh, trailing)
   {
     var data = this.getData(rawdata, "CH1");
     if (!this.threshold(data))
@@ -10,7 +44,7 @@ class Analyser
 
     // find smallest
     var minPeriod = -1;
-    this.OnEdge(data, (count) =>
+    this.OnEdgeTrailing(data, 0, (count) =>
     {
       if (count <= 2)
          return true;
@@ -22,18 +56,20 @@ class Analyser
 
     // sum
     var totalBits = 0, totalTime = 0;
-    var ok = this.OnEdge(data, (count, risingEdge) =>
+    var ok = this.OnEdgeTrailing(data, 0, (count, risingEdge) =>
     {
       if (count <= 2)
         return false;
 
       var bits = 0;
-//      var xx = (count)/minPeriod;
-//      console.log([count, Math.floor(xx), (xx - Math.floor(xx)).toFixed(2) ]);
-//      count += 2;
-      if (count >= minPeriod*9 && risingEdge) 
+      if (count >= minPeriod*9 && risingEdge)  // TODO: uart?
       {
         return false;
+      }
+      else if (count >= minPeriod*9 && !risingEdge)  // TODO: uart?
+      {
+        // ignore idle line
+        return true;
       }
       else if (count >= minPeriod*8) bits = 8;
       else if (count >= minPeriod*7) bits = 7;
@@ -55,129 +91,36 @@ class Analyser
     if (!ok)
       return;
 
-    var decodeByte = 0, decodeIndex = -1, decoded = [], decodePosition = 0;
-    var annotate = (text, dx, dy) =>
-    {
-      if (!dx) dx = 0;
-      if (!dy) dy = 0;
-      canvas.annotate(decodePosition + minPeriod/2 + dx, INTERFACE.ch1offset + dy, text);
-    }
-
-    var decodeBit = (bit) =>
-    {
-      if ( decodeIndex == -2 )
-      {
-        if (bit == 1) // stop bit
-        {
-          decodeIndex = -1;
-          annotate(">");
-        }
-        else
-          return false;
-      }
-
-      if ( decodeIndex == -1 )
-      {
-        if ( bit == 0 )
-        {
-          decodeIndex = 0;
-          annotate("<");
-        }
-        return true;
-      }
-
-      annotate(bit.toString());
-      decodeByte >>= 1;
-      if ( bit )
-        decodeByte |= 128;
-
-      if (++decodeIndex >= 8)
-      {
-        annotate("0x"+decodeByte.toString(16) + " = " + decodeByte + " = '"+String.fromCharCode(decodeByte) + "'" , -minPeriod*4, 16);
-        decoded.push(decodeByte);
-        decodeIndex = -2; // stop bit
-        decodeByte = 0;
-      }
-      return true;
-    };
-
-    var code = "";
-//    var lastLevel = 0;
+    var decodeCode = [];
     var decodeOffsets = [];
-//    data = data.concat(new Array(minPeriod*7).fill(1-data[data.length-1])).concat(data[data.length-1]);
-    var ok = this.OnEdgeTrailing(data, minPeriod*3, (count, risingEdge, position) =>
+    var ok = this.OnEdgeTrailing(data, minPeriod*trailing, (count, risingEdge, position) =>
     {
       if (count <= 2)
         return false;
-//      var bits = Math.floor((count-minPeriod*0.9+1)/(minPeriod)+1);
 
       var bits = Math.floor(count/minPeriod + 0.2);
-      if (bits > 3) 
+      if (risingEdge && bits > maxBitsLow) 
         return false;
-//        bits = 10;
+      if (!risingEdge && bits > maxBitsHigh) 
+        return false;
 
-      decodePosition = position;
+      if (!risingEdge && bits > 10) 
+        bits = 10; // uart idle line
 
-//      lastLevel = 1-risingEdge;
+      var decodePosition = position;
+
       for (var i=0; i<bits; i++, decodePosition += minPeriod)
       {
         decodeOffsets.push(decodePosition);
-        code += this.idlePolarity ? 1-risingEdge : risingEdge;
+        decodeCode.push(this.idlePolarity ? 1-risingEdge : risingEdge);
       }
-//        if (!decodeBit(this.idlePolarity ? 1-risingEdge : risingEdge))
-//          return false;
       return true;
     });
 
-var bites = "";
-for (var i=0; i<code.length; i+=3)
-{
-  var seq = code.substr(i, 3);
-  if (seq == "100")
-    bites += "0";
-  else
-  if (seq == "110")
-    bites += "1";
-  else
-  if (seq == "000")
-    break;
-  else
-    bites += "?";
-}
-
-var ledWords = []
-for (var i=0; i<bites.length; i+= 24)
-{
-  var ledWord = bites.substr(i, 24);
-  if (ledWord.length < 24 || ledWord.indexOf("?") != -1)
-    break;
-
-  var ledCode = eval("0b"+ledWord);
-  var red = ledCode & 0xff;
-  var blue = (ledCode >> 8) & 0xff;
-  var green = (ledCode >> 16) & 0xff;
-
-  ledWords.push({r:red, g:green, b:blue, raw:ledCode});
-  canvas.annotate(decodeOffsets[i*3 + 3*24/2] + minPeriod/2, INTERFACE.ch1offset, "LED-GBR: " + ("00000"+ledCode.toString(16)).substr(-6));
-  var clr = x => ("00" + x.toString(16)).substr(-2);
-  canvas.annotate(decodeOffsets[i*3 + 3*24/2] + minPeriod/2 + 120, INTERFACE.ch1offset, "\u2B24", "#" + clr(red) + clr(green) + clr(blue));
-
-  canvas.annotate(decodeOffsets[i*3] + minPeriod/2, INTERFACE.ch1offset, "<");
-  canvas.annotate(decodeOffsets[i*3+24*3-1] + minPeriod/2, INTERFACE.ch1offset, ">");
-
-  canvas.OscilloscopeRedrawGraphPart(INTERFACE._wave.scroll, INTERFACE._wave.data, decodeOffsets[i*3+8*3*0], decodeOffsets[i*3+8*3*1], "CH1", "#00ff00");
-  canvas.OscilloscopeRedrawGraphPart(INTERFACE._wave.scroll, INTERFACE._wave.data, decodeOffsets[i*3+8*3*1], decodeOffsets[i*3+8*3*2], "CH1", "#0000ff");
-  canvas.OscilloscopeRedrawGraphPart(INTERFACE._wave.scroll, INTERFACE._wave.data, decodeOffsets[i*3+8*3*2], decodeOffsets[i*3+8*3*3], "CH1", "#ff0000");
-}
-if (ledWords.length>0)
-  console.log(JSON.stringify(ledWords));
-
     if (!ok)
       return;
-
-    if (decoded.length > 0)
-      console.log(decoded.map(x=>String.fromCharCode(x)).join(""));
-  }
+    return {code:decodeCode, offsets:decodeOffsets, rate:totalBits/totalTime, channel:ch, minPeriod:minPeriod};
+  }                                                                                                         
  
   getData(rawdata, ch)
   {
@@ -204,11 +147,11 @@ if (ledWords.length>0)
     }
     
     var range = dmax - dmin;
-    if (range < 30)
+    if (range < 30) // weak signal
       return;
 
-    var trigMin = dmin + range/4;
-    var trigMax = dmax - range/4;
+    var trigMin = dmin + range/8;
+    var trigMax = dmax - range/8;
 
     var oldState = data[0] > (dmin+dmax)/2;
     var middle = 0;
@@ -227,32 +170,13 @@ if (ledWords.length>0)
       }
       else
       {
-        if (middle++ > 10)
+        if (middle++ > 10) // slow transition
           return;
       }
       data[i] = newState;
       oldState = newState;
     }
     return data;
-  }
-
-  OnEdge(data, h)
-  {
-    var old = data[0];
-    var last = -1;
-    for (var i = 0; i < data.length; i++)
-    {
-      var cur = data[i];
-      if (cur != old)
-      {
-        if (last != -1)
-          if (!h(i-last, cur, last))
-            return false;
-        last = i;
-        old = cur;
-      }
-    }
-    return true;
   }
 
   OnEdgeTrailing(data, trailing, h)
@@ -272,8 +196,124 @@ if (ledWords.length>0)
         old = cur;
       }
     }    
-    return h(trailing, 1-data[data.length-1], last);
+    if (trailing > 0)
+      return h(trailing, 1-data[data.length-1], last); // TODO:
+    else
+      return true;
   }
+}
 
 
+class LedDecoder
+{
+  decode(bitstream)
+  {
+    var code = bitstream.code.join("");
+    var offsets = bitstream.offsets;
+    var minPeriod = bitstream.minPeriod;
+
+    // led decoder
+    var bits = "";
+    for (var i=0; i<code.length; i+=3)
+    {
+      var seq = code.substr(i, 3);
+      if (seq == "100")
+        bits += "0";
+      else
+      if (seq == "110")
+      {
+        bits += "1";
+      }
+      else
+      if (seq == "000")
+        break;
+      else
+        bits += "?";
+    }
+
+    var ledWords = []
+    for (var i=0; i<bits.length; i+= 24)
+    {
+      var ledWord = bits.substr(i, 24);
+      if (ledWord.length < 24 || ledWord.indexOf("?") != -1)
+        break;          	
+
+      var ledCode = eval("0b"+ledWord);
+      var red = ledCode & 0xff;
+      var blue = (ledCode >> 8) & 0xff;
+      var green = (ledCode >> 16) & 0xff;
+
+      ledWords.push({r:red, g:green, b:blue});
+      canvas.annotate(offsets[i*3 + 3*24/2] + minPeriod/2, INTERFACE.ch1offset, "LED-GBR: " + ("00000"+ledCode.toString(16)).substr(-6));
+      var clr = x => ("00" + x.toString(16)).substr(-2);
+      canvas.annotate(offsets[i*3 + 3*24/2] + minPeriod/2 + 120, INTERFACE.ch1offset, "\u2B24", "#" + clr(red) + clr(green) + clr(blue));
+
+      canvas.annotate(offsets[i*3] + minPeriod/2, INTERFACE.ch1offset, "<");
+      canvas.annotate(offsets[i*3+24*3-1] + minPeriod/2, INTERFACE.ch1offset, ">");
+
+      canvas.OscilloscopeRedrawGraphPart(INTERFACE._wave.scroll, INTERFACE._wave.data, offsets[i*3+8*3*0], offsets[i*3+8*3*1], "CH1", "#00ff00");
+      canvas.OscilloscopeRedrawGraphPart(INTERFACE._wave.scroll, INTERFACE._wave.data, offsets[i*3+8*3*1], offsets[i*3+8*3*2], "CH1", "#0000ff");
+      canvas.OscilloscopeRedrawGraphPart(INTERFACE._wave.scroll, INTERFACE._wave.data, offsets[i*3+8*3*2], offsets[i*3+8*3*3], "CH1", "#ff0000");
+    }
+
+    if (ledWords.length>0)
+      return ledWords;
+    return;
+  }
+}
+
+class UartDecoder
+{
+  decode(bitstream)
+  {
+    var decodeByte = 0, decodeIndex = -1, decoded = [], decodePosition = 0;
+
+    var annotate = (text, dx, dy) =>
+    {
+      if (!dx) dx = 0;
+      if (!dy) dy = 0;
+      canvas.annotate(decodePosition + bitstream.minPeriod/2 + dx, INTERFACE.ch1offset + dy, text);
+    }
+
+    for (var i=0; i<bitstream.code.length; i++)
+    {
+      var bit = bitstream.code[i];
+      decodePosition = bitstream.offsets[i];
+
+      if ( decodeIndex == -2 )
+      {
+        if (bit == 1) // stop bit
+        {
+          decodeIndex = -1;
+          annotate(">");
+        }
+        else
+          return false;
+      }
+      else if ( decodeIndex == -1 )
+      {
+        if ( bit == 0 )
+        {
+          decodeIndex = 0;
+          annotate("<");
+        }
+      } 
+      else
+      {
+        annotate(bit.toString());
+        decodeByte >>= 1;
+        if ( bit )
+          decodeByte |= 128;
+
+        if (++decodeIndex >= 8)
+        {
+          annotate("0x"+decodeByte.toString(16) + " = " + decodeByte + " = '"+String.fromCharCode(decodeByte) + "'" , -bitstream.minPeriod*4, 16);
+          decoded.push(decodeByte);
+          decodeIndex = -2; // stop bit
+          decodeByte = 0;
+        }
+      }
+    }
+    return decoded;
+  }
 }

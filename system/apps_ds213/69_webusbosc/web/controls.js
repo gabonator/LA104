@@ -191,8 +191,9 @@ float:left;
     Analysis:<br>
     <br>
     <select id="analyserMode">
-      <option>Off</option>
-      <option>UART</option>
+      <option value="">Off</option>
+      <option value="UART">UART</option>
+      <option value="LED-RGB">RGB leds</option>
     </select><br>
   </div>
   <div class="controlsSpacer"></div>
@@ -382,7 +383,7 @@ float:left;
     document.querySelector("#genCondEquation").style.display = INTERFACE.genFlavour == "Equation" ? "block" : "none";
 
     document.querySelector("#genEquation").value = INTERFACE.genEquation;
-    document.querySelector("#analyserMode").value = INTERFACE.analyse ? "UART" : "Off";
+    document.querySelector("#analyserMode").value = INTERFACE.analyse;
   }
 
   memPreview(rawdata)

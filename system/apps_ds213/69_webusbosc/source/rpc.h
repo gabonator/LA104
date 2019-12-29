@@ -4,17 +4,17 @@ namespace RPC
 {
   uint32_t GetRpcAdress(char* command)
   {
-    if (strcmp(command, "RPC::GetBufferPtr")==0)
-      return (uint32_t)MEMORY::GetBufferPtr;
-    if (strcmp(command, "RPC::GetBufferSize")==0)
-      return (uint32_t)MEMORY::GetBufferSize;
-    if (strcmp(command, "RPC::MemoryWrite")==0)
-      return (uint32_t)MEMORY::MemoryWrite;
-    if (strcmp(command, "RPC::MemoryRead")==0)
-      return (uint32_t)MEMORY::MemoryRead;
-    if (strcmp(command, "RPC::Print")==0)
+    if (strcmp(command, "DBG::Print")==0)
       return (uint32_t)BIOS::DBG::Print;
 
+    if (strcmp(command, "MEM::GetBufferPtr")==0)
+      return (uint32_t)MEMORY::GetBufferPtr;
+    if (strcmp(command, "MEM::GetBufferSize")==0)
+      return (uint32_t)MEMORY::GetBufferSize;
+    if (strcmp(command, "MEM::Write")==0)
+      return (uint32_t)MEMORY::Write;
+    if (strcmp(command, "MEM::Read")==0)
+      return (uint32_t)MEMORY::Read;
     if (strcmp(command, "MEM::Read32")==0)
       return (uint32_t)MEMORY::Read32;
     if (strcmp(command, "MEM::Write32")==0)
@@ -23,7 +23,7 @@ namespace RPC
       return (uint32_t)MEMORY::Mask32;
 
     if (strcmp(command, "MEM::TestBurst")==0)
-      return (uint32_t)MEMORY::Burst;
+      return (uint32_t)EXPERIMENTS::Burst;
 
 #if defined(LA104)
     if (strcmp(command, "SPI::begin")==0)

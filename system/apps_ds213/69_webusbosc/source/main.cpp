@@ -4,6 +4,7 @@
 #include "adc.h"
 #include "spi.h"
 #include "memory.h"
+#include "experiments.h"
 #include "rpc.h"
 #include "evaluator.h"
 
