@@ -160,6 +160,7 @@ int sfp_printi(char **out, int i, int b, int sg, int width, int pad, int letbase
 	return pc + sfp_prints (out, s, width, pad);
 }
 
+#ifndef WIN32
 int vsprintf(char *out_, const char *format, va_list args )
 {
 	register int width, pad;
@@ -248,6 +249,8 @@ int sprintf(char *out, const char *format, ...)
         va_start( args, format );
         return vsprintf( out, format, args );
 }
+#endif
+
 
 #ifdef TEST_PRINTF
 int main(void)

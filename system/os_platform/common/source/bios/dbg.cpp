@@ -42,5 +42,5 @@ void BIOS::DAC::SetFrequency(int freqHz){}
 void BIOS::DAC::SetDuty(int duty){}
 int BIOS::DAC::GetFrequency(){return 0;}
 int BIOS::DAC::GetDuty(){return 0;}
-void BIOS::DAC::SetWave(uint16_t* wave, int length){}
+void BIOS::DAC::SetMode(EMode, uint16_t* buffer, int length) {}
 #endif

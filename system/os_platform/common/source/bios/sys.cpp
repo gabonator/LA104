@@ -93,6 +93,7 @@ namespace BIOS
 {
   namespace PRIVATE
   {
+	enum class EInternal { CharRom, LastChar };
     uintptr_t GetInternal(EInternal eInternal)
     {
       switch (eInternal)
