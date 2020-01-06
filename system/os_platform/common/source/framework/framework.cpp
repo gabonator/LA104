@@ -1,4 +1,4 @@
-#ifndef __APPLE__
+#if !defined(__APPLE__) && !defined(WIN32)
 #include "../../../os_host/library/spf/spf.h"
 #include "../../../os_host/library/spf/spf.c"
 #endif
