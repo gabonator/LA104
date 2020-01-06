@@ -19,11 +19,23 @@ include_directories(${SDL2_INCLUDE_DIRS})
 #include_directories("include/")
 include_directories("../../os_platform/common/include")
 
+if (WIN32)
+#Force math.h before systme libraries to get the definition of random() function
+include_directories(BEFORE "../../os_platform/win32_sdl/source")
+file(GLOB main_src 
+    "../../os_platform/win32_sdl/source/sdlmain.cpp"
+    "../../os_platform/win32_sdl/source/sdlhal.h"
+    "../../os_platform/win32_sdl/source/math.h"
+    "../../os_platform/win32_sdl/source/math.cpp"
+    "../../os_platform/common/include/library.h"
+)
+else()
 file(GLOB main_src 
     "../../os_platform/mac_sdl/source/sdlmain.cpp"
     "../../os_platform/mac_sdl/source/sdlhal.h"
     "../../os_platform/common/include/library.h"
 )
+endif()
 
 file(GLOB bios_src
     "../../os_platform/common/source/bios/*.cpp"
