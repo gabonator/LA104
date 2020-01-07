@@ -159,7 +159,7 @@ namespace BIOS
 			if (NeedInvalidateFat())
 				InvalidateFat();
 			
-			ui32 rcount;
+			UINT rcount;
 			FRESULT r = f_read(&g_file, pSectorData, BIOS::FAT::SectorSize, &rcount);
 			if (r != 0)
 				BIOS::DBG::Print("FAT:READ RESULT=%d\n", r);
@@ -169,7 +169,7 @@ namespace BIOS
 		
 		EResult Write(ui8* pSectorData)
 		{
-			ui32 wcount;
+			UINT wcount;
 			FRESULT r = f_write(&g_file, pSectorData, BIOS::FAT::SectorSize, &wcount);
 			if (wcount != BIOS::FAT::SectorSize)
 				return EDiskFull; // Disk is full

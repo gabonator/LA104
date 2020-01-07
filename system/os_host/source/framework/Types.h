@@ -31,6 +31,8 @@ void _HandleAssertion(const char*, int, const char*);
 #define COUNT(arr) (int)(sizeof(arr)/sizeof(arr[0]))
 #ifdef __APPLE__
 #define NATIVEENUM uint32_t
+#elif WIN32
+#define NATIVEENUM uint32_t
 #else
 #define NATIVEENUM uint8_t
 #endif
@@ -46,12 +48,18 @@ typedef unsigned long ui32;
 typedef signed long si32;
 typedef signed short si16;
 typedef void* PVOID;
+#ifdef WIN32
+typedef int BOOL;
+#else
 typedef bool BOOL;
+#endif
 typedef float FLOAT;
 typedef int INT;
 typedef const char * PCSTR;
 typedef char * PSTR;
 //typedef char CHAR;
+#ifndef WIN32
 typedef ui32 UINT;
+#endif
 
 #define EVERY(ms) static long dwTick##__LINE__ = 0; bool bDo##__LINE__ = BIOS::SYS::GetTick() - dwTick##__LINE__ > ms; if (bDo##__LINE__) dwTick##__LINE__ = BIOS::SYS::GetTick(); if (bDo##__LINE__)
