@@ -16,7 +16,10 @@
 //#pragma clang diagnostic ignored "no-write-strings"
 //#pragma clang diagnostic ignored "write-strings"
 
-#define _ASSERT assert
+#ifndef _ASSERT
+	#define _ASSERT assert
+#endif
+
 #define _T(a) a
 class CString
 {
