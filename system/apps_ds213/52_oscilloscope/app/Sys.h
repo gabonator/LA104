@@ -19,8 +19,8 @@
 
   typedef uint64_t  u64;
 
-  #define DC               1
-  #define AC               0
+  #define couplingDC               1
+  #define couplingAC               0
   #define MAX_SEC_SIZE     4096
 
   #define CALIBRAT(k, n)  (((k)*(n)+512)/1024)

@@ -1,30 +1,15 @@
 #include <library.h>
 #include "../../os_host/source/framework/BufferedIo.h"
 #include "shapes.h"
-
-void _HandleAssertion(const char* file, int line, const char* cond)
-{
-    BIOS::DBG::Print("Assertion failed in %s [%d]: %s\n", file, line, cond);
-    while (1);
-}
+#include "mididevice.h"
 
 void Nop()
 {
-#ifdef _ARM
-    ;
-#else
-    BIOS::KEY::GetKey();
-#endif
 }
 
-class CMidiOutput
+class CMidiOutput : public CMidiDevice
 {
 public:
-    void Send(int v)
-    {
-        BIOS::GPIO::UART::Write(v);
-    }
-    
     void Panic()
     {
         for (int i=0; i<16; i++)
@@ -82,7 +67,7 @@ private:
         }
         bool isValid()
         {
-            return memcmp(chunk, "MTrk", 4) == 0 && length < 100000;
+            return memcmp(chunk, "MTrk", 4) == 0 && length < 500000;
         }
     } __attribute__((packed));
 
@@ -256,7 +241,11 @@ public:
                     mOutput.Send(event);
                     mOutput.Send(get()); // lsb
                     mOutput.Send(get()); // msb
-                }
+				} else
+				{
+                    get(); // lsb
+                    get(); // msb
+				}
                 break;
             }
             default:
@@ -592,7 +581,7 @@ public:
     
     void DrawCaption()
     {
-        CRect rc1(0, 0, 320, 14);
+        CRect rc1(0, 0, BIOS::LCD::Width, 14);
         GUI::Background(rc1, RGB565(4040b0), RGB565(404040));
 
         int x = 0;
@@ -706,7 +695,7 @@ public:
         if (Eof())
             return false;
         
-        int wait = Wait();;
+        int wait = Wait();
         if (wait)
         {
             mCurrentTick += wait;
@@ -731,6 +720,16 @@ public:
     
     void HandleKey(BIOS::KEY::EKey key)
     {
+		if (key == BIOS::KEY::F4)
+		{
+			mTickDurationUs = mTickDurationUs*2/3;
+		}
+		
+		if (key == BIOS::KEY::F3)
+		{
+			mTickDurationUs = mTickDurationUs*3/2;
+		}
+		
         if (key == BIOS::KEY::Enter)
         {
             switch (mViewMode)
@@ -1013,23 +1012,143 @@ public:
     }
 };
 
+int ListFiles(char* path, const CRect& rcWindow, int index, int scroll)
+{
+	if (BIOS::FAT::OpenDir(path) != BIOS::FAT::EResult::EOk)
+		return 0;
+	
+	int y = rcWindow.top + 20;
+	int i = 0;
+	int first = scroll;
+	int last = first;
+	
+	BIOS::FAT::TFindFile file;
+	while (BIOS::FAT::FindNext(&file) == BIOS::FAT::EResult::EOk)
+	{
+		if (strstr(file.strName, ".MID") != nullptr)
+		{
+			if (scroll > 0)
+			{
+				scroll--;
+				i++;
+				continue;
+			}
+			if (y+16 < rcWindow.bottom)
+			{
+				last++;
+				if (i==index)
+					BIOS::LCD::Printf(rcWindow.left+4, y, RGB565(ffffff), RGB565(000000), " %s ", file.strName);
+				else
+					BIOS::LCD::Printf(rcWindow.left+4, y, RGB565(000000), RGB565(b0b0b0), " %s       ", file.strName);
+			}
+			y += 16;
+			i++;
+		}
+	}
+	
+	int total = i;
+	
+	int top = rcWindow.top + 20;
+	int bottom = rcWindow.bottom - 6;
+	BIOS::LCD::Bar(rcWindow.right-10, top, rcWindow.right-6, bottom, RGB565(d0d0d0));
+	BIOS::LCD::Bar(rcWindow.right-10, top + first * (bottom - top) / total, rcWindow.right-6, top + last * (bottom - top) / total, RGB565(808080));
+	return i;
+}
+
+void AppendFile(char* path, int index)
+{
+	if (BIOS::FAT::OpenDir(path) != BIOS::FAT::EResult::EOk)
+		return;
+	
+	BIOS::FAT::TFindFile file;
+	int i = 0;
+	while (BIOS::FAT::FindNext(&file) == BIOS::FAT::EResult::EOk)
+	{
+		if (strstr(file.strName, ".MID") != nullptr)
+		{
+			if (i++==index)
+			{
+				if (strlen(path) > 0 && path[strlen(path)-1] != '/')
+					strcat(path, "/");
+				strcat(path, file.strName);
+				return;
+			}
+		}
+	}
+}
+
+char* GetFileToPlay()
+{
+	char* fileName = BIOS::OS::GetArgument();
+
+    if (strstr(fileName, " "))
+	{
+		fileName = strstr(fileName, " ") + 1;
+	}
+	else
+	{
+		CRect rcWindow(40, 40, BIOS::LCD::Width-40, BIOS::LCD::Height-40);
+		GUI::Window(rcWindow, RGB565(ffffff));
+		const char* title = "Select file to play";
+		BIOS::LCD::Print(BIOS::LCD::Width/2 - strlen(title)*4, rcWindow.top+2, RGB565(000000), RGBTRANS, title);
+		
+		_ASSERT(fileName);
+		char* strPath = fileName;
+		char* last = strrchr(strPath, '/');
+		if (last)
+			*last = 0;
+		else
+			strcpy(fileName, "");
+
+		int maxLines = (rcWindow.Height()-20)/16;
+		int scroll = 0;
+		int index = 0;
+		int totalFiles = ListFiles(strPath, rcWindow, index, 0);
+		BIOS::KEY::EKey key;
+		while ((key = BIOS::KEY::GetKey()) != BIOS::KEY::Escape)
+		{
+			if (key == BIOS::KEY::Up && index > 0)
+			{
+				index--;
+				if (index < scroll)
+					scroll = index;
+				ListFiles(strPath, rcWindow, index, scroll);
+			}
+			if (key == BIOS::KEY::Down && index < totalFiles-1)
+			{
+				index++;
+				if (index >= scroll+maxLines)
+					scroll = index - maxLines +1;
+				ListFiles(strPath, rcWindow, index, scroll);
+			}
+			if (key == BIOS::KEY::Enter)
+			{
+				AppendFile(strPath, index);
+				return strPath;
+			}
+		}
+	}
+	return fileName;
+}
+
 #ifdef _ARM
 __attribute__((__section__(".entry")))
 #endif
 int _main(void)
 {
+#if defined(__APPLE__) || defined(WIN32)
+	BIOS::FAT::Init();
+	BIOS::OS::SetArgument((char*)"/APPS/SYNTH/MIDI/PLAYER.ELF");
+#endif
+	
     BIOS::LCD::Clear(RGB565(404040));
     
     CMidiPlayer midi;
     char strDisplay[40];
     bool loaded{false};
-
-    char* fileName = BIOS::OS::GetArgument();
-
-    fileName = strstr(fileName, " ");
-    if (fileName)
-        fileName++;
-
+	
+	char* fileName = GetFileToPlay();
+	
     if (!fileName || strlen(fileName) == 0)
     {
         strcpy(strDisplay, "No midi loaded, use F4 in manager");
@@ -1058,10 +1177,6 @@ int _main(void)
     BIOS::LCD::Bar(rcDisplay, RGB565(404040));
     BIOS::LCD::Print( (BIOS::LCD::Width-(int)strlen(strDisplay)*8)/2, 16, RGB565(ffffff), RGBTRANS, strDisplay);
     
-    BIOS::GPIO::PinMode(BIOS::GPIO::P1, BIOS::GPIO::Uart);
-    BIOS::GPIO::PinMode(BIOS::GPIO::P2, BIOS::GPIO::Uart);
-    BIOS::GPIO::UART::Setup(31250, BIOS::GPIO::UART::length8);
-
     if (loaded)
     {
         while (midi.Do());
@@ -1072,6 +1187,18 @@ int _main(void)
         BIOS::LCD::Print( (BIOS::LCD::Width-(int)strlen(strDisplay)*8)/2, 16, RGB565(ffffff), RGBTRANS, strDisplay);
     }
 
+    Nop();
     BIOS::SYS::DelayMs(1500);
     return 0;
+}
+
+void _HandleAssertion(const char* file, int line, const char* cond)
+{
+    BIOS::DBG::Print("Assertion failed in %s [%d]: %s\n", file, line, cond);
+    while (1);
+}
+
+extern "C" void __cxa_pure_virtual(void)
+{
+  _ASSERT(!"Pure virtual call");
 }

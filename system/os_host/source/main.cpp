@@ -60,7 +60,7 @@ int main()
 
   BIOS::SYS::Init();
   BIOS::FAT::Init();
-#ifndef DS203
+#ifndef DISABLE_USB
   BIOS::USB::Enable();
 //  BIOS::USB::InitializeSerial();
   BIOS::USB::InitializeMass();

@@ -26,7 +26,7 @@ void USB_ARC_set_joystick_callback(usb_joy_report_ready_cb_f cb) {
   joy_report_ready_cb = cb;
 }
 
-void USB_ARC_KB_tx(usb_kb_report *report)
+bool USB_ARC_KB_tx(usb_kb_report *report)
 {
   // byte 0:   modifiers
   // byte 1:   reserved (0x00)
@@ -36,9 +36,7 @@ void USB_ARC_KB_tx(usb_kb_report *report)
   uint32_t spoon_guard = 1000000;
   while(kb_tx_complete==0 && --spoon_guard);
   if (spoon_guard <= 0)
-  {
-    while (1);
-  }
+    return false;
   //ASSERT(spoon_guard > 0);
 
   /* Reset the control token to inform upper layer that a transfer is ongoing */
@@ -49,17 +47,16 @@ void USB_ARC_KB_tx(usb_kb_report *report)
 
   /* Enable endpoint for transmission */
   SetEPTxValid(ENDP1);
-
+  return true;
 }
 
-void USB_ARC_MOUSE_tx(usb_mouse_report *report)
+bool USB_ARC_MOUSE_tx(usb_mouse_report *report)
 {
   uint32_t spoon_guard = 1000000;
   while(mouse_tx_complete==0 && --spoon_guard);
   if (spoon_guard <= 0)
-  {
-    while (1);
-  }
+    return false;
+
   //ASSERT(spoon_guard > 0);
 
   /* Reset the control token to inform upper layer that a transfer is ongoing */
@@ -70,10 +67,10 @@ void USB_ARC_MOUSE_tx(usb_mouse_report *report)
 
   /* Enable endpoint for transmission */
   SetEPTxValid(ENDP2);
-
+  return true;
 }
 
-void USB_ARC_JOYSTICK_tx(usb_joystick j, usb_joystick_report *report)
+bool USB_ARC_JOYSTICK_tx(usb_joystick j, usb_joystick_report *report)
 {
   uint32_t spoon_guard = 1000000;
   if (j == JOYSTICK1) {
@@ -82,9 +79,7 @@ void USB_ARC_JOYSTICK_tx(usb_joystick j, usb_joystick_report *report)
     while(joy2_tx_complete==0 && --spoon_guard);
   }
   if (spoon_guard <= 0)
-  {
-    while (1);
-  }
+    return false;
   //ASSERT(spoon_guard > 0);
 
   /* Reset the control token to inform upper layer that a transfer is ongoing */
@@ -99,4 +94,5 @@ void USB_ARC_JOYSTICK_tx(usb_joystick j, usb_joystick_report *report)
 
   /* Enable endpoint for transmission */
   SetEPTxValid(j == JOYSTICK1 ? ENDP3 : ENDP4);
+  return true;
 }

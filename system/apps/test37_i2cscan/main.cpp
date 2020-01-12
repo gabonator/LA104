@@ -147,6 +147,9 @@ void GetDescription(int address)
     char* last = strrchr(databasePath, '/');
     if (last)
         *last = 0;
+    else
+        strcpy(databasePath, "");
+
     strcat(databasePath, "/devices.txt");
 #endif
     

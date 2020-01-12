@@ -25,12 +25,14 @@ __attribute__((__section__(".entry"))) int main(void);
 int main(void)
 { 
   CPRNG prng;
+  int Width = BIOS::SYS::GetAttribute(BIOS::SYS::EAttribute::ScreenWidth);
+  int Height = BIOS::SYS::GetAttribute(BIOS::SYS::EAttribute::ScreenWidth);
 
-  for (int x=0; x<320; x++)
-    for (int y=0; y<240; y++)
+  for (int x=0; x<Width; x++)
+    for (int y=0; y<Height; y++)
     {
-      uint32_t dx = (x-160);
-      uint32_t dy = (y-120);
+      uint32_t dx = (x-Width/2);
+      uint32_t dy = (y-Height/2);
       dx *= dx;
       dy *= dy;
       uint32_t dl = dx+dy;
@@ -68,11 +70,13 @@ int cury = ay[0];
 
 void mainInit()
 {
-  for (int x=0; x<320; x++)
-    for (int y=0; y<240; y++)
+  int Width = BIOS::SYS::GetAttribute(BIOS::SYS::EAttribute::ScreenWidth);
+  int Height = BIOS::SYS::GetAttribute(BIOS::SYS::EAttribute::ScreenWidth);
+  for (int x=0; x<Width; x++)
+    for (int y=0; y<Height; y++)
     {
-      uint32_t dx = (x-160);
-      uint32_t dy = (y-120);
+      uint32_t dx = (x-Width/2);
+      uint32_t dy = (y-Height/2);
       dx *= dx;
       dy *= dy;
       uint32_t dl = dx+dy;

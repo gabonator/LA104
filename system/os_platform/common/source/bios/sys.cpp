@@ -91,14 +91,15 @@ extern unsigned char font[256*14];
 
 namespace BIOS
 {
-  namespace PRIVATE
+  namespace SYS
   {
-	enum class EInternal { CharRom, LastChar };
-    uintptr_t GetInternal(EInternal eInternal)
+    uintptr_t GetAttribute(BIOS::SYS::EAttribute eAttribute)
     {
-      switch (eInternal)
+      switch (eAttribute)
       {
-        case EInternal::CharRom: return (uintptr_t)font;
+        case EAttribute::CharRom: return (uintptr_t)font;
+        case EAttribute::ScreenWidth: return 320;
+        case EAttribute::ScreenHeight: return 240;
 //        case EInternal::LastChar: return (uintptr_t)&lastChar;
         default:
           break;

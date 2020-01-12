@@ -12,7 +12,7 @@ void Correction(void)
 {
   u16 BakA[10], BakB[10];
   for(u32 i = 0; i < ITEM_END; i++) CtrlUpdate(i);          // 全部硬件初始化设置
-  *Hw.pOut_A_Coupl = AC, *Hw.pOut_B_Coupl = AC;             // 模拟输入为交流耦合
+  *Hw.pOut_A_Coupl = couplingAC, *Hw.pOut_B_Coupl = couplingAC;             // 模拟输入为交流耦合
   SetBase(15);                                              // 设置采样速率 10uS/Div
   SetTriggTyp(TRIG_ANY, Menu[V_T].Src);                     // 设任意触发
   Hw.pDevInit(SO_ANLG);

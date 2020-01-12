@@ -119,7 +119,8 @@ class Canvas
     var colors = ["#ffff00", "#00ffff", "#ff00ff", "#ff0000"];
     var basey = [350, 280, 210, 140];
     var stepy = -50;
-    var scalex = 2;
+    var scalex = 0.003; // 10 div -> 1ms, 100us/div
+    var scalex = 0.03; // 10us/div
 
     var allSeries = [];
     for (var s=0; s<4; s++)

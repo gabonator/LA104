@@ -123,10 +123,10 @@ void CWndCharMap::Create(CWnd *pParent, ui16 dwFlags)
 
 void CWndCharMap::OnPaint()
 {
-        CRect rc1(0, 0, 320, 14);
+        CRect rc1(0, 0, BIOS::LCD::Width, 14);
         GUI::Background(rc1, RGB565(4040b0), RGB565(404040));
         int x = 0;
-        x += BIOS::LCD::Print(x, 0, RGB565(000000), RGB565(b0b0b0), " LA104 Character map");
+        x += BIOS::LCD::Print(x, 0, RGB565(000000), RGB565(b0b0b0), " LA104 Character map"); // TODO:
         x += BIOS::LCD::Draw( x, 0, RGB565(b0b0b0), RGBTRANS, CShapes_sel_right);
 
         GUI::Background(m_rcClient, RGB565(404040), RGB565(101010));
