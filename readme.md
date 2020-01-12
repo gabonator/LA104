@@ -19,8 +19,7 @@ Go to release section on top of this page, download *system.hex*. Power on the L
 
 ##### (DS203) Web USB Oscilloscope
 
-Proud to announce the first oscilloscope in the world using the WebUsb technology (correct me if I am wrong)! 
-[69_webusbosc/release](system/apps_featured/69_webusbosc/readme.md)
+Proud to announce the first oscilloscope in the world using the WebUsb technology (correct me if I am wrong)! [Read more here](system/apps_featured/69_webusbosc/readme.md)
 
 Watch video here:
 
@@ -36,7 +35,7 @@ Addressable LED tester with advanced functions. Supports up to 32x WS2812/WS2812
 
 ##### Temperature grapher
 
-Shows temperature of up to 8 DS1820 sensors in form of graph. Automatic export of measured values into [html](https://rawgit.valky.eu/gabonator/LA104/master/system/apps/test33_temper/visualize/TEMPER01.HTM), [source code](system/apps/test33_temper/visualize/TEMPER01.HTM).
+Shows temperature of up to 8 DS1820 sensors in form of graph. Automatic export of measured values into [html](https://rawgit.valky.eu/gabonator/LA104/master/system/apps_featured/test33_temper/visualize/TEMPER01.HTM), [source code](system/apps_featured/test33_temper/visualize/TEMPER01.HTM).
 
 ![temperature measure tool 1](resources/imgTempMeas1.jpg)
 ![temperature measure tool 2](resources/imgTempMeas2.png)
