@@ -1,4 +1,4 @@
-##### (DS203) Web USB Oscilloscope
+# Web USB Oscilloscope (DS203)
 
 Proud to announce the first oscilloscope in the world using the WebUsb technology (correct me if I am wrong)! Read about the webusb technology and the evolution of connection between [microcontroller and web browser](https://github.com/gabonator/Education/blob/master/2019/WebUsb/readme.md). Just run the 69webusb.elf, connect the USB cable and click on system notification to open the oscilloscope interface. No application installation is required. Prebuilt binaries can be found here: [release 2019.12](https://github.com/gabonator/LA104/releases/tag/2019.12)
 
@@ -38,4 +38,11 @@ Features:
   - UART decoder - shows stream bits, and decoded values in hexadecimal and decimal form and as ascii characters
   - Memory slots - store and restore your waveform and channel settings, including preview
 
+
+UART Decoder and arbitrary signal generator:
+
 ![WebUsb oscilloscope](resources/imgWebusb2.png)
+
+Addressable led decoder with visualization:
+
+![WebUsb oscilloscope](resources/imgWebusbRgb.png)
