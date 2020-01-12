@@ -17,6 +17,11 @@ Go to release section on top of this page, download *system.hex*. Power on the L
 
 #### News
 
+##### WASM experimental evironment
+
+You the experience of using LA104 analyser in [your browser](https://rawgit.valky.eu/gabonator/LA104/master/system/release/wasm/index.html)
+
+
 ##### (DS203) Web USB Oscilloscope
 
 Proud to announce the first oscilloscope in the world using the WebUsb technology (correct me if I am wrong)! [Read more here](system/apps_featured/69_webusbosc/readme.md)

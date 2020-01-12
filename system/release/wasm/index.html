@@ -127,7 +127,7 @@ class Shell
   constructor()
   {
     Promise.resolve()
-    .then(() => this.readAsync("la104.fat"))
+    .then(() => this.readAsync("la104_small.fat"))
     .then((data) => Module['disk'] = new Uint8Array(data))
     .then(() => this.main());
   }
