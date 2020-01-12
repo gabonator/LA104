@@ -95,7 +95,7 @@ void USART3_IRQHandler(void)
 }
 
 // TODO: move to platform dependent code
-#ifdef DISABLE_USB
+#if defined(DISABLE_USB) || defined(DS203)
 
 extern void __USB_Istr(void);
 extern void __CTR_HP(void);
