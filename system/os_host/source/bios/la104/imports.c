@@ -3,6 +3,11 @@
 #include <stdbool.h>
 #include "library/STM32F10x_StdPeriph_Driver/inc/misc.h"
 
+#ifdef DISABLE_USB
+void __USB_Istr(void) {}
+void __CTR_HP(void) {}
+#endif
+
 extern void (* g_pfnVectors[76])(void);
 
 __attribute__ ((section(".biosfunc"), optimize("O0")))

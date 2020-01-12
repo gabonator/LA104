@@ -216,7 +216,7 @@ void CCoreGenerator::SetDuty(int nPercent)
 
 void CCoreGenerator::ConfigureSq( int psc, int arr, int ccr )
 {
-  BIOS::DAC::SetWave(nullptr, 0);
+  BIOS::DAC::SetMode(BIOS::DAC::EMode::Square, nullptr, 0);
   BIOS::DAC::SetFrequency(CPUCLOCK / (arr + 1) / (psc + 1));
 }
 
@@ -234,6 +234,6 @@ void CCoreGenerator::ConfigureDc( int dc )
 
 void CCoreGenerator::ConfigureWave( uint16_t* p, int n)
 {
-  BIOS::DAC::SetWave(p, n);
+  BIOS::DAC::SetMode(BIOS::DAC::EMode::Buffer, p, n);
 }
 

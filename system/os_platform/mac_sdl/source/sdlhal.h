@@ -1,12 +1,5 @@
 #include "../../common/source/bios/Bios.h"
 
-#include <termios.h>
-#include <fcntl.h>
-#include <sys/ioctl.h>
-#include <sys/types.h>
-#include <dirent.h>
-#include <unistd.h>
-
 void setPixel(int x, int y, int c);
 int getPixel(int x, int y);
 bool sdl_running();
@@ -15,9 +8,7 @@ void sdl_loop();
 
 class CSdlHal : public CHal
 {
-    int fd;
-    FILE* f;
-    DIR* dirp;
+  int fd;
 
   virtual void SetPixel(int x, int y, uint16_t c) override
   {
@@ -92,8 +83,10 @@ class CSdlHal : public CHal
     
     virtual void UartClose() override
     {
+#ifdef USEUART
         close(fd);
         fd = 0;
+#endif
     }
     
     virtual bool UartAvailable() override
@@ -136,6 +129,7 @@ class CSdlHal : public CHal
     {
         return SDL_GetTicks();
     }
+
 #if 0
     // FAT
     virtual bool FatInit() override

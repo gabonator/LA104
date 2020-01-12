@@ -30,7 +30,7 @@ int _main(void)
     uint8_t placement[512];
 
     CDeviceInfo* devInfo = nullptr;
-    char* id = BIOS::SYS::GetDeviceType();
+    char* id = (char*)BIOS::SYS::GetAttribute(BIOS::SYS::EAttribute::DeviceType);
     if (strcmp(id, "LA104") == 0)
       devInfo = new(placement) CLA104();
     if (strcmp(id, "DS203") == 0)
