@@ -63,6 +63,9 @@ cleanApp () {
   )
 }
 
+for d in apps_featured/*/ ; do
+    buildApp "$d"
+done
 for d in apps_shell/*/ ; do
     buildApp "$d"
 done
@@ -89,6 +92,9 @@ done
 rm release/bin/output.elf
 
 # cleanup
+for d in apps_featured/*/ ; do
+    cleanApp "$d"
+done
 for d in apps_shell/*/ ; do
     cleanApp "$d"
 done
