@@ -35,4 +35,4 @@ returns:
 ]
 ```
 
-used as external signal analyser/decoder in WebUsbOscilloscope for DS203 [system/apps_featured/69_webusbosc/web/v2](69_webusbosc)
+used as external signal analyser/decoder in WebUsbOscilloscope for DS203 [69_webusbosc](system/apps_featured/69_webusbosc/web/v2)
