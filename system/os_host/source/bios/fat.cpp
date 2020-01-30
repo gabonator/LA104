@@ -136,6 +136,9 @@ namespace BIOS
 
     EResult Open(const char* strName, ui8 nIoMode)
     {
+	if (NeedInvalidateFat())
+		InvalidateFat();
+
 	if ( nIoMode == BIOS::FAT::IoWrite )
 	{
 	    FRESULT r = f_open(&g_file, strName, FA_WRITE | FA_CREATE_ALWAYS);
@@ -198,6 +201,9 @@ namespace BIOS
 
     EResult OpenDir(char* strPath)
     {
+	if (NeedInvalidateFat())
+		InvalidateFat();
+
     	FRESULT r = f_opendir(&g_directory, (char*)strPath);
     	return Result(r);
     }

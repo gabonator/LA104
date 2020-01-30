@@ -194,7 +194,12 @@ float:left;
       <option value="">Off</option>
       <option value="UART">UART</option>
       <option value="LED-RGB">RGB leds</option>
+      <option value="EXT">External</option>
     </select><br>
+    <span id="analCondExternal">
+      <input type="button" value="Example" id="analExtExample"><br>
+      <input type="button" value="RTL433" id="analExtRtl433"><br>
+    </span>
   </div>
   <div class="controlsSpacer"></div>
   <div class="controlsBlock blockMemory">
@@ -311,7 +316,16 @@ float:left;
       });
 
     document.querySelector("#analyserMode").addEventListener('change', 
-      (o) => INTERFACE.setAnalyserMode(o.target.value));
+      (o) => 
+      {
+        document.querySelector("#analCondExternal").style.display = o.target.value == "EXT" ? "block" : "none";
+        INTERFACE.setAnalyserMode(o.target.value);
+      });
+
+    document.querySelector("#analExtExample").addEventListener('click', 
+      (o) => INTERFACE.openExtAnalyser("sample"));
+    document.querySelector("#analExtRtl433").addEventListener('click', 
+      (o) => INTERFACE.openExtAnalyser("rtl433"));
 
     document.querySelector("#memSlot").addEventListener('change', 
       (o) => INTERFACE.memoryPreview(o.target.value));
