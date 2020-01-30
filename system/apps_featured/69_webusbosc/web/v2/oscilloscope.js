@@ -54,6 +54,7 @@ INTERFACE = {
   analyse:"",
 
   memSlot:"0",
+  extWindows:{},
 
   // CH1          	
   save()
@@ -308,6 +309,12 @@ INTERFACE = {
   setAnalyserMode(mode)
   {
     INTERFACE.analyse = mode;
+    INTERFACE.extWindows = {};
+  },
+
+  openExtAnalyser(name)
+  {
+    INTERFACE.extWindows[name] = window.open("extensions/"+name+"/", "_blank", "width=600,height=400,location=no,menubar=no");
   },
 
   // MEMORY/FILE
@@ -359,6 +366,32 @@ INTERFACE = {
       INTERFACE.updateGenerator();
 
       delete _wave.oscSettings;
+
+      ////////////TODO: select wave range by trigger mode
+      var data = [new Array(_wave.data.length/5), new Array(_wave.data.length/5)];
+      for (var i =0; i<_wave.data.length; i+=5)
+      {
+        var s = parseInt("0x" + _wave.data.substr(i, 5));
+        var bundle = [s&255, (s>>8)&255, (s>>16)&1, (s>>17)&1];
+        data[0][i/5] = bundle[0];
+        data[1][i/5] = bundle[1];
+      }
+
+      var event = new CustomEvent("OscDataChanged", {detail:{
+        wave: data,
+        ch1range: INTERFACE.ch1range,
+        ch1coupling: INTERFACE.ch1coupling,
+        ch1offset: INTERFACE.ch1offset,
+        ch2range: INTERFACE.ch2range,
+        ch2coupling: INTERFACE.ch2coupling,
+        ch2offset: INTERFACE.ch2offset,
+        timebase: INTERFACE.timebase,
+        trigThreshold: INTERFACE.trigThreshold,
+        trigSource: INTERFACE.trigSource,
+      }});
+
+      for (var i in INTERFACE.extWindows)
+        INTERFACE.extWindows[i].document.dispatchEvent(event);
 
       var dt = parseFloat(OSC.Enums[INTERFACE.timebase]);
       var dv = [50e-3, 100e-3, 200e-3, 500e-3, 1, 2, 5, 10][OSC.Enums[INTERFACE.ch1range]];
