@@ -1,19 +1,14 @@
 MEMORY
 {
-  rom (rx) : ORIGIN = 0x08040000, LENGTH = 256K
-  null (rwx): ORIGIN = 0x00001000, LENGTH = 8K
-
-  ram (rwx) : ORIGIN = 0x20004300, LENGTH = 42K
-/*  ram (rwx) : ORIGIN = 0x20003000, LENGTH = 42K*/
+  rom (rx)  : ORIGIN = 0x0801ed00, LENGTH = 60K
+  ram (rwx) : ORIGIN = 0x20004800, LENGTH = 16K
+  null (rwx): ORIGIN = 0x00001000, LENGTH = 4K
 }
 
+/* _estack = ORIGIN(ram)+LENGTH(ram)-0x100; */
 
 SECTIONS
   {
-    .bios 0x08004200 (NOLOAD) : {
-      BIOS.o
-    }
-
     .text : {
       *(.entry)
       *(.text*)        /* Program code */
@@ -22,7 +17,8 @@ SECTIONS
 
     .data : {
       *(.data*)        /* Data memory */
-    } >ram
+/*      *(.dynamic*) */
+    } >ram AT >rom
 
   .bss : {
     *(.bss*)         /* Zero-filled run time allocate data memory */
