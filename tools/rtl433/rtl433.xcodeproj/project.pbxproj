@@ -1,0 +1,732 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 50;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		2D9CF5A524006F7300ED0753 /* util.c in Sources */ = {isa = PBXBuildFile; fileRef = 2D9CF52E24006F7200ED0753 /* util.c */; };
+		2D9CF5A624006F7300ED0753 /* decoder_util.c in Sources */ = {isa = PBXBuildFile; fileRef = 2D9CF53024006F7200ED0753 /* decoder_util.c */; };
+		2D9CF5A724006F7300ED0753 /* alloc.c in Sources */ = {isa = PBXBuildFile; fileRef = 2D9CF53524006F7200ED0753 /* alloc.c */; };
+		2D9CF5A824006F7300ED0753 /* pulse_demod.c in Sources */ = {isa = PBXBuildFile; fileRef = 2D9CF53924006F7200ED0753 /* pulse_demod.c */; };
+		2D9CF5A924006F7300ED0753 /* data.c in Sources */ = {isa = PBXBuildFile; fileRef = 2D9CF53A24006F7200ED0753 /* data.c */; };
+		2D9CF5AA24006F7300ED0753 /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2D9CF53C24006F7200ED0753 /* main.cpp */; };
+		2D9CF5AB24006F7300ED0753 /* bitbuffer.c in Sources */ = {isa = PBXBuildFile; fileRef = 2D9CF53D24006F7200ED0753 /* bitbuffer.c */; };
+		2D9CF5AC24006F7300ED0753 /* efergy_e2_classic.c in Sources */ = {isa = PBXBuildFile; fileRef = 2D9CF54024006F7200ED0753 /* efergy_e2_classic.c */; };
+		2D9CF5AD24006F7300ED0753 /* hondaremote.c in Sources */ = {isa = PBXBuildFile; fileRef = 2D9CF54124006F7200ED0753 /* hondaremote.c */; };
+		2D9CF5AE24006F7300ED0753 /* springfield.c in Sources */ = {isa = PBXBuildFile; fileRef = 2D9CF54224006F7200ED0753 /* springfield.c */; };
+		2D9CF5AF24006F7300ED0753 /* thermopro_tp11.c in Sources */ = {isa = PBXBuildFile; fileRef = 2D9CF54324006F7200ED0753 /* thermopro_tp11.c */; };
+		2D9CF5B024006F7300ED0753 /* kerui.c in Sources */ = {isa = PBXBuildFile; fileRef = 2D9CF54424006F7200ED0753 /* kerui.c */; };
+		2D9CF5B124006F7300ED0753 /* solight_te44.c in Sources */ = {isa = PBXBuildFile; fileRef = 2D9CF54524006F7200ED0753 /* solight_te44.c */; };
+		2D9CF5B224006F7300ED0753 /* fineoffset_wh1080.c in Sources */ = {isa = PBXBuildFile; fileRef = 2D9CF54624006F7200ED0753 /* fineoffset_wh1080.c */; };
+		2D9CF5B324006F7300ED0753 /* tfa_pool_thermometer.c in Sources */ = {isa = PBXBuildFile; fileRef = 2D9CF54724006F7200ED0753 /* tfa_pool_thermometer.c */; };
+		2D9CF5B424006F7300ED0753 /* gt_wt_02.c in Sources */ = {isa = PBXBuildFile; fileRef = 2D9CF54824006F7200ED0753 /* gt_wt_02.c */; };
+		2D9CF5B524006F7300ED0753 /* nexus.c in Sources */ = {isa = PBXBuildFile; fileRef = 2D9CF54924006F7200ED0753 /* nexus.c */; };
+		2D9CF5B624006F7300ED0753 /* digitech_xc0324.c in Sources */ = {isa = PBXBuildFile; fileRef = 2D9CF54A24006F7200ED0753 /* digitech_xc0324.c */; };
+		2D9CF5B724006F7300ED0753 /* oregon_scientific.c in Sources */ = {isa = PBXBuildFile; fileRef = 2D9CF54B24006F7200ED0753 /* oregon_scientific.c */; };
+		2D9CF5B824006F7300ED0753 /* ttx201.c in Sources */ = {isa = PBXBuildFile; fileRef = 2D9CF54C24006F7200ED0753 /* ttx201.c */; };
+		2D9CF5B924006F7300ED0753 /* nexa.c in Sources */ = {isa = PBXBuildFile; fileRef = 2D9CF54D24006F7200ED0753 /* nexa.c */; };
+		2D9CF5BA24006F7300ED0753 /* honeywell_wdb.c in Sources */ = {isa = PBXBuildFile; fileRef = 2D9CF54E24006F7200ED0753 /* honeywell_wdb.c */; };
+		2D9CF5BB24006F7300ED0753 /* infactory.c in Sources */ = {isa = PBXBuildFile; fileRef = 2D9CF54F24006F7200ED0753 /* infactory.c */; };
+		2D9CF5BC24006F7300ED0753 /* elro_db286a.c in Sources */ = {isa = PBXBuildFile; fileRef = 2D9CF55024006F7200ED0753 /* elro_db286a.c */; };
+		2D9CF5BD24006F7300ED0753 /* alecto.c in Sources */ = {isa = PBXBuildFile; fileRef = 2D9CF55124006F7200ED0753 /* alecto.c */; };
+		2D9CF5BE24006F7300ED0753 /* ambientweather_tx8300.c in Sources */ = {isa = PBXBuildFile; fileRef = 2D9CF55224006F7200ED0753 /* ambientweather_tx8300.c */; };
+		2D9CF5BF24006F7300ED0753 /* tpms_ford.c in Sources */ = {isa = PBXBuildFile; fileRef = 2D9CF55324006F7200ED0753 /* tpms_ford.c */; };
+		2D9CF5C024006F7300ED0753 /* radiohead_ask.c in Sources */ = {isa = PBXBuildFile; fileRef = 2D9CF55424006F7200ED0753 /* radiohead_ask.c */; };
+		2D9CF5C124006F7300ED0753 /* x10_sec.c in Sources */ = {isa = PBXBuildFile; fileRef = 2D9CF55524006F7200ED0753 /* x10_sec.c */; };
+		2D9CF5C224006F7300ED0753 /* tpms_citroen.c in Sources */ = {isa = PBXBuildFile; fileRef = 2D9CF55624006F7200ED0753 /* tpms_citroen.c */; };
+		2D9CF5C324006F7300ED0753 /* elv.c in Sources */ = {isa = PBXBuildFile; fileRef = 2D9CF55724006F7200ED0753 /* elv.c */; };
+		2D9CF5C424006F7300ED0753 /* tpms_pmv107j.c in Sources */ = {isa = PBXBuildFile; fileRef = 2D9CF55824006F7200ED0753 /* tpms_pmv107j.c */; };
+		2D9CF5C524006F7300ED0753 /* waveman.c in Sources */ = {isa = PBXBuildFile; fileRef = 2D9CF55924006F7200ED0753 /* waveman.c */; };
+		2D9CF5C624006F7300ED0753 /* esa.c in Sources */ = {isa = PBXBuildFile; fileRef = 2D9CF55A24006F7200ED0753 /* esa.c */; };
+		2D9CF5C724006F7300ED0753 /* ht680.c in Sources */ = {isa = PBXBuildFile; fileRef = 2D9CF55B24006F7200ED0753 /* ht680.c */; };
+		2D9CF5C824006F7300ED0753 /* chuango.c in Sources */ = {isa = PBXBuildFile; fileRef = 2D9CF55C24006F7200ED0753 /* chuango.c */; };
+		2D9CF5C924006F7300ED0753 /* thermopro_tp12.c in Sources */ = {isa = PBXBuildFile; fileRef = 2D9CF55D24006F7200ED0753 /* thermopro_tp12.c */; };
+		2D9CF5CA24006F7300ED0753 /* emontx.c in Sources */ = {isa = PBXBuildFile; fileRef = 2D9CF55E24006F7200ED0753 /* emontx.c */; };
+		2D9CF5CB24006F7300ED0753 /* brennenstuhl_rcs_2044.c in Sources */ = {isa = PBXBuildFile; fileRef = 2D9CF55F24006F7200ED0753 /* brennenstuhl_rcs_2044.c */; };
+		2D9CF5CC24006F7300ED0753 /* oregon_scientific_v1.c in Sources */ = {isa = PBXBuildFile; fileRef = 2D9CF56024006F7200ED0753 /* oregon_scientific_v1.c */; };
+		2D9CF5CD24006F7300ED0753 /* intertechno.c in Sources */ = {isa = PBXBuildFile; fileRef = 2D9CF56124006F7200ED0753 /* intertechno.c */; };
+		2D9CF5CE24006F7300ED0753 /* kedsum.c in Sources */ = {isa = PBXBuildFile; fileRef = 2D9CF56224006F7200ED0753 /* kedsum.c */; };
+		2D9CF5CF24006F7300ED0753 /* quhwa.c in Sources */ = {isa = PBXBuildFile; fileRef = 2D9CF56324006F7200ED0753 /* quhwa.c */; };
+		2D9CF5D024006F7300ED0753 /* esperanza_ews.c in Sources */ = {isa = PBXBuildFile; fileRef = 2D9CF56424006F7200ED0753 /* esperanza_ews.c */; };
+		2D9CF5D124006F7300ED0753 /* ambientweather_wh31e.c in Sources */ = {isa = PBXBuildFile; fileRef = 2D9CF56524006F7200ED0753 /* ambientweather_wh31e.c */; };
+		2D9CF5D224006F7300ED0753 /* maverick_et73x.c in Sources */ = {isa = PBXBuildFile; fileRef = 2D9CF56624006F7200ED0753 /* maverick_et73x.c */; };
+		2D9CF5D324006F7300ED0753 /* x10_rf.c in Sources */ = {isa = PBXBuildFile; fileRef = 2D9CF56724006F7200ED0753 /* x10_rf.c */; };
+		2D9CF5D424006F7300ED0753 /* ge_coloreffects.c in Sources */ = {isa = PBXBuildFile; fileRef = 2D9CF56824006F7200ED0753 /* ge_coloreffects.c */; };
+		2D9CF5D524006F7300ED0753 /* current_cost.c in Sources */ = {isa = PBXBuildFile; fileRef = 2D9CF56924006F7200ED0753 /* current_cost.c */; };
+		2D9CF5D624006F7300ED0753 /* ft004b.c in Sources */ = {isa = PBXBuildFile; fileRef = 2D9CF56A24006F7200ED0753 /* ft004b.c */; };
+		2D9CF5D724006F7300ED0753 /* simplisafe.c in Sources */ = {isa = PBXBuildFile; fileRef = 2D9CF56B24006F7200ED0753 /* simplisafe.c */; };
+		2D9CF5D824006F7300ED0753 /* inovalley-kw9015b.c in Sources */ = {isa = PBXBuildFile; fileRef = 2D9CF56C24006F7200ED0753 /* inovalley-kw9015b.c */; };
+		2D9CF5D924006F7300ED0753 /* ibis_beacon.c in Sources */ = {isa = PBXBuildFile; fileRef = 2D9CF56D24006F7200ED0753 /* ibis_beacon.c */; };
+		2D9CF5DA24006F7300ED0753 /* prologue.c in Sources */ = {isa = PBXBuildFile; fileRef = 2D9CF56E24006F7200ED0753 /* prologue.c */; };
+		2D9CF5DB24006F7300ED0753 /* lacrosse_TX141TH_Bv2.c in Sources */ = {isa = PBXBuildFile; fileRef = 2D9CF56F24006F7200ED0753 /* lacrosse_TX141TH_Bv2.c */; };
+		2D9CF5DC24006F7300ED0753 /* silvercrest.c in Sources */ = {isa = PBXBuildFile; fileRef = 2D9CF57024006F7200ED0753 /* silvercrest.c */; };
+		2D9CF5DD24006F7300ED0753 /* tpms_renault.c in Sources */ = {isa = PBXBuildFile; fileRef = 2D9CF57124006F7200ED0753 /* tpms_renault.c */; };
+		2D9CF5DE24006F7300ED0753 /* schraeder.c in Sources */ = {isa = PBXBuildFile; fileRef = 2D9CF57224006F7200ED0753 /* schraeder.c */; };
+		2D9CF5DF24006F7300ED0753 /* tfa_twin_plus_30.3049.c in Sources */ = {isa = PBXBuildFile; fileRef = 2D9CF57324006F7200ED0753 /* tfa_twin_plus_30.3049.c */; };
+		2D9CF5E024006F7300ED0753 /* bresser_3ch.c in Sources */ = {isa = PBXBuildFile; fileRef = 2D9CF57424006F7200ED0753 /* bresser_3ch.c */; };
+		2D9CF5E124006F7300ED0753 /* new_template.c in Sources */ = {isa = PBXBuildFile; fileRef = 2D9CF57524006F7200ED0753 /* new_template.c */; };
+		2D9CF5E224006F7300ED0753 /* efergy_optical.c in Sources */ = {isa = PBXBuildFile; fileRef = 2D9CF57624006F7200ED0753 /* efergy_optical.c */; };
+		2D9CF5E324006F7300ED0753 /* newkaku.c in Sources */ = {isa = PBXBuildFile; fileRef = 2D9CF57724006F7200ED0753 /* newkaku.c */; };
+		2D9CF5E424006F7300ED0753 /* blyss.c in Sources */ = {isa = PBXBuildFile; fileRef = 2D9CF57824006F7200ED0753 /* blyss.c */; };
+		2D9CF5E524006F7300ED0753 /* oil_watchman.c in Sources */ = {isa = PBXBuildFile; fileRef = 2D9CF57924006F7200ED0753 /* oil_watchman.c */; };
+		2D9CF5E624006F7300ED0753 /* generic_temperature_sensor.c in Sources */ = {isa = PBXBuildFile; fileRef = 2D9CF57A24006F7200ED0753 /* generic_temperature_sensor.c */; };
+		2D9CF5E724006F7300ED0753 /* calibeur.c in Sources */ = {isa = PBXBuildFile; fileRef = 2D9CF57B24006F7200ED0753 /* calibeur.c */; };
+		2D9CF5E824006F7300ED0753 /* opus_xt300.c in Sources */ = {isa = PBXBuildFile; fileRef = 2D9CF57C24006F7200ED0753 /* opus_xt300.c */; };
+		2D9CF5E924006F7300ED0753 /* cardin.c in Sources */ = {isa = PBXBuildFile; fileRef = 2D9CF57D24006F7200ED0753 /* cardin.c */; };
+		2D9CF5EA24006F7300ED0753 /* rftech.c in Sources */ = {isa = PBXBuildFile; fileRef = 2D9CF57E24006F7200ED0753 /* rftech.c */; };
+		2D9CF5EB24006F7300ED0753 /* wg_pb12v1.c in Sources */ = {isa = PBXBuildFile; fileRef = 2D9CF57F24006F7200ED0753 /* wg_pb12v1.c */; };
+		2D9CF5EC24006F7300ED0753 /* ambient_weather.c in Sources */ = {isa = PBXBuildFile; fileRef = 2D9CF58024006F7200ED0753 /* ambient_weather.c */; };
+		2D9CF5ED24006F7300ED0753 /* m_bus.c in Sources */ = {isa = PBXBuildFile; fileRef = 2D9CF58124006F7200ED0753 /* m_bus.c */; };
+		2D9CF5EF24006F7300ED0753 /* mebus.c in Sources */ = {isa = PBXBuildFile; fileRef = 2D9CF58324006F7200ED0753 /* mebus.c */; };
+		2D9CF5F024006F7300ED0753 /* bresser_5in1.c in Sources */ = {isa = PBXBuildFile; fileRef = 2D9CF58424006F7200ED0753 /* bresser_5in1.c */; };
+		2D9CF5F124006F7300ED0753 /* tpms_toyota.c in Sources */ = {isa = PBXBuildFile; fileRef = 2D9CF58524006F7200ED0753 /* tpms_toyota.c */; };
+		2D9CF5F224006F7300ED0753 /* generic_remote.c in Sources */ = {isa = PBXBuildFile; fileRef = 2D9CF58624006F7200ED0753 /* generic_remote.c */; };
+		2D9CF5F324006F7300ED0753 /* rubicson.c in Sources */ = {isa = PBXBuildFile; fileRef = 2D9CF58724006F7200ED0753 /* rubicson.c */; };
+		2D9CF5F424006F7300ED0753 /* fineoffset_wh1050.c in Sources */ = {isa = PBXBuildFile; fileRef = 2D9CF58824006F7200ED0753 /* fineoffset_wh1050.c */; };
+		2D9CF5F524006F7300ED0753 /* generic_motion.c in Sources */ = {isa = PBXBuildFile; fileRef = 2D9CF58924006F7200ED0753 /* generic_motion.c */; };
+		2D9CF5F624006F7300ED0753 /* dish_remote_6_3.c in Sources */ = {isa = PBXBuildFile; fileRef = 2D9CF58A24006F7200ED0753 /* dish_remote_6_3.c */; };
+		2D9CF5F724006F7300ED0753 /* fineoffset.c in Sources */ = {isa = PBXBuildFile; fileRef = 2D9CF58B24006F7200ED0753 /* fineoffset.c */; };
+		2D9CF5F824006F7300ED0753 /* smoke_gs558.c in Sources */ = {isa = PBXBuildFile; fileRef = 2D9CF58C24006F7200ED0753 /* smoke_gs558.c */; };
+		2D9CF5F924006F7300ED0753 /* dsc.c in Sources */ = {isa = PBXBuildFile; fileRef = 2D9CF58D24006F7200ED0753 /* dsc.c */; };
+		2D9CF5FA24006F7300ED0753 /* lacrossews.c in Sources */ = {isa = PBXBuildFile; fileRef = 2D9CF58E24006F7200ED0753 /* lacrossews.c */; };
+		2D9CF5FB24006F7300ED0753 /* maverick_et73.c in Sources */ = {isa = PBXBuildFile; fileRef = 2D9CF58F24006F7200ED0753 /* maverick_et73.c */; };
+		2D9CF5FC24006F7300ED0753 /* proove.c in Sources */ = {isa = PBXBuildFile; fileRef = 2D9CF59024006F7200ED0753 /* proove.c */; };
+		2D9CF5FD24006F7300ED0753 /* philips.c in Sources */ = {isa = PBXBuildFile; fileRef = 2D9CF59124006F7200ED0753 /* philips.c */; };
+		2D9CF5FE24006F7300ED0753 /* hideki.c in Sources */ = {isa = PBXBuildFile; fileRef = 2D9CF59224006F7200ED0753 /* hideki.c */; };
+		2D9CF5FF24006F7300ED0753 /* steelmate.c in Sources */ = {isa = PBXBuildFile; fileRef = 2D9CF59324006F7200ED0753 /* steelmate.c */; };
+		2D9CF60024006F7300ED0753 /* wssensor.c in Sources */ = {isa = PBXBuildFile; fileRef = 2D9CF59424006F7200ED0753 /* wssensor.c */; };
+		2D9CF60124006F7300ED0753 /* wt450.c in Sources */ = {isa = PBXBuildFile; fileRef = 2D9CF59524006F7200ED0753 /* wt450.c */; };
+		2D9CF60224006F7300ED0753 /* acurite.c in Sources */ = {isa = PBXBuildFile; fileRef = 2D9CF59624006F7200ED0753 /* acurite.c */; };
+		2D9CF60324006F7300ED0753 /* lacrosse.c in Sources */ = {isa = PBXBuildFile; fileRef = 2D9CF59724006F7200ED0753 /* lacrosse.c */; };
+		2D9CF60424006F7300ED0753 /* s3318p.c in Sources */ = {isa = PBXBuildFile; fileRef = 2D9CF59824006F7200ED0753 /* s3318p.c */; };
+		2D9CF60524006F7300ED0753 /* lightwave_rf.c in Sources */ = {isa = PBXBuildFile; fileRef = 2D9CF59924006F7200ED0753 /* lightwave_rf.c */; };
+		2D9CF60624006F7300ED0753 /* vaillant_vrt340f.c in Sources */ = {isa = PBXBuildFile; fileRef = 2D9CF59A24006F7200ED0753 /* vaillant_vrt340f.c */; };
+		2D9CF60724006F7300ED0753 /* akhan_100F14.c in Sources */ = {isa = PBXBuildFile; fileRef = 2D9CF59B24006F7200ED0753 /* akhan_100F14.c */; };
+		2D9CF60824006F7300ED0753 /* oil_standard.c in Sources */ = {isa = PBXBuildFile; fileRef = 2D9CF59C24006F7200ED0753 /* oil_standard.c */; };
+		2D9CF60924006F7300ED0753 /* honeywell.c in Sources */ = {isa = PBXBuildFile; fileRef = 2D9CF59D24006F7200ED0753 /* honeywell.c */; };
+		2D9CF60A24006F7300ED0753 /* oregon_scientific_sl109h.c in Sources */ = {isa = PBXBuildFile; fileRef = 2D9CF59E24006F7200ED0753 /* oregon_scientific_sl109h.c */; };
+		2D9CF60B24006F7300ED0753 /* interlogix.c in Sources */ = {isa = PBXBuildFile; fileRef = 2D9CF59F24006F7200ED0753 /* interlogix.c */; };
+		2D9CF60C24006F7300ED0753 /* fordremote.c in Sources */ = {isa = PBXBuildFile; fileRef = 2D9CF5A024006F7200ED0753 /* fordremote.c */; };
+		2D9CF60D24006F7300ED0753 /* lacrosse_tx35.c in Sources */ = {isa = PBXBuildFile; fileRef = 2D9CF5A124006F7200ED0753 /* lacrosse_tx35.c */; };
+		2D9CF60E24006F7300ED0753 /* bt_rain.c in Sources */ = {isa = PBXBuildFile; fileRef = 2D9CF5A224006F7200ED0753 /* bt_rain.c */; };
+		2D9CF60F24006F7300ED0753 /* wt0124.c in Sources */ = {isa = PBXBuildFile; fileRef = 2D9CF5A324006F7200ED0753 /* wt0124.c */; };
+		2D9CF61024006F7300ED0753 /* danfoss.c in Sources */ = {isa = PBXBuildFile; fileRef = 2D9CF5A424006F7200ED0753 /* danfoss.c */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		2D9CF52124006F2900ED0753 /* CopyFiles */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = /usr/share/man/man1/;
+			dstSubfolderSpec = 0;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 1;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
+/* Begin PBXFileReference section */
+		2D9CF52324006F2900ED0753 /* rtl433 */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = rtl433; sourceTree = BUILT_PRODUCTS_DIR; };
+		2D9CF52E24006F7200ED0753 /* util.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = util.c; sourceTree = "<group>"; };
+		2D9CF52F24006F7200ED0753 /* pulse_demod.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = pulse_demod.h; sourceTree = "<group>"; };
+		2D9CF53024006F7200ED0753 /* decoder_util.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = decoder_util.c; sourceTree = "<group>"; };
+		2D9CF53124006F7200ED0753 /* data.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = data.h; sourceTree = "<group>"; };
+		2D9CF53224006F7200ED0753 /* decoder.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = decoder.h; sourceTree = "<group>"; };
+		2D9CF53324006F7200ED0753 /* rtl_433_devices.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = rtl_433_devices.h; sourceTree = "<group>"; };
+		2D9CF53424006F7200ED0753 /* pulse_detect.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = pulse_detect.h; sourceTree = "<group>"; };
+		2D9CF53524006F7200ED0753 /* alloc.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = alloc.c; sourceTree = "<group>"; };
+		2D9CF53624006F7200ED0753 /* bitbuffer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = bitbuffer.h; sourceTree = "<group>"; };
+		2D9CF53724006F7200ED0753 /* r_device.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = r_device.h; sourceTree = "<group>"; };
+		2D9CF53824006F7200ED0753 /* util.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = util.h; sourceTree = "<group>"; };
+		2D9CF53924006F7200ED0753 /* pulse_demod.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = pulse_demod.c; sourceTree = "<group>"; };
+		2D9CF53A24006F7200ED0753 /* data.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = data.c; sourceTree = "<group>"; };
+		2D9CF53B24006F7200ED0753 /* decoder_util.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = decoder_util.h; sourceTree = "<group>"; };
+		2D9CF53C24006F7200ED0753 /* main.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
+		2D9CF53D24006F7200ED0753 /* bitbuffer.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = bitbuffer.c; sourceTree = "<group>"; };
+		2D9CF53E24006F7200ED0753 /* alloc.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = alloc.h; sourceTree = "<group>"; };
+		2D9CF54024006F7200ED0753 /* efergy_e2_classic.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = efergy_e2_classic.c; sourceTree = "<group>"; };
+		2D9CF54124006F7200ED0753 /* hondaremote.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = hondaremote.c; sourceTree = "<group>"; };
+		2D9CF54224006F7200ED0753 /* springfield.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = springfield.c; sourceTree = "<group>"; };
+		2D9CF54324006F7200ED0753 /* thermopro_tp11.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = thermopro_tp11.c; sourceTree = "<group>"; };
+		2D9CF54424006F7200ED0753 /* kerui.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = kerui.c; sourceTree = "<group>"; };
+		2D9CF54524006F7200ED0753 /* solight_te44.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = solight_te44.c; sourceTree = "<group>"; };
+		2D9CF54624006F7200ED0753 /* fineoffset_wh1080.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = fineoffset_wh1080.c; sourceTree = "<group>"; };
+		2D9CF54724006F7200ED0753 /* tfa_pool_thermometer.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = tfa_pool_thermometer.c; sourceTree = "<group>"; };
+		2D9CF54824006F7200ED0753 /* gt_wt_02.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = gt_wt_02.c; sourceTree = "<group>"; };
+		2D9CF54924006F7200ED0753 /* nexus.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = nexus.c; sourceTree = "<group>"; };
+		2D9CF54A24006F7200ED0753 /* digitech_xc0324.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = digitech_xc0324.c; sourceTree = "<group>"; };
+		2D9CF54B24006F7200ED0753 /* oregon_scientific.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = oregon_scientific.c; sourceTree = "<group>"; };
+		2D9CF54C24006F7200ED0753 /* ttx201.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = ttx201.c; sourceTree = "<group>"; };
+		2D9CF54D24006F7200ED0753 /* nexa.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = nexa.c; sourceTree = "<group>"; };
+		2D9CF54E24006F7200ED0753 /* honeywell_wdb.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = honeywell_wdb.c; sourceTree = "<group>"; };
+		2D9CF54F24006F7200ED0753 /* infactory.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = infactory.c; sourceTree = "<group>"; };
+		2D9CF55024006F7200ED0753 /* elro_db286a.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = elro_db286a.c; sourceTree = "<group>"; };
+		2D9CF55124006F7200ED0753 /* alecto.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = alecto.c; sourceTree = "<group>"; };
+		2D9CF55224006F7200ED0753 /* ambientweather_tx8300.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = ambientweather_tx8300.c; sourceTree = "<group>"; };
+		2D9CF55324006F7200ED0753 /* tpms_ford.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = tpms_ford.c; sourceTree = "<group>"; };
+		2D9CF55424006F7200ED0753 /* radiohead_ask.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = radiohead_ask.c; sourceTree = "<group>"; };
+		2D9CF55524006F7200ED0753 /* x10_sec.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = x10_sec.c; sourceTree = "<group>"; };
+		2D9CF55624006F7200ED0753 /* tpms_citroen.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = tpms_citroen.c; sourceTree = "<group>"; };
+		2D9CF55724006F7200ED0753 /* elv.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = elv.c; sourceTree = "<group>"; };
+		2D9CF55824006F7200ED0753 /* tpms_pmv107j.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = tpms_pmv107j.c; sourceTree = "<group>"; };
+		2D9CF55924006F7200ED0753 /* waveman.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = waveman.c; sourceTree = "<group>"; };
+		2D9CF55A24006F7200ED0753 /* esa.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = esa.c; sourceTree = "<group>"; };
+		2D9CF55B24006F7200ED0753 /* ht680.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = ht680.c; sourceTree = "<group>"; };
+		2D9CF55C24006F7200ED0753 /* chuango.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = chuango.c; sourceTree = "<group>"; };
+		2D9CF55D24006F7200ED0753 /* thermopro_tp12.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = thermopro_tp12.c; sourceTree = "<group>"; };
+		2D9CF55E24006F7200ED0753 /* emontx.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = emontx.c; sourceTree = "<group>"; };
+		2D9CF55F24006F7200ED0753 /* brennenstuhl_rcs_2044.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = brennenstuhl_rcs_2044.c; sourceTree = "<group>"; };
+		2D9CF56024006F7200ED0753 /* oregon_scientific_v1.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = oregon_scientific_v1.c; sourceTree = "<group>"; };
+		2D9CF56124006F7200ED0753 /* intertechno.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = intertechno.c; sourceTree = "<group>"; };
+		2D9CF56224006F7200ED0753 /* kedsum.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = kedsum.c; sourceTree = "<group>"; };
+		2D9CF56324006F7200ED0753 /* quhwa.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = quhwa.c; sourceTree = "<group>"; };
+		2D9CF56424006F7200ED0753 /* esperanza_ews.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = esperanza_ews.c; sourceTree = "<group>"; };
+		2D9CF56524006F7200ED0753 /* ambientweather_wh31e.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = ambientweather_wh31e.c; sourceTree = "<group>"; };
+		2D9CF56624006F7200ED0753 /* maverick_et73x.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = maverick_et73x.c; sourceTree = "<group>"; };
+		2D9CF56724006F7200ED0753 /* x10_rf.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = x10_rf.c; sourceTree = "<group>"; };
+		2D9CF56824006F7200ED0753 /* ge_coloreffects.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = ge_coloreffects.c; sourceTree = "<group>"; };
+		2D9CF56924006F7200ED0753 /* current_cost.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = current_cost.c; sourceTree = "<group>"; };
+		2D9CF56A24006F7200ED0753 /* ft004b.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = ft004b.c; sourceTree = "<group>"; };
+		2D9CF56B24006F7200ED0753 /* simplisafe.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = simplisafe.c; sourceTree = "<group>"; };
+		2D9CF56C24006F7200ED0753 /* inovalley-kw9015b.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = "inovalley-kw9015b.c"; sourceTree = "<group>"; };
+		2D9CF56D24006F7200ED0753 /* ibis_beacon.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = ibis_beacon.c; sourceTree = "<group>"; };
+		2D9CF56E24006F7200ED0753 /* prologue.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = prologue.c; sourceTree = "<group>"; };
+		2D9CF56F24006F7200ED0753 /* lacrosse_TX141TH_Bv2.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = lacrosse_TX141TH_Bv2.c; sourceTree = "<group>"; };
+		2D9CF57024006F7200ED0753 /* silvercrest.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = silvercrest.c; sourceTree = "<group>"; };
+		2D9CF57124006F7200ED0753 /* tpms_renault.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = tpms_renault.c; sourceTree = "<group>"; };
+		2D9CF57224006F7200ED0753 /* schraeder.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = schraeder.c; sourceTree = "<group>"; };
+		2D9CF57324006F7200ED0753 /* tfa_twin_plus_30.3049.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = tfa_twin_plus_30.3049.c; sourceTree = "<group>"; };
+		2D9CF57424006F7200ED0753 /* bresser_3ch.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = bresser_3ch.c; sourceTree = "<group>"; };
+		2D9CF57524006F7200ED0753 /* new_template.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = new_template.c; sourceTree = "<group>"; };
+		2D9CF57624006F7200ED0753 /* efergy_optical.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = efergy_optical.c; sourceTree = "<group>"; };
+		2D9CF57724006F7200ED0753 /* newkaku.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = newkaku.c; sourceTree = "<group>"; };
+		2D9CF57824006F7200ED0753 /* blyss.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = blyss.c; sourceTree = "<group>"; };
+		2D9CF57924006F7200ED0753 /* oil_watchman.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = oil_watchman.c; sourceTree = "<group>"; };
+		2D9CF57A24006F7200ED0753 /* generic_temperature_sensor.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = generic_temperature_sensor.c; sourceTree = "<group>"; };
+		2D9CF57B24006F7200ED0753 /* calibeur.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = calibeur.c; sourceTree = "<group>"; };
+		2D9CF57C24006F7200ED0753 /* opus_xt300.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = opus_xt300.c; sourceTree = "<group>"; };
+		2D9CF57D24006F7200ED0753 /* cardin.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = cardin.c; sourceTree = "<group>"; };
+		2D9CF57E24006F7200ED0753 /* rftech.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = rftech.c; sourceTree = "<group>"; };
+		2D9CF57F24006F7200ED0753 /* wg_pb12v1.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = wg_pb12v1.c; sourceTree = "<group>"; };
+		2D9CF58024006F7200ED0753 /* ambient_weather.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = ambient_weather.c; sourceTree = "<group>"; };
+		2D9CF58124006F7200ED0753 /* m_bus.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = m_bus.c; sourceTree = "<group>"; };
+		2D9CF58224006F7200ED0753 /* flex.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = flex.c; sourceTree = "<group>"; };
+		2D9CF58324006F7200ED0753 /* mebus.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = mebus.c; sourceTree = "<group>"; };
+		2D9CF58424006F7200ED0753 /* bresser_5in1.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = bresser_5in1.c; sourceTree = "<group>"; };
+		2D9CF58524006F7200ED0753 /* tpms_toyota.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = tpms_toyota.c; sourceTree = "<group>"; };
+		2D9CF58624006F7200ED0753 /* generic_remote.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = generic_remote.c; sourceTree = "<group>"; };
+		2D9CF58724006F7200ED0753 /* rubicson.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = rubicson.c; sourceTree = "<group>"; };
+		2D9CF58824006F7200ED0753 /* fineoffset_wh1050.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = fineoffset_wh1050.c; sourceTree = "<group>"; };
+		2D9CF58924006F7200ED0753 /* generic_motion.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = generic_motion.c; sourceTree = "<group>"; };
+		2D9CF58A24006F7200ED0753 /* dish_remote_6_3.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = dish_remote_6_3.c; sourceTree = "<group>"; };
+		2D9CF58B24006F7200ED0753 /* fineoffset.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = fineoffset.c; sourceTree = "<group>"; };
+		2D9CF58C24006F7200ED0753 /* smoke_gs558.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = smoke_gs558.c; sourceTree = "<group>"; };
+		2D9CF58D24006F7200ED0753 /* dsc.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = dsc.c; sourceTree = "<group>"; };
+		2D9CF58E24006F7200ED0753 /* lacrossews.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = lacrossews.c; sourceTree = "<group>"; };
+		2D9CF58F24006F7200ED0753 /* maverick_et73.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = maverick_et73.c; sourceTree = "<group>"; };
+		2D9CF59024006F7200ED0753 /* proove.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = proove.c; sourceTree = "<group>"; };
+		2D9CF59124006F7200ED0753 /* philips.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = philips.c; sourceTree = "<group>"; };
+		2D9CF59224006F7200ED0753 /* hideki.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = hideki.c; sourceTree = "<group>"; };
+		2D9CF59324006F7200ED0753 /* steelmate.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = steelmate.c; sourceTree = "<group>"; };
+		2D9CF59424006F7200ED0753 /* wssensor.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = wssensor.c; sourceTree = "<group>"; };
+		2D9CF59524006F7200ED0753 /* wt450.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = wt450.c; sourceTree = "<group>"; };
+		2D9CF59624006F7200ED0753 /* acurite.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = acurite.c; sourceTree = "<group>"; };
+		2D9CF59724006F7200ED0753 /* lacrosse.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = lacrosse.c; sourceTree = "<group>"; };
+		2D9CF59824006F7200ED0753 /* s3318p.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = s3318p.c; sourceTree = "<group>"; };
+		2D9CF59924006F7200ED0753 /* lightwave_rf.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = lightwave_rf.c; sourceTree = "<group>"; };
+		2D9CF59A24006F7200ED0753 /* vaillant_vrt340f.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = vaillant_vrt340f.c; sourceTree = "<group>"; };
+		2D9CF59B24006F7200ED0753 /* akhan_100F14.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = akhan_100F14.c; sourceTree = "<group>"; };
+		2D9CF59C24006F7200ED0753 /* oil_standard.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = oil_standard.c; sourceTree = "<group>"; };
+		2D9CF59D24006F7200ED0753 /* honeywell.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = honeywell.c; sourceTree = "<group>"; };
+		2D9CF59E24006F7200ED0753 /* oregon_scientific_sl109h.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = oregon_scientific_sl109h.c; sourceTree = "<group>"; };
+		2D9CF59F24006F7200ED0753 /* interlogix.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = interlogix.c; sourceTree = "<group>"; };
+		2D9CF5A024006F7200ED0753 /* fordremote.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = fordremote.c; sourceTree = "<group>"; };
+		2D9CF5A124006F7200ED0753 /* lacrosse_tx35.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = lacrosse_tx35.c; sourceTree = "<group>"; };
+		2D9CF5A224006F7200ED0753 /* bt_rain.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = bt_rain.c; sourceTree = "<group>"; };
+		2D9CF5A324006F7200ED0753 /* wt0124.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = wt0124.c; sourceTree = "<group>"; };
+		2D9CF5A424006F7200ED0753 /* danfoss.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = danfoss.c; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		2D9CF52024006F2900ED0753 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		2D9CF51A24006F2900ED0753 = {
+			isa = PBXGroup;
+			children = (
+				2D9CF52D24006F7200ED0753 /* rtltest */,
+				2D9CF52424006F2900ED0753 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		2D9CF52424006F2900ED0753 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				2D9CF52324006F2900ED0753 /* rtl433 */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		2D9CF52D24006F7200ED0753 /* rtltest */ = {
+			isa = PBXGroup;
+			children = (
+				2D9CF52E24006F7200ED0753 /* util.c */,
+				2D9CF52F24006F7200ED0753 /* pulse_demod.h */,
+				2D9CF53024006F7200ED0753 /* decoder_util.c */,
+				2D9CF53124006F7200ED0753 /* data.h */,
+				2D9CF53224006F7200ED0753 /* decoder.h */,
+				2D9CF53324006F7200ED0753 /* rtl_433_devices.h */,
+				2D9CF53424006F7200ED0753 /* pulse_detect.h */,
+				2D9CF53524006F7200ED0753 /* alloc.c */,
+				2D9CF53624006F7200ED0753 /* bitbuffer.h */,
+				2D9CF53724006F7200ED0753 /* r_device.h */,
+				2D9CF53824006F7200ED0753 /* util.h */,
+				2D9CF53924006F7200ED0753 /* pulse_demod.c */,
+				2D9CF53A24006F7200ED0753 /* data.c */,
+				2D9CF53B24006F7200ED0753 /* decoder_util.h */,
+				2D9CF53C24006F7200ED0753 /* main.cpp */,
+				2D9CF53D24006F7200ED0753 /* bitbuffer.c */,
+				2D9CF53E24006F7200ED0753 /* alloc.h */,
+				2D9CF53F24006F7200ED0753 /* devices */,
+			);
+			path = rtltest;
+			sourceTree = "<group>";
+		};
+		2D9CF53F24006F7200ED0753 /* devices */ = {
+			isa = PBXGroup;
+			children = (
+				2D9CF54024006F7200ED0753 /* efergy_e2_classic.c */,
+				2D9CF54124006F7200ED0753 /* hondaremote.c */,
+				2D9CF54224006F7200ED0753 /* springfield.c */,
+				2D9CF54324006F7200ED0753 /* thermopro_tp11.c */,
+				2D9CF54424006F7200ED0753 /* kerui.c */,
+				2D9CF54524006F7200ED0753 /* solight_te44.c */,
+				2D9CF54624006F7200ED0753 /* fineoffset_wh1080.c */,
+				2D9CF54724006F7200ED0753 /* tfa_pool_thermometer.c */,
+				2D9CF54824006F7200ED0753 /* gt_wt_02.c */,
+				2D9CF54924006F7200ED0753 /* nexus.c */,
+				2D9CF54A24006F7200ED0753 /* digitech_xc0324.c */,
+				2D9CF54B24006F7200ED0753 /* oregon_scientific.c */,
+				2D9CF54C24006F7200ED0753 /* ttx201.c */,
+				2D9CF54D24006F7200ED0753 /* nexa.c */,
+				2D9CF54E24006F7200ED0753 /* honeywell_wdb.c */,
+				2D9CF54F24006F7200ED0753 /* infactory.c */,
+				2D9CF55024006F7200ED0753 /* elro_db286a.c */,
+				2D9CF55124006F7200ED0753 /* alecto.c */,
+				2D9CF55224006F7200ED0753 /* ambientweather_tx8300.c */,
+				2D9CF55324006F7200ED0753 /* tpms_ford.c */,
+				2D9CF55424006F7200ED0753 /* radiohead_ask.c */,
+				2D9CF55524006F7200ED0753 /* x10_sec.c */,
+				2D9CF55624006F7200ED0753 /* tpms_citroen.c */,
+				2D9CF55724006F7200ED0753 /* elv.c */,
+				2D9CF55824006F7200ED0753 /* tpms_pmv107j.c */,
+				2D9CF55924006F7200ED0753 /* waveman.c */,
+				2D9CF55A24006F7200ED0753 /* esa.c */,
+				2D9CF55B24006F7200ED0753 /* ht680.c */,
+				2D9CF55C24006F7200ED0753 /* chuango.c */,
+				2D9CF55D24006F7200ED0753 /* thermopro_tp12.c */,
+				2D9CF55E24006F7200ED0753 /* emontx.c */,
+				2D9CF55F24006F7200ED0753 /* brennenstuhl_rcs_2044.c */,
+				2D9CF56024006F7200ED0753 /* oregon_scientific_v1.c */,
+				2D9CF56124006F7200ED0753 /* intertechno.c */,
+				2D9CF56224006F7200ED0753 /* kedsum.c */,
+				2D9CF56324006F7200ED0753 /* quhwa.c */,
+				2D9CF56424006F7200ED0753 /* esperanza_ews.c */,
+				2D9CF56524006F7200ED0753 /* ambientweather_wh31e.c */,
+				2D9CF56624006F7200ED0753 /* maverick_et73x.c */,
+				2D9CF56724006F7200ED0753 /* x10_rf.c */,
+				2D9CF56824006F7200ED0753 /* ge_coloreffects.c */,
+				2D9CF56924006F7200ED0753 /* current_cost.c */,
+				2D9CF56A24006F7200ED0753 /* ft004b.c */,
+				2D9CF56B24006F7200ED0753 /* simplisafe.c */,
+				2D9CF56C24006F7200ED0753 /* inovalley-kw9015b.c */,
+				2D9CF56D24006F7200ED0753 /* ibis_beacon.c */,
+				2D9CF56E24006F7200ED0753 /* prologue.c */,
+				2D9CF56F24006F7200ED0753 /* lacrosse_TX141TH_Bv2.c */,
+				2D9CF57024006F7200ED0753 /* silvercrest.c */,
+				2D9CF57124006F7200ED0753 /* tpms_renault.c */,
+				2D9CF57224006F7200ED0753 /* schraeder.c */,
+				2D9CF57324006F7200ED0753 /* tfa_twin_plus_30.3049.c */,
+				2D9CF57424006F7200ED0753 /* bresser_3ch.c */,
+				2D9CF57524006F7200ED0753 /* new_template.c */,
+				2D9CF57624006F7200ED0753 /* efergy_optical.c */,
+				2D9CF57724006F7200ED0753 /* newkaku.c */,
+				2D9CF57824006F7200ED0753 /* blyss.c */,
+				2D9CF57924006F7200ED0753 /* oil_watchman.c */,
+				2D9CF57A24006F7200ED0753 /* generic_temperature_sensor.c */,
+				2D9CF57B24006F7200ED0753 /* calibeur.c */,
+				2D9CF57C24006F7200ED0753 /* opus_xt300.c */,
+				2D9CF57D24006F7200ED0753 /* cardin.c */,
+				2D9CF57E24006F7200ED0753 /* rftech.c */,
+				2D9CF57F24006F7200ED0753 /* wg_pb12v1.c */,
+				2D9CF58024006F7200ED0753 /* ambient_weather.c */,
+				2D9CF58124006F7200ED0753 /* m_bus.c */,
+				2D9CF58224006F7200ED0753 /* flex.c */,
+				2D9CF58324006F7200ED0753 /* mebus.c */,
+				2D9CF58424006F7200ED0753 /* bresser_5in1.c */,
+				2D9CF58524006F7200ED0753 /* tpms_toyota.c */,
+				2D9CF58624006F7200ED0753 /* generic_remote.c */,
+				2D9CF58724006F7200ED0753 /* rubicson.c */,
+				2D9CF58824006F7200ED0753 /* fineoffset_wh1050.c */,
+				2D9CF58924006F7200ED0753 /* generic_motion.c */,
+				2D9CF58A24006F7200ED0753 /* dish_remote_6_3.c */,
+				2D9CF58B24006F7200ED0753 /* fineoffset.c */,
+				2D9CF58C24006F7200ED0753 /* smoke_gs558.c */,
+				2D9CF58D24006F7200ED0753 /* dsc.c */,
+				2D9CF58E24006F7200ED0753 /* lacrossews.c */,
+				2D9CF58F24006F7200ED0753 /* maverick_et73.c */,
+				2D9CF59024006F7200ED0753 /* proove.c */,
+				2D9CF59124006F7200ED0753 /* philips.c */,
+				2D9CF59224006F7200ED0753 /* hideki.c */,
+				2D9CF59324006F7200ED0753 /* steelmate.c */,
+				2D9CF59424006F7200ED0753 /* wssensor.c */,
+				2D9CF59524006F7200ED0753 /* wt450.c */,
+				2D9CF59624006F7200ED0753 /* acurite.c */,
+				2D9CF59724006F7200ED0753 /* lacrosse.c */,
+				2D9CF59824006F7200ED0753 /* s3318p.c */,
+				2D9CF59924006F7200ED0753 /* lightwave_rf.c */,
+				2D9CF59A24006F7200ED0753 /* vaillant_vrt340f.c */,
+				2D9CF59B24006F7200ED0753 /* akhan_100F14.c */,
+				2D9CF59C24006F7200ED0753 /* oil_standard.c */,
+				2D9CF59D24006F7200ED0753 /* honeywell.c */,
+				2D9CF59E24006F7200ED0753 /* oregon_scientific_sl109h.c */,
+				2D9CF59F24006F7200ED0753 /* interlogix.c */,
+				2D9CF5A024006F7200ED0753 /* fordremote.c */,
+				2D9CF5A124006F7200ED0753 /* lacrosse_tx35.c */,
+				2D9CF5A224006F7200ED0753 /* bt_rain.c */,
+				2D9CF5A324006F7200ED0753 /* wt0124.c */,
+				2D9CF5A424006F7200ED0753 /* danfoss.c */,
+			);
+			path = devices;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		2D9CF52224006F2900ED0753 /* rtl433 */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 2D9CF52A24006F2900ED0753 /* Build configuration list for PBXNativeTarget "rtl433" */;
+			buildPhases = (
+				2D9CF51F24006F2900ED0753 /* Sources */,
+				2D9CF52024006F2900ED0753 /* Frameworks */,
+				2D9CF52124006F2900ED0753 /* CopyFiles */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = rtl433;
+			productName = rtl433;
+			productReference = 2D9CF52324006F2900ED0753 /* rtl433 */;
+			productType = "com.apple.product-type.tool";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		2D9CF51B24006F2900ED0753 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				LastUpgradeCheck = 1130;
+				ORGANIZATIONNAME = "Gabriel Valky";
+				TargetAttributes = {
+					2D9CF52224006F2900ED0753 = {
+						CreatedOnToolsVersion = 11.3;
+					};
+				};
+			};
+			buildConfigurationList = 2D9CF51E24006F2900ED0753 /* Build configuration list for PBXProject "rtl433" */;
+			compatibilityVersion = "Xcode 9.3";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = 2D9CF51A24006F2900ED0753;
+			productRefGroup = 2D9CF52424006F2900ED0753 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				2D9CF52224006F2900ED0753 /* rtl433 */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXSourcesBuildPhase section */
+		2D9CF51F24006F2900ED0753 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				2D9CF5CF24006F7300ED0753 /* quhwa.c in Sources */,
+				2D9CF5FD24006F7300ED0753 /* philips.c in Sources */,
+				2D9CF5C324006F7300ED0753 /* elv.c in Sources */,
+				2D9CF5BE24006F7300ED0753 /* ambientweather_tx8300.c in Sources */,
+				2D9CF5C724006F7300ED0753 /* ht680.c in Sources */,
+				2D9CF60524006F7300ED0753 /* lightwave_rf.c in Sources */,
+				2D9CF5DC24006F7300ED0753 /* silvercrest.c in Sources */,
+				2D9CF5E424006F7300ED0753 /* blyss.c in Sources */,
+				2D9CF5B824006F7300ED0753 /* ttx201.c in Sources */,
+				2D9CF5DF24006F7300ED0753 /* tfa_twin_plus_30.3049.c in Sources */,
+				2D9CF60824006F7300ED0753 /* oil_standard.c in Sources */,
+				2D9CF5B624006F7300ED0753 /* digitech_xc0324.c in Sources */,
+				2D9CF5CB24006F7300ED0753 /* brennenstuhl_rcs_2044.c in Sources */,
+				2D9CF5FA24006F7300ED0753 /* lacrossews.c in Sources */,
+				2D9CF5FC24006F7300ED0753 /* proove.c in Sources */,
+				2D9CF61024006F7300ED0753 /* danfoss.c in Sources */,
+				2D9CF60D24006F7300ED0753 /* lacrosse_tx35.c in Sources */,
+				2D9CF5E824006F7300ED0753 /* opus_xt300.c in Sources */,
+				2D9CF5E324006F7300ED0753 /* newkaku.c in Sources */,
+				2D9CF5B024006F7300ED0753 /* kerui.c in Sources */,
+				2D9CF60A24006F7300ED0753 /* oregon_scientific_sl109h.c in Sources */,
+				2D9CF5CC24006F7300ED0753 /* oregon_scientific_v1.c in Sources */,
+				2D9CF5B424006F7300ED0753 /* gt_wt_02.c in Sources */,
+				2D9CF60E24006F7300ED0753 /* bt_rain.c in Sources */,
+				2D9CF5A924006F7300ED0753 /* data.c in Sources */,
+				2D9CF5ED24006F7300ED0753 /* m_bus.c in Sources */,
+				2D9CF60124006F7300ED0753 /* wt450.c in Sources */,
+				2D9CF5E524006F7300ED0753 /* oil_watchman.c in Sources */,
+				2D9CF5B724006F7300ED0753 /* oregon_scientific.c in Sources */,
+				2D9CF5BC24006F7300ED0753 /* elro_db286a.c in Sources */,
+				2D9CF60724006F7300ED0753 /* akhan_100F14.c in Sources */,
+				2D9CF5D524006F7300ED0753 /* current_cost.c in Sources */,
+				2D9CF5D224006F7300ED0753 /* maverick_et73x.c in Sources */,
+				2D9CF5B924006F7300ED0753 /* nexa.c in Sources */,
+				2D9CF5BA24006F7300ED0753 /* honeywell_wdb.c in Sources */,
+				2D9CF5F024006F7300ED0753 /* bresser_5in1.c in Sources */,
+				2D9CF5B224006F7300ED0753 /* fineoffset_wh1080.c in Sources */,
+				2D9CF5E224006F7300ED0753 /* efergy_optical.c in Sources */,
+				2D9CF5F824006F7300ED0753 /* smoke_gs558.c in Sources */,
+				2D9CF5EF24006F7300ED0753 /* mebus.c in Sources */,
+				2D9CF5C024006F7300ED0753 /* radiohead_ask.c in Sources */,
+				2D9CF5E124006F7300ED0753 /* new_template.c in Sources */,
+				2D9CF5CE24006F7300ED0753 /* kedsum.c in Sources */,
+				2D9CF5BB24006F7300ED0753 /* infactory.c in Sources */,
+				2D9CF5FF24006F7300ED0753 /* steelmate.c in Sources */,
+				2D9CF5FE24006F7300ED0753 /* hideki.c in Sources */,
+				2D9CF5F724006F7300ED0753 /* fineoffset.c in Sources */,
+				2D9CF60224006F7300ED0753 /* acurite.c in Sources */,
+				2D9CF5D624006F7300ED0753 /* ft004b.c in Sources */,
+				2D9CF5D124006F7300ED0753 /* ambientweather_wh31e.c in Sources */,
+				2D9CF5E024006F7300ED0753 /* bresser_3ch.c in Sources */,
+				2D9CF5AD24006F7300ED0753 /* hondaremote.c in Sources */,
+				2D9CF5CA24006F7300ED0753 /* emontx.c in Sources */,
+				2D9CF60624006F7300ED0753 /* vaillant_vrt340f.c in Sources */,
+				2D9CF5A724006F7300ED0753 /* alloc.c in Sources */,
+				2D9CF5F924006F7300ED0753 /* dsc.c in Sources */,
+				2D9CF5AA24006F7300ED0753 /* main.cpp in Sources */,
+				2D9CF5DB24006F7300ED0753 /* lacrosse_TX141TH_Bv2.c in Sources */,
+				2D9CF5E624006F7300ED0753 /* generic_temperature_sensor.c in Sources */,
+				2D9CF60324006F7300ED0753 /* lacrosse.c in Sources */,
+				2D9CF5D324006F7300ED0753 /* x10_rf.c in Sources */,
+				2D9CF5B524006F7300ED0753 /* nexus.c in Sources */,
+				2D9CF5A624006F7300ED0753 /* decoder_util.c in Sources */,
+				2D9CF5F124006F7300ED0753 /* tpms_toyota.c in Sources */,
+				2D9CF5EA24006F7300ED0753 /* rftech.c in Sources */,
+				2D9CF60024006F7300ED0753 /* wssensor.c in Sources */,
+				2D9CF5D424006F7300ED0753 /* ge_coloreffects.c in Sources */,
+				2D9CF5D824006F7300ED0753 /* inovalley-kw9015b.c in Sources */,
+				2D9CF60F24006F7300ED0753 /* wt0124.c in Sources */,
+				2D9CF5C924006F7300ED0753 /* thermopro_tp12.c in Sources */,
+				2D9CF5F624006F7300ED0753 /* dish_remote_6_3.c in Sources */,
+				2D9CF5AB24006F7300ED0753 /* bitbuffer.c in Sources */,
+				2D9CF5EB24006F7300ED0753 /* wg_pb12v1.c in Sources */,
+				2D9CF5AC24006F7300ED0753 /* efergy_e2_classic.c in Sources */,
+				2D9CF5A524006F7300ED0753 /* util.c in Sources */,
+				2D9CF5EC24006F7300ED0753 /* ambient_weather.c in Sources */,
+				2D9CF5BD24006F7300ED0753 /* alecto.c in Sources */,
+				2D9CF5C524006F7300ED0753 /* waveman.c in Sources */,
+				2D9CF5D024006F7300ED0753 /* esperanza_ews.c in Sources */,
+				2D9CF5F324006F7300ED0753 /* rubicson.c in Sources */,
+				2D9CF5C424006F7300ED0753 /* tpms_pmv107j.c in Sources */,
+				2D9CF5CD24006F7300ED0753 /* intertechno.c in Sources */,
+				2D9CF5C224006F7300ED0753 /* tpms_citroen.c in Sources */,
+				2D9CF60424006F7300ED0753 /* s3318p.c in Sources */,
+				2D9CF5C824006F7300ED0753 /* chuango.c in Sources */,
+				2D9CF5DE24006F7300ED0753 /* schraeder.c in Sources */,
+				2D9CF5F224006F7300ED0753 /* generic_remote.c in Sources */,
+				2D9CF5F424006F7300ED0753 /* fineoffset_wh1050.c in Sources */,
+				2D9CF5B124006F7300ED0753 /* solight_te44.c in Sources */,
+				2D9CF60B24006F7300ED0753 /* interlogix.c in Sources */,
+				2D9CF5D724006F7300ED0753 /* simplisafe.c in Sources */,
+				2D9CF5E924006F7300ED0753 /* cardin.c in Sources */,
+				2D9CF60924006F7300ED0753 /* honeywell.c in Sources */,
+				2D9CF5C124006F7300ED0753 /* x10_sec.c in Sources */,
+				2D9CF5F524006F7300ED0753 /* generic_motion.c in Sources */,
+				2D9CF60C24006F7300ED0753 /* fordremote.c in Sources */,
+				2D9CF5AF24006F7300ED0753 /* thermopro_tp11.c in Sources */,
+				2D9CF5DD24006F7300ED0753 /* tpms_renault.c in Sources */,
+				2D9CF5B324006F7300ED0753 /* tfa_pool_thermometer.c in Sources */,
+				2D9CF5E724006F7300ED0753 /* calibeur.c in Sources */,
+				2D9CF5FB24006F7300ED0753 /* maverick_et73.c in Sources */,
+				2D9CF5DA24006F7300ED0753 /* prologue.c in Sources */,
+				2D9CF5A824006F7300ED0753 /* pulse_demod.c in Sources */,
+				2D9CF5D924006F7300ED0753 /* ibis_beacon.c in Sources */,
+				2D9CF5AE24006F7300ED0753 /* springfield.c in Sources */,
+				2D9CF5BF24006F7300ED0753 /* tpms_ford.c in Sources */,
+				2D9CF5C624006F7300ED0753 /* esa.c in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		2D9CF52824006F2900ED0753 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 10.15;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = macosx;
+			};
+			name = Debug;
+		};
+		2D9CF52924006F2900ED0753 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 10.15;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				SDKROOT = macosx;
+			};
+			name = Release;
+		};
+		2D9CF52B24006F2900ED0753 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Debug;
+		};
+		2D9CF52C24006F2900ED0753 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		2D9CF51E24006F2900ED0753 /* Build configuration list for PBXProject "rtl433" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				2D9CF52824006F2900ED0753 /* Debug */,
+				2D9CF52924006F2900ED0753 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		2D9CF52A24006F2900ED0753 /* Build configuration list for PBXNativeTarget "rtl433" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				2D9CF52B24006F2900ED0753 /* Debug */,
+				2D9CF52C24006F2900ED0753 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 2D9CF51B24006F2900ED0753 /* Project object */;
+}

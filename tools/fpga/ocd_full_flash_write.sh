@@ -1,0 +1,1 @@
+openocd -f /usr/local/share/openocd/scripts/interface/stlink.cfg -f /usr/local/share/openocd/scripts/target/stm32f1x.cfg -c init -c halt -c "flash erase_sector 0 0 last" -c reset -c halt -c "flash write_bank 0 gabo_full_flash" -c reset

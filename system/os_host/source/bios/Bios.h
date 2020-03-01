@@ -15,7 +15,8 @@ namespace BIOS
     enum class EAttribute {BiosVersion, CharRom, LastChar, ScreenWidth, ScreenHeight, DeviceType,
       BuildRevision, BuildDate, BuildUser, BuildSystem, 
       VersionDfu, VersionHardware, VersionSystem, VersionFpga,
-      SerialNumber, DisplayType, DiskType};
+      SerialNumber, LicenseNumber, LicenseValid, DisplayType, DiskType,
+      DiskSectorSize, DiskSectorCount};
 
     uintptr_t GetAttribute(EAttribute eInternal);
   }

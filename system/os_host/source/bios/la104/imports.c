@@ -93,6 +93,19 @@ enum
     EXT_TXD, // ??? PIO ???     Var: PIOCFG+PinDef      Rtn: SUCC
 };
 
+enum
+{
+    PRDT_SN, //    8c33b088
+    PRODUCT, //    LA104
+    PRDTNUM, //    0104
+    HDW_VER, //    1.5B
+    MCU_TYP, //    STM32F103VC
+    DFU_VER, //    V3.61D
+    OEM_NUM, //    X
+    MANUFAC, //    e-Design
+    LICENCE, //    1
+};
+
 #define INIT            0xFFFF0000
 #define ENBL 1
 #define DSBL            0
@@ -370,4 +383,22 @@ uint16_t FPGA16(uint8_t Cmd, uint16_t Cnt, uint16_t Data)
   Temp |= *SpiByte;
 
   return Temp;
+}
+
+uintptr_t GetAttribute(enum EAttribute attribute)
+{
+  switch (attribute)
+  {
+    case DeviceType: return (uintptr_t)"LA104";
+    case VersionDfu: return (uintptr_t)(char*)__Bios(SYSINFO, DFU_VER);
+    case VersionHardware: return (uintptr_t)(char*)__Bios(SYSINFO, HDW_VER);
+    case VersionSystem: return (uintptr_t)(char*)__Bios(SYSINFO, PRODUCT);
+    case VersionFpga: return (uintptr_t)(char*)0;
+    case SerialNumber: return (uintptr_t)(uint32_t)__Bios(SYSINFO, PRDT_SN);
+    case LicenseNumber: return (uintptr_t)0;
+    case LicenseValid: return (uintptr_t)0;
+    case DisplayType: return (uintptr_t)(char*)"ili9314";
+    case DiskType: return (uintptr_t)0;
+    default: return 0;
+  }
 }

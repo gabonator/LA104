@@ -151,3 +151,21 @@ bool ExtFlashDataRd(uint8_t* pBuffer, uint32_t ReadAddr, uint16_t Length)
   __ReadDiskData(pBuffer, ReadAddr, Length);
   return 1;
 }
+
+uintptr_t GetAttribute(enum EAttribute attribute)
+{
+  switch (attribute)
+  {
+    case DeviceType: return (uintptr_t)"DS203";
+    case VersionDfu: return (uintptr_t)(char*)__Get(DFUVER, 0);
+    case VersionHardware: return (uintptr_t)(char*)__Get(HDWVER, 0);
+    case VersionSystem: return (uintptr_t)(char*)__Get(SYSVER, 0);
+    case VersionFpga: return (uintptr_t)(char*)__Get(FPGAVER, 0);
+    case SerialNumber: return (uintptr_t)(uint32_t)__GetDev_SN();
+    case LicenseNumber: return (uintptr_t)0;
+    case LicenseValid: return (uintptr_t)0;
+    case DisplayType: return (uintptr_t)0;
+    case DiskType: return (uintptr_t)0;
+    default: return 0;
+  }
+}

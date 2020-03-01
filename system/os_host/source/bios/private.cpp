@@ -1,5 +1,9 @@
 #include "Bios.h"
 
+#include "imports.h"
+
+static_assert((int)BIOS::SYS::EAttribute::DiskSectorCount == (int)EAttribute::DiskSectorCount);
+
 //extern const unsigned char font[256*14];
 //extern const unsigned char* font;
 extern const void* ptrFont;
@@ -10,48 +14,42 @@ namespace BIOS
 {
   namespace SYS
   {
-    char* GetDeviceType()
+    uintptr_t GetAttribute(EAttribute attribute)
     {
-    #ifdef LA104
-      return (char*)"LA104";
-    #elif defined(DS213)
-      return (char*)"DS213";
-    #elif defined(DS203)
-      return (char*)"DS203";
-    #endif
-      return nullptr;
-    }
-
-    uintptr_t GetAttribute(EAttribute EAttribute)
-    {
-      switch (EAttribute)
+      switch (attribute)
       {
-        case EAttribute::BiosVersion: return 0x0101;
+        case EAttribute::BiosVersion: return 0x0102;
 
         case EAttribute::CharRom: return (uintptr_t)ptrFont;
         case EAttribute::LastChar: return (uintptr_t)&lastChar;
         case EAttribute::ScreenWidth: return BIOS::LCD::Width;
         case EAttribute::ScreenHeight: return BIOS::LCD::Height;
 
-        case EAttribute::DeviceType: return (uintptr_t)GetDeviceType();
-
+        case EAttribute::DeviceType: return (uintptr_t)::GetAttribute((::EAttribute)attribute);
 
         case EAttribute::BuildRevision: return (uintptr_t)__GITREVISION__;
         case EAttribute::BuildDate: return (uintptr_t)(__DATE__ " " __TIME__); 
         case EAttribute::BuildUser: return (uintptr_t)__USER__;
         case EAttribute::BuildSystem: return (uintptr_t)__OSTYPE__;
 
-        case EAttribute::VersionDfu: return (uintptr_t)nullptr;
-        case EAttribute::VersionHardware: return (uintptr_t)nullptr;
-        case EAttribute::VersionSystem: return (uintptr_t)nullptr;
-        case EAttribute::VersionFpga: return (uintptr_t)nullptr;
+        case EAttribute::VersionDfu:
+        case EAttribute::VersionHardware:
+        case EAttribute::VersionSystem:
+        case EAttribute::VersionFpga:
 
-        case EAttribute::SerialNumber: return (uintptr_t)nullptr;
-        case EAttribute::DisplayType: return (uintptr_t)nullptr;
-        case EAttribute::DiskType: return (uintptr_t)nullptr;
+        case EAttribute::SerialNumber:
+        case EAttribute::LicenseNumber:
+        case EAttribute::LicenseValid:
+        case EAttribute::DisplayType:
+        case EAttribute::DiskType:
+          return (uintptr_t)::GetAttribute((::EAttribute)attribute);
+
+        case EAttribute::DiskSectorSize: return BIOS::FAT::SectorSize;
+        case EAttribute::DiskSectorCount: return BIOS::FAT::SectorCount;
+        default:
+          _ASSERT(0);
+          return (uintptr_t)nullptr;
       }
-      _ASSERT(0);
-      return 0;
     }
   }
 }

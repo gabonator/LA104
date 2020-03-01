@@ -1,5 +1,4 @@
-#include <stdint.h>
-#include <stdbool.h>
+#include "../imports.h"
 #include "library/STM32F10x_StdPeriph_Driver/inc/misc.h"
 #include "DS213HwDriver.h"
 
@@ -8,7 +7,6 @@
 HwDrvDef  Hw;
 
 void Delay_mS(uint32_t mS);
-
 
 extern void (* g_pfnVectors[76])(void);
                  
@@ -198,4 +196,22 @@ bool ExtFlashDataRd(uint8_t* pBuffer, uint32_t ReadAddr, uint16_t Length)
   // TODO: Interruption not handled properly!
   Hw.pSpiFlashRead((uint32_t)pBuffer, ReadAddr, _SEC_SIZE);
   return 1;
+}
+
+uintptr_t GetAttribute(enum EAttribute attribute)
+{
+  switch (attribute)
+  {
+    case DeviceType: return (uintptr_t)"DS213";
+    case VersionDfu: return (uintptr_t)(char*)Hw.pDfuVerStr;
+    case VersionHardware: return (uintptr_t)(char*)Hw.pHwVerStr;
+    case VersionSystem: return (uintptr_t)(char*)Hw.pProductStr;
+    case VersionFpga: return (uintptr_t)(char*)Hw.pFpgaTypStr;
+    case SerialNumber: return (uintptr_t)(uint32_t)Hw.ProductSN;
+    case LicenseNumber: return (uintptr_t)(uint32_t) Hw.GetLicence;
+    case LicenseValid: return (uintptr_t)(uint32_t) Hw.LicenceOk;
+    case DisplayType: return (uintptr_t)(uint32_t)Hw.pLcdcTypStr;
+    case DiskType: return (uintptr_t)(uint32_t)Hw.pDiskTypStr;
+    default: return 0;
+  }
 }
