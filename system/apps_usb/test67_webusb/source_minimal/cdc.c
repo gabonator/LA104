@@ -117,7 +117,8 @@ cdcacm_comm_cb(
   usbd_device *usbd_dev,
   uint8_t ep __attribute__((unused))) 
 {
-  cdc_sending = false;
+// TODO: toto tu nema byt!!!
+//  cdc_sending = false;
 }
 
 /*

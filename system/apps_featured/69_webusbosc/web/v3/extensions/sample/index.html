@@ -1,0 +1,53 @@
+<canvas id="canvas" width="400" height="100" style="border: 1px solid #d0d0d0;"></canvas>
+
+<script>
+class Preview
+{
+  constructor(id)
+  {
+    this.elem = document.querySelector(id);
+    this.width = this.elem.width;
+    this.height = this.elem.height;
+    this.ctx = this.elem.getContext("2d");
+  }
+
+  clear()
+  {
+    this.elem.width = this.elem.width;
+  }
+
+  drawPoly(p, c, w)
+  {
+    this.ctx.strokeStyle = c;
+    this.ctx.lineJoin="round";
+    this.ctx.lineWidth = w ? w : 1;
+    this.ctx.beginPath();
+
+    this.ctx.moveTo(p[0].x, p[0].y);
+    for (var i=0; i<p.length; i++)
+      this.ctx.lineTo(p[i].x, p[i].y);
+    this.ctx.stroke();
+  }
+}
+
+var preview = new Preview("#canvas");
+
+window.document.addEventListener('OscDataChanged', (e) => { 
+  var data1 = e.detail.wave[0];
+  var data2 = e.detail.wave[1];
+  var trigger = e.detail.trigThreshold;
+  var ypos = y => preview.height-y*preview.height/256;
+  var points1 = [], points2 = [];
+  var l = data1.length;
+  for (var i=0; i<l; i++)
+  {
+    points1.push({x:i/l*preview.width, y:ypos(data1[i])});
+    points2.push({x:i/l*preview.width, y:ypos(data2[i])});
+  }
+  preview.clear();
+  preview.drawPoly([{x:0, y:ypos(trigger)}, {x:preview.width, y:ypos(trigger)}], "#d0d0d0");
+  preview.drawPoly(points1, "#b00000");
+  preview.drawPoly(points2, "#0000b0");
+}, false);
+
+</script>

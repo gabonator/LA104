@@ -20,6 +20,12 @@ extern "C"
     KeyF4 = 1<<3
   };
 
+  enum EAttribute {BiosVersion, CharRom, LastChar, ScreenWidth, ScreenHeight, DeviceType,
+    BuildRevision, BuildDate, BuildUser, BuildSystem, 
+    VersionDfu, VersionHardware, VersionSystem, VersionFpga,
+    SerialNumber, LicenseNumber, LicenseValid, DisplayType, DiskType,
+    DiskSectorSize, DiskSectorCount};
+
   void Set_Posi(uint_fast16_t x, uint_fast16_t y);
   void Set_Pixel(uint_fast16_t Color);
 
@@ -40,6 +46,7 @@ extern "C"
 
   uint32_t FPGA32(uint8_t Cmd, uint16_t Cnt, uint32_t Data);
   uint16_t FPGA16(uint8_t Cmd, uint16_t Cnt, uint16_t Data);
+  uintptr_t GetAttribute(enum EAttribute attr);
 
 #ifdef __cplusplus
 }

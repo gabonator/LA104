@@ -1,0 +1,23 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "GDB",
+            "type": "cortex-debug",
+            "servertype":"openocd",
+            "configFiles": ["/usr/local/share/openocd/scripts/interface/stlink.cfg",
+            "/usr/local/share/openocd/scripts/target/stm32f1x.cfg"],
+            "request": "launch",
+            "cwd": "${workspaceRoot}",
+            "executable": "${workspaceRoot}/build/output.elf",
+            "gdbpath" : "/Users/gabrielvalky/Downloads/gcc-arm-none-eabi-7-2018-q2-update/bin/arm-none-eabi-gdb",
+            "autorun": [
+                "target remote localhost:3333",
+                "symbol-file ./${workspaceRoot}/build/61devin.elf",
+                "monitor reset"
+                ]
+        }    ]
+}

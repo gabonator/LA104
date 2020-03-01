@@ -1,0 +1,1 @@
+converts binary file into ELF file which loads the binary blob onto specific address when executed. Useful when flashing fpga image
