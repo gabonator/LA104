@@ -1,4 +1,4 @@
-#ifdef DS203
+#if defined(DS203) || defined(DS213)
 
 #include <library.h>
 #include "SPI.h"
@@ -43,32 +43,41 @@ void CSPI::dmaSendAsync(uint8_t* stream, int len)
   #define DELAYS() __asm__("nop"); __asm__("nop"); __asm__("nop");
 
   BIOS::OS::DisableInterrupts();
+#ifdef DS203
   uint32_t destptr[2] = {0x40010C14, 0x40010C10};
+  //constexpr int pin = 6;
+  #define pin 6
+#endif
+#ifdef DS213
+  uint32_t destptr[2] = {0x40010814, 0x40010810};
+//  constexpr int pin = 2;
+  #define pin 2
+#endif
   while (len--)
   {
     int v = *stream++;
-    *((volatile uint32_t*)destptr[v&1]) = 1<<6;
+    *((volatile uint32_t*)destptr[v&1]) = 1<<pin;
     v>>=1;
     DELAY();
-    *((volatile uint32_t*)destptr[v&1]) = 1<<6;
+    *((volatile uint32_t*)destptr[v&1]) = 1<<pin;
     v>>=1;
     DELAY();
-    *((volatile uint32_t*)destptr[v&1]) = 1<<6;
+    *((volatile uint32_t*)destptr[v&1]) = 1<<pin;
     v>>=1;
     DELAY();
-    *((volatile uint32_t*)destptr[v&1]) = 1<<6;
+    *((volatile uint32_t*)destptr[v&1]) = 1<<pin;
     v>>=1;
     DELAY();
-    *((volatile uint32_t*)destptr[v&1]) = 1<<6;
+    *((volatile uint32_t*)destptr[v&1]) = 1<<pin;
     v>>=1;
     DELAY();
-    *((volatile uint32_t*)destptr[v&1]) = 1<<6;
+    *((volatile uint32_t*)destptr[v&1]) = 1<<pin;
     v>>=1;
     DELAY();
-    *((volatile uint32_t*)destptr[v&1]) = 1<<6;
+    *((volatile uint32_t*)destptr[v&1]) = 1<<pin;
     v>>=1;
     DELAY();
-    *((volatile uint32_t*)destptr[v&1]) = 1<<6;
+    *((volatile uint32_t*)destptr[v&1]) = 1<<pin;
     DELAYS();
   }
   BIOS::OS::EnableInterrupts(0);

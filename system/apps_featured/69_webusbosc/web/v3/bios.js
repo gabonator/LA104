@@ -115,10 +115,11 @@ var OSC = {
 
 var GEN =
 {
+  Enums: {"off":0, "square":1, "buffer":2, "logicHigh":3, "logicLow":4},
   SetFrequency: (freq) => BIOS.rpcCall('GEN::SetFrequency('+freq+');'),
   GetFrequency: () => BIOS.rpcCall('GEN::GetFrequency();').then( json => BIOS.retval(json) ),
   SetDuty: (duty) => BIOS.rpcCall('GEN::SetDuty('+duty+');'),
-  SetWave: (ptr, len) => BIOS.rpcCall('GEN::SetWave('+ptr+','+len+');'),
+  SetMode: (mode, ptr, len) => BIOS.rpcCall('GEN::SetMode('+mode+','+ptr+','+len+');'),
 };
 
 var BIOS =

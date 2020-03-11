@@ -100,21 +100,11 @@ namespace BIOS
   {
     uint32_t SetParam(int attribute, int value)
     {
+      _ASSERT(0);
       return 0;
     }
   }
 #endif
-
-  namespace DAC
-  {
-    void SetWave(uint16_t* buffer, int length)
-    {
-      if (buffer)
-        BIOS::DAC::SetMode(BIOS::DAC::EMode::Buffer, buffer, length);
-      else 
-        BIOS::DAC::SetMode(BIOS::DAC::EMode::Square, nullptr, 0);
-    }
-  }
 
   namespace ADC
   {
