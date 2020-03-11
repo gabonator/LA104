@@ -1,8 +1,10 @@
 #include "streamer/streamer.h"
 
-#if !defined(EMULATED) && defined(DS203)
+#if !defined(EMULATED) 
+
 namespace BIOS
 {
+#if defined(DS203)
   namespace LOW
   {
     enum {
@@ -93,6 +95,15 @@ namespace BIOS
       }
     }
   }
+#else
+  namespace LOW
+  {
+    uint32_t SetParam(int attribute, int value)
+    {
+      return 0;
+    }
+  }
+#endif
 
   namespace DAC
   {
@@ -174,7 +185,7 @@ namespace BIOS
       return BIOS::ADC::Ready();
     }
 
-    void ConfigureTrigger2(int time, int value, ETriggerType type, EInput source)
+    void ConfigureTrigger2(int time, int value, BIOS::ADC::ETriggerType type, BIOS::ADC::EInput source)
     {
       if ((int)type == (int)BIOS::ADC::ETriggerType::None+1)
       {

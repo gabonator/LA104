@@ -1,6 +1,12 @@
 #pragma once
 #include "Serialize.h"
 
+#if defined(DS203) || defined(DS213) || defined(LA104)
+#define BufferSectorSize BIOS::FAT::SectorSize
+#else
+#define BufferSectorSize (int)BIOS::SYS::GetAttribute(BIOS::SYS::EAttribute::DiskSectorSize)
+#endif
+
 class CBufferedReader : public CSerialize
 {
 	ui8* m_pData;
@@ -34,9 +40,9 @@ public:
         for ( i = 0; i < maxLength-1; )
         {
             str[i] = m_pData[m_nOffset++];
-            if ( m_nOffset == BIOS::FAT::SectorSize )
+            if ( m_nOffset == BufferSectorSize )
             {
-		m_nSectorOffset += BIOS::FAT::SectorSize;
+		m_nSectorOffset += BufferSectorSize;
                 m_nOffset = 0; // TODO: nemame skutocny offset
                 BIOS::FAT::EResult eResult = BIOS::FAT::Read( m_pData );
                 _ASSERT( eResult == BIOS::FAT::EOk );
@@ -94,10 +100,10 @@ public:
 		for (int i = 0; i < stream.GetLength(); i++ )
 		{
 			stream[i] = m_pData[m_nOffset++];
-			if ( m_nOffset == BIOS::FAT::SectorSize )
+			if ( m_nOffset == BufferSectorSize )
 			{
 				m_nOffset = 0;
-				m_nSectorOffset += BIOS::FAT::SectorSize;
+				m_nSectorOffset += BufferSectorSize;
 				BIOS::FAT::EResult eResult = BIOS::FAT::Read( m_pData );
 				_ASSERT( eResult == BIOS::FAT::EOk );
 			}
@@ -107,7 +113,7 @@ public:
 
 	void Seek(ui32 lOffset)
 	{
-	        m_nOffset = lOffset % BIOS::FAT::SectorSize;
+	        m_nOffset = lOffset % BufferSectorSize;
 		lOffset -= m_nOffset;
 
 	        if ((int)lOffset != m_nSectorOffset)
@@ -205,13 +211,13 @@ public:
 		for (int i = 0; i < stream.GetLength(); i++ )
 		{
 			m_pData[m_nOffset++] = stream[i];
-			if ( m_nOffset == BIOS::FAT::SectorSize )
+			if ( m_nOffset == BufferSectorSize )
 			{
 				m_nOffset = 0;
 				BIOS::FAT::EResult eResult = BIOS::FAT::Write( m_pData );
 				_ASSERT( eResult == BIOS::FAT::EOk );
 #ifdef _WIN32
-				memset( m_pData, 0x20, BIOS::FAT::SectorSize );
+				memset( m_pData, 0x20, BufferSectorSize );
 #endif
 			}
 		}
