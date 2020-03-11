@@ -31,7 +31,7 @@ namespace RPC
       return (uint32_t)BIOS::GPIO::DigitalRead;
 #endif
 
-#if defined(DS203)
+#if defined(DS203) || defined(DS213)
     // Oscilloscope
     if (strcmp(command, "OSC::Enable")==0)
       return (uint32_t)BIOS::ADC::Enable;  // malo by zavolat aj reset!
