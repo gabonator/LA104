@@ -2,7 +2,7 @@
   {
     promises.push(() => 
       Promise.resolve()
-      .then( ()=>GEN.SetWave(0, 0) )
+      .then( ()=>GEN.SetMode(GEN.Enums["square"], 0, 0) )
       .then( ()=>GEN.SetFrequency(freq) )
       .then( ()=>{ if (duty) return GEN.SetDuty(duty); } )
       .then( ()=>GEN.GetFrequency() )
@@ -115,7 +115,7 @@
       Promise.resolve()
       .then( ()=>BIOS.biosMemBulk(bufferPtr, buf) )
 //      .then( ()=>GEN.SetWave(bufferPtr, samples.length-1) ) // WTF??? bios error, wont configure DMA without changing buffer length
-      .then( ()=>GEN.SetWave(bufferPtr, samples.length) )
+      .then( ()=>GEN.SetMode(GEN.Enums["buffer"], bufferPtr, samples.length) )
       .then( ()=>GEN.SetFrequency(freq*samples.length) )
       .then( ()=>GEN.GetFrequency() )
       .then( (f)=>console.log("Frequency="+Math.floor(f/samples.length)) )

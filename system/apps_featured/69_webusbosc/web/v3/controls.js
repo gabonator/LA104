@@ -137,7 +137,7 @@ float:left;
       <option>LowerDTHigh</option>
       <option>GreaterDTHigh</option>
       <option value="None">Scan</option>
-      <option>Streaming</option>
+<!--      <option>Streaming</option> -->
     </select><br>
     TrigSource:
     <select id="triggerSource">
@@ -228,6 +228,7 @@ float:left;
     <button id="connect">Connect</button><br>
     <div id="status"></div>
   </div>
+<!--
   <div class="controlsSpacer"></div>
   <div class="controlsBlock blockControl">
     Control:<br><br>
@@ -279,7 +280,7 @@ float:left;
     </select><br>
     Value:<input size=8 type="text" value="0" id="controlValue"><br>
   </div>
-
+-->
 
 </div>
 `;
@@ -390,8 +391,8 @@ float:left;
       (o) => INTERFACE.memorySave());
 //    document.querySelector("#memExport").addEventListener('click', 
 //      (o) => INTERFACE.memoryExport());
-    document.querySelector("#controlValue").addEventListener('change', 
-      (o) => INTERFACE.setControl(document.querySelector("#controlAttribute").value, o.target.value));
+//    document.querySelector("#controlValue").addEventListener('change', 
+//      (o) => INTERFACE.setControl(document.querySelector("#controlAttribute").value, o.target.value));
 
   }
 

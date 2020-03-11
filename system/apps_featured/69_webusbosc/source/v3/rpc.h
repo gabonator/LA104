@@ -60,8 +60,8 @@ namespace RPC
       return (uint32_t)BIOS::DAC::GetFrequency;
     if (strcmp(command, "GEN::SetDuty")==0)
       return (uint32_t)BIOS::DAC::SetDuty;
-    if (strcmp(command, "GEN::SetWave")==0)
-      return (uint32_t)BIOS::DAC::SetWave;
+    if (strcmp(command, "GEN::SetMode")==0)
+      return (uint32_t)BIOS::DAC::SetMode;
 #endif
 
     if (strcmp(command, "LCD::BufferBegin")==0)
