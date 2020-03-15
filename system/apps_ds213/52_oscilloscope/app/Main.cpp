@@ -71,6 +71,7 @@ int main(void)
     //============================== 
     u16 Act = KeyAct & (ENCDBIT | K1_ACTn | K2_ACTn | K3_ACTn);
 
+    //gabo
     if (!Act && (KeyAct & K4_ACTn))
       break;
 

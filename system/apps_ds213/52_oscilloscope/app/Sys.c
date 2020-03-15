@@ -5,9 +5,9 @@
 #include "DS213Bios.h"
 
 void SysInt(void);
-uint32_t counter = 0;
+
 //=================+=====+=====+=====+=====+=====+=====+=====+=====+=====+=====+
-//
+//量程挡位开关设定 | 10mv| 20mv| 50mv| 0.1v| 0.2v| 0.5v|  1v |  2v |  5v | 10v |
 //=================+=====+=====+=====+=====+=====+=====+=====+=====+=====+=====+
 uc8 RANGE_SW[][10]= {{ 1,    1,    1,    1,    1,    0,    0,    0,    0,    0,}, 
                      { 0,    0,    1,    1,    0,    0,    0,    0,    1,    0,}, 
@@ -59,11 +59,11 @@ uc16 WF100[][100] = {{0x7FF, 0x87F, 0x8FF, 0x97E, 0x9FC, 0xA77, 0xAF0, 0xB66,
 u8   Flashing, PwrDownEn = 1;
 vu16 Dly_mS, Delay_Cnt, Sec_Cnt, BeepCnt, PD_Cnt = 300;// = LED_PWM_MAX;
 u16  Fps, FpsCnt, nKeySt;
-u16  WfBuf[100];                    // 
+u16  WfBuf[100];                    // 输出波形数据缓冲区
 u16  KeyAct = 0, Vsum = 3600*8;
 
 /*******************************************************************************
-  USB 
+  USB 设备复位
 *******************************************************************************/
 void DiskReset()
 {
@@ -73,11 +73,11 @@ void DiskReset()
   USB_Init();
 }
 /*******************************************************************************
-  Description : 
+  Description : 设置 USB 端口连接                 NewState = ENABLE / DISABLE
 *******************************************************************************/
 void USB_DiskLink(u8 NewState)
 {
-// gabo
+//gabo
 /*
   if(NewState == DISABLE){             
     while(PowerOff() != USB_SUCCESS) {}; // USB Device Power Off!
@@ -91,62 +91,61 @@ void USB_DiskLink(u8 NewState)
 */
 }
 /*******************************************************************************
- 系统
+ 系统中断处理
 *******************************************************************************/
 void SysInt(void)
 {
-  counter++;
   static u16 LastEnc, LastSt, Cnt_20mS, CursorCnt, Cnt_mS, LED_Dir, LED_Pwm;
   if (Dly_mS != 0) Dly_mS--;
   Cnt_mS++;
-  if(Cnt_mS%2 == 0){                                     // 
+  if(Cnt_mS%2 == 0){                                     // 编码器采样周期 2mS
     u16 EncdInp = (*Hw.pEa_St << 12)|(*Hw.pEb_St << 13)|
-                  (*Hw.pEc_St << 14)|(*Hw.pEd_St << 15); // 
-    u16 EncActP = EncdInp & ~LastEnc;                    // 
-    u16 EncActN = ~EncdInp & LastEnc;                    // 
+                  (*Hw.pEc_St << 14)|(*Hw.pEd_St << 15); // 读入编码器状态
+    u16 EncActP = EncdInp & ~LastEnc;                    // 编码器输入正跳变
+    u16 EncActN = ~EncdInp & LastEnc;                    // 编码器输入负跳变
     LastEnc = EncdInp;
     if(EncActN & ENC1a) KeyAct = (EncdInp & ENC1b) ? ENCD_1p : ENCD_1n;
     if(EncActN & ENC2a) KeyAct = (EncdInp & ENC2b) ? ENCD_2n : ENCD_2p;
     if(EncActP & ENC1b) KeyAct = (EncdInp & ENC1a) ? ENCD_1p : ENCD_1n;
     if(EncActP & ENC2b) KeyAct = (EncdInp & ENC2a) ? ENCD_2n : ENCD_2p;
     if(BeepCnt > 1) BeepCnt -= 2;
-    else            *Hw.pBuz_Dev &= ~ENABLE;             // 
-    if(Cnt_mS % 20 == 0){                                // 20mS 
+    else            *Hw.pBuz_Dev &= ~ENABLE;             // 关闭蜂鸣器
+    if(Cnt_mS % 20 == 0){                                // 20mS 周期
       if(Cnt_mS > 1000) Cnt_mS = 0;
       nKeySt  = (*Hw.pK1_St << 0)|(*Hw.pK2_St << 1)|
-                (*Hw.pK3_St << 2)|(*Hw.pK4_St << 3);     // 
-      KeyAct |= (~nKeySt & LastSt) << 4;                 // 识
-      KeyAct |= (nKeySt & ~LastSt) << 8;                 // 识
+                (*Hw.pK3_St << 2)|(*Hw.pK4_St << 3);     // 读入按键状态
+      KeyAct |= (~nKeySt & LastSt) << 4;                 // 识别按键按下跳变
+      KeyAct |= (nKeySt & ~LastSt) << 8;                 // 识别按键释放跳变
       LastSt  = nKeySt;
       if(Cnt_20mS < 50) Cnt_20mS++;
-      else {                                             // 1S 
+      else {                                             // 1S 周期
         Cnt_20mS = 0;
         Sec_Cnt++;
         if(PD_Cnt > 0) PD_Cnt--;
-        Fps = FpsCnt;                                    // 帧
+        Fps = FpsCnt;                                    // 帧数累计
         FpsCnt = 0;
       }
-      if((Pop[SPDT].Val != 0) && (PD_Cnt == 0)){         // 
+      if((Pop[SPDT].Val != 0) && (PD_Cnt == 0)){         // 待机呼吸灯控制
         if(LED_Dir == 0){
-          if(LED_Pwm < LED_PWM_MAX-5) LED_Pwm += 5;        // 
+          if(LED_Pwm < LED_PWM_MAX-5) LED_Pwm += 5;        // 亮度增加
           else                        LED_Dir  = 1;
         } else {
-          if(LED_Pwm > LED_PWM_MIN+5) LED_Pwm -= 5;        // 
+          if(LED_Pwm > LED_PWM_MIN+5) LED_Pwm -= 5;        // 亮度减弱
           else                        LED_Dir  = 0;
         }
         *Hw.pPwm_LED = LED_Pwm;
       }
-      if(CursorCnt++ >= 12){                             // 12*20mS = 240mS 
+      if(CursorCnt++ >= 12){                             // 12*20mS = 240mS 闪烁
         CursorCnt = 0;
         Flashing = (Flashing) ? 0 : 1;
-        Vsum = Vsum-Vsum/8+*Hw.pAdc_Vbty*375/256;        // 8 
+        Vsum = Vsum-Vsum/8+*Hw.pAdc_Vbty*375/256;        // 8 阶平滑滤波
         if(Vsum > 3800*8)      Menu[BTY].Val = 4;
         else if(Vsum > 3600*8) Menu[BTY].Val = 3; 
         else if(Vsum > 3400*8) Menu[BTY].Val = 2; 
         else if(Vsum > 3200*8) Menu[BTY].Val = 1; 
 //      else if(Vsum > 3000*8) Menu[BTY].Val = 0; 
-        else *Hw.pOut_PEn = 0;                           // 
-        Menu[BTY].Flg |= UPDT;                           // 刷
+        else *Hw.pOut_PEn = 0;                           // 电池电量低时关机  
+        Menu[BTY].Flg |= UPDT;                           // 刷新电池电量指示
       }
     }
   }
@@ -167,7 +166,7 @@ u16 Font_8x14(u8 Code, u16 Row)
   return Hw.pFont_8x14[((Code-0x22)*8)+Row];
 }
 /*******************************************************************************
- 
+ 设置显示范围
 *******************************************************************************/
 void LCD_WrBlock(u16 x1, u16 y1, u16 x2, u16 y2)
 {
@@ -179,7 +178,7 @@ void LCD_RdBlock(u16 x1, u16 y1, u16 x2, u16 y2)
   Hw.pLCD_R_Block(x1, y1, x2, y2);
 }
 /*******************************************************************************
- 
+ 设置显示颜色
 *******************************************************************************/
 void WrPxl(u16 Color)
 {
@@ -193,7 +192,7 @@ u16 RdPxl(void)
   return *Hw.pLcd_Data_R;
 }
 /*******************************************************************************
- 
+ 设置显示位置
 *******************************************************************************/
 void PxlPosi(u16 x, u16 y)
 {
@@ -211,23 +210,20 @@ u32 GetDev_SN(void)
 *******************************************************************************/
 void SmplStart(void)
 { 
-//  if(Menu[RUN].Val == HOLD) return;          // 
-  FPGA_DataWr(A_C_CH, SMPL_MODE, SEPARATE);  // 
+  if(Menu[RUN].Val == HOLD) return;          // 暂停状态下不启动
+  FPGA_DataWr(A_C_CH, SMPL_MODE, SEPARATE);  // 采样模式
   FPGA_DataWr(B_D_CH, SMPL_MODE, SEPARATE);
-  SetPreSmplDpth(20);//30*Menu[T_0].Val);          // 预
-  SetBase(Menu[TIM].Val);                    // 
-  FPGA_ByteWr(A_C_CH, TRIG_VOLT, Vt[CH_A]);  // 
+  SetPreSmplDpth(30*Menu[T_0].Val);          // 预采样深度
+  SetBase(Menu[TIM].Val);                    // 设置采样速率
+  FPGA_ByteWr(A_C_CH, TRIG_VOLT, Vt[CH_A]);  // 设置触发阈值
   FPGA_ByteWr(B_D_CH, TRIG_VOLT, Vt[CH_B]);
-  SetTriggTyp(Menu[TRG].Val, Menu[V_T].Src); // 
-
-  FPGA_ByteWr(A_C_CH, TRIG_KIND, TRIG_AiDN);
-  FPGA_ByteWr(B_D_CH, TRIG_KIND, TRIG_AiDN);
+  SetTriggTyp(Menu[TRG].Val, Menu[V_T].Src); // 设置触发模式
   
-  Trigg = 0, ScrnF = 0;                      // 
-  *Hw.pOut_Clr = 1, *Hw.pOut_Clr = 0;        // FPGA 
+  Trigg = 0, ScrnF = 0;                      // 触发状态复位
+  *Hw.pOut_Clr = 1, *Hw.pOut_Clr = 0;        // FPGA 采样开始
 }
 /*******************************************************************************
-  
+  清除显示波形轨迹
 *******************************************************************************/
 void TrackClr(void)
 {
@@ -241,17 +237,17 @@ u8  FPGA_DataWr(u8 Dev, u8 Cmd, u16 Data)
   SPI_TypeDef* SpiX = (SPI_TypeDef*)Hw.Fpga_Spi;
   vu8* nSS = (Dev == 0) ? Hw.pOut_nSS0 : Hw.pOut_nSS1;
   *nSS = 0;
-  SpiX->DR = (u8)Cmd;                      // 
+  SpiX->DR = (u8)Cmd;                      // 发送命令 Cmd
   while(!(SpiX->SR & SPI_I2S_FLAG_RXNE)){}
-  Cmd = SpiX->DR;                          // 
+  Cmd = SpiX->DR;                          // 接收数据 Info
   while(!(SpiX->SR & SPI_I2S_FLAG_TXE)){}
-  SpiX->DR = (u8)Data;                     // 
+  SpiX->DR = (u8)Data;                     // 发送数据 DataL
   while(!(SpiX->SR & SPI_I2S_FLAG_RXNE)){}
-  Cmd |= (SpiX->DR)<< 16;                  // 
+  Cmd |= (SpiX->DR)<< 16;                  // 接收数据 Dummy
   while(!(SpiX->SR & SPI_I2S_FLAG_TXE)){}
-  SpiX->DR = Data >> 8;                    // 
+  SpiX->DR = Data >> 8;                    // 发送数据 DataH
   while(!(SpiX->SR & SPI_I2S_FLAG_RXNE)){}
-  Cmd |= (SpiX->DR)<< 16;                  // 
+  Cmd |= (SpiX->DR)<< 16;                  // 接收数据 Dummy
   *nSS = 1;
   return Cmd;
 }
@@ -263,13 +259,13 @@ u8  FPGA_ByteWr(u8 Dev, u8 Cmd, u8 Byte)
   SPI_TypeDef* SpiX = (SPI_TypeDef*)Hw.Fpga_Spi;
   vu8* nSS = (Dev == 0) ? Hw.pOut_nSS0 : Hw.pOut_nSS1;
   *nSS = 0;
-  SpiX->DR = (u8)Cmd;                      // 
+  SpiX->DR = (u8)Cmd;                      // 发送命令 Cmd
   while(!(SpiX->SR & SPI_I2S_FLAG_RXNE)){}
-  Cmd = SpiX->DR;                          // 
+  Cmd = SpiX->DR;                          // 接收数据 Info
   while(!(SpiX->SR & SPI_I2S_FLAG_TXE)){}
-  SpiX->DR = Byte;                         // 
+  SpiX->DR = Byte;                         // 发送数据 Byte
   while(!(SpiX->SR & SPI_I2S_FLAG_RXNE)){}
-  Cmd |= (SpiX->DR)<< 16;                  // 
+  Cmd |= (SpiX->DR)<< 16;                  // 接收数据 Dummy
   *nSS = 1;
   return Cmd;
 }
@@ -281,9 +277,9 @@ u8  FPGA_CtrlRW(u8 Dev, u8 Cmd)
   SPI_TypeDef* SpiX = (SPI_TypeDef*)Hw.Fpga_Spi;
   vu8* nSS = (Dev == 0) ? Hw.pOut_nSS0 : Hw.pOut_nSS1;
   *nSS = 0;
-  SpiX->DR = Cmd;                          // 
+  SpiX->DR = Cmd;                          // 发送命令 Cmd
   while(!(SpiX->SR & SPI_I2S_FLAG_RXNE)){}
-  u8 Info = SpiX->DR;                      // 
+  u8 Info = SpiX->DR;                      // 接收数据 Info
   *nSS = 1;
   return Info;
 }
@@ -295,13 +291,13 @@ u16 FPGA_SmplRd(u8 Dev)
   SPI_TypeDef* SpiX = (SPI_TypeDef*)Hw.Fpga_Spi;
   vu8* nSS = (Dev == 0) ? Hw.pOut_nSS0 : Hw.pOut_nSS1;
   *nSS = 0;
-  SpiX->DR = SMPL_RD;                      // 
+  SpiX->DR = SMPL_RD;                      // 发送命令 Cmd
   while(!(SpiX->SR & SPI_I2S_FLAG_RXNE)){}
-  u16 Data = (u8)(SpiX->DR) ;              // 
+  u16 Data = (u8)(SpiX->DR) ;              // 接收数据 Info
   while(!(SpiX->SR & SPI_I2S_FLAG_TXE)){}
-  SpiX->DR = 0;                            // 
+  SpiX->DR = 0;                            // 发送命令 Dummy
   while(!(SpiX->SR & SPI_I2S_FLAG_RXNE)){}
-  Data |= (u8)(SpiX->DR) << 8;             // 
+  Data |= (u8)(SpiX->DR) << 8;             // 接收数据 Data
   *nSS = 1;
   return Data;
 }
@@ -313,13 +309,13 @@ u8 FPGA_ByteRd(u8 Dev, u8 Cmd)
   SPI_TypeDef* SpiX = (SPI_TypeDef*)Hw.Fpga_Spi;
   vu8* nSS = (Dev == 0) ? Hw.pOut_nSS0 : Hw.pOut_nSS1;
   *nSS = 0;
-  SpiX->DR = Cmd;                          // 
+  SpiX->DR = Cmd;                          // 发送命令 Cmd
   while(!(SpiX->SR & SPI_I2S_FLAG_RXNE)){}
-  vu8 Info = SpiX->DR;                     // 
+  vu8 Info = SpiX->DR;                     // 接收数据 Info
   while(!(SpiX->SR & SPI_I2S_FLAG_TXE)){}
-  SpiX->DR = 0;                            // 
+  SpiX->DR = 0;                            // 发送命令 Dummy
   while(!(SpiX->SR & SPI_I2S_FLAG_RXNE)){}
-  u8 Byte = (SpiX->DR);                    // 
+  u8 Byte = (SpiX->DR);                    // 接收数据 Byte
   *nSS = 1;
   return Byte;
 }
@@ -331,17 +327,17 @@ u16 FPGA_DataRd(u8 Dev, u8 Cmd)
   SPI_TypeDef* SpiX = (SPI_TypeDef*)Hw.Fpga_Spi;
   vu8* nSS = (Dev == 0) ? Hw.pOut_nSS0 : Hw.pOut_nSS1;
   *nSS = 0;
-  SpiX->DR = Cmd;                          // 
+  SpiX->DR = Cmd;                          // 发送命令 Cmd
   while(!(SpiX->SR & SPI_I2S_FLAG_RXNE)){}
-  vu8 Info = SpiX->DR;                     // 
+  vu8 Info = SpiX->DR;                     // 接收数据 Info
   while(!(SpiX->SR & SPI_I2S_FLAG_TXE)){}
-  SpiX->DR = 0;                            // 
+  SpiX->DR = 0;                            // 发送命令 Dummy
   while(!(SpiX->SR & SPI_I2S_FLAG_RXNE)){}
-  u16 Data = (SpiX->DR) & 0xFF;            // 
+  u16 Data = (SpiX->DR) & 0xFF;            // 接收数据 Data
   while(!(SpiX->SR & SPI_I2S_FLAG_TXE)){}
-  SpiX->DR = 0;                            // 
+  SpiX->DR = 0;                            // 发送命令 Dummy
   while(!(SpiX->SR & SPI_I2S_FLAG_RXNE)){}
-  Data |= (u16)((SpiX->DR)<< 8);           // 
+  Data |= (u16)((SpiX->DR)<< 8);           // 接收数据 Data
   *nSS = 1;
   return Data;
 }
@@ -353,30 +349,30 @@ u32 FPGA_WordRd(u8 Dev, u8 Cmd)
   SPI_TypeDef* SpiX = (SPI_TypeDef*)Hw.Fpga_Spi;
   vu8* nSS = (Dev == 0) ? Hw.pOut_nSS0 : Hw.pOut_nSS1;
   *nSS = 0;
-  SpiX->DR = Cmd;                          // 
+  SpiX->DR = Cmd;                          // 发送命令 Cmd
   while(!(SpiX->SR & SPI_I2S_FLAG_RXNE)){}
-  vu8 Info = SpiX->DR;                     // 
+  vu8 Info = SpiX->DR;                     // 接收数据 Info
   while(!(SpiX->SR & SPI_I2S_FLAG_TXE)){}
-  SpiX->DR = 0;                            // 
+  SpiX->DR = 0;                            // 发送命令 Dummy
   while(!(SpiX->SR & SPI_I2S_FLAG_RXNE)){}
-  u32 Word = (u8)(SpiX->DR);               // 
+  u32 Word = (u8)(SpiX->DR);               // 接收数据 Word
   while(!(SpiX->SR & SPI_I2S_FLAG_TXE)){}
-  SpiX->DR = 0;                            // 
+  SpiX->DR = 0;                            // 发送命令 Dummy
   while(!(SpiX->SR & SPI_I2S_FLAG_RXNE)){}
-  Word |= ((u8)(SpiX->DR)) << 8;           // 
+  Word |= ((u8)(SpiX->DR)) << 8;           // 接收数据 Word
   while(!(SpiX->SR & SPI_I2S_FLAG_TXE)){}
-  SpiX->DR = 0;                            // 
+  SpiX->DR = 0;                            // 发送命令 Dummy
   while(!(SpiX->SR & SPI_I2S_FLAG_RXNE)){}
-  Word |= ((u8)(SpiX->DR)) << 16;          // 
+  Word |= ((u8)(SpiX->DR)) << 16;          // 接收数据 Word
   while(!(SpiX->SR & SPI_I2S_FLAG_TXE)){}
-  SpiX->DR = 0;                            // 
+  SpiX->DR = 0;                            // 发送命令 Dummy
   while(!(SpiX->SR & SPI_I2S_FLAG_RXNE)){}
-  Word |= ((u8)(SpiX->DR)) << 24;          // 
+  Word |= ((u8)(SpiX->DR)) << 24;          // 接收数据 Word
   *nSS = 1;
   return Word;
 }
 /*******************************************************************************
-  
+  设置 A 通道量程档位
 *******************************************************************************/
 void SetRangeA(u8 Range)
 { 
@@ -387,7 +383,7 @@ void SetRangeA(u8 Range)
   *Hw.pOut_A_Slct_B = 0;
 }
 /*******************************************************************************
-  
+  设置 B 通道量程档位
 *******************************************************************************/
 void SetRangeB(u8 Range)
 {
@@ -398,7 +394,7 @@ void SetRangeB(u8 Range)
   *Hw.pOut_B_Slct_A = 0;
 }
 /*******************************************************************************
-  
+  设置采样时基
 *******************************************************************************/
 void SetBase(u8 Base)
 {
@@ -408,7 +404,7 @@ void SetBase(u8 Base)
   FPGA_DataWr(B_D_CH, SMPL_TDIV, BASE_ARR[Base]);
 }
 /*******************************************************************************
-  通
+  通道垂直位移 0~200
 *******************************************************************************/
 void SetOffsetA(u8 Range, u8 Offset)
 {
@@ -419,16 +415,16 @@ void SetOffsetB(u8 Range, u8 Offset)
   *Hw.pCh_B_Posn = Diff[CH_B][Range]+CALIBRAT(Slope[CH_B], Offset);
 }
 /*******************************************************************************
-  预
+  预采样深度
 *******************************************************************************/
 void SetPreSmplDpth(u16 PsDpth)
 {
-  PsDpth = (PsDpth+1)*BASE_KP1[Menu[TIM].Val]/1024; // 
+  PsDpth = (PsDpth+1)*BASE_KP1[Menu[TIM].Val]/1024; // 插值补偿
   FPGA_DataWr(A_C_CH, SMPL_PSMP, PsDpth);
   FPGA_DataWr(B_D_CH, SMPL_PSMP, PsDpth);
 }
 /*******************************************************************************
-  
+  设置脉冲输出频率
 *******************************************************************************/
 void SetDgtlFrq(u16 Nfrq)
 {
@@ -438,7 +434,7 @@ void SetDgtlFrq(u16 Nfrq)
   *Hw.pFout_TIM_CCR = (DGTL_ARR[Nfrq]+1)/2;
 }
 /*******************************************************************************
-  
+  设置模拟输出频率
 *******************************************************************************/
 void SetAnlgFrq(u16 Nfrq)
 {
@@ -456,7 +452,7 @@ void SetAnlgFrq(u16 Nfrq)
   Hw.pFout_DMA(ENABLE);
 }
 /*******************************************************************************
-  
+  设置触发方式
 *******************************************************************************/
 void SetTriggTyp(u8 Type, u8 Src)
 {
@@ -486,7 +482,7 @@ void SetTriggTyp(u8 Type, u8 Src)
   FPGA_ByteWr(B_D_CH, TRIG_KIND, Temp1);
 }
 /*******************************************************************************
-  
+  蜂鸣器响声时间
 *******************************************************************************/
 void Beep_mS(u16 mS)
 {
@@ -494,7 +490,7 @@ void Beep_mS(u16 mS)
   *Hw.pBuz_Dev |= ENABLE;
 }
 /*******************************************************************************
-  
+  毫秒延时
 *******************************************************************************/
 void Delay_mS(vu32 mS)
 {
@@ -502,11 +498,11 @@ void Delay_mS(vu32 mS)
   while(Dly_mS) {};
 }
 /*******************************************************************************
-  USB 
+  USB 设备初始化
 *******************************************************************************/
 void USB_DevInit(void)
 {
- // gabo
+	//gabo
 /*
   GPIO_InitTypeDef  GPIO_Struct;
   NVIC_InitTypeDef  NVIC_Struct;
