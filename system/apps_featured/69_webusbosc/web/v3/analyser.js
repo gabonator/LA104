@@ -238,12 +238,12 @@ class LedDecoder
         break;          	
 
       var ledCode = eval("0b"+ledWord);
-      var red = ledCode & 0xff;
-      var blue = (ledCode >> 8) & 0xff;
+      var blue = ledCode & 0xff;
+      var red = (ledCode >> 8) & 0xff;
       var green = (ledCode >> 16) & 0xff;
 
       ledWords.push({r:red, g:green, b:blue});
-      canvas.annotate(offsets[i*3 + 3*24/2] + minPeriod/2, INTERFACE.ch1offset, "LED-GBR: " + ("00000"+ledCode.toString(16)).substr(-6));
+      canvas.annotate(offsets[i*3 + 3*24/2] + minPeriod/2, INTERFACE.ch1offset, "LED-GRB: " + ("00000"+ledCode.toString(16)).substr(-6));
       var clr = x => ("00" + x.toString(16)).substr(-2);
       canvas.annotate(offsets[i*3 + 3*24/2] + minPeriod/2 + 120, INTERFACE.ch1offset, "\u2B24", "#" + clr(red) + clr(green) + clr(blue));
 
@@ -251,8 +251,8 @@ class LedDecoder
       canvas.annotate(offsets[i*3+24*3-1] + minPeriod/2, INTERFACE.ch1offset, ">");
 
       canvas.OscilloscopeRedrawGraphPart(INTERFACE._wave.scroll, INTERFACE._wave.data, offsets[i*3+8*3*0], offsets[i*3+8*3*1], "CH1", "#00ff00");
-      canvas.OscilloscopeRedrawGraphPart(INTERFACE._wave.scroll, INTERFACE._wave.data, offsets[i*3+8*3*1], offsets[i*3+8*3*2], "CH1", "#0000ff");
-      canvas.OscilloscopeRedrawGraphPart(INTERFACE._wave.scroll, INTERFACE._wave.data, offsets[i*3+8*3*2], offsets[i*3+8*3*3], "CH1", "#ff0000");
+      canvas.OscilloscopeRedrawGraphPart(INTERFACE._wave.scroll, INTERFACE._wave.data, offsets[i*3+8*3*1], offsets[i*3+8*3*2], "CH1", "#ff0000");
+      canvas.OscilloscopeRedrawGraphPart(INTERFACE._wave.scroll, INTERFACE._wave.data, offsets[i*3+8*3*2], offsets[i*3+8*3*3], "CH1", "#0000ff");
     }
 
     if (ledWords.length>0)

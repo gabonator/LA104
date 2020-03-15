@@ -335,14 +335,14 @@ class Renderer
   {
     var ypos = (v) => canvas.height-v*(canvas.height/256);
 
-    var data = [];
-    for (var i =0; i<rawdata.length; i+=5)
+    var data = new Array(rawdata.length/3);
+    for (var i=0, j=0; i<rawdata.length; i+=3, j++)
     {
-      var s = parseInt("0x" + rawdata.substr(i, 5));
+      var bundle = [rawdata[i+0], rawdata[i+1], rawdata[i+2] & 1, rawdata[i+2] & 2];
       if (channel == "CH1")
-        data.push(s&255);
-      else if (channel == "CH2")
-        data.push((s>>8)&255);
+        data[j] = bundle[0];
+      if (channel == "CH2")
+        data[j] = bundle[1];
     }
 
     var trigx = 120/OSC.ResampleTable[INTERFACE.timebase];
