@@ -393,7 +393,7 @@ namespace I2C
 
 namespace UART
 {
-  void uart_configure(int baudrate)
+  void uart_configure(int baudrate, int dataBits = 8, char parity = 0, int stopBits = 1)
   {
   	/* Configure the USART3 */
   	USART_InitTypeDef USART_InitStructure;
@@ -413,9 +413,27 @@ namespace UART
   		                           the SCLK pin
   	 */
   	USART_InitStructure.USART_BaudRate = baudrate;
-  	USART_InitStructure.USART_WordLength = USART_WordLength_8b;
-  	USART_InitStructure.USART_StopBits = USART_StopBits_1;
-  	USART_InitStructure.USART_Parity = USART_Parity_No;
+  	switch (parity)
+        { 
+          case 'E': dataBits++; USART_InitStructure.USART_Parity = USART_Parity_Even; break;
+          case 'O': dataBits++; USART_InitStructure.USART_Parity = USART_Parity_Odd; break;
+          case 0:   USART_InitStructure.USART_Parity = USART_Parity_No; break;
+          default: _ASSERT(0);
+        }
+        switch (dataBits)
+        {
+          case 8: USART_InitStructure.USART_WordLength = USART_WordLength_8b; break;
+          case 9: USART_InitStructure.USART_WordLength = USART_WordLength_9b; break;
+          default: _ASSERT(0);
+        }
+  	switch (stopBits)
+        {
+          case 5: USART_InitStructure.USART_StopBits = USART_StopBits_0_5; break;
+          case 1: USART_InitStructure.USART_StopBits = USART_StopBits_1; break;
+          case 15: USART_InitStructure.USART_StopBits = USART_StopBits_1_5; break;
+          case 2: USART_InitStructure.USART_StopBits = USART_StopBits_2; break;
+          default: _ASSERT(0);
+        }
   	USART_InitStructure.USART_HardwareFlowControl = USART_HardwareFlowControl_None;
   	USART_InitStructure.USART_Mode = USART_Mode_Rx | USART_Mode_Tx;
 
@@ -733,8 +751,24 @@ namespace BIOS
 
       void Setup(int baudrate, EConfig config)
       {
-        _ASSERT((int)config == 0);
-        ::UART::uart_configure(baudrate); 
+        int dataBits = 8;
+        char parity = 0;
+        int stopBits = 1;
+
+        if (config & EConfig::length9)
+          dataBits = 9;
+        if (config & EConfig::stopBits15)
+          stopBits = 15;
+        if (config & EConfig::stopBits2)
+          stopBits = 2;
+        if (config & EConfig::parityEven)
+          parity = 'E';
+        if (config & EConfig::parityOdd)
+          parity = 'O';
+
+        _ASSERT(!(config & EConfig::flowHw));
+
+        ::UART::uart_configure(baudrate, dataBits, parity, stopBits); 
       }
 
       bool Available()

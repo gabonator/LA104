@@ -224,7 +224,7 @@ namespace BIOS
     namespace UART
     {
       enum EConfig {length8 = 0, length9 = 0x10, stopBits1 = 0, stopBits15 = 0x1, stopBits2 = 0x2,
-        parityNone = 0, parityEven = 0x4, paritOdd = 0x08, flowNone = 0, flowHw = 0x20};
+        parityNone = 0, parityEven = 0x4, parityOdd = 0x08, flowNone = 0, flowHw = 0x20};
       void Setup(int baudrate, EConfig config);
       bool Available();
       uint8_t Read();
