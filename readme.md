@@ -19,9 +19,12 @@ Go to release section on top of this page, download *system.hex*. Power on the L
 
 ##### (LA104) Variable frequency drive visualizer
 
-This app uses RS485 adapter to talk to Invt Good drive inverters. Read more [here](system/apps_featured/74_invtvisual), besides the visualization tool, there is also [application](system/apps_experiments/75_invtemu) which emulates GD100 VFD (as seen on the picture)...
+This app uses RS485 adapter to talk to Invt Good drive inverters. Read more [here](system/apps_featured/74_invtvisual), besides the visualization tool, there is also [application](system/apps_experiments/75_invtemu) which emulates GD100 VFD (as seen on the picture)... Watch video:
+
+[![VFD talking to LA104 over RS485](https://img.youtube.com/vi/0Ns7AHVvmX0/0.jpg)](https://www.youtube.com/watch?v=0Ns7AHVvmX0 "VFD talking to LA104 over RS485")
 
 ![image](system/apps_featured/74_invtvisual/res/emulation.jpg)
+
 
 ##### WASM experimental evironment
 
