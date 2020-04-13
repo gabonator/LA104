@@ -17,6 +17,12 @@ Go to release section on top of this page, download *system.hex*. Power on the L
 
 #### News
 
+##### (LA104) Variable frequency drive visualizer
+
+This app uses RS485 adapter to talk to Invt Good drive inverters. Read more [here](system/apps_featured/64_invtvisual), besides the visualization tool, there is also [application](system/apps_experiments/75_invtemu) which emulates GD100 VFD (as seen on the picture)...
+
+![image](system/apps_featured/64_invtvisual/res/emulation.jpg)
+
 ##### WASM experimental evironment
 
 You the experience of using LA104 analyser in [your browser](https://rawgit.valky.eu/gabonator/LA104/master/system/release/wasm/index.html)

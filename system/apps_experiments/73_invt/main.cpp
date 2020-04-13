@@ -42,7 +42,6 @@ void loop()
   if (now - lastRequest > 2000 && !processing)
   {
     lastRequest = now;
-
     processing = true;
 
     static uint16_t requestBase;
@@ -59,6 +58,7 @@ void loop()
         gVfd.buildReadPacket(packet, requestBase, 0x0001);
         break;
     }
+
     gVfd.send(packet);
  
     gVfd.onPacket([](const CVfdPacket& packet)
@@ -89,7 +89,6 @@ void loop()
         
         uint16_t value = packet.getWord(i);
         Serial_print(" = ");
-        //Serial_print(value, HEX);
         Serial_print(value);
 
         if (reg == 0x5000)

@@ -45,7 +45,7 @@ public:
     
     if (mLastReceive != 0 && now - mLastReceive > mReadTimeout)
     {
-      _ASSERT(mReceivePacket.getLength() > 0);
+      _ASSERT(mReceivePacket.getLength() > 0); // TODO: fix!
       if (checkCrc(mReceivePacket))
       {
         if (mPacketHandler)
@@ -90,6 +90,7 @@ public:
     Serial_print("Send ");
     printPacket(p);
 
+    mLastReceive = 0;
     mReceivePacket.clear();
     write(p.getData(), p.getLength());
     mPacketSent = SYS::GetTick();

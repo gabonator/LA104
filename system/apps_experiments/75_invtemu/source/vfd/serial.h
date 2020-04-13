@@ -31,12 +31,12 @@ public:
     GPIO::DigitalWrite((GPIO::EPin)ControlDe, true);
     GPIO::DigitalWrite((GPIO::EPin)ControlRe, true);
     
-    SYS::DelayMs(2); // 3.5bytes   0.57ms per byte    
+//    SYS::DelayMs(2); // 3.5bytes   0.57ms per byte    
     while (length--)
       GPIO::UART::Write(*buf++);
     
 //    delay(1); // wait for transmission of last byte - UART::Write waits for finish
-    SYS::DelayMs(2); 
+//    SYS::DelayMs(2); 
     
     GPIO::DigitalWrite((GPIO::EPin)ControlDe, false);
     GPIO::DigitalWrite((GPIO::EPin)ControlRe, false);        

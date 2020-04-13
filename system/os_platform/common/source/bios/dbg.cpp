@@ -1,5 +1,8 @@
 #include "Bios.h"
 #include <stdarg.h>
+namespace SPF {
+#include <../../../os_host/library/spf/spf.h>
+}
 
 extern "C" void js_log(char *);
 extern int _DrawChar(int x, int y, unsigned short clrf, unsigned short clrb, char ch);
@@ -15,7 +18,7 @@ void BIOS::DBG::Print(const char * format, ...)
     va_list args;
         
     va_start( args, format );
-    vsprintf( bbuf, format, args );
+    SPF::vsprintf( bbuf, format, args );
     va_end(args);
     
     //fprintf(stdout, buf);
