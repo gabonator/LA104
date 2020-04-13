@@ -29,12 +29,14 @@ class CApplication : public CWnd
 	bool mWasFault{false};
 	bool mHasValidData{false};
 	int mErrorCounter{0};
+	float mLastDrawnFrequency{-1.f};
+	CVfdAttributes::EOperation mLastDrawnOperation{CVfdAttributes::EOperation::Unknown};
 
 public:
     void Create(const char* pszId, ui16 dwFlags, const CRect& rc, CWnd* pParent)
     {
         CWnd::Create("application", CWnd::WsVisible, rc, pParent);
-		mGraph.Create(CRect(rc.left+10, rc.top + 50, rc.right-10, rc.bottom-70), this);
+		mGraph.Create(CRect(rc.left+10, rc.top + 50 + 4, rc.right-10, rc.bottom-70 + 4), this);
 		mManager.setup();
         SetTimer(100);
     }
@@ -84,6 +86,7 @@ public:
 			OnCommError();
 			if (mHasValidData && mErrorCounter++ > 10)
 			{
+				BIOS::SYS::Beep(1000);
 				mHasValidData = false;
 				OnUpdate();
 			}
@@ -128,60 +131,77 @@ public:
 		
 		if (!mHasValidData)
 		{
+			//mLastDrawnOperation = CVfdAttributes::Unknown;
+			mLastDrawnFrequency = -1.f;
 			mWasFault = true;
 			const char* message = "No connection";
-			GUI::Background(CRect(m_rcClient.left, y, m_rcClient.right, y + 12*3), RGB565(404040), RGB565(101010));
-			BIOS::LCD::Printf(m_rcClient.CenterX() - strlen(message)*4, y+4+8, RGB565(ffffff), RGBTRANS, message, mAttributes.GetErrorCode());
+			GUI::Background(CRect(m_rcClient.left, y, m_rcClient.right, y + 13*3), RGB565(404040), RGB565(101010));
+			BIOS::LCD::Printf(m_rcClient.CenterX() - strlen(message)*4, y+4+8+2, RGB565(ffffff), RGBTRANS, message, mAttributes.GetErrorCode());
 			return;
 		}
 		
 		if (mAttributes.GetError())
 		{
+			mLastDrawnFrequency = -1.f;
 			mWasFault = true;
-			GUI::Background(CRect(0, y, m_rcClient.CenterX() + 40, y + 12*3), RGB565(404040), RGB565(ff1010));
-			BIOS::LCD::Printf(_x, y+4, RGB565(ffffff), RGBTRANS, "Error #%d:", mAttributes.GetErrorCode());
-			BIOS::LCD::Printf(_x, y+20, RGB565(ffffff), RGBTRANS, mAttributes.GetError());
+			GUI::Background(CRect(0, y, m_rcClient.CenterX() + 40, y + 13*3), RGB565(404040), RGB565(ff1010));
+			BIOS::LCD::Printf(_x, y+6, RGB565(ffffff), RGBTRANS, "Error #%d:", mAttributes.GetErrorCode());
+			BIOS::LCD::Printf(_x, y+22, RGB565(ffffff), RGBTRANS, mAttributes.GetError());
 		} else
 		{
 			if (mWasFault)
 			{
-				GUI::Background(CRect(m_rcClient.left, y, m_rcClient.right, y + 12*3), RGB565(404040), RGB565(101010));
+				GUI::Background(CRect(m_rcClient.left, y, m_rcClient.right, y + 13*3), RGB565(404040), RGB565(101010));
 				mWasFault = false;
 			}
-			
-			_x = x + 16;
-			char temp[8];
-			sprintf(temp, "%.1f", mAttributes.GetFrequency());
-			GUI::Background(CRect(_x, y, _x + 8*3*4, y + 12*3), RGB565(404040), RGB565(101010));
-			PrintBig(_x, y, RGB565(fffffff), temp);
-			_x += 4*3*8 + 8;
-			BIOS::LCD::Printf(_x, y + 22, RGB565(ffffff), RGBTRANS, "Hz");
+			if (mLastDrawnFrequency != mAttributes.GetFrequency())
+			{
+				mLastDrawnFrequency = mAttributes.GetFrequency();
+				_x = x + 16;
+				char temp[8];
+				sprintf(temp, "%.1f", mAttributes.GetFrequency());
+				GUI::Background(CRect(_x, y, _x + 8*3*4, y + 12*3), RGB565(404040), RGB565(101010));
+				PrintBig(_x, y, RGB565(fffffff), temp);
+				_x += 4*3*8 + 8;
+				_x += BIOS::LCD::Printf(_x, y + 22, RGB565(ffffff), RGBTRANS, "Hz");
+				_x += BIOS::LCD::Printf(_x, y + 22, RGB565RGB(39, 101, 217), RGBTRANS, "\x7");
+			}
 		}
 		
-		_x = m_rcClient.CenterX() + 40;
-		switch (mAttributes.GetOperation())
+		if (mLastDrawnOperation != mAttributes.GetOperation())
 		{
-			case CVfdAttributes::Unknown:
-				GUI::Background(CRect(_x, y, _x + 8*3*4, y + 12*3), RGB565(404040), RGB565(101010));
-				break;
-			case CVfdAttributes::ForwardRunning:
-			case CVfdAttributes::ReverseRunning:
-				GUI::Background(CRect(_x, y, _x + 8*3*4, y + 12*3), RGB565(405040), RGB565(10b010));
-				_x += PrintBig(_x, y, RGB565(b0b0b0), (char*)"Run");
-				break;
-			case CVfdAttributes::Stop:
-				GUI::Background(CRect(_x, y, _x + 8*3*4, y + 12*3), RGB565(404040), RGB565(101010));
-				_x += PrintBig(_x, y, RGB565(b0b0b0), (char*)"Stop");
-				break;
-			case CVfdAttributes::Fault:
-				mWasFault = true;
-				GUI::Background(CRect(_x, y, m_rcClient.right, y + 12*3), RGB565(804040), RGB565(ff1010));
-				_x += PrintBig(_x, y, RGB565(b0b0b0), (char*)"Fail");
-				break;
-			case CVfdAttributes::Off:
-				GUI::Background(CRect(_x, y, _x + 8*3*4, y + 12*3), RGB565(404040), RGB565(101010));
-				_x += PrintBig(_x, y, RGB565(b0b0b0), (char*)"Off");
-				break;
+			mLastDrawnOperation = mAttributes.GetOperation();
+			
+			if (mAttributes.GetOperation() == CVfdAttributes::Fault)
+			{
+				BIOS::SYS::Beep(1000);
+			}
+			
+			_x = m_rcClient.CenterX() + 40;
+			switch (mAttributes.GetOperation())
+			{
+				case CVfdAttributes::Unknown:
+					GUI::Background(CRect(_x, y, _x + 8*3*4, y + 13*3), RGB565(404040), RGB565(101010));
+					break;
+				case CVfdAttributes::ForwardRunning:
+				case CVfdAttributes::ReverseRunning:
+					GUI::Background(CRect(_x, y, _x + 8*3*4, y + 13*3), RGB565(405040), RGB565(10b010));
+					_x += PrintBig(_x, y, RGB565(b0b0b0), (char*)"Run");
+					break;
+				case CVfdAttributes::Stop:
+					GUI::Background(CRect(_x, y, _x + 8*3*4, y + 13*3), RGB565(404040), RGB565(101010));
+					_x += PrintBig(_x, y, RGB565(b0b0b0), (char*)"Stop");
+					break;
+				case CVfdAttributes::Fault:
+					mWasFault = true;
+					GUI::Background(CRect(_x, y, m_rcClient.right, y + 13*3), RGB565(804040), RGB565(ff1010));
+					_x += PrintBig(_x, y, RGB565(b0b0b0), (char*)"Fail");
+					break;
+				case CVfdAttributes::Off:
+					GUI::Background(CRect(_x, y, _x + 8*3*4, y + 13*3), RGB565(404040), RGB565(101010));
+					_x += PrintBig(_x, y, RGB565(b0b0b0), (char*)"Off");
+					break;
+			}
 		}
 
 		_x = x;
@@ -190,6 +210,8 @@ public:
 		_x += BIOS::LCD::Printf(_x, y, RGB565(b0b0b0), RGBTRANS, "Bus: ", mAttributes.GetBusVoltage());
 		_x += BIOS::LCD::Printf(_x, y, RGB565(ffffff), RGBTRANS, "%.1f", mAttributes.GetBusVoltage()) + 4;
 		_x += BIOS::LCD::Printf(_x, y, RGB565(b0b0b0), RGBTRANS, "V");
+		_x += BIOS::LCD::Printf(_x, y, RGB565(b0b0b0), RGBTRANS, ", Mode: ");
+		_x += BIOS::LCD::Printf(_x, y, RGB565(ffffff), RGBTRANS, mAttributes.GetOperationString());
 		y += 16;
 		_x = x;
 		GUI::Background(CRect(_x, y, m_rcClient.right, y+14), RGB565(404040), RGB565(101010));
@@ -204,8 +226,11 @@ public:
 		_x = x;
 		GUI::Background(CRect(_x, y, m_rcClient.right, y+14), RGB565(404040), RGB565(101010));
 		_x += BIOS::LCD::Printf(_x, y, RGB565(b0b0b0), RGBTRANS, "Pressure: ");
+		_x += BIOS::LCD::Printf(_x, y, RGB565(ffff00), RGBTRANS, "\x7");
 		_x += BIOS::LCD::Printf(_x, y, RGB565(ffffff), RGBTRANS, "%.2f", mAttributes.GetPidValue()) + 4;
-		_x += BIOS::LCD::Printf(_x, y, RGB565(b0b0b0), RGBTRANS, "bar, Target: ");
+		_x += BIOS::LCD::Printf(_x, y, RGB565(b0b0b0), RGBTRANS, "bar");
+		_x += BIOS::LCD::Printf(_x, y, RGB565(b0b0b0), RGBTRANS, ", Target: ");
+		_x += BIOS::LCD::Printf(_x, y, RGB565(00ff00), RGBTRANS, "\x7");
 		_x += BIOS::LCD::Printf(_x, y, RGB565(ffffff), RGBTRANS, "%.2f", mAttributes.GetPidTarget()) + 4;
 		_x += BIOS::LCD::Printf(_x, y, RGB565(b0b0b0), RGBTRANS, "bar");
 	}

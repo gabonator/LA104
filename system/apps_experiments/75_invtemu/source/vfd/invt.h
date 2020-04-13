@@ -1,8 +1,8 @@
 
 class CVfd : public CVfdComm
 {
-  const long mReadTimeout{50};
-  const long mNoResponseTimeout{500};
+  const long mReadTimeout{15};
+  const long mNoResponseTimeout{100};
   
   typedef void(*TPacketHandler)(const CVfdPacket& p);
   typedef void(*TErrorHandler)();
@@ -11,6 +11,8 @@ class CVfd : public CVfdComm
   long mLastReceive{0};
   long mPacketSent{0};
   uint8_t mDeviceAddress{1};
+
+public:
   enum ECommand
   {
     Read = 0x03,
@@ -19,6 +21,7 @@ class CVfd : public CVfdComm
     Abnormal = 0x80
   };
 
+private:
   TPacketHandler mPacketHandler{nullptr};
   TErrorHandler mErrorHandler{nullptr};
   
@@ -45,7 +48,7 @@ public:
     
     if (mLastReceive != 0 && now - mLastReceive > mReadTimeout)
     {
-      _ASSERT(mReceivePacket.getLength() > 0);
+      _ASSERT(mReceivePacket.getLength() > 0); // TODO: fix!
       if (checkCrc(mReceivePacket))
       {
         if (mPacketHandler)
@@ -85,14 +88,29 @@ public:
     }
   }
 
-  void send(const CVfdPacket& p)
+  CVfd& sendAndReceive(const CVfdPacket& p)
   {
     Serial_print("Send ");
     printPacket(p);
 
+    mLastReceive = 0;
     mReceivePacket.clear();
     write(p.getData(), p.getLength());
     mPacketSent = SYS::GetTick();
+	  
+    return *this;
+  }
+
+  CVfd& send(const CVfdPacket& p)
+  {
+//    Serial_print("Send ");
+//    printPacket(p);
+
+    mLastReceive = 0;
+    mReceivePacket.clear();
+    write(p.getData(), p.getLength());
+	  
+    return *this;
   }
   
   void buildWritePacket(CVfdPacket& p, uint16_t dataAddress, uint16_t dataValue)
@@ -115,14 +133,16 @@ public:
     appendCrc(p);
   }
 
-  void onPacket(TPacketHandler handler)
+  CVfd& onPacket(TPacketHandler handler)
   {
-    mPacketHandler = handler;    
+    mPacketHandler = handler;
+	return *this;
   }
   
-  void onError(TErrorHandler handler)
+  CVfd& onError(TErrorHandler handler)
   {
-    mErrorHandler = handler;    
+    mErrorHandler = handler;
+	return *this;
   }
 
   virtual void processPacket(const CVfdPacket& p)
@@ -170,7 +190,6 @@ public:
     Serial_print("\n");
   }
 
-private:
   void appendCrc(CVfdPacket& p)
   {
     uint16_t crc = calculateCrc(p.getData(), p.getLength());
@@ -178,6 +197,7 @@ private:
     p.add((uint8_t)(crc >> 8));
   }
 
+private:
   bool checkCrc(CVfdPacket& p)
   {
     uint16_t crc = calculateCrc(p.getData(), p.getLength()-2);

@@ -1,7 +1,9 @@
-#if !defined(__APPLE__) && !defined(WIN32)
+//#if !defined(__APPLE__) && !defined(WIN32)
+namespace SPF {
 #include "../../../os_host/library/spf/spf.h"
 #include "../../../os_host/library/spf/spf.c"
-#endif
+}
+//#endif
 #include "../../../../os_host/source/framework/Wnd.cpp"
 #include "../../../os_host/source/framework/BufferedIo.h"
 #include "../../../os_host/source/framework/Serialize.cpp"

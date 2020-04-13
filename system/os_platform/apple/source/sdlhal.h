@@ -17,7 +17,6 @@ class CSdlHal : public CHal
 {
     int fd;
 	FILE* f{nullptr};
-    DIR* dirp;
 
 public:
 	virtual ~CSdlHal()

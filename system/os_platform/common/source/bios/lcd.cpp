@@ -1,6 +1,10 @@
 #include "Bios.h"
 #include "font.h"
 
+namespace SPF {
+#include <../../../os_host/library/spf/spf.h>
+}
+
 #define FLIP(y) (BIOS::LCD::Height-1-(y))
 
 // TODO: global namespace
@@ -83,12 +87,9 @@ int BIOS::LCD::Printf(int x, int y, unsigned short clrf, unsigned short clrb, co
     char* bbuf = buf;
     
     va_list args;
-	
-	if (strcmp(format, "%f") == 0)
-		format = "%.3f";
-    
+	    
     va_start( args, format );
-    vsprintf( bbuf, format, args );
+    SPF::vsprintf( bbuf, format, args );
     va_end(args);
 
     return BIOS::LCD::Print(x, y, clrf, clrb, buf);
