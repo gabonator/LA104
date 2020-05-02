@@ -1,3 +1,4 @@
+# for use in LA104/system/hybrid folder
 
 cmake_minimum_required(VERSION 2.8)
 cmake_policy(SET CMP0054 NEW)
@@ -10,18 +11,20 @@ set (CMAKE_CXX_STANDARD 17)
 # call "brew install sdl2"
 
 if (ARM)
-include_directories("../../os_platform/common/include")
+include_directories("../os_library/include")
 endif()
+
+include_directories("../../os_host/source")
 
 if (DESKTOP)           	
 find_package(SDL2 REQUIRED)
 include_directories(${SDL2_INCLUDE_DIRS})
-#include_directories("include/")
+include_directories("include/")
 include_directories("../../os_platform/common/include")
 
 file(GLOB main_src 
-    "../../os_platform/mac_sdl/source/sdlmain.cpp"
-    "../../os_platform/mac_sdl/source/sdlhal.h"
+    "../../os_platform/apple/source/sdlmain.cpp"
+    "../../os_platform/apple/source/sdlhal.h"
     "../../os_platform/common/include/library.h"
 )
 
@@ -35,49 +38,59 @@ file(GLOB framework_src
     "../../os_platform/common/source/framework/*.h"
 )
 
+
+file(GLOB spf_src
+    "../../os_host/library/spf/*.cpp"
+    "../../os_host/library/spf/*.h"
+)
+
+
+file(GLOB gui_src
+    "../../os_platform/common/source/gui/*.cpp"
+    "../../os_platform/common/source/gui/*.h"
+)
 endif()
 
 if (ARM)
 file(GLOB main_src 
-    "../../os_host/source/framework/Wnd.cpp"
+    "../os_host/source/framework/Wnd.cpp"
 )
 
 file(GLOB linker_script
-    "../../apps/test45_simcom/app.lds"
+    "../apps_experiments/test33_temper/app.lds"
 )
 endif()
 
 file(GLOB application_src
-    "../../apps/test45_simcom/*.cpp"
-    "../../apps/test45_simcom/*.h"
+    "source/*.cpp"
+    "source/*.h"
+)
+
+file(GLOB application_device_src
+    "source/device/*.cpp"
+    "source/device/*.h"
+)
+
+file(GLOB application_protocol_src
+    "source/protocol/*.cpp"
+    "source/protocol/*.h"
 )
 
 if (DESKTOP)           	
-
-#file(GLOB application_sdl
-#    "../os_platform/mac_sdl/sdlmain.cpp"
-#    "../os_platform/mac_sdl/sdlhal.h"
-#)
-
-source_group("platform\\main" FILES ${main_src})
-source_group("platform\\bios" FILES ${bios_src})
-source_group("platform\\framework" FILES ${framework_src})
-#source_group("source\\gui" FILES ${gui_src})
+source_group("source\\main" FILES "source/sdlmain.cpp")
+source_group("source\\bios" FILES ${bios_src})
+source_group("source\\framework" FILES ${framework_src})
+source_group("source\\gui" FILES ${gui_src})
 endif()
 
 source_group("application" FILES ${application_src})
-source_group("include" FILES "../../os_platform/common/include")
+source_group("application\\device" FILES ${application_device_src})
+source_group("application\\protocol" FILES ${application_protocol_src})
+source_group("include" FILES "include/library.h")
 
-file(GLOB application_exec
-  ${main_src} ${bios_src} ${framework_src} 
-  ${gui_src} ${application_src} ${application_devices_src} ${application_codecs_src} 
-  ${application_layouts_src} ${application_utils_src} ${application_controls_src} 
-  ${application_layouts_file_src} ${application_layouts_meas_src} ${application_layouts_modem_src}
-)
+add_executable(application ${main_src} ${bios_src} ${framework_src} ${gui_src} ${application_src} ${application_device_src} ${application_protocol_src})
 
-add_executable(application ${application_exec})
-
-add_definitions(-DEMULATED)
+add_definitions(-DLA104)
 
 if (ARM)
 target_link_libraries(application m)

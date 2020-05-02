@@ -1,12 +1,13 @@
 #include "spi.h"
 #include <math.h>
+#include "json.h"
 
 class CSampler
 {
 public:
-  virtual bool Init();
-  virtual void Deinit();
-  virtual bool Read();
+  virtual bool Init() = 0;
+  virtual void Deinit() = 0;
+  virtual bool Read() = 0;
 
     void delayMicroseconds(int us)
     {
@@ -104,17 +105,16 @@ public:
     void Reset()
     {
         mSpi.deselect();                    // Deselect CC1101
-        delayMicroseconds(5);
+        BIOS::SYS::DelayMs(1);
         mSpi.select();                      // Select CC1101
-        delayMicroseconds(10);
+        BIOS::SYS::DelayMs(1);
         mSpi.deselect();                    // Deselect CC1101
-        delayMicroseconds(41);
+        BIOS::SYS::DelayMs(1);
         mSpi.select();                      // Select CC1101
         mSpi.wait();                          // Wait until MISO goes low
         enum {CC1101_SRES = 0x30};
         Write(CC1101_SRES);                // Send reset command strobe
         mSpi.wait();                          // Wait until MISO goes low
-
         mSpi.deselect();                    // Deselect CC1101
     }
 
@@ -141,7 +141,7 @@ public:
 class CDeviceCC1101 : public CCc1101Spi
 {
     bool mLoaded{false};
-  char str[600]; // TODO!! STACK!!!
+//  char str[600]; // TODO!! STACK!!!
     
 public:
     enum TRegister {
@@ -160,13 +160,22 @@ public:
     const char* mConfig =
     "{"
     "IOCFG0:0x06,"
-    "FIFOTHR:0x00,PKTCTRL1:0x06,PKTCTRL0:0x00,PKTLEN:0x04,"
+    "PKTCTRL1:0x06,PKTCTRL0:0x00,PKTLEN:0x04,"
     "FSCTRL1:0x06,FSCTRL0:0x00,FREQ2:0x10,FREQ1:0xB0,FREQ0:0x71,"
     "MDMCFG4:0xA4,MDMCFG3:0x32,MDMCFG2:0x30,MDMCFG1:0x22,MDMCFG0:0xF8,"
     "MCSM2:0x07,MCSM1:0x30,MCSM0:0x18,AGCCTRL2:0x04,AGCCTRL1:0x00,"
     "AGCCTRL0:0x92,FREND1:0xB6,FREND0:0x11,FSCAL3:0xE9,FSCAL2:0x2A,FSCAL1:0x00,"
     "FSCAL0:0x1F,TEST2:0x81,TEST1:0x35,TEST0:0x09"
     ",AGCCTRL2:0x07,PATABLE:0x50}";
+  
+/* Oregon
+    "{IOCFG2:0x0D,FIFOTHR:0x47,PKTCTRL0:0x32,FSCTRL1:0x06,FSCTRL0:0x00,FREQ2:0x10,"
+    "FREQ1:0xB0,FREQ0:0x71,MDMCFG4:0xF7,MDMCFG3:0x32,MDMCFG2:0x30,MDMCFG1:0x22,"
+    "MDMCFG0:0xF8,MCSM2:0x07,MCSM1:0x30,MCSM0:0x18,AGCCTRL2:0x04,AGCCTRL1:0x00,"
+    "AGCCTRL0:0x92,FREND1:0xB6,FREND0:0x11,FSCAL3:0xE9,FSCAL2:0x2A,FSCAL1:0x00,"
+    "FSCAL0:0x1F,TEST2:0x81,TEST1:0x35,TEST0:0x09"
+    ",AGCCTRL2:0x07}";
+*/
 
     TRegister GetRegister(char* reg)
     {
@@ -200,44 +209,17 @@ public:
         return "";
     }
 
-/*
-    bool Save(char* filename)
-    {
-        CBufferedWriter wr;
-        if (!wr.Open(filename))
-            return false;
-        
-        wr << "{";
-        for (int i=0; i<TRegister::ALL; i++)
-        {
-            char value[8];
-            sprintf(value, "0x%02x", mRegisters[i]);
-            if (i>0)
-                wr << ",";
-            wr << GetRegister((TRegister)i) << ":" << value;
-        }
-        wr << "}";
-        wr.Close();
-        return true;
-    }
-*/    
     bool Load(char* filename)
     {
-        if (!filename)
-        {
-            // load default values only once!
-        }
-        
-//        static CCc1101Config* _this;
+        static CDeviceCC1101* _this;
         static long _lTimeout;
         static bool _check;
         _lTimeout = BIOS::SYS::GetTick() + 1500;
         _check = true;
-//        _this = this;
+        _this = this;
         
         CCc1101Spi::Reset();
-        //TODO: json parser problem!
-  /*      
+
         CJson(mConfig).ForEach([](const CSubstring& key, const CSubstring& value)
         {
             char strKey[32];
@@ -246,51 +228,19 @@ public:
             int val = CConversion(value).ToInt();
             _this->mRegisters[reg] = val;
             do {
-                mDeviceModem.Write(reg, val);
+                _this->Write(reg, val);
                 if ((long)BIOS::SYS::GetTick() > _lTimeout)
                 {
                     _check = false;
                     return;
                 }
             }
-            while ((int)mDeviceModem.Read(reg) != val);
-        });*/
-
-_ASSERT(sizeof(str)>strlen(mConfig));
-
-  strcpy(str, mConfig+1);
-  str[strlen(str)-1] = 0;
-  char* pch = strtok (str,":,");
-  while (pch != NULL)
-  {
-    int reg = GetRegister(pch);
-    pch = strtok (NULL, ":,");
-    int val = CConversion(pch).ToInt();
-
-    pch = strtok (NULL, ":,");
-
-            mRegisters[reg] = val;
-            do {
-                CCc1101Spi::Write(reg, val);
-                if ((long)BIOS::SYS::GetTick() > _lTimeout)
-                {
-                    _check = false;
-                    break;
-                }
-            }
-            while ((int)CCc1101Spi::Read(reg) != val);
-
-  }
+            while ((int)_this->Read(reg) != val);
+        });
 
         if (!_check)
             return false;
 
-/*        
-        enum {CC1101_SRX = 0x34};
-        CCc1101Spi::Write(CC1101_SRX);
-        CCc1101Spi::Write(PKTCTRL0, 0x30);
-        CCc1101Spi::Write(IOCFG0, 0x0d);
-*/
         mLoaded = CCc1101Spi::Read(TEST1) == mRegisters[TEST1];
         return mLoaded;
     }
@@ -302,6 +252,9 @@ _ASSERT(sizeof(str)>strlen(mConfig));
     
     virtual bool InitModem()
     {
+#ifdef __APPLE__
+		return true;
+#endif
         if (mLoaded)
             return true;
         return Load(nullptr);
@@ -394,7 +347,7 @@ _ASSERT(sizeof(str)>strlen(mConfig));
         CCc1101Spi::Write(FREQ0, mRegisters[FREQ0]);
     }
 
-    void SetFreq(int32_t freqHz)
+    void SetFrequency(int32_t freqHz)
     {
         uint32_t freqReg = (((uint64_t)freqHz) << 16) / GetOscFrequency();
 
@@ -430,12 +383,16 @@ _ASSERT(sizeof(str)>strlen(mConfig));
     void SetRxState()
     {
         enum {CC1101_SRX = 0x34};
+        CCc1101Spi::Write(PKTCTRL0, 0x30); // RX: 0x30 - async serial, data out n GDOx, TX: 0x00 - use TX fifo
+        CCc1101Spi::Write(IOCFG0, 0x0d); // RX: GDO0: serial data output, TX: 0x06 - optional transmission sync pulse
         CCc1101Spi::Write(CC1101_SRX);
     }
 
     void SetTxState()
     {
         enum {CC1101_STX = 0x35};
+        CCc1101Spi::Write(PKTCTRL0, 0x00); // RX: 0x30 - async serial, data out n GDOx, TX: 0x00 - use TX fifo
+        CCc1101Spi::Write(IOCFG0, 0x06); // RX: GDO0: serial data output, TX: 0x06 - optional transmission sync pulse
         CCc1101Spi::Write(CC1101_STX);
     }
 
@@ -472,6 +429,7 @@ _ASSERT(sizeof(str)>strlen(mConfig));
     void SetOutputPower(int power)
     {
         _ASSERT(power > 0 && power < 256);
+        // ASK uses two entries, first power for zero logic level and second power for logic one
         uint8_t table[2] = {0, (uint8_t)power};
         CCc1101Spi::Write(PATABLE, table, 2);
     }
