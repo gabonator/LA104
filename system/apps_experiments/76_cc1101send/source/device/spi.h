@@ -42,14 +42,17 @@ public:
     
     virtual void Set(EPin p, bool b) override
     {
+//        for (volatile int i=0; i<50; i++);
         BIOS::GPIO::DigitalWrite(Pin(p), b);
-        //for (volatile int i=0; i<500; i++);
+        for (volatile int i=0; i<50; i++);
     }
     
     virtual bool Get(EPin p) override
     {
-        //for (volatile int i=0; i<500; i++);
-        return BIOS::GPIO::DigitalRead(Pin(p));
+//        for (volatile int i=0; i<50; i++);
+        bool b = BIOS::GPIO::DigitalRead(Pin(p));
+        for (volatile int i=0; i<50; i++);
+        return b;
     }
 };
 
@@ -65,6 +68,10 @@ public:
       PinMode(CPinIoBase::MOSI, CPinIoBase::Output);
       PinMode(CPinIoBase::MISO, CPinIoBase::Input);
       PinMode(CPinIoBase::D, CPinIoBase::Input); 
+
+      Set(CPinIoBase::CS, true);
+      Set(CPinIoBase::SCK, true);
+      Set(CPinIoBase::MOSI, false);
       deselect();
   }
     
@@ -114,7 +121,10 @@ public:
         iter = 0;
         int32_t delta = BIOS::SYS::GetTick() - tick;
         if (delta > 100)
+{
+BIOS::DBG::Print("[WAIT FAIL!]");
           return false;
+}
       }
     }
     return true;
