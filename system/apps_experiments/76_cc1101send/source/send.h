@@ -27,13 +27,23 @@ bool sendPacket(uint32_t frequency, uint32_t bps, uint8_t* buffer, int length)
 	gModem.Write(CC1101_TXFIFO, buffer, length); // max 64 bytes
 	gModem.SetTxState();
 
+long lBase = BIOS::SYS::GetTick();
 	int marcState = 0;
 	do {
 		// add delay, enabling TX goes through calibration, or disable automatic calibration
 		// TODO: measure time required for calibration
 		marcState = gModem.Read(CC1101_MARCSTATE | CC1101_STATUS_REGISTER) & 0x1F;
 		BIOS::SYS::DelayMs(5);
+if (BIOS::SYS::GetTick() - lBase > 1000)
+{
+  BIOS::DBG::Print("--TX fail 1-- marc=%d", marcState);
+  gModem.FlushTxFifo();
+	gModem.SetIdleState();
+  return false;
+}
 	} while ((marcState != 0x13) && (marcState != 0x14) && (marcState != 0x15));
+
+lBase = BIOS::SYS::GetTick();
 
 	int txbytes = 0;
 	do {
@@ -41,6 +51,13 @@ bool sendPacket(uint32_t frequency, uint32_t bps, uint8_t* buffer, int length)
 		txbytes = gModem.Read(CC1101_TXBYTES | CC1101_STATUS_REGISTER) & 0x7F;
 		//CONSOLE::Print("%d ", txbytes);
 		BIOS::SYS::DelayMs(5);
+if (BIOS::SYS::GetTick() - lBase > 1000)
+{
+  BIOS::DBG::Print("--TX fail 2--");
+  return false;
+}
+
 	} while (txbytes > 0);
 	BIOS::SYS::DelayMs(20);
+	return true;
 }

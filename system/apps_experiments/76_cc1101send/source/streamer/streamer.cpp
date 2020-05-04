@@ -21,7 +21,7 @@ volatile int streamerOverrun = 0;
 bool streamerBufferLogic = 0;
 int streamerBufferCounter = 0;
 int streamerBufferMaxCounter = 20000; // 1 second @ 50 kHz
-const int streamerPeriodUs = 20;
+const int streamerPeriodUs = 40;
 int totalSamples = 0;
 RingBufCPP<uint16_t, 256> streamerBuffer;
 
@@ -32,7 +32,7 @@ void streamerProcess(const volatile uint16_t *data)
   const volatile uint16_t *end = data + ADC_FIFO_HALFSIZE;
   while (data < end)
   {   
-totalSamples++;
+    totalSamples++;
     int sample = GetLogic(*data++); 
     if (sample == streamerBufferLogic)
     {
@@ -120,8 +120,15 @@ void streamerStart()
 
 // 1200 -> 85 samples per second!?
 
-    int psc = 60; // 5khz
-    TIM1->PSC = psc - 1; // 50kHz
+    // freq = 72MHz / 24 / psc
+    // psc = 72e6 / 24 / freq
+    // psc = 60 -> 40kHz (1ms as 39 pulses)
+    // psc = 48 -> 50kHz (1ms as 61 pulses)
+    // psc = 53          (1ms as 51.3 pulses)
+    // psc = 54          (1ms as 48.5 pulses), 40 pulses per 1us
+
+    int psc = 54;
+    TIM1->PSC = psc - 1;
     TIM1->ARR = psc/2 - 1;
     TIM1->CCMR1 = 0x0000; // CC2 time base
     TIM1->CCMR2 = 0x0000; // CC4 time base

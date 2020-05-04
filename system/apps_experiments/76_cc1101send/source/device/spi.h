@@ -42,17 +42,12 @@ public:
     
     virtual void Set(EPin p, bool b) override
     {
-//        for (volatile int i=0; i<50; i++);
         BIOS::GPIO::DigitalWrite(Pin(p), b);
-        for (volatile int i=0; i<50; i++);
     }
     
     virtual bool Get(EPin p) override
     {
-//        for (volatile int i=0; i<50; i++);
-        bool b = BIOS::GPIO::DigitalRead(Pin(p));
-        for (volatile int i=0; i<50; i++);
-        return b;
+        return BIOS::GPIO::DigitalRead(Pin(p));
     }
 };
 
