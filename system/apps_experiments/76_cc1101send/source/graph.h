@@ -6,11 +6,11 @@ void graphPush(int interval)
 	static int row = 0;
 	static bool skip = false;
 
-	const int baseY = 40;
+	const int baseY = 16;
 	const int height = 12;
-	const int k = 2;
-	const int rowHeight = 20;
-	const int maxRows = 8;
+	const int k = 10;
+	const int rowHeight = 16;
+	const int maxRows = 10;
 
 	if (interval == -1)
 	{
@@ -53,7 +53,7 @@ void graphPush(int interval)
 		row++;
 		curY += rowHeight;
 		nx -= BIOS::LCD::Width*k;
-		if (row >= maxRows-1)
+		if (row >= maxRows)
 		{
 			skip = true;
 			return;

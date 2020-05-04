@@ -18,11 +18,15 @@ public:
 
   virtual bool Identify(CArray<int>& pulse)
   {
+    auto IsSpacer = [](int l){ return l >= 18 && l <= 25; };
+    auto IsShort = [](int l){ return l >= 4 && l <= 5; };
+    auto IsLong = [](int l){ return l >= 8 && l <= 10; };
+    
     if (PulseLen(pulse[0]) == 1 && 
-        PulseLen(pulse[1]) == 18 &&
+        IsSpacer(PulseLen(pulse[1])) &&
         PulseLen(pulse[2]) == 1 &&
-        (PulseLen(pulse[3]) == 4 ||
-        PulseLen(pulse[4]) == 8))
+        (IsShort(PulseLen(pulse[3])) ||
+        IsLong(PulseLen(pulse[3]))))
     {
       return true;
     }
