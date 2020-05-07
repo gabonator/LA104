@@ -531,7 +531,7 @@ namespace FPGA
     // We should reset trigger!
     constexpr int SMPL_CLR = 0x02;
     FPGA16(SMPL_CLR, 1, 0);
-    delayMicroseconds(20);
+    delayMicroseconds(100); // 20, 50 - not enough
   }
 
   int Direct()

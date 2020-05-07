@@ -180,7 +180,7 @@ public:
 		_ASSERT( m_nCount >= 0 && m_nCount <= m_nMaxCount );
 	}
 
-	int GetSize()
+	int GetSize() const
 	{
 		return m_nCount;
 	}
@@ -196,6 +196,14 @@ public:
 	}
 
 	TYPE& operator []( int i)
+	{
+		if ( i < 0 )
+			i += m_nCount;
+		_ASSERT( i >= 0 && i < GetSize() );
+		return m_arrElements[i];
+	}
+
+	const TYPE& operator []( int i) const
 	{
 		if ( i < 0 )
 			i += m_nCount;
@@ -251,4 +259,5 @@ public:
 	{
 		return m_arrElements;
 	}
+
 };

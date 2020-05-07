@@ -44,6 +44,7 @@ public:
 
   virtual void Example(CAttributes& attributes)
   {
+    // -512 (-51.2 C) ... 999 (+99.9 C)
     attributes["temperature10"] = 171; // 17.1 C
     attributes["humidity"] = 99; // 99 %
     attributes["id"] = 38;
@@ -94,7 +95,7 @@ public:
 
     nibbles.Add(attr["id"] & 0xf);
     nibbles.Add(Reverse2(attr["channel"]) | (attr["id"] >> 4) << 2);
-    nibbles.Add(attr["battery_low"] | (attr["unk"] << 1));
+    nibbles.Add(attr["battery_low"] | (attr["junk"] << 1));
     nibbles.Add(temp & 15);
     nibbles.Add((temp >> 4) & 15);
     nibbles.Add((temp >> 8) & 15);
