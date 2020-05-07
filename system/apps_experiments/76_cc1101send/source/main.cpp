@@ -14,6 +14,7 @@
 #include "graph.h"
 CDeviceCC1101 gModem;
 #include "send.h"
+#include "thermo.h"
 
 
 // 10ms -> 493 pulses
@@ -47,14 +48,16 @@ bool setup()
   gModem.DeltaGain(-100); 
 //  gModem.DeltaGain(2); // 0..7
   gModem.DeltaBandwidth(-100);
-  gModem.DeltaBandwidth(9);  // 8:203khz, 10: 135khz, 12 -> 101khz
+  gModem.DeltaBandwidth(9); // 8:203khz, 10: 135khz, 12 -> 101khz
 
 
 
-  gModem.DeltaGain(+5);
-	gModem.SetDataRate(4000);
+  gModem.DeltaGain(+5); // 5:-12db
+  gModem.SetDataRate(4000);
 
 //	BIOS::GPIO::PinMode(BIOS::GPIO::EPin::P4, BIOS::GPIO::EMode::Input);
+
+
     gModem.SetRxState();
     streamerBufferMaxCounter = 4000;
     streamerBegin();
@@ -78,25 +81,25 @@ BIOS::SYS::DelayMs(1000);
 {
 BIOS::SYS::Beep(50);
 }
-  gModem.SetRxState();
+//  gModem.SetRxState();
 //  gModem.SetDataRate(4000);
 }
 
 
 int signal_[100];
-CArray<int> signal(signal_, COUNT(signal_));
+CArray<int> arrsignal(signal_, COUNT(signal_));
 CWeather weather;
 
 void _graphPush(int v)
 {
   if (v==-1)
   {
-    signal.RemoveAll();
+    arrsignal.RemoveAll();
   }
   else
   {
-    if (signal.GetSize() < signal.GetMaxSize())
-      signal.Add(v*25);
+    if (arrsignal.GetSize() < arrsignal.GetMaxSize())
+      arrsignal.Add(v*25);
 
 /*
     #define Ticks(d) ((d+10)/20)
@@ -106,7 +109,7 @@ void _graphPush(int v)
     #define IsLong(l) (Ticks(l) >= 8 && Ticks(l) <= 10)
     #define IsLongOrShort(l) (IsLong(l) || IsShort(l))
 */
-    if (signal.GetSize() >= weather.MinIndentifyCount())
+    if (arrsignal.GetSize() >= weather.MinIndentifyCount())
     {
 /*
       if (IsPulse(signal[0]) && 
@@ -115,10 +118,10 @@ void _graphPush(int v)
           IsLongOrShort(signal[3]) &&
           IsPulse(signal[4]))
 */
-      if (weather.Identify(signal))
+      if (weather.Identify(arrsignal))
       {
         BIOS::LCD::Printf(0, BIOS::LCD::Height-16-16-20, RGB565(ff0000), RGB565(0000d0), "!!!");
-        signal.RemoveAll();
+        arrsignal.RemoveAll();
         Noise();
       }
     }
@@ -311,71 +314,9 @@ void drop()
 
 void loop()
 {
-  static long lastRequest = 0;
-  static int seq = 0;
-  
-  long now = SYS::GetTick();
-//  if (now - lastRequest > 2500)
-EVERY(200)
-{
-//BIOS::LCD::Printf(0, 0, RGB565(ffffff), RGB565(000000), "sams %d", totalSamples);
-//    CONSOLE::Print("cr %d, ", TIM1->CNT);
-}
-/*
-{EVERY(5000){
-CONSOLE::Print("Start...");
-startDma();
-CONSOLE::Print("Data %02x %02x %02x %02x %02x %02x\n", gpio_buffer[0], gpio_buffer[1], gpio_buffer[2], gpio_buffer[3], gpio_buffer[4], gpio_buffer[5]);
-}}*/
+  StreamerPreview();
 
-//  if (now - lastRequest >= 2000)
-  {
-    lastRequest = now;
-
-//    int n = streamerBuffer.size();
-//    for (int i=0; i<n; n++)
-////      streamerBuffer.pull();
-//    CONSOLE::Print("%d samples, %x%x%x%x, ", n, adc_fifo[0]&15, adc_fifo[1]&15, adc_fifo[2]&15, adc_fifo[3]&15);
-
-/*
-streamerBuffer.empty();
-CONSOLE::Color(RGB565(ff0000));
-      CONSOLE::Print(" %x ", adc_fifo[0]);
-
-CONSOLE::Color(RGB565(b0b0b0));
-    for (int i=0; i<16; i++)
-      CONSOLE::Print("%x", (uint8_t)(adc_fifo[i]>>8) & 2);
-CONSOLE::Color(RGB565(ffffff));
-      CONSOLE::Print("\n");
-*/
-
-/*
-    static int p = 0;
-    int n = streamerBuffer.size();
-//CONSOLE::Print("s=%d,", n);
-    for (int i=0; i<n; i++, p++)
-    {
-      CONSOLE::Color((!(p & 1)) ? RGB565(b0b0b0) : RGB565(ffffff));
-      CONSOLE::Print("%d ", streamerBuffer.pull());
-   }
-CONSOLE::Color(RGB565(ffffff));
-
-*/
-StreamerPreview();
-
-//CONSOLE::Print(" ok ", n);
-
-//TIM1->CNT = 0;
-
-/*
-//    CONSOLE::Print("Sending... ");
-    if (sendThermo())
-      CONSOLE::Print(".");
-//      CONSOLE::Print("Ok. ");
-    else
-      CONSOLE::Print("Failed. \n");
-*/
-  }
+//  {EVERY(1000){ sendThermo();    CONSOLE::Print("."); }}
 }
 
 #ifdef _ARM
