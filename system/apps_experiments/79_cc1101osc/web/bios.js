@@ -16,8 +16,8 @@ var LCD = {
 };
 
 var MODEM = {
-    SetFrequency: (arg) => BIOS.rpcCallR('CC1101::SetFrequeny('+arg+');'),
-    GetFrequency: () => BIOS.rpcCallR('CC1101::GetFrequeny();'),
+    SetFrequency: (arg) => BIOS.rpcCallR('CC1101::SetFrequency('+arg+');'),
+    GetFrequency: () => BIOS.rpcCallR('CC1101::GetFrequency();'),
     SetBandwidth: (arg) => BIOS.rpcCallR('CC1101::SetBandwidth('+arg+');'),
     GetBandwidth: () => BIOS.rpcCallR('CC1101::GetBandwidth();'),
     SetBandwidth: (arg) => BIOS.rpcCallR('CC1101::SetBandwidth('+arg+');'),
