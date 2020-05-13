@@ -5,25 +5,62 @@ var maxError = 0;
 var sumError = 0;
 var cntError = 0;
 
+
+function Calc(rate)
+{
+  var base = (1<<28) / fOsc;
+  var E = Math.ceil(Math.log2(rate * base / (256 + 255)));
+  var M = Math.floor(rate * base / (1<<E) - 256 + 0.5);
+
+  //Average error: 0.07% Max error: 0.19%
+  return {E:E, M:M};
+}
+
+function CalcFix(rate)
+{
+  // var t = rate * (1<<28) / fOsc;
+  // maximal common divisor of 26 000 000 and 268435456 is 128
+  // max rate value is 2048 to fit uint32_t
+  //var t = rate * (1<<21) / Math.floor(fOsc/128);
+  var t = rate * (1 << 28) / fOsc;
+
+  var Ebase = Math.floor(t/511);
+
+  var E = 0, Ev = 1;
+  while (Ebase > 0)
+  {
+    Ebase >>= 1;
+    Ev <<= 1;
+    E++;
+  }
+
+  var M = Math.floor((t + Ev/2) / Ev - 256);
+
+  var check = Calc(rate);
+  if (E != check.E || M != check.M)
+    throw "err";
+
+  return {E:E, M:M};
+}
+
 for (var i=100; i<10000; i+=1)
 {
   var rate = i;
 
   var base = (1<<28) / fOsc;
-  var E = Math.ceil(Math.log2(rate * base / (256 + 255)));
-  var M = Math.floor(rate * base / (1<<Math.ceil(E)) - 256 + 0.5);
+  var c = CalcFix(i);
 
-  var check = (256+M) * (1<<E) / base;
+  var check = (256+c.M) * (1<<c.E) / base;
 
   var error = Math.abs(rate-check)/rate;
   maxError = Math.max(error, maxError);
   sumError += error;
   cntError++;
 
-  console.log({rate:rate, check:check.toFixed(1), error:(error*100).toFixed(1) + "%", E:E, M:M});
-  if (Math.ceil(E) > 15)
+  console.log({rate:rate, check:check.toFixed(1), error:(error*100).toFixed(1) + "%", E:c.E, M:c.M});
+  if (Math.ceil(c.E) > 15)
     throw "Exponent too big";
-  if (Math.floor(M) > 255)
+  if (Math.floor(c.M) > 255)
     throw "Mantisa too big";
 }
 

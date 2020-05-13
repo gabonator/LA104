@@ -1,0 +1,108 @@
+<script>
+var buf = [];
+var interval1 = 0, interval2 = 0, leading = true, terminated = false;
+
+
+// H2300, L2100, 
+// H300, L400, H500, L600,   H6300, L2100         -> 300 400 500 600
+// H300, L400, H500, L600,   H4000                -> 300 400 500 600
+// L100, H200, L300, H400                         -> 200 300 400
+// L3000, H2110
+// L100, H200, L300, H400,                        -> 200 300 400
+// L3000, H500, L500
+// H100, L200, H300, L400,                        -> 100 200 300 400
+
+join([
+  1000, 0, 1000, 0, 300, // leading 2300
+  1000, 0, 1000, 0, 100, 300, 400, 500, 600,  // data
+  1000, 0, 1000, 0, 1000, 0, 1000, 0, 1000, 0, 1000, 0, 300, // leading 6300
+  1000, 0, 1000, 0, 100, 300, 400, 500, 600, // data
+  1000, 0, 1000, 0, 1000, 0, 1000, // trailing 4000
+  100, 200, 300, 400,
+  1000, 0, 1000, 0, 1000, 2110,
+  100, 200, 300, 400,
+  1000, 0, 1000, 0, 1000, 500, 500,
+  100, 200, 300, 400,
+  1000, 0, 1000, 0, 1000, 0
+], console.log);
+
+function join(d)
+{
+  var p = 0;
+  for (var i in d)
+    pulseMachine(d[i], p=1-p);
+}
+
+function pulseMachine(interval, level)
+{
+//  console.log(interval);
+  if (interval == -1)
+  {
+    interval1 = 0;
+    interval2 = 0;
+    leading = true;
+    pulseMachinePush(-1);
+    return;
+  }
+
+  if (interval1 == 0)
+  {
+    interval += interval2;
+  }
+  
+  //if (!terminated)
+  {
+    if (interval > 1000)
+    {
+      // finalizuj, ale dalej pokracuj!
+console.log("--STOP-A--");
+
+      pulseMachinePush(-1);
+      leading = true;     
+    }
+  }
+
+  if (interval1 != 0 && interval2 != 0)
+  {
+    if (interval2 > 1000)
+    {
+      // finalizuj, ale dalej pokracuj!
+console.log("--STOP-B--");
+
+      pulseMachinePush(-1);
+      leading = true;     
+    }
+
+    if (leading)
+    {
+console.log(level ? "--HIGH--" : "--LOW--");
+console.log("LH"[level]+" "+interval2);
+      if (level == 0)   
+        leading = false;
+    }
+    else
+    {
+console.log("LH"[level]+" "+interval2);
+//      if (!terminated)
+        pulseMachinePush(interval2);
+    }
+  }
+
+  interval2 = interval1;
+  interval1 = interval;
+}
+
+function pulseMachinePush(i)
+{
+//  console.log(i);
+  if (i==-1)
+  {
+    if (buf.length)
+      console.log(buf);
+    buf = [];
+    return;
+  }
+  buf.push(i);
+}
+
+</script>
