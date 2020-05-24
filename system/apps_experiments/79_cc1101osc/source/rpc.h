@@ -16,12 +16,14 @@ namespace RPC
     EXPORT(CC1101::GetGain);
     EXPORT(CC1101::SetDataRate);
     EXPORT(CC1101::GetDataRate);
+    EXPORT(CC1101::SetOutputPower);
 
     EXPORT(CC1101::Init);
     EXPORT(CC1101::Start);
     EXPORT(CC1101::Stop);
     EXPORT(CC1101::Transfer);
     EXPORT(CC1101::Status);
+    EXPORT(CC1101::Send);
 
     if (strcmp(command, "CC1101::SetFrequency")==0)
       return (uint32_t)CC1101::SetFrequency;
@@ -29,6 +31,9 @@ namespace RPC
       return (uint32_t)BIOS::GPIO::DigitalWrite;
     if (strcmp(command, "CC1101::SetBandwidth")==0)
       return (uint32_t)BIOS::GPIO::DigitalRead;
+
+    if (strcmp(command, "SYS::Info")==0)
+      return (uint32_t)SYS::Info;
 
     if (strcmp(command, "DBG::Print")==0)
       return (uint32_t)BIOS::DBG::Print;

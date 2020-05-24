@@ -2,6 +2,7 @@
 #include "terminal.h"
 #include "memory.h"
 #include "cc1101.h"
+#include "sys.h"
 #include "rpc.h"
 #include "evaluator.h"
 #include "webusb/webusb.h"

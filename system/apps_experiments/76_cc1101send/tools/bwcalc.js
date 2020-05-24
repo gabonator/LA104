@@ -3,7 +3,7 @@ function GetOscFrequency()
   return 26e6;
 }
 
-//int CHANBW_M = (mRegisters[MDMCFG4] >> 4) & 3;  // 0..7
+//int CHANBW_M = (mRegisters[MDMCFG4] >> 4) & 3;  // 0..3
 //int CHANBW_E = mRegisters[MDMCFG4] >> 6; // 0..3
 
 function GetBandwidth(CHANBW_M, CHANBW_E)
@@ -25,12 +25,13 @@ function CalcBandwidthFix(bw)
   var root2 = [0, 1, 2, 2, 3, 3, 3, 3];
   var t = GetOscFrequency() / 8 / bw;
   var _e = root2[Math.floor(t/12)];
-  var _m = Math.floor(t / (1<<_e) - 4);
+//  var _m = Math.floor(t / (1<<_e) - 4);
+  var _m = (Math.floor(t) >> _e) - 4;
   return {e:_e, m:_m};
 }
 
 for (var e=0; e<=3; e++)
-  for (var m=0; m<=7; m++)
+  for (var m=0; m<=3; m++)
   {
     var bw = GetBandwidth(m, e);
     var _calc = CalcBandwidthFix(bw);

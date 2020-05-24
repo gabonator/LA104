@@ -23,7 +23,7 @@ int streamerBufferCounter = 0;
 int streamerBufferMaxCounter = 20000; // 1 second @ 50 kHz
 const int streamerPeriodUs = 40;
 int totalSamples = 0;
-RingBufCPP<uint16_t, 256> streamerBuffer;
+RingBufCPP<uint16_t, 512> streamerBuffer;
 
 #define GetLogic(idr) (((idr) >> 9) & 1) // B9
 
@@ -40,25 +40,24 @@ void streamerProcess(const volatile uint16_t *data)
       // append [60000, 0] to buffer
       if (streamerBufferCounter >= streamerBufferMaxCounter)
       {
-        if (streamerBuffer.isFull())
-          streamerOverrun++;
-        else
+        if (streamerBuffer.capacity() > 2)
+        {
           streamerBuffer.push(streamerBufferCounter);
-
-        streamerBufferCounter = 0;
-
-        if (streamerBuffer.isFull())
-          streamerOverrun++;
-        else
+          streamerBufferCounter = 0;
           streamerBuffer.push(0);
+        } else
+        {
+          streamerOverrun++;
+        }
       }
     } else
     {
       // append ticks to buffer and toggle logic
-      if (streamerBuffer.isFull())
-        streamerOverrun++;
-      else
+      if (streamerBuffer.capacity() > 1)
         streamerBuffer.push(streamerBufferCounter);
+      else
+        streamerOverrun++;
+
       streamerBufferCounter = 0;
       streamerBufferLogic = 1 - streamerBufferLogic;
     }

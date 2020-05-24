@@ -6,15 +6,31 @@
   <body>
     <p style="">
       <button id="connect">Connect</button> [<span id="status"></span>]
-      <button id="start">Start</button>
+      <button id="start">Init</button>
+      <button id="sstart">Start</button>
+      <button id="sstop">Stop</button>
+      <button id="simulator">Simulator</button>
+      <button id="zoomin">Zoom +</button>
+      <button id="zoomout">Zoom -</button>
+<br>
+      <button id="dzoomin">Detail Zoom +</button>
+      <button id="dzoomout">Detail Zoom -</button>
+      <button id="dquantize">Quantize</button>
+      <button id="dendminus">Trim &lt;</button>
+      <button id="dendplus">Trim &gt;</button>
+      <button id="dexample">Example</button>
+      <button id="dsend">Send</button>
+
     </p>
+<input type="button" id="toggle" value="Toggle scanning">
 
 
     <script src="serial.js"></script>
     <script src="comm.js"></script>
     <script src="bios.js"></script>
     <script src="decoder.js"></script>
+    <script src="canvas.js"></script>
     <script src="analyser.js"></script>
-
+    <script src="protocol/weather.js"></script>
   </body>
 </html>

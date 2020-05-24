@@ -10,7 +10,7 @@ void streamerResume();
 extern int streamerBufferMaxCounter;
 extern const int streamerPeriodUs;
 extern volatile int streamerOverrun;
-extern RingBufCPP<uint16_t, 256> streamerBuffer;
+extern RingBufCPP<uint16_t, 512> streamerBuffer;
 
 #else
 void streamerBegin(){}
@@ -18,7 +18,7 @@ void streamerEnd(){}
 bool isStreaming(){return true;}
 void streamerPause(){}
 void streamerResume(){}
-RingBufCPP<uint16_t, 256> streamerBuffer;
+RingBufCPP<uint16_t, 512> streamerBuffer;
 volatile int streamerOverrun;
 int streamerBufferMaxCounter;
 
