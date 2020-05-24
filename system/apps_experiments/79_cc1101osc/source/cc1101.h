@@ -19,6 +19,8 @@ public:
 
 CDeviceCC1101Interface gModem;
 
+#include "device/send.h"
+
 namespace CC1101
 {
   int SetFrequency(int f)
@@ -65,6 +67,17 @@ namespace CC1101
     return gModem.GetDataRate();
   }
 
+  int SetOutputPower(int power)
+  {
+    gModem.SetOutputPower(power);
+    return gModem.GetOutputPower();
+  }
+
+  int GetOutputPower()
+  {
+    return gModem.GetOutputPower();
+  }
+
   int Init()
   {
     if (!gModem.Init())
@@ -84,6 +97,7 @@ namespace CC1101
 
   int Start()
   {
+    gModem.SetRxState();
     streamerBufferMaxCounter = 4000;
     streamerBegin();
     return true;
@@ -104,6 +118,23 @@ namespace CC1101
 
   int Status()
   {
+    if (streamerOverrun)
+    {
+      streamerOverrun = 0;
+      return 'E' * 256 + 'O';
+    }
+
     return 0;
+  }
+
+  int Send(uint16_t* data, int length, int divisor)
+  {
+    CArray<uint16_t> pulse(data, length);
+    pulse.SetSize(length);
+
+    int ok = SendPulses(pulse, divisor);
+    gModem.SetRxState();
+
+    return ok;
   }
 }

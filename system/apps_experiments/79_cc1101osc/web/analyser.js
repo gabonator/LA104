@@ -1,151 +1,376 @@
+var canvas = new PreviewCanvas(900, 100);
+var detail = new DetailCanvas(900, 100);
 
+class Memory
+{
+  constructor()
+  {
+    this.buffers = [[], []];
+    this.sizes = [0, 0];
+    this.current = 0;
+    this.maxSize = 2000*1000 / 20; // 2 seconds max
+    this.counter = 0;
+  }
+
+  push(pulse)
+  {
+    this.counter += pulse.length;
+    this.buffers[0] = this.buffers[0].concat(pulse);
+    this.sizes[0] += pulse.reduce((a,b) => a+b, 0);
+    if (this.sizes[0] > this.maxSize)
+    {
+//      this.counter -= this.buffers[1].length;
+      this.buffers[1] = this.buffers[0];
+      this.sizes[1] = this.sizes[0];
+      this.buffers[0] = [];
+      this.sizes[0] = 0;
+    }
+  }
+
+  getRange(first, last)
+  {
+    if (first > last)
+      throw "wrong order";
+
+    var pos = 0;
+    var buf = this.buffers[1].concat(this.buffers[0]);
+    var aux = [];
+    var recording = false;
+    var counter = this.counter;
+    for (var i=buf.length-1; i>=0; i--)
+    {
+      var cur = buf[i];
+      if (!recording && cur + pos >= first)
+      {
+        // toggle!
+        recording = true;
+      }
+
+      if (recording)
+        aux.push(cur);
+
+      if (cur + pos >= last)
+      {
+        // polarity!
+        if ((counter & 1) == 0)
+          aux.push(0);
+        break;
+      }
+      counter--; 
+      pos += cur;
+    }
+    aux.reverse();
+    for (var i=2; i<aux.length; i++)
+    {
+      if (aux[i]==0)
+      {
+        aux[i-1] += aux[i+1];
+        aux.splice(i, 2);
+        i--;
+      }
+    }
+    return aux;
+  }
+};
+
+var memory = new Memory();
+
+function dumpRange(first, last)
+{ 
+  var buf = memory.getRange(-last, -first);
+  if (buf[0] == 0 && buf[1] > 100)
+    buf[1] = 100;
+
+  var origbuf = [...buf];
+  var ofsstart = 0;
+  var ofsend = origbuf.length;
+
+  console.log(buf);
+  if (buf[0] == 0 && buf.length > 1)
+  {
+    buf.splice(0, 2);
+    ofsstart += 2;
+    ofsend -= 2;
+  }
+  if (buf.length & 1)
+  {
+    buf.pop();
+    ofsend--;
+  }
+  detail.show(origbuf, ofsstart, ofsend);
+
+  analyse(buf);
+}
+
+var scanEnabled = true;
 let startButton = document.querySelector("#start");
 startButton.addEventListener('click', function() {
-  MODEM.Init().then( i => {
-    if (!i) 
-    {
-      console.log("Modem init failed");
+    BIOS.Info()
+      .then( console.log )
+      .catch( () => 0 )
+      .then( () => BIOS.Info() )
+      .then( console.log )
+      .then( onMain )
+      .catch( () => console.log("Device not ready") )
+});
+
+function timestamp()
+{
+  return (new Date()).getTime();
+}
+
+document.querySelector("#sstart").addEventListener('click', onStart);
+document.querySelector("#sstop").addEventListener('click', onStop);
+document.querySelector("#zoomin").addEventListener('click', () => canvas.zoomIn());
+document.querySelector("#zoomout").addEventListener('click', () => canvas.zoomOut());
+document.querySelector("#dzoomin").addEventListener('click', () => detail.zoomIn());
+document.querySelector("#dzoomout").addEventListener('click', () => detail.zoomOut());
+document.querySelector("#dquantize").addEventListener('click', () => { analyse(detail.quantize()); });
+document.querySelector("#dendminus").addEventListener('click', () => { detail.trim(-1); });
+document.querySelector("#dendplus").addEventListener('click', () => { detail.trim(+1); });
+document.querySelector("#dsend").addEventListener('click', () => { sendPulse(detail.trim(0)); });
+document.querySelector("#dexample").addEventListener('click', () => { example(); });
+
+var simulator = false;
+
+document.querySelector("#simulator").addEventListener('click', function() {
+  var simTick = 0;
+  var level = 0;
+  if (simulator) return;
+  simulator = true;
+  started = true;
+
+  setInterval(() => {
+    var phase = simTick++ % (5*5);
+    if (!started)
       return;
+
+    var signal = [];
+    if (phase == 20) 
+    {
+        signal.push(1000/20);
+        signal.push(9000/20);
+        signal.push(1000/20);
+        signal.push(9000/20);
+        signal.push(5000/20);
+        signal.push(5000/20); // 30ms
+      signal = signal.concat([0, 10*1000/20, 0, 40*1000/20, 0, 40*1000/20, 0, 40*1000/20, 0, 40*1000/20]);
     }
+    else if (phase == 3) 
+    {
+        signal.push(20000/20);
+        signal.push(20000/20);
+        signal.push(20000/20);
+        signal.push(20000/20);
+        signal.push(20000/20);
+        signal.push(20000/20);
+        signal.push(20000/20);
+        signal.push(20000/20);
+        signal.push(20000/20);
+        signal.push(20000/20);
+    }
+    else if (phase == 5) 
+    {
+        signal.push(40000/20);
+        signal.push(40000/20);
+        signal.push(40000/20);
+        signal.push(40000/20);
+        signal.push(0);
+        signal.push(40000/20);
+    }
+    else if (phase == 6) 
+    {
+        signal.push(25000/20);
+        signal.push(3);
+        signal.push(15000/20);
+        signal.push(30000/20);
+        signal.push(7);
+        signal.push(10000/20);
+        signal.push(30000/20);
+        signal.push(5);
+        signal.push(10000/20);
+        signal.push(40000/20);
+        signal.push(0);
+        signal.push(40000/20);
+    }
+    else if (phase == 10)
+    {
+//      signal = [0, 40*1000/20, 0, 10*1000/200];
+      for (var i = 0; i<100*1000; i += 10000)
+      {
+        signal.push(5000/20);
+        signal.push(5000/20);
+      }
 
+      for (var i = 0; i<100*1000; i += 2000)
+      {
+        var d = Math.floor(Math.random()*10);
+        signal.push(1000/20+d);
+        signal.push(1000/20-d);
+      }
+    } 
+    else if (phase == 11)
+    {
+      for (var i = 0; i<50*1000; i += 500)
+      {
+        var d = Math.floor(Math.random()*5);
+        signal.push(Math.floor(250/20)+d);
+        signal.push(Math.floor(250/20)-d);
+      }
+      signal = signal.concat([0, 40*1000/20, 0, 40*1000/200, 0, 20*1000/200]);
+    } else
+      signal = [0, 40*1000/20, 0, 40*1000/20, 0, 40*1000/20, 0, 40*1000/20, 0, 40*1000/20];
+
+   var data = signal;
+
+   memory.push(data);
+              for (var i=0; i<data.length; i++)
+              {
+                canvas.drawPulse(data[i], level);
+                pulseMachine(data[i], level = 1-level);
+              }
+              canvas.drawPulseFinish();
+
+  }, 200);
+});
+
+
+var started = false;
+let toggleButton = document.querySelector("#toggle");
+toggleButton.addEventListener('click', function() {
+  scanEnabled = 1-scanEnabled;
+});
+
+function document_write(msg)
+{
+}
+
+function onStart()
+{
+  if (simulator) {started = true; return; }
+  if (COMM.onReceive)
+  {
+    console.log("Try later");
+    return;
+  }
+  MODEM.Start().then( () => started = true);
+}
+
+function onStop()
+{
+  if (simulator) {started = false; return; }
+  if (COMM.onReceive)
+  {
+    console.log("Try later");
+    return;
+  }
+  MODEM.Stop().then( () => started = false);
+}
+
+function onMain()
+{
     var level = 1;
-
-    MODEM.Start()
-//      .then( () => MODEM.SetFrequency(434424000)) // keyfob
+    console.log("-- main --");
+    memory.push([0]);
+    MODEM.Init()
+        .then( (x) => { if (!x) throw "error"; })
+//        .then( () => MODEM.Start() )
+//       .then( () => MODEM.SetFrequency(433876000)) //conrad
+      .then( () => MODEM.SetFrequency(434424000)) // keyfob
+//      .then( () => MODEM.SetFrequency(433918000)) // garage
 //      .then( () => MODEM.SetFrequency(433856000)) // conrad, OS/rain
 //      .then( () => MODEM.SetFrequency(433942000)) // conrad, OS/temp
-      .then( () => MODEM.SetFrequency(433900000)) // conrad, OS/temp
+//      .then( () => MODEM.SetFrequency(433900000)) // conrad, OS/temp
       .then( () =>
       {
         setInterval(() =>
         {
+          if (COMM.onReceive)
+            return;
+/*
+          if (!scanEnabled)
+          {
+            MODEM.Transfer().then( (data) => 
+            {
+              if (data.length&1)
+                level = 1-level;
+            });
+            return;
+          }
+*/
+          if (!started)
+            return;
+
           MODEM.Transfer().then( (data) => 
           {
             if (data && data.length) 
             {
+              memory.push(data);
               for (var i=0; i<data.length; i++)
+              {
+                canvas.drawPulse(data[i], level);
                 pulseMachine(data[i], level = 1-level);
-    //          console.log(data);
+              }
+              canvas.drawPulseFinish();
             }
-          });
+          })
+          .then( () => MODEM.Status())
+          .then( status => { if (status) console.log("Buffer overflow!"); })
+          .catch(console.log);
         }, 200);
 
         console.log("Modem running");
-        document.write("<pre>Modem running\n");
+        document_write("<pre>Modem running\n");
       });
-  });
-});
+}
 
+ 
 
 var decoder = new Decoder();
-document.write("<pre>started\n");
+document_write("<pre>started\n");
 var buf = [];
 var last;
 function pulseMachinePush(i)
 {
   if (i==-1)
   {
+/*
     if (buf.length > 20 && buf.length < 1000)
     {
-      console.log("l="+buf.length + " d=" + buf.reduce((a, b) => a+b, 0) + " " + JSON.stringify(buf));
-//last = buf;
-//      if (buf.length > 100)
-
-if (buf[0] >= 20 && buf[0] <= 27 && buf[1] >= 20 && buf[1] <= 27 && buf[2] >= 20 && buf[2] <= 27)
-{
-  var pref = "22222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222";
-  var key = "2222222222222222222222222222222222222222222222222222222222222" + "22222423333332224";
-  var kf = buf.map(x => Math.floor((x+6)/12));
-//console.log(buf.map(x => Math.floor((x+2)/12*10)).join(" "));
-
-  var kfs = kf.join("");
-  if (kfs.indexOf(key) != -1)
-  {
-    var end = kfs.indexOf(key) + key.length;
-    var ps = kfs.substr(end);
-    console.log(ps);
-    var ps1 = "";
-    var lev = 0;;
-    // 2222222222222222444444224224224444222222224224422224224222222444422224224422444222222222242222444444222222222242222
-/*
-    for (var i=0; i<ps.length; i++)
-    {
-      if (ps[i] == "2")
-      {
-        ps1 += lev;
-        lev = 1 - lev;
-      } else
-      if (ps[i] == "4")
-      {
-        ps1 += lev;
-        ps1 += lev;
-        lev = 1 - lev;
-      } else
-      {
-        ps1 += "ERROR!";
-        break;
-      }
-    }
-// 010101010101001101010101001100101101001011010010110011001011010100110010110100110010110011010010101010101010101010110101001011010101010011010101001
-//    console.log(ps1);
-    var ps2 = "";
-    for (var i=0; i<ps1.length; i+=2)
-    {
-      if (ps1.substr(i, 2) == "01")
-        ps2 += "A";
-      else if (ps1.substr(i, 2) == "10")
-        ps2 += "B";
-      else
-        ps2 += "?";
-    }
-*/
-
-    var ps1 = "";
-    for (var i=0; i<ps.length; i++)
-    {
-      if (ps[i] == "2" && ps[i+1] == "2")
-      {
-        i++;
-        ps1 += "0";
-      } else
-      if (ps[i] == "4")
-      {
-        ps1 += "1";
-      } else
-      {
-        ps1 += "ERROR!";
-        break;
-      }
-
-    }
-
-    kfs = "KEY PREAMBLE " + ps1;
-  }
-  else if (kfs.substr(0, pref.length) == pref) 
-    kfs = "STATIC PREAMBLE " + kfs.substr(pref.length);
-
-  console.log(kf.reduce((a, b) => a+b, 0) + " -> " + kfs);
-
-// 2222222222222423442222224422442244422444222242222
-// 222222222222244422442222422224442222422224224222242242242242222444224422224222244442242244422422422422224442244444
-
-// 22222222222224233333322242222222222222222444444224224224444222222224224422224224222222444422224224422444222222222242222444444222222222242222
-// 22222222222224233333322242222222222224442244224442
-//  2222222222224233333322242222222222224422444422224222222222222224422224222222422224444442222422224222242242222422444444444224422224222242222
-// 222222222222242333333222422222222222222224222222442244224224224224442222222222442244224422222244222222422444224422444224224444444222242222
-// 222222222222242333333222422222222222242242222442242242222224442222224222222224222222224222242222224224444444444222222442222224422422224222242222
-// 22222222222224233333322242222222222222244222222224422444444224444224222222444224442222442
-//  2222222222224233333322242222222222222222224422422442222442242242222222242222222242222422422422422444224422422222242222
-// 22222222222224233333322242222222222224224222242222442242244442244222222444442222224222222422442244222242222422222222224222222422222222224
-
-// 2222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222224233333322242222222222224442244222222222242244442244444222222422222222224422422444442242242244222244222242222222244224222242222
-// 22222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222242333333222422222222224224222244222244224444224222244222242222422222244444222242222442244222242242244224444222244224222242222
-// 22222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222244444222222222244444224222222422222222224222222422224422222244422224222242222422222222224442244222242222
-}
-      var good = false;
-        k = 19;
+        k = 20;
         l = 0;
-      for (var k=14; k<60; k++)
+      var pulse = buf.map(x => x*k);
+      var arr = JSON.stringify(pulse);
+      console.log("l="+buf.length + " d=" + buf.reduce((a, b) => a+b, 0) + " " + arr);
+      document_write("<a href=\"javascript:send("+arr+")\">"+arr.substr(0, 100)+"..."+"</a>\n");
+
+      test360(pulse);
+
+      var is500 = x => x >= 400 && x <= 540;
+      var is1000 = x => x >= 920 && x <= 1020;
+      var is750 = x => x >= 700 && x <= 750;
+      if (is500(pulse[0]) && is500(pulse[1]) && is500(pulse[2]) && is500(pulse[3]) && is500(pulse[4]))
+      {
+
+        // quantize
+        var quantize = [];
+        for (var i=0; i<pulse.length; i++)
+        {
+          if (is500(pulse[i]))
+            quantize.push(500);
+          else if (is1000(pulse[i]))
+            quantize.push(1000);
+          else if (is750(pulse[i]))
+            quantize.push(7500);
+          else
+            quantize.push("unknown_"+pulse[i]);
+        }
+        console.log(JSON.stringify(quantize));
+      }
+      //keyfobTest(buf);
+
+      var good = false;
+//      for (var k=14; k<60; k++)
       {
 //        for (l=-6; l<=6; l++)
         {
@@ -153,23 +378,24 @@ if (buf[0] >= 20 && buf[0] <= 27 && buf[1] >= 20 && buf[1] <= 27 && buf[2] >= 20
 //          var d = decoder.decode(buf.map(x => x*k ));
           if (d.length)
           {
-            document.write(k + "," + l + ": " + JSON.stringify(d)+"\n");
+            document_write(k + "," + l + ": " + JSON.stringify(d)+"\n");
 //            console.log(JSON.stringify(buf));
             console.log(d); 
             good = true;
-		break;
+//		break;
           }
         }
 //        if (good) break;
       }
-
     }
+*/
     buf = [];
     return;
   }
   buf.push(i);
 }
 
+var enableFraming = true;
 var interval1 = 0, interval2 = 0, leading = true, terminated = false;
 function pulseMachine(interval, level)
 {
@@ -187,7 +413,7 @@ function pulseMachine(interval, level)
     interval += interval2;
   }
   
-  if (interval > 800)
+  if (interval > 800 && enableFraming)
   {
     pulseMachinePush(-1);
     leading = true;     
@@ -195,7 +421,7 @@ function pulseMachine(interval, level)
 
   if (interval1 != 0 && interval2 != 0)
   {
-    if (interval2 > 800)
+    if (interval2 > 800 && enableFraming)
     {
       pulseMachinePush(-1);
       leading = true;     
@@ -216,51 +442,107 @@ function pulseMachine(interval, level)
   interval1 = interval;
 }
 
-/*
-function pulseMachine(interval)
+function analyse(buf)
 {
-	if (interval == -1)
-	{
-		interval1 = 0;
-		interval2 = 0;
-		leading = true;
-		pulseMachinePush(-1);
-		return;
-	}
-  if (interval1 == 0)
-  {
-    interval += interval2;
+  var k = 20;
+  var l = 0;
+//      for (var k=14; k<60; k++)
+      {
+//        for (l=-6; l<=6; l++)
+        {
+          var d = decoder.decode(buf.map((x, i) => (x + ((i&1)*2-1)*l) * k ));
+//          var d = decoder.decode(buf.map(x => x*k ));
+          if (d.length)
+          {
+console.log(buf.map(x => x*k));
+            document_write(k + "," + l + ": " + JSON.stringify(d)+"\n");
+//            console.log(JSON.stringify(buf));
+//console.log("k="+k);
+            console.log(d); 
+//            good = true;
+//		break;
+          }
+        }
+//        if (good) break;
+      }
+}
+
+Array.prototype.contains = function(v) {
+  for (var i = 0; i < this.length; i++) {
+    if (this[i] === v) return true;
   }
+  return false;
+};
 
-  if (interval > 800)
+Array.prototype.unique = function() {
+  var arr = [];
+  for (var i = 0; i < this.length; i++) {
+    if (!arr.contains(this[i])) {
+      arr.push(this[i]);
+    }
+  }
+  return arr;
+}
+
+function sendPulse(pulse)
+{
+  if (COMM.onReceive)
   {
-// ked predosly nie je nula, tak nejoinoval, takze by mohol byt v bufri nejaky uzitocny?
-	  if (!terminated)
-	  {
-		  terminated = true;
-if (interval1 != 0)
-  pulseMachinePush(interval1);
-			pulseMachinePush(-1);
-
-	  }
-		interval1 = 0;
-		interval2 = 0;
-    leading = true;
+    console.log("Try later");
     return;
   }
+  console.log([... pulse].sort((a,b)=>a-b).unique());
 
-  if (interval1 != 0 && interval2 != 0)
+  // find gcd
+  var quantum = pulse.reduce((a,b) => Math.min(a,b), pulse[0]);
+  console.log("Quantum: " + quantum);
+
+  var maxRem = pulse.reduce((a, b) => Math.max(a, b % quantum), 0); 
+  if (maxRem != 0)
   {
-    if (leading)
-      leading = false;
-    else
-	{
-      pulseMachinePush(interval2);
-		terminated = false;
-	}
+    quantum /= 2;
+    maxRem = pulse.reduce((a, b) => Math.max(a, b % quantum), 0); 
+  }
+  if (maxRem != 0)
+    throw "cannot find common divisor";
+
+  // in microseconds
+  var buf8 = [];
+
+  for (var i=0; i<pulse.length; i++)
+  {
+    buf8.push(pulse[i]&255);
+    buf8.push(pulse[i]>>8);
   }
 
-  interval2 = interval1;
-  interval1 = interval;
+  var bufferPtr = 0;
+
+  enableFraming = false;
+  COMM.debug = true;
+  BIOS.biosMemGetBufferPtr()
+  .then( (x) => bufferPtr = x )
+  .then( () => BIOS.biosMemBulkWrite(bufferPtr, buf8) )
+//  .then( () => MODEM.SetFrequency(frequency) )
+  .then( () => MODEM.SetDataRate(Math.floor(1000000/quantum)) )
+  .then( () => MODEM.SetOutputPower(0xb0) )
+  .then( () => MODEM.Send(bufferPtr, buf8.length/2, quantum) )
+  .then( () => { enableFraming = true; COMM.debug = false; } )
+  .then( () => MODEM.SetDataRate(4000) )
 }
-*/
+
+var lastTemp = 33.3;
+function example()
+{
+  var proto = new CWeather()
+  var attributes = proto.Example();
+  var newt = prompt("Set temperature", lastTemp);
+  if (newt)
+    lastTemp = newt;
+
+  attributes["temperature10"] = Math.floor(lastTemp*10); // 17.1 C
+
+  var pulse = proto.Modulate(attributes);
+  pulse = pulse.map(x=>x/20);
+  var aligned = [0, 100, ... pulse]; 
+  detail.show(aligned, 2, aligned.length+1);
+}

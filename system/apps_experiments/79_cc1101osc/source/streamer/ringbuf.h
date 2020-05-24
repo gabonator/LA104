@@ -65,6 +65,11 @@ size_t size()
     return ret;
 }
 
+size_t capacity()
+{
+    return MaxElements - _numElements;
+}
+
 bool isEmpty()
 {
     bool ret;

@@ -156,7 +156,8 @@ public:
     };
     
     uint8_t mRegisters[ALL];
-    
+    int mRegisterPower{0x50};
+
     const char* mConfig =
 
     "{"
@@ -338,8 +339,19 @@ public:
     {
         enum {CC1101_STX = 0x35};
         CCc1101Spi::Write(CC1101_STX);
+    }
+
+    void PrepareTxState()
+    {
         CCc1101Spi::Write(PKTCTRL0, 0x00); // RX: 0x30 - async serial, data out n GDOx, TX: 0x00 - use TX fifo
         CCc1101Spi::Write(IOCFG0, 0x06); // RX: GDO0: serial data output, TX: 0x06 - optional transmission sync pulse
+    }
+
+    void LeaveTxState()
+    {
+        FlushRxFifo();
+        CCc1101Spi::Write(PKTCTRL0, 0x30); // RX: 0x30 - async serial, data out n GDOx, TX: 0x00 - use TX fifo
+        CCc1101Spi::Write(IOCFG0, 0x0d); // RX: GDO0: serial data output, TX: 0x06 - optional transmission sync pulse
     }
 
     void SetIdleState()
@@ -369,15 +381,21 @@ public:
     void SetPacketLength(int len)
     {
         _ASSERT(len > 0 && len < 256);
+	// todo: save in regs
         CCc1101Spi::Write(PKTLEN, len);         
     }
 
-    void SetOutputPower(int power)
+    void SetFinitePacketLength()
     {
-        _ASSERT(power > 0 && power < 256);
-        // ASK uses two entries, first power for zero logic level and second power for logic one
-        uint8_t table[2] = {0, (uint8_t)power};
-        CCc1101Spi::Write(PATABLE, table, 2);
+        mRegisters[PKTCTRL0] &= 0b11111100;
+        CCc1101Spi::Write(PKTCTRL0, mRegisters[PKTCTRL0]);
+    }
+
+    void SetInfinitePacketLength()
+    {
+        mRegisters[PKTCTRL0] &= 0b11111100;
+        mRegisters[PKTCTRL0] |= 0b00000010;
+        CCc1101Spi::Write(PKTCTRL0, mRegisters[PKTCTRL0]);
     }
 };
 
@@ -417,9 +435,18 @@ public:
     void SetDataRate(int bps)
     {
         // dataratecalc.js
-        const float base = (float)(1<<28ULL) / GetOscFrequency();
-        int E = ceil(log2f(bps * base / (256 + 255)));
-        int M = floor(bps * base / (1<<E) - 256 + 0.5f);
+        uint32_t t = uint32_t( (uint64_t(bps) << 28ULL) / GetOscFrequency() );
+        int Ebase = t/511;
+        int E = 0, Ev = 1;
+
+        while (Ebase > 0)
+        {
+          Ebase >>= 1;
+          Ev <<= 1;
+          E++;
+        }
+
+        int M = (t + Ev/2) / Ev - 256;
 
         _ASSERT(E >= 0 && E <= 15 && M >= 0 && M < 256);
         mRegisters[MDMCFG3] = M;
@@ -438,10 +465,17 @@ public:
 
     void SetBandwidth(int bw)
     {
-        BIOS::DBG::Print("Not implemented");
-        //int CHANBW_M = (mRegisters[MDMCFG4] >> 4) & 3;  // 0..7
-        //int CHANBW_E = mRegisters[MDMCFG4] >> 6; // 0..3
-        //return (GetOscFrequency() / 8 / (4 + CHANBW_M)) >> CHANBW_E;
+        const int root2[] = {0, 1, 2, 2, 3, 3, 3, 3};
+        int t = GetOscFrequency() / 8 / bw;
+        int e = root2[min(t/12, 7)];
+        int m = (t >> e) - 4;
+
+        _ASSERT(m >= 0 && m <= 3 && e >= 0 && e <= 3);
+        mRegisters[MDMCFG4] &= 0x0f;    // eemm....
+        mRegisters[MDMCFG4] |= m << 4;
+        mRegisters[MDMCFG4] |= e << 6;
+
+        CCc1101Spi::Write(MDMCFG4, mRegisters[MDMCFG4]);
     }
 
     int GetGain()
@@ -459,5 +493,18 @@ public:
         CCc1101Spi::Write(AGCCTRL2, mRegisters[AGCCTRL2]);
     }
 
+    int GetOutputPower()
+    {
+      return mRegisterPower;
+    }
+
+    void SetOutputPower(int power)
+    {
+        _ASSERT(power > 0 && power < 256);
+        mRegisterPower = power;
+        // ASK uses two entries, first power for zero logic level and second power for logic one
+        uint8_t table[2] = {0, (uint8_t)power};
+        CCc1101Spi::Write(PATABLE, table, 2);
+    }
 };
 

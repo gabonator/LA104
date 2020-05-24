@@ -26,11 +26,15 @@ var MODEM = {
     GetGain: () => BIOS.rpcCallR('CC1101::GetGain();'),
     SetDataRate: (arg) => BIOS.rpcCallR('CC1101::SetDataRate('+arg+');'),
     GetDataRate: (arg) => BIOS.rpcCallR('CC1101::GetDataRate();'),
+    SetOutputPower: (arg) => BIOS.rpcCallR('CC1101::SetOutputPower('+arg+');'),
+    GetOutputPower: (arg) => BIOS.rpcCallR('CC1101::GetOutputPower();'),
 
     Init: () => BIOS.rpcCallR('CC1101::Init();'),
     Start: () => BIOS.rpcCallR('CC1101::Start();'),
     Stop: () => BIOS.rpcCallR('CC1101::Stop();'),
     Status: () => BIOS.rpcCallR('CC1101::Status();'),
+
+    Send: (ptr, len, divisor) => BIOS.rpcCallR('CC1101::Send('+ptr+','+len+','+divisor+');'),
 
     Transfer: () => BIOS.rpcCallBinary("CC1101::Transfer();").then( (data) => new Promise((resolve, reject) =>
     { 
@@ -56,10 +60,48 @@ var MODEM = {
 
 var BIOS =
 {
-  biosMemWrite: (addr, data) => BIOS.rpcCall('RPC::MemoryWrite(0x'+addr.toString(16)+', "'+data.map(i => ("0"+i.toString(16)).substr(-2) ).join("")+'");'),
+  Info: () => new Promise( (resolve, reject) => 
+  {
+    var timeout = setTimeout(reject, 100);
+    BIOS.rpcCallR('SYS::Info()')
+      .then( (ptr) => { clearTimeout(timeout); return BIOS.GetString(ptr); } )
+      .then( resolve );
+  }),
+  memRead32: (addr) => BIOS.rpcCallR('MEM::Read32(0x'+addr.toString(16)+');'),
+  GetString: (addr, aux) =>
+  {
+    return BIOS.memRead32(addr).then( x =>
+    {
+      var chars = [x&255, (x>>8)&255, (x>>16)&255, x >> 24];
+      if (!aux)
+        aux = "";
+      for (var i=0; i<chars.length; i++)
+      {
+        if (chars[i] == 0)
+          return aux;
+        aux += String.fromCharCode(chars[i]);
+      }
+
+      return BIOS.GetString(addr+4, aux);
+    })
+  },
+  biosMemWrite: (addr, data) => BIOS.rpcCall('MEM::Write(0x'+addr.toString(16)+', "'+data.map(i => ("0"+i.toString(16)).substr(-2) ).join("")+'");'),
+  biosMemBulkWrite: (addr, data) =>
+  {
+    data = [... data]; // copy
+    var bulkLen = 16;
+    if (data.length < bulkLen)
+      return BIOS.biosMemWrite(addr, data);
+    else
+    {
+      var section = data.splice(0, bulkLen);
+      return BIOS.biosMemWrite(addr, section)
+        .then( () => BIOS.biosMemBulkWrite(addr + section.length, data));
+    }
+  },
   safeeval: (json) => { if (json[0] == "{") return eval("("+json+")") },
   retval: (json) => { var j = BIOS.safeeval(json); if (j && typeof(j.ret) != "undefined") return j.ret },
-  biosMemGetBufferPtr: () => BIOS.rpcCall('RPC::GetBufferPtr();').then( json => BIOS.retval(json) ), 
+  biosMemGetBufferPtr: () => BIOS.rpcCall('MEM::GetBufferPtr();').then( json => BIOS.retval(json) ), 
   biosLcdBuffer: (x1, y1, x2, y2, pixels) =>
   {
     var numpix = pixels.length / 2;
@@ -74,6 +116,7 @@ var BIOS =
     {
       COMM.onReceive = (x) =>
       {         
+        COMM.onReceive = null;
         resolve(new TextDecoder().decode(x));
       }
       COMM.send(command);
@@ -84,7 +127,11 @@ var BIOS =
   {                 
     return new Promise((resolve, reject) =>
     {
-      COMM.onReceive = resolve;
+      COMM.onReceive = (d) => 
+      {
+        COMM.onReceive = null;
+        resolve(d);
+      }
       COMM.send(command);
     });
   }
