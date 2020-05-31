@@ -84,7 +84,8 @@ namespace CC1101
       return false;
 
   // 433.91, 135khz, 0dB	
-  gModem.SetFrequency(433876000UL);
+//  gModem.SetFrequency(433876000UL);
+  gModem.SetFrequency(434424000UL); //434424000 keyfob
   gModem.DeltaGain(-100); 
   gModem.DeltaBandwidth(-100);
   gModem.DeltaBandwidth(9); // 8:203khz, 10: 135khz, 12 -> 101khz
@@ -136,5 +137,11 @@ namespace CC1101
     gModem.SetRxState();
 
     return ok;
+  }
+
+  int Calibrate()
+  {
+    gModem.Calibrate();
+    return true;
   }
 }

@@ -20,7 +20,7 @@ var serial = {};
     this.interfaceNumber_ = 3;  // original interface number of WebUSB Arduino demo
     this.endpointIn_ = 4;       // original in endpoint ID of WebUSB Arduino demo
     this.endpointOut_ = 3;      // original out endpoint ID of WebUSB Arduino demo
-    this.ilovebill = ilovebill;
+    this.ilovebill = 1; //ilovebill;
   };
 
   serial.Port.prototype.connect = function() {

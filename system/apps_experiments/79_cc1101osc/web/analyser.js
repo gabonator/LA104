@@ -1,5 +1,6 @@
 var canvas = new PreviewCanvas(900, 100);
 var detail = new DetailCanvas(900, 100);
+var aaa;
 
 class Memory
 {
@@ -8,7 +9,7 @@ class Memory
     this.buffers = [[], []];
     this.sizes = [0, 0];
     this.current = 0;
-    this.maxSize = 2000*1000 / 20; // 2 seconds max
+    this.maxSize = 2000*1000; // 2 seconds max
     this.counter = 0;
   }
 
@@ -78,27 +79,27 @@ var memory = new Memory();
 function dumpRange(first, last)
 { 
   var buf = memory.getRange(-last, -first);
-  if (buf[0] == 0 && buf[1] > 100)
-    buf[1] = 100;
+  if (buf[0] == 0 && buf[1] > 2000)
+    buf[1] = 2000;
 
   var origbuf = [...buf];
   var ofsstart = 0;
   var ofsend = origbuf.length;
 
-  console.log(buf);
+//  console.log(buf);
   if (buf[0] == 0 && buf.length > 1)
   {
     buf.splice(0, 2);
     ofsstart += 2;
-    ofsend -= 2;
   }
-  if (buf.length & 1)
+  if ((buf.length % 2) == 0)
   {
     buf.pop();
     ofsend--;
   }
   detail.show(origbuf, ofsstart, ofsend);
-
+  aaa = buf.map(x=>x/20);
+  console.log("analyse: " + JSON.stringify(buf));
   analyse(buf);
 }
 
@@ -126,113 +127,17 @@ document.querySelector("#zoomout").addEventListener('click', () => canvas.zoomOu
 document.querySelector("#dzoomin").addEventListener('click', () => detail.zoomIn());
 document.querySelector("#dzoomout").addEventListener('click', () => detail.zoomOut());
 document.querySelector("#dquantize").addEventListener('click', () => { analyse(detail.quantize()); });
+document.querySelector("#dreconstruct").addEventListener('click', () => { 
+  reconstruct({protocol:"keyfob", data:{payload:[0x02, 0x70, 0x3f, 0x20, 0xd4, 0x35, 0xb3, 0xe7, 0x01], command:"open"}});
+//  reconstruct(analyse(detail.quantize())); 
+});
 document.querySelector("#dendminus").addEventListener('click', () => { detail.trim(-1); });
 document.querySelector("#dendplus").addEventListener('click', () => { detail.trim(+1); });
 document.querySelector("#dsend").addEventListener('click', () => { sendPulse(detail.trim(0)); });
 document.querySelector("#dexample").addEventListener('click', () => { example(); });
-
-var simulator = false;
-
-document.querySelector("#simulator").addEventListener('click', function() {
-  var simTick = 0;
-  var level = 0;
-  if (simulator) return;
-  simulator = true;
-  started = true;
-
-  setInterval(() => {
-    var phase = simTick++ % (5*5);
-    if (!started)
-      return;
-
-    var signal = [];
-    if (phase == 20) 
-    {
-        signal.push(1000/20);
-        signal.push(9000/20);
-        signal.push(1000/20);
-        signal.push(9000/20);
-        signal.push(5000/20);
-        signal.push(5000/20); // 30ms
-      signal = signal.concat([0, 10*1000/20, 0, 40*1000/20, 0, 40*1000/20, 0, 40*1000/20, 0, 40*1000/20]);
-    }
-    else if (phase == 3) 
-    {
-        signal.push(20000/20);
-        signal.push(20000/20);
-        signal.push(20000/20);
-        signal.push(20000/20);
-        signal.push(20000/20);
-        signal.push(20000/20);
-        signal.push(20000/20);
-        signal.push(20000/20);
-        signal.push(20000/20);
-        signal.push(20000/20);
-    }
-    else if (phase == 5) 
-    {
-        signal.push(40000/20);
-        signal.push(40000/20);
-        signal.push(40000/20);
-        signal.push(40000/20);
-        signal.push(0);
-        signal.push(40000/20);
-    }
-    else if (phase == 6) 
-    {
-        signal.push(25000/20);
-        signal.push(3);
-        signal.push(15000/20);
-        signal.push(30000/20);
-        signal.push(7);
-        signal.push(10000/20);
-        signal.push(30000/20);
-        signal.push(5);
-        signal.push(10000/20);
-        signal.push(40000/20);
-        signal.push(0);
-        signal.push(40000/20);
-    }
-    else if (phase == 10)
-    {
-//      signal = [0, 40*1000/20, 0, 10*1000/200];
-      for (var i = 0; i<100*1000; i += 10000)
-      {
-        signal.push(5000/20);
-        signal.push(5000/20);
-      }
-
-      for (var i = 0; i<100*1000; i += 2000)
-      {
-        var d = Math.floor(Math.random()*10);
-        signal.push(1000/20+d);
-        signal.push(1000/20-d);
-      }
-    } 
-    else if (phase == 11)
-    {
-      for (var i = 0; i<50*1000; i += 500)
-      {
-        var d = Math.floor(Math.random()*5);
-        signal.push(Math.floor(250/20)+d);
-        signal.push(Math.floor(250/20)-d);
-      }
-      signal = signal.concat([0, 40*1000/20, 0, 40*1000/200, 0, 20*1000/200]);
-    } else
-      signal = [0, 40*1000/20, 0, 40*1000/20, 0, 40*1000/20, 0, 40*1000/20, 0, 40*1000/20];
-
-   var data = signal;
-
-   memory.push(data);
-              for (var i=0; i<data.length; i++)
-              {
-                canvas.drawPulse(data[i], level);
-                pulseMachine(data[i], level = 1-level);
-              }
-              canvas.drawPulseFinish();
-
-  }, 200);
-});
+document.querySelector("#aenable").addEventListener('click', () => { attackEnable(); });
+document.querySelector("#adisable").addEventListener('click', () => { attackDisable(); });
+document.querySelector("#calibrate").addEventListener('click', () => { calibrate(); });
 
 
 var started = false;
@@ -275,12 +180,13 @@ function onMain()
     MODEM.Init()
         .then( (x) => { if (!x) throw "error"; })
 //        .then( () => MODEM.Start() )
-//       .then( () => MODEM.SetFrequency(433876000)) //conrad
-      .then( () => MODEM.SetFrequency(434424000)) // keyfob
+       .then( () => MODEM.SetFrequency(433876000)) //conrad
+//      .then( () => MODEM.SetFrequency(434424000)) // keyfob
 //      .then( () => MODEM.SetFrequency(433918000)) // garage
 //      .then( () => MODEM.SetFrequency(433856000)) // conrad, OS/rain
 //      .then( () => MODEM.SetFrequency(433942000)) // conrad, OS/temp
 //      .then( () => MODEM.SetFrequency(433900000)) // conrad, OS/temp
+       .then( () => MODEM.Calibrate()) //conrad
       .then( () =>
       {
         setInterval(() =>
@@ -305,10 +211,13 @@ function onMain()
           {
             if (data && data.length) 
             {
+              var flags = data.map(x=>x>>12);
+              data = data.map(x=>(x & 0x0fff)*21);
+//console.log(data);
               memory.push(data);
               for (var i=0; i<data.length; i++)
               {
-                canvas.drawPulse(data[i], level);
+                canvas.drawPulse(data[i], level, flags[i]);
                 pulseMachine(data[i], level = 1-level);
               }
               canvas.drawPulseFinish();
@@ -413,7 +322,7 @@ function pulseMachine(interval, level)
     interval += interval2;
   }
   
-  if (interval > 800 && enableFraming)
+  if (interval > 1600 && enableFraming)
   {
     pulseMachinePush(-1);
     leading = true;     
@@ -421,7 +330,7 @@ function pulseMachine(interval, level)
 
   if (interval1 != 0 && interval2 != 0)
   {
-    if (interval2 > 800 && enableFraming)
+    if (interval2 > 1600 && enableFraming)
     {
       pulseMachinePush(-1);
       leading = true;     
@@ -444,27 +353,44 @@ function pulseMachine(interval, level)
 
 function analyse(buf)
 {
-  var k = 20;
-  var l = 0;
+  var resp;
+  if ((resp = analysekeyfob(buf)))
+  {
+    return resp;
+  }        
+
+  var d = decoder.decode(buf);
+  if (d.length)
+  {
+    console.log(JSON.stringify(buf));
+    console.log(JSON.stringify(d));
+  }
+
+/*
+//  var k = 20;
+//  var l = 0;
 //      for (var k=14; k<60; k++)
       {
 //        for (l=-6; l<=6; l++)
         {
-          var d = decoder.decode(buf.map((x, i) => (x + ((i&1)*2-1)*l) * k ));
-//          var d = decoder.decode(buf.map(x => x*k ));
+//          var d = decoder.decode(buf.map((x, i) => (x + ((i&1)*2-1)*l) * k ));
+          var d = decoder.decode(buf);
           if (d.length)
           {
-console.log(buf.map(x => x*k));
-            document_write(k + "," + l + ": " + JSON.stringify(d)+"\n");
+            console.log(JSON.stringify(buf));
+            console.log(JSON.stringify(d));
+//console.log(buf.map(x => x*k));
+//            document_write(k + "," + l + ": " + JSON.stringify(d)+"\n");
 //            console.log(JSON.stringify(buf));
 //console.log("k="+k);
-            console.log(d); 
+//            console.log(d); 
 //            good = true;
 //		break;
           }
         }
 //        if (good) break;
       }
+*/
 }
 
 Array.prototype.contains = function(v) {
@@ -542,7 +468,154 @@ function example()
   attributes["temperature10"] = Math.floor(lastTemp*10); // 17.1 C
 
   var pulse = proto.Modulate(attributes);
-  pulse = pulse.map(x=>x/20);
-  var aligned = [0, 100, ... pulse]; 
+  var aligned = [0, 2000, ... pulse]; 
   detail.show(aligned, 2, aligned.length+1);
+}
+
+
+function analysekeyfob(nsig)
+{
+  var q = nsig.map(x => Math.floor((x+120)/240)).join("");
+  var preamble = "22222222222222222222222";
+  var pos = q.indexOf(preamble + "423333332"); //224");// + "22222222224");
+  if (pos == -1)
+  {
+    console.log("keyfob: Preamble not found");
+    return false; // 
+  }
+  q = q.substr(pos+9+preamble.length);
+//  console.log(q);
+  var r = "";
+  for (var i =0; i<q.length; i++)
+  {  
+    if (q.substr(i, 2) == "22")
+    {
+      r += "A";
+      i++;
+    }
+    else if (q.substr(i, 1) == "4")
+    { 
+      r += "B";
+    }
+    else 
+    {
+      r += "?";
+      console.log("keyfob: Wrong data");
+      return false;
+    }
+  }
+
+  var cmd = "";
+  if (r.substr(-7) == "AABAABB") // open 
+  {
+    cmd = "open";
+  } else
+  if (r.substr(-7) == "ABBBBBA") // close
+  {
+    cmd = "close";
+  } else
+  if (r.substr(-7) == "BBAABAA") // trunk
+  {
+    cmd = "trunk";
+  } else
+  {
+    console.log("keyfob: No matching suffix - " + r.substr(-7) );
+    return false;
+  } 
+
+  r = r.substr(0, r.length-7);
+  if (r.length != 64 + 8)
+  {
+    console.log("keyfob: Wrong code length");
+    return false;
+  } 
+
+  r = r.split("").map(c => c.charCodeAt(0) - 65);
+//console.log(r);
+  r = bitstreamToBytes(r);
+  var rs = r.map(x=>("0"+x.toString(16)).substr(-2)).join(" ")
+  console.log(rs + " " + cmd); // 77
+  return {protocol:"keyfob", data:{payload:r, command:cmd}};
+}
+
+function reconstruct(p)
+{
+  if (!p || p.protocol != "keyfob")
+    return false;
+  var pulses = "222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222"
+  pulses += "423333332";
+
+  var codeToPulse = code => code.split("").map(x => ((x=="A") ? "22" : "4")).join("");
+ 
+  for (var bits=0; bits<72; bits++)
+  {
+    var bit = p.data.payload[Math.floor(bits/8)] & (1 << (bits%8));
+    if (bit == 0)
+      pulses += "22";
+    else
+      pulses += "4";
+  }
+
+  if (p.data.command == "open")
+    pulses += codeToPulse("AABAABB");
+  else
+  if (p.data.command == "close")
+    pulses += codeToPulse("ABBBBBA");
+  else
+  if (p.data.command == "trunk")
+    pulses += codeToPulse("BBAABAA");
+
+  var k = 250;
+  var intervals = pulses.split("").map(x=>parseInt(x)*k);
+  intervals = [0, 2000, ...intervals];
+
+  analysekeyfob(intervals);
+  detail.show(intervals, 2, intervals.length);
+}
+
+function bitstreamToBytes(str)
+{
+  var bytes = [];
+  for (var i=0; i<str.length; i++)
+  {
+    if ((i%8) == 0)
+      bytes.push(0);
+    bytes[Math.floor(i/8)] >>= 1;
+    if (str[i])
+      bytes[Math.floor(i/8)] |= 128;
+  }
+  return bytes;
+}
+
+function attackEnable()
+{
+  if (COMM.onReceive)
+  {
+    console.log("Try later");
+    return;
+  }
+
+  APP.GetConfigPtr().then( configPtr => BIOS.biosMemWrite(configPtr, [1]) );
+}
+
+function attackDisable()
+{
+  if (COMM.onReceive)
+  {
+    console.log("Try later");
+    return;
+  }
+
+  APP.GetConfigPtr().then( configPtr => BIOS.biosMemWrite(configPtr, [0]) );
+}
+
+function calibrate()
+{
+  if (COMM.onReceive)
+  {
+    console.log("Try later");
+    return;
+  }
+
+  MODEM.Calibrate();
 }
