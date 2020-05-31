@@ -33,6 +33,7 @@ var MODEM = {
     Start: () => BIOS.rpcCallR('CC1101::Start();'),
     Stop: () => BIOS.rpcCallR('CC1101::Stop();'),
     Status: () => BIOS.rpcCallR('CC1101::Status();'),
+    Calibrate: () => BIOS.rpcCallR('CC1101::Calibrate();'),
 
     Send: (ptr, len, divisor) => BIOS.rpcCallR('CC1101::Send('+ptr+','+len+','+divisor+');'),
 
@@ -58,12 +59,17 @@ var MODEM = {
 
 }
 
+var APP =
+{
+  GetConfigPtr: () => BIOS.rpcCall('APP::GetConfigPtr();').then( json => BIOS.retval(json) )	
+};
+
 var BIOS =
 {
   Info: () => new Promise( (resolve, reject) => 
   {
     var timeout = setTimeout(reject, 100);
-    BIOS.rpcCallR('SYS::Info()')
+    BIOS.rpcCallR('APP::Info()')
       .then( (ptr) => { clearTimeout(timeout); return BIOS.GetString(ptr); } )
       .then( resolve );
   }),

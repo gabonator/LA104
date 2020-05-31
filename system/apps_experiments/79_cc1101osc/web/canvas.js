@@ -116,7 +116,7 @@ class PreviewCanvas
   // animator
   animatorInit()
   {
-    this.zoom = 1/200;
+    this.zoom = 1/200/20;
 
     this.drawX = 0;
     this.drawY = 20;
@@ -147,10 +147,14 @@ class PreviewCanvas
       this.drawToOffset(this.calculateOffset());
   }
 
-  drawPulse(len, level)
+  drawPulse(len, level, flag)
   {
     if (len == 0)
       return;         
+
+    this.ctx1.strokeStyle = ["rgba(0, 0, 0, 0.5)", "#ff0000", "#00ff00", "#0000ff", "#ff00ff", "#ffff00", "#00ffff"][flag];
+    this.ctx2.strokeStyle = ["rgba(0, 0, 0, 0.5)", "#ff0000", "#00ff00", "#0000ff", "#ff00ff", "#ffff00", "#00ffff"][flag];
+
     var x0 = this.drawX;
     this.drawX += len*this.zoom;
     var x1 = this.drawX;
@@ -286,7 +290,7 @@ class DetailCanvas
     this.elem.height = h;
     this.ctx = this.elem.getContext("2d");
     this.scrollContainer.appendChild(this.elem);
-    this.zoom = 1/10;
+    this.zoom = 1/10/20;
 
     this.pulse = [];
     this.range = [0, 0];
@@ -317,6 +321,7 @@ class DetailCanvas
 
   show(pulse, begin, end)
   {
+    //console.log("show: " + JSON.stringify(pulse) + " " + begin + "-" + end);
     this.pulse = [...pulse];
     this.range = [begin, end];
     this.redraw();          	
@@ -345,19 +350,19 @@ class DetailCanvas
       if (i == this.range[0])
         this.ctx.strokeStyle = "rgba(0, 0, 0, 1)";
 
-      if (i == this.range[1]+1 && ny != 80)
+      if (i == this.range[1] && ny != 80)
         this.ctx.strokeStyle = "rgba(0, 0, 0, 0.3)";
 
       this.Line(x, y, x, ny);
 
-      if (i == this.range[1]+1 && ny == 80)
+      if (i == this.range[1] && ny == 80)
         this.ctx.strokeStyle = "rgba(0, 0, 0, 0.3)";
 
       this.Line(x, ny, nx, ny);
 
       // draw text?
       if (nx-x > 30)
-        this.Text((x+nx)/2, 50, this.pulse[i]*20);
+        this.Text((x+nx)/2, 50, this.pulse[i]);
       x = nx;
       y = ny;
     }
@@ -385,9 +390,10 @@ class DetailCanvas
 
   quantize()
   {
-    var q = this.pulse.map(x => x*20);
+    var q = this.pulse;
+    var k = 500;
 
-    for (var i=this.range[0]; i<=this.range[1]; i++)
+    for (var i=this.range[0]; i<this.range[1]; i++)
     {
       var d = q[i];
       if (d < 100 && i > 0)
@@ -412,15 +418,15 @@ class DetailCanvas
         d = 9000;
 */
       if (d >= 400 && d <= 560)
-        d = 480;
+        d = k;
       if (d >= 900 && d <= 1100)
-        d = 480*2;
+        d = k*2;
       if (d >= 580 && d <= 780)
-        d = 480*1.5;
+        d = k*1.5;
 
       q[i] = d;
     }
-    this.pulse = q.map(x => Math.floor(x/20));
+//    this.pulse = q.map(x => Math.floor(x/20));
     return this.trim(0);
   }
 
@@ -429,8 +435,8 @@ class DetailCanvas
     this.range[1] += delta;
     this.redraw();  
 
-    var quantized = this.pulse.map(x => x*20);
-    quantized = quantized.splice(this.range[0], this.range[1]-this.range[0]+1); //?
+    var quantized = [...this.pulse]; //.map(x => x*20);
+    quantized = quantized.splice(this.range[0], this.range[1]-this.range[0]); //?
     console.log(quantized);
     return quantized;
   }

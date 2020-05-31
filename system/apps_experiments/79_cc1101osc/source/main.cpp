@@ -2,7 +2,7 @@
 #include "terminal.h"
 #include "memory.h"
 #include "cc1101.h"
-#include "sys.h"
+#include "app.h"
 #include "rpc.h"
 #include "evaluator.h"
 #include "webusb/webusb.h"
@@ -68,7 +68,7 @@ int main(void)
   });
 
   BIOS::KEY::EKey key;
-  BIOS::LCD::BufferBegin(CRect(0, 0, 100, 100));
+  APP::Init();
 
   while ((key = BIOS::KEY::GetKey()) != BIOS::KEY::Escape) 
   {
@@ -88,7 +88,9 @@ int main(void)
     {
       BIOS::LCD::Printf(BIOS::LCD::Width-16, BIOS::LCD::Height-14, RGB565(b0b0b0), RGB565(404040), "%c", anim[animphase++&7]);
     }
+    APP::Do();
   }
+  APP::End();
 
   BIOS::DBG::Print("USB end\n");
   BIOS::OS::SetInterruptVector(BIOS::OS::IUSB_LP_CAN_RX0_IRQ, isrOld);
