@@ -255,9 +255,24 @@ namespace Layout
         virtual void Visit(Render* r) const
         {
             CRect rcWindow(r->GetRectangle());
-            DrawWindow(rcWindow, RGB565(b0b0b0));
+            DrawWindow(rcWindow, RGB565(808080));
             BIOS::LCD::Print(rcWindow.left + 16, rcWindow.top+2, RGB565(ffffff), RGBTRANS, mLabel);
             *r << Padding(8, 20, 8, 4);
+        }
+    };
+
+    class Bar : public Sublayout
+    {
+        const int mColor;
+        
+    public:
+        Bar(int color) : mColor(color)
+        {
+        }
+
+        virtual void Visit(Render* r) const
+        {
+            BIOS::LCD::Bar(r->GetRectangle(), mColor);
         }
     };
 }

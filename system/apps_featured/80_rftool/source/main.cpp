@@ -5,15 +5,44 @@ using namespace BIOS;
 #include "framework/layout.h"
 #include "framework/block.h"
 #include "framework/Menu.h"
+#include "framework/scroller.h"
+
+#include "protocol/protocol.h"
+#include "protocol/weather.h"
+#include "protocol/oregon.h"
+
+#include "modem/cc1101.h"
+#include "streamer/streamer.h"
+#include "framer/framer.h"
+
+CAttributes::TAttribute attributesData[10];
+CWeather weather;
+COregon oregon;
+CAttributes attributes(attributesData, COUNT(attributesData));
 
 class CApplicationData
 {
+    bool mConnected = false;
     int nFrequency = 433100000;
     int nBandwidth = 225000;
     int nGain = -10;
     int nDataRate = 4300;
-
+    CArray<CProtocol*> mProtocols;
+    CProtocol* mProtocolsData[16] {0};
+    TKeyValue mAttributesBuffer[16*10];
+    
+    //typedef uint8_t TProtocolBuffer[64];
+    //TProtocolBuffer mProtocolsBuffer[16];
+    
 public:
+    CApplicationData()
+    {
+        mProtocols.Init(mProtocolsData, COUNT(mProtocolsData));
+    }
+    bool GetConnected()
+    {
+        return mConnected;
+    }
     int GetFrequency()
     {
         return nFrequency;
@@ -57,65 +86,131 @@ public:
     // Capture
     int GetCaptureRecords()
     {
-        return (BIOS::SYS::GetTick() >> 12) % 10;
+        return mProtocols.GetSize();
     }
     
     void GetCaptureRecord(int i, int& ts, char* name, char* desc)
     {
-        switch (i)
-        {
-            case 0:
-                ts = 34*1000;
-                strcpy(name, "TFA-Twin-Plus-30.3049");
-                if (desc)
-                    strcpy(desc, "Ch: <74> Temp: <22.3 'C> Humidity: <99%>");
+        CAttributes local(&mAttributesBuffer[i*10], 10);
+        for (int j=0; j<10; j++)
+            if (mAttributesBuffer[i*10+j].key == nullptr)
+            {
+                local.SetSize(j);
                 break;
-            case 1:
-                ts = 39*1000;
-                strcpy(name, "OS - THGR810");
-                if (desc)
-                    strcpy(desc, "Ch: <19> Temp: <12.7 'C> Humidity: <34%>");
-                break;
-            case 2:
-                ts = 72*1000;
-                strcpy(name, "Keyfob-1");
-                if (desc)
-                    strcpy(desc, "<40 09 0b ca 2d 84 30 f3 4c> open");
-                break;
-            default:
-                ts = (75+i*5)*1000;
-                strcpy(name, "Keyless entry");
-                if (desc)
-                    sprintf(desc, "Data: <%c%c %c%c %c%c %c%c>", 'A' + i, 'A' + i, 'A' + i, 'A' + i, 'A' + i, 'A' + i, 'a' + i, 'a' + i);
-                break;
-        }
+            }
+
+        ts = local["timestamp"];
+        if (name)
+            mProtocols[i]->GetName(name);
+        if (desc)
+            mProtocols[i]->GetDescription(local, desc);
     }
-    int GetCaptureAttributes(int i)
+
+    void AddCaptureRecord(CProtocol* pProtocol, const CAttributes& attr)
     {
-        return 6;
+        int index = mProtocols.GetSize();
+        if (index == mProtocols.GetMaxSize())
+            return;
+        
+        CAttributes local(&mAttributesBuffer[index*10], 10);
+        local.Copy(attr);
+            
+        mProtocols.Add(pProtocol);
     }
+
+    // Capture data
+    int GetCaptureAttributesCount(int i)
+    {
+        CAttributes local(&mAttributesBuffer[i*10], 10);
+        for (int j=0; j<10; j++)
+            if (mAttributesBuffer[i*10+j].key == nullptr)
+            {
+                local.SetSize(j);
+                break;
+            }
+
+        return local.GetSize();
+    }
+
     void GetCaptureAttribute(int i, int j, char* name, char* value, char* units)
     {
-        switch (j)
+        CAttributes local(&mAttributesBuffer[i*10], 10);
+        for (int j=0; j<10; j++)
+            if (mAttributesBuffer[i*10+j].key == nullptr)
+            {
+                local.SetSize(j);
+                break;
+            }
+
+        const CAttributes::TAttribute& attr = local[j];
+        if (strcmp(attr.key, "temperature10") == 0)
         {
-            case 0: strcpy(name, "Temperature"); strcpy(value, "19.2"); strcpy(units, "'C"); break;
-            case 1: strcpy(name, "Humidity"); strcpy(value, "49"); strcpy(units, "%"); break;
-            case 2: strcpy(name, "Id"); strcpy(value, "38"); strcpy(units, ""); break;
-            case 3: strcpy(name, "Low battery"); strcpy(value, "false"); strcpy(units, ""); break;
-            case 4: strcpy(name, "Channel"); strcpy(value, "7"); strcpy(units, ""); break;
-            case 5: strcpy(name, "Junk"); strcpy(value, "2"); strcpy(units, ""); break;
+            strcpy(name, "Temperature");
+            sprintf(value, "%d.%d", attr.value/10, attr.value%10);
+            strcpy(units, "'C");
+            return;
+
         }
+        if (strcmp(attr.key, "humidity") == 0)
+        {
+            strcpy(name, "Humidity");
+            sprintf(value, "%d", attr.value);
+            strcpy(units, "%");
+            return;
+
+        }
+        if (strcmp(attr.key, "id") == 0 || strcmp(attr.key, "channel") == 0 || strcmp(attr.key, "junk") == 0 || strcmp(attr.key, "length") == 0)
+        {
+            strcpy(name, attr.key);
+            sprintf(value, "%d", attr.value);
+            strcpy(units, "");
+            return;
+        }
+        if (strcmp(attr.key, "battery_low") == 0)
+        {
+            strcpy(name, attr.key);
+            if (attr.value)
+                strcpy(value, "true");
+            else
+                strcpy(value, "false");
+            strcpy(units, "");
+            return;
+        }
+
+        if (strncmp(attr.key, "data64", 6) == 0)
+        {
+            strcpy(name, attr.key);
+            sprintf(value, "%08x", attr.value);
+            strcpy(units, "");
+            return;
+        }
+
+
+        strcpy(name, attr.key);
+        sprintf(value, "%d", attr.value);
+        strcpy(units, "?");
     }
-    CArray<uint16_t>& GetWaveform()
+    
+    void GetWaveform(int i, CArray<uint16_t>& pulse)
     {
-        static uint16_t arrData[800];
-        static CArray<uint16_t> arr(arrData, COUNT(arrData));
-        uint16_t sample[] =
-        {1980,980,980,1980,1000,1000,1980,980,1000,940,1020,980,1000,980,980,1980,2000,1980,980,1000,2000,980,1000,1960,2000,2000,1960,1000,1000,1960,2000,1980,1020,960,2000,1980,2000,2000,1980,1980,1000,980,1000,960,1000,960,2000,1000,980,980,1000,980,980,1980,1020,960,2000,1980,2000,1980,1000,960,2000,1000,980,980,1000,980,980,10020,2000,980,980,1960,1020,980,1980,1000,980,980,1000,980,980,980,980,1980,2020,1980,1000,960,2000,1000,980,1980,1980,1980,2000,980,1020,1980,1980,2000,1000,960,2000,1960,2020,1980,1980,1980,1020,960,1020,940,1020,960,2000,1000,980,960,980,1000,980,2000,980,980,2000,1980,1980,2020,980,980,2000,980,980,960,1000,980,980,10040,1980,980,1000,1980,1000,960,2000,1000,980,980,1000,980,980,980,1000,1960,2020,1980,980,1000,2000,980,980,1960,2020,1980,2000,980,980,1980,2000,1960,1020,980,2000,1980,2000,1980,1980,2000,980,980,1020,940,1020,980,1980,980,980,1000,980,980,1000,1980,980,1000,1960,2020,2000,1960,1020,960,2000,960,1000,980,1000,960,1000};
-        for (int i=0; i<COUNT(sample); i++)
-            arrData[i] = sample[i];
-        arr.SetSize(COUNT(sample));
-        return arr;
+        CProtocol* protocol = mProtocols[i];
+        CAttributes local(&mAttributesBuffer[i*10], 10);
+        for (int j=0; j<10; j++)
+            if (mAttributesBuffer[i*10+j].key == nullptr)
+            {
+                local.SetSize(j);
+                break;
+            }
+        
+        pulse.SetSize(0);
+        protocol->Modulate(local, pulse);
+    }
+    
+    
+    //
+    void SetConnected(bool b)
+    {
+        mConnected = b;
     }
 };
 
@@ -124,7 +219,6 @@ CApplicationData appData;
 #include "gui/modem.h"
 #include "gui/capture.h"
 #include "gui/details.h"
-
 
 class CMenuMain : public CTopMenu
 {
@@ -180,38 +274,102 @@ class CApplication : public CWnd
 public:
 	void Create()
 	{
+        appData.SetConnected(framerStart());
+        
 		CWnd::Create("Application", CWnd::WsVisible, CRect(0, 0, BIOS::LCD::Width, BIOS::LCD::Height), nullptr);
 		
 		const int padding = 20;
 		
         mMenu.Create("MainMenu", CWnd::WsVisible, CRect(0, 0, BIOS::LCD::Width-60, 14), this);
         mTime.Create("Time", CWnd::WsVisible, CRect(BIOS::LCD::Width-60, 0, BIOS::LCD::Width, 14), this);
-		mControl.Create(" Control ", CWnd::WsVisible, CRect(10, 14+padding, BIOS::LCD::Width-10, 14+padding + mControl.Height), this);
-        mModem.Create(" Modem ", CWnd::WsVisible, CRect(10, mControl.m_rcClient.bottom + padding, BIOS::LCD::Width-10, mControl.m_rcClient.bottom + padding + mModem.Height), this);
+		mControl.Create(" Control ", CWnd::WsHidden, CRect(10, 14+padding, BIOS::LCD::Width-10, 14+padding + mControl.Height), this);
+        mModem.Create(" Modem ", CWnd::WsHidden, CRect(10, mControl.m_rcClient.bottom + padding, BIOS::LCD::Width-10, mControl.m_rcClient.bottom + padding + mModem.Height), this);
 
-        mPreview.Create(" Preview ", CWnd::WsVisible | CWnd::WsNoActivate, CRect(10, mModem.m_rcClient.bottom + padding, BIOS::LCD::Width-10, mModem.m_rcClient.bottom + padding + mPreview.Height), this);
+        mPreview.Create(" Preview ", CWnd::WsHidden | CWnd::WsNoActivate, CRect(10, mModem.m_rcClient.bottom + padding, BIOS::LCD::Width-10, mModem.m_rcClient.bottom + padding + mPreview.Height), this);
         mModem.SetFocus();
 
         
         mCapture.Create("Capture", CWnd::WsHidden, CRect(10, 14+10, BIOS::LCD::Width-10, BIOS::LCD::Height-10), this);
         mDetails.Create("Details", CWnd::WsHidden, CRect(30, 40, BIOS::LCD::Width-30, BIOS::LCD::Height-40), this);
 		SetTimer(50);
+        OnMessage(&mMenu, 0, 1);
 	}
 	
 	void Destroy()
 	{
+        framerStop();
 	}
-	
     
 	virtual void OnTimer() override
 	{
-		EVERY(1000)
+		EVERY(5000)
 		{
-//            ShowTime();
-			//mColor.SetColor(mPreview.GetColor());
+            /*
+            CArray<uint16_t> arrPulses;
+            uint16_t arrPulsesData[256];
+            arrPulses.Init(arrPulsesData, COUNT(arrPulsesData));
+            
+            weather.Example(attributes);
+            weather.Modulate(attributes, arrPulses);
+            BIOS::DBG::Print("dump: {");
+            for (int i=0; i<arrPulses.GetSize(); i++)
+                BIOS::DBG::Print("%d,", arrPulses[i]);
+            BIOS::DBG::Print("}\n");
+             */
+            
+            /*
+            uint16_t bufferConrad[] =            {500,9000,500,2000,500,4000,500,4000,500,2000,500,2000,500,4000,500,2000,500,4000,500,2000,500,2000,500,4000,500,2000,500,4000,500,4000,500,2000,500,4000,500,2000,500,4000,500,2000,500,4000,500,2000,500,2000,500,2000,500,2000,500,4000,500,4000,500,4000,500,4000,500,4000,500,4000,500,4000,500,4000,500,4000,500,4000,500,4000,500,2000,500};
+             CArray<uint16_t> pulse;
+             pulse.Init(bufferConrad, COUNT(bufferConrad));
+             pulse.SetSize(COUNT(bufferConrad));
+             */
+
+            uint16_t buffer[] =  {380,360,320,420,300,400,300,400,340,420,280,400,340,400,320,400,300,420,300,420,300,420,300,3820,700,380,740,360,720,400,720,380,700,380,720,400,700,400,680,400,700,420,680,420,700,360,720,400,340,760,700,400,700,380,360,740,720,380,340,780,700,400,700,380,720,380,340,760,720,380,320,780,720,380,720,380,320,760,720,380,720,400,700,380,720,400,700,400,700,380,340,760,340,780,300,800,300,780,720,360,340,780,320,780,300,800,720,360,340,780,340,740,360,760,300,780,340,760,700,400,340,780,680,400,700,400,340,780,320,760,320,760,340,760,720,380,320,780,720,380,340,760,720,400,300,780,700,400,720,400,320,760,340,760,300};
+
+            CArray<uint16_t> pulse;
+            pulse.Init(buffer, COUNT(buffer));
+            pulse.SetSize(COUNT(buffer));
+
+            AnalyseBuffer(pulse);
+            
+            /*
+            CArray<uint16_t> pulses;
+            uint16_t pulsesData[256];
+            pulses.Init(pulsesData, COUNT(pulsesData));
+
+            weather.Example(attributes);
+            static int temp = 10;
+            attributes["temperature10"] = (temp++)*10;
+            weather.Modulate(attributes, pulses);
+            AnalyseBuffer(pulses);
+            */
 		}
 	}
 	
+    void AnalyseBuffer(CArray<uint16_t>& pulse)
+    {
+        static int nRecordId = 1000;
+        
+        if (weather.Demodulate(pulse, attributes))
+        {
+            //weather.Example(attributes);
+            attributes["timestamp"] = BIOS::SYS::GetTick();
+            attributes["uid"] = nRecordId++;
+            appData.AddCaptureRecord(&weather, attributes);
+            appData.GetWaveform(appData.GetCaptureRecords()-1, mDetails.GetWave());
+            return;
+        }
+        if (oregon.Demodulate(pulse, attributes))
+        {
+            //weather.Example(attributes);
+            attributes["timestamp"] = BIOS::SYS::GetTick();
+            attributes["uid"] = nRecordId++;
+            appData.AddCaptureRecord(&oregon, attributes);
+            appData.GetWaveform(appData.GetCaptureRecords()-1, mDetails.GetWave());
+            return;
+        }
+    }
+    
 	virtual void OnMessage(CWnd* pSender, int code, uintptr_t data) override
 	{
         if (pSender == &mMenu)
@@ -263,6 +421,7 @@ bool mainLoop()
 
 void mainFinish()
 {
+    app.Destroy();
 }
 
 #ifdef _ARM

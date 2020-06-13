@@ -7,11 +7,13 @@ cd build
 
 arm-none-eabi-g++ -Os -Werror -fno-common -mcpu=cortex-m3 -mthumb -msoft-float -fno-exceptions -fno-rtti -fno-threadsafe-statics -Wno-psabi -DLA104 -MD -D _ARM -D STM32F10X_HD -D STM32F103xB -c \
   ../source/main.cpp \
+  ../source/streamer/streamer.cpp \
   ../../../os_host/source/framework/Wnd.cpp \
   -I../../../os_library/include/
 
 arm-none-eabi-gcc -fPIC -mcpu=cortex-m3 -mthumb -o output.elf -nostartfiles -T ../source/app.lds \
   ./main.o \
+  ./streamer.o \
   ./Wnd.o \
   -lbios_la104 -L../../../os_library/build
 

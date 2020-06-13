@@ -9,6 +9,8 @@ constexpr uint16_t blk1b[]    = {h, h, h, h, h, h, w, h, h, h, h, h, h, h, h, h,
 constexpr uint16_t blk0b[]    = {h, h, h, h, h, h, h, h, h, h, h, h, h, h, h, h, h, h, h, h, h, h, h, h, w, h, h, h, h, h, h};
 constexpr uint16_t blkSwapb[] = {h, h, h, h, h, h, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, h, h, h, h, h, h};
 
+uint16_t waveData[256];
+
 class CSignalView : public CWnd
 {
     virtual void OnPaint() override
@@ -34,8 +36,18 @@ public:
     int mSettings_mSignalScaleX{200};
     int mStart;
     int mTotal;
+    CArray<uint16_t> mWave;
 
 public:
+    CSignalView()
+    {
+        // TODO: pozor! ctor!
+        mWave.Init(waveData, COUNT(waveData));
+    }
+    CArray<uint16_t>& GetWave()
+    {
+        return mWave;
+    }
     virtual void OnTimer() override
     {
         DrawAsync();
@@ -45,8 +57,8 @@ public:
 
     void Redraw()
     {
-        uint16_t* arrIntervals = appData.GetWaveform().GetData();
-        const int& nCount = appData.GetWaveform().GetSize();
+        uint16_t* arrIntervals = mWave.GetData();
+        const int& nCount = mWave.GetSize();
         
         mDrawState.finished = false;
         mDrawState.index = 0;
@@ -98,8 +110,8 @@ public:
     
     void DrawAsync()
     {
-        uint16_t* arrIntervals = appData.GetWaveform().GetData();
-        const int& nCount = appData.GetWaveform().GetSize();
+        uint16_t* arrIntervals = mWave.GetData();
+        const int& nCount = mWave.GetSize();
         const int& nStep = mSettings_mSignalScaleX;
 
         CRect rcBlock(m_rcClient);
