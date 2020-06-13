@@ -1,23 +1,35 @@
+
 class CCapture : public CWnd
 {
-    int mFocus{0};
-    int mScroll{0};
+    CScroller mScroller{6, &mRedrawMask};
     int mLastCount{0};
-    
+    int mRedrawMask{0};
+
 public:
     void Create( const char* pszId, int dwFlags, const CRect& rc, CWnd* pParent )
     {
         CWnd::Create(pszId, dwFlags, rc, pParent);
-        SetTimer(500);
+        SetTimer(200);
     }
 
     virtual void OnTimer() override
     {
         int nNewCount = appData.GetCaptureRecords();
+
         if (mLastCount != nNewCount)
-        {
+            mRedrawMask = -1;
+
+        if (mRedrawMask)
             Invalidate();
+    }
+    
+    virtual void WindowMessage(int nMsg, int nParam /*=0*/) override
+    {
+        if (nMsg == WmWillShow || nMsg == WmWillLoseFocus || nMsg == WmWillGetFocus)
+        {
+            mRedrawMask = -1;
         }
+        CWnd::WindowMessage(nMsg, nParam);
     }
     
     virtual void OnPaint() override
@@ -27,11 +39,23 @@ public:
         CRect rcElement(m_rcClient.left, m_rcClient.top, m_rcClient.right-8, m_rcClient.top + nElementHeight);
 
         mLastCount = appData.GetCaptureRecords();
-        int nTopIndex = mScroll;
-        int nBottomIndex = min(nTopIndex + 6, mLastCount);
+        if (mLastCount == 0)
+        {
+            rcElement.bottom = m_rcClient.top + 6*nElementSpacing+1;
+            GUI::Background(rcElement, RGB565(404040), RGB565(101010));
+            
+            CRect rcScrollbar(m_rcClient.right-2, m_rcClient.top, m_rcClient.right, m_rcClient.top + 6*nElementSpacing+1);
+            BIOS::LCD::Bar(rcScrollbar, RGB565(606060));
+            return;
+        }
+
+        int nTopIndex, nBottomIndex;
+        mScroller.SetCount(mLastCount, 0);
+        mScroller.GetRange(nTopIndex, nBottomIndex);
+        
         CRect rcScrollbar(m_rcClient.right-2, m_rcClient.top, m_rcClient.right, m_rcClient.top + 6*nElementSpacing+1);
-        int nScrollTop = mLastCount ? rcScrollbar.top + nTopIndex*rcScrollbar.Height()/mLastCount : rcScrollbar.top;
-        int nScrollBottom = mLastCount ? rcScrollbar.top + nBottomIndex*rcScrollbar.Height()/mLastCount : rcScrollbar.top;
+        int nScrollTop = rcScrollbar.top + nTopIndex*rcScrollbar.Height()/mLastCount;
+        int nScrollBottom = rcScrollbar.top + nBottomIndex*rcScrollbar.Height()/mLastCount;
         BIOS::LCD::Bar(rcScrollbar, RGB565(606060));
         rcScrollbar.top = nScrollTop;
         rcScrollbar.bottom = nScrollBottom;
@@ -39,23 +63,42 @@ public:
 
         using namespace Layout;
         
-        for (int i=nTopIndex; i<nBottomIndex; i++)
+        int mask = mRedrawMask;
+        mRedrawMask = 0;
+        long now = BIOS::SYS::GetTick();
+        int index = 0;
+        for (int i=nTopIndex; i<nBottomIndex; i++, index++)
         {
+            if (!(mask & (1<<index)))
+            {
+                rcElement.Offset(0, nElementSpacing);
+                continue;
+            }
+                
             int ts;
             char name[64];
             char desc[64];
             char time[8];
-            appData.GetCaptureRecord(i, ts, name, desc);
+            appData.GetCaptureRecord(mLastCount-1-i, ts, name, desc);
             
+            int alpha = 0;
+            if (now - ts < 5000)
+            {
+                alpha = 255-(now - ts)*256/5000;
+                mRedrawMask |= 1<<index;
+            }
+                
             ts /= 1000;
             sprintf(time, "%02d:%02d", ts/60, ts%60);
                       
-            bool focus = HasFocus() && (mFocus + mScroll) == i;
+            bool focus = HasFocus() && mScroller.mFocus == index;
             Color def(focus ? RGB565(000000) : RGB565(b0b0b0));
             Color hig(RGB565(ffffff));
 
+            int y = (focus ? 0x80 : 0x10) + alpha/2;
+            y = min(y, 255);
             Render r(rcElement);
-            r   << Rectangle(focus ? RGB565(808080) : RGB565(101010))
+            r   << Rectangle(focus ? RGB565RGB(0x80, 0x80, y) : RGB565RGB(0x10, 0x10, y))
                 << Padding(8, 2, 8, 2)
                 << Color(focus ? RGB565(404040) : RGB565(808080)) << time << " " << def << name;
             
@@ -83,33 +126,26 @@ public:
             r << ptext;
             rcElement.Offset(0, nElementSpacing);
         }
+        
+        rcElement.top++;
+        rcElement.bottom = m_rcClient.top + 6*nElementSpacing+1;
+        GUI::Background(rcElement, RGB565(404040), RGB565(101010));
     }
     
     virtual void OnKey(int key) override
     {
         if (key == BIOS::KEY::Up)
         {
-            if (mFocus > 0)
+            if (mScroller.Up())
             {
-                mFocus--;
-                Invalidate();
-                return;
-            } else
-            if (mScroll > 0)
-            {
-                mScroll--;
                 Invalidate();
                 return;
             }
         }
         if (key == BIOS::KEY::Down)
         {
-            if (mFocus + mScroll < appData.GetCaptureRecords()-1)
+            if (mScroller.Down())
             {
-                if (mFocus >= 5)
-                    mScroll++;
-                else
-                    mFocus++;
                 Invalidate();
                 return;
             }

@@ -1,3 +1,6 @@
+//volatile uint32_t streamerTotalHigh;
+//volatile uint32_t streamerTotalLow;
+
 class CControlLayout : public CBlock
 {
 public:
@@ -16,6 +19,7 @@ public:
             << Goto(m_rcClient.CenterX())
             << Select(CWnd::HasFocus() && mFocus == 1) << Radio(mLogging, (char*)"Logging");
     }
+    
     virtual void OnKey(int key) override
     {
         if (key == BIOS::KEY::Enter && mFocus == 1)
@@ -44,7 +48,6 @@ public:
         }
         CBlock::OnKey(key);
     }
-
 };
 
 class CModemLayout : public CBlock
@@ -95,20 +98,31 @@ public:
         int nDataRate = appData.GetDataRate();
         char buffer[16];
         
-        Render(m_rcClient)
-            << Padding(8, 4, 8, 4)
-            << "Status:" << " " << Color(RGB565(00ff00)) << "Connected" << Color(RGB565(b0b0b0))
-            << NewLine()
-            << "Freq:" << Select(HasFocus(0)) << Units(formatMhz(buffer, nFrequency), "Mhz")
+        Render r(m_rcClient);
+        
+        r   << Padding(8, 4, 8, 4);
+        
+        if (appData.GetConnected())
+        {
+            r   << "Status:" << " " << Color(RGB565(00ff00)) << "Connected" << Color(RGB565(b0b0b0))
+                << Select(HasFocus(0)) << Button((char*)"Disconnect") << Select(false) << " ";
+        } else
+        {
+            r   << "Status:" << " " << Color(RGB565(ff0000)) << "Disconnected" << Color(RGB565(b0b0b0))
+                << Select(HasFocus(0)) << Button((char*)"Connect") << Select(false) << " ";
+        }
+
+        r   << NewLine() << Color(RGB565(b0b0b0))
+            << "Freq:" << Select(HasFocus(1)) << Units(formatMhz(buffer, nFrequency), "Mhz")
             << Goto(m_rcClient.CenterX())
-            << "Bandwidth:" << Color(RGB565(00ff00)) << Select(HasFocus(1)) << Units(formatKhz(buffer, nBandwidth), "kHz")
+            << "Bandwidth:" << Color(RGB565(00ff00)) << Select(HasFocus(2)) << Units(formatKhz(buffer, nBandwidth), "kHz")
             << NewLine()
-            << "Gain:" << Select(HasFocus(2)) << Units(formatNumber(buffer, nGain), "dB")
+            << "Gain:" << Select(HasFocus(3)) << Units(formatNumber(buffer, nGain), "dB")
             << Goto(m_rcClient.CenterX())
-            << "Datarate:" << Select(HasFocus(3)) << Units(formatKNumber(buffer, nDataRate), "kBps")
+            << "Datarate:" << Select(HasFocus(4)) << Units(formatKNumber(buffer, nDataRate), "kBps")
             << NewLine() << Goto(m_rcClient.CenterX())
-            << Select(HasFocus(4)) << Button((char*)"Load") << Select(false) << " "
-            << Select(HasFocus(5)) << Button((char*)"Save") << Select(false);
+            << Select(HasFocus(5)) << Button((char*)"Load") << Select(false) << " "
+            << Select(HasFocus(6)) << Button((char*)"Save") << Select(false);
 	}
 	
 	virtual void OnKey(int key) override
@@ -122,13 +136,29 @@ public:
 		{
 			switch (mFocus)
 			{
-                case 0: appData.DeltaFrequency(dir); break;
-                case 1: appData.DeltaBandwidth(dir); break;
-                case 2: appData.DeltaGain(dir); break;
-                case 3: appData.DeltaDataRate(dir); break;
+                case 1: appData.DeltaFrequency(dir); break;
+                case 2: appData.DeltaBandwidth(dir); break;
+                case 3: appData.DeltaGain(dir); break;
+                case 4: appData.DeltaDataRate(dir); break;
 			}
             Invalidate();
 		}
+        
+        if (key == BIOS::KEY::Enter && mFocus == 0)
+        {
+                // dispatch to main
+            if (!appData.GetConnected())
+            {
+                appData.SetConnected(framerStart());
+            }
+            else
+            {
+                framerStop();
+                appData.SetConnected(false);
+            }
+            Invalidate();
+        }
+        
 		if (key == BIOS::KEY::Up)
 		{
 			if (mFocus > 0)
@@ -140,7 +170,7 @@ public:
 		}
 		if (key == BIOS::KEY::Down)
 		{
-			if (mFocus < 5)
+			if (mFocus < 6)
 			{
 				mFocus++;
 				Invalidate();
@@ -163,55 +193,74 @@ public:
 		CBlock::OnPaint(); 
 	}
     
-    virtual void WindowMessage(int nMsg, int nParam = 0) override
+    virtual void WindowMessage(int nMsg, int nParam /*=0*/) override
     {
-        if (nMsg == CWnd::WmTick /*&& mSettings.mDeviceCurrent*/ ) // not paused
+        if (nMsg == WmWillShow)
         {
-            enum TLast {Z, L, H, LH};
-            int current = appData.GetSample() > 128;
-            static int x = m_rcClient.right-2;
-            static enum TLast last = L;
-            //static int counter = 0;
-            //static int highs = 0;
-            if (last != LH)
-            {
-                if (current == 0 && last == H)
-                    last = LH;
-                if (current == 1 && last == L)
-                    last = LH;
-            }
-            /*
-            if (current)
-                highs++;
-            if (counter++ < 10) // malo byt 80
-                return;
-             */
-            //counter = 0;
-            int highs = appData.GetSample() / 4;
-            
-            uint16_t pixBuf[40];
-            for (int i=0; i<40; i++)
-                pixBuf[i] = RGB565(404040);
-            
-            if (last == LH)
-            {
-                int c = highs < 40 ? RGB565(b0b0b0) : RGB565(ffffff);
-                for (int i=5;i<35; i++)
-                    pixBuf[i] = c;
-            } else if (last == L)
-                pixBuf[5] = RGB565(ffffff);
-            else if (last == H)
-                pixBuf[34] = RGB565(ffffff);
-            
-            BIOS::LCD::BufferBegin(CRect(x, m_rcClient.top+1, x+1, m_rcClient.bottom-1));
-            BIOS::LCD::BufferWrite(pixBuf, COUNT(pixBuf));
-            if (++x >= m_rcClient.right-1)
-                x = m_rcClient.left+1;
-            
-            last = current == 0 ? L : H;
-            highs = 0;
+            SetTimer(10);
+        }
+        if (nMsg == WmWillHide)
+        {
+            KillTimer();
         }
         CWnd::WindowMessage(nMsg, nParam);
+    }
+
+    virtual void OnTimer() override
+    {
+        if (!appData.GetConnected())
+            return;
+        
+        enum TLast {Z, L, H, LH};
+        
+        static uint32_t lastHighs = 0;
+        static uint32_t lastLows = 0;
+        uint32_t nowHighs = streamerTotalHigh;
+        uint32_t nowLows = streamerTotalLow;
+        int current = (int)(nowHighs-lastHighs) > (int)(nowLows-lastLows);
+        lastHighs = nowHighs;
+        lastLows = nowLows;
+
+        static int x = m_rcClient.right-2;
+        static enum TLast last = L;
+        //static int counter = 0;
+        //static int highs = 0;
+        if (last != LH)
+        {
+            if (current == 0 && last == H)
+                last = LH;
+            if (current == 1 && last == L)
+                last = LH;
+        }
+        /*
+        if (current)
+            highs++;
+        if (counter++ < 10) // malo byt 80
+            return;
+         */
+        //counter = 0;
+        
+        uint16_t pixBuf[40];
+        for (int i=0; i<40; i++)
+            pixBuf[i] = RGB565(404040);
+        
+        if (last == LH)
+        {
+            int c = false ? RGB565(b0b0b0) : RGB565(ffffff);
+            for (int i=5;i<35; i++)
+                pixBuf[i] = c;
+        } else if (last == L)
+            pixBuf[5] = RGB565(ffffff);
+        else if (last == H)
+            pixBuf[34] = RGB565(ffffff);
+        
+        BIOS::LCD::BufferBegin(CRect(x, m_rcClient.top+1, x+1, m_rcClient.bottom-1));
+        BIOS::LCD::BufferWrite(pixBuf, COUNT(pixBuf));
+        if (++x >= m_rcClient.right-1)
+            x = m_rcClient.left+1;
+        
+        last = current == 0 ? L : H;
+        //highs = 0;
     }
 
 	
