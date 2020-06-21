@@ -38,6 +38,14 @@ public:
     {
         return CArray<TKeyValue>::operator[](i);
     }
+
+  int indexOf(const char* key)
+  {
+    for (int i=0; i<GetSize(); i++)
+      if (strcmp(CArray<TKeyValue>::operator[](i).key, key) == 0)
+        return i;
+    return -1;
+  }
 };
 
 class CProtocol

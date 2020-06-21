@@ -149,7 +149,7 @@ public:
 
 class CDeviceCC1101 : public CCc1101Spi
 {
-    bool mLoaded{false};
+//    bool mLoaded{false};
 //  char str[600]; // TODO!! STACK!!!
     
 public:
@@ -256,8 +256,9 @@ public:
         if (!_check)
             return false;
 
-        mLoaded = CCc1101Spi::Read(TEST1) == mRegisters[TEST1];
-        return mLoaded;
+        return CCc1101Spi::Read(TEST1) == mRegisters[TEST1];
+//        mLoaded = CCc1101Spi::Read(TEST1) == mRegisters[TEST1];
+//        return mLoaded;
     }
     
     bool Apply()
@@ -270,8 +271,8 @@ public:
 #ifdef __APPLE__
 		return true;
 #endif
-        if (mLoaded)
-            return true;
+//        if (mLoaded)
+//            return true;
         return Load(nullptr);
     }
 
@@ -315,6 +316,9 @@ public:
         CCc1101Spi::Write(FREQ2, mRegisters[FREQ2]);
         CCc1101Spi::Write(FREQ1, mRegisters[FREQ1]);
         CCc1101Spi::Write(FREQ0, mRegisters[FREQ0]);
+        _ASSERT(CCc1101Spi::Read(FREQ2) == mRegisters[FREQ2]);
+        _ASSERT(CCc1101Spi::Read(FREQ1) == mRegisters[FREQ1]);
+        _ASSERT(CCc1101Spi::Read(FREQ0) == mRegisters[FREQ0]);
     }
     
     void DeltaGain(int d)
@@ -430,6 +434,12 @@ public:
         CCc1101Spi::Write(FREQ2, mRegisters[FREQ2]);
         CCc1101Spi::Write(FREQ1, mRegisters[FREQ1]);
         CCc1101Spi::Write(FREQ0, mRegisters[FREQ0]);
+
+#ifndef __APPLE__
+        _ASSERT(CCc1101Spi::Read(FREQ2) == mRegisters[FREQ2]);
+        _ASSERT(CCc1101Spi::Read(FREQ1) == mRegisters[FREQ1]);
+        _ASSERT(CCc1101Spi::Read(FREQ0) == mRegisters[FREQ0]);
+#endif
     }
 
     int GetFrequency()

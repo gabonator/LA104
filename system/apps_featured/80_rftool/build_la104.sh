@@ -9,12 +9,14 @@ arm-none-eabi-g++ -Os -Werror -fno-common -mcpu=cortex-m3 -mthumb -msoft-float -
   ../source/main.cpp \
   ../source/streamer/streamer.cpp \
   ../../../os_host/source/framework/Wnd.cpp \
+  ../../../os_host/source/framework/Serialize.cpp \
   -I../../../os_library/include/
 
 arm-none-eabi-gcc -fPIC -mcpu=cortex-m3 -mthumb -o output.elf -nostartfiles -T ../source/app.lds \
   ./main.o \
   ./streamer.o \
   ./Wnd.o \
+  ./Serialize.o \
   -lbios_la104 -L../../../os_library/build
 
 arm-none-eabi-objdump -d -S output.elf > output.asm

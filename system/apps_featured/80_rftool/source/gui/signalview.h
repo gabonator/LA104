@@ -9,7 +9,7 @@ constexpr uint16_t blk1b[]    = {h, h, h, h, h, h, w, h, h, h, h, h, h, h, h, h,
 constexpr uint16_t blk0b[]    = {h, h, h, h, h, h, h, h, h, h, h, h, h, h, h, h, h, h, h, h, h, h, h, h, w, h, h, h, h, h, h};
 constexpr uint16_t blkSwapb[] = {h, h, h, h, h, h, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, w, h, h, h, h, h, h};
 
-uint16_t waveData[256];
+uint16_t waveData[400];
 
 class CSignalView : public CWnd
 {

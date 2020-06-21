@@ -9,7 +9,9 @@ using namespace BIOS;
 
 #include "protocol/protocol.h"
 #include "protocol/weather.h"
-#include "protocol/oregon.h"
+#include "protocol/oregon2.h"
+#include "protocol/key360.h"
+#include "protocol/vw.h"
 
 #include "modem/cc1101.h"
 #include "streamer/streamer.h"
@@ -17,16 +19,19 @@ using namespace BIOS;
 
 CAttributes::TAttribute attributesData[10];
 CWeather weather;
-COregon oregon;
+COregon2 oregon;
+CKey360 key360;
+CVw vw;
 CAttributes attributes(attributesData, COUNT(attributesData));
+static CProtocol* protocols[] = {&weather, &oregon, &key360, &vw};
 
 class CApplicationData
 {
     bool mConnected = false;
-    int nFrequency = 433100000;
-    int nBandwidth = 225000;
-    int nGain = -10;
-    int nDataRate = 4300;
+//    int nFrequency = 433100000;
+//    int nBandwidth = 225000;
+//    int nGain = -10;
+//    int nDataRate = 4300;
     CArray<CProtocol*> mProtocols;
     CProtocol* mProtocolsData[16] {0};
     TKeyValue mAttributesBuffer[16*10];
@@ -45,38 +50,35 @@ public:
     }
     int GetFrequency()
     {
-        return nFrequency;
+        return CC1101::GetFrequency();
     }
     int GetBandwidth()
     {
-        return nBandwidth;
+        return CC1101::GetBandwidth();
     }
     int GetGain()
     {
-        return nGain;
+        return CC1101::GetGain();
     }
     int GetDataRate()
     {
-        return nDataRate;
+        return CC1101::GetDataRate();
     }
     void DeltaFrequency(int d)
     {
-        nFrequency += d*100000;
+        CC1101::SetFrequency(CC1101::GetFrequency()+d*50000);
     }
     void DeltaBandwidth(int d)
     {
-        if (d < 0)
-            nBandwidth /= 2;
-        else
-            nBandwidth *= 2;
+        CC1101::DeltaBandwidth(d);
     }
     void DeltaGain(int d)
     {
-        nGain += d;
+        CC1101::DeltaGain(d);
     }
     void DeltaDataRate(int d)
     {
-        nDataRate += d*100;
+        CC1101::SetDataRate(CC1101::GetDataRate() + d * 200);
     }
     int GetSample()
     {
@@ -185,7 +187,6 @@ public:
             return;
         }
 
-
         strcpy(name, attr.key);
         sprintf(value, "%d", attr.value);
         strcpy(units, "?");
@@ -203,7 +204,9 @@ public:
             }
         
         pulse.SetSize(0);
+BIOS::DBG::Print("mod{{{");
         protocol->Modulate(local, pulse);
+BIOS::DBG::Print("}}}");
     }
     
     
@@ -215,6 +218,7 @@ public:
 };
 
 CApplicationData appData;
+
 
 #include "gui/modem.h"
 #include "gui/capture.h"
@@ -302,6 +306,8 @@ public:
     
 	virtual void OnTimer() override
 	{
+        framerLoop();
+#ifdef __APPLE__
 		EVERY(5000)
 		{
             /*
@@ -323,7 +329,7 @@ public:
              pulse.Init(bufferConrad, COUNT(bufferConrad));
              pulse.SetSize(COUNT(bufferConrad));
              */
-
+/*
             uint16_t buffer[] =  {380,360,320,420,300,400,300,400,340,420,280,400,340,400,320,400,300,420,300,420,300,420,300,3820,700,380,740,360,720,400,720,380,700,380,720,400,700,400,680,400,700,420,680,420,700,360,720,400,340,760,700,400,700,380,360,740,720,380,340,780,700,400,700,380,720,380,340,760,720,380,320,780,720,380,720,380,320,760,720,380,720,400,700,380,720,400,700,400,700,380,340,760,340,780,300,800,300,780,720,360,340,780,320,780,300,800,720,360,340,780,340,740,360,760,300,780,340,760,700,400,340,780,680,400,700,400,340,780,320,760,320,760,340,760,720,380,320,780,720,380,340,760,720,400,300,780,700,400,720,400,320,760,340,760,300};
 
             CArray<uint16_t> pulse;
@@ -331,7 +337,7 @@ public:
             pulse.SetSize(COUNT(buffer));
 
             AnalyseBuffer(pulse);
-            
+*/            
             /*
             CArray<uint16_t> pulses;
             uint16_t pulsesData[256];
@@ -343,30 +349,39 @@ public:
             weather.Modulate(attributes, pulses);
             AnalyseBuffer(pulses);
             */
+            /*
+            uint16_t buffer[] = {360, 440, 240, 440, 280, 460, 280, 420, 280, 440, 320, 380, 320, 420, 300, 420, 300, 420, 300, 420, 300, 400, 320, 3800, 700, 400, 700, 400, 720, 400, 700, 380, 700, 400, 700, 380, 720, 400, 700, 380, 720, 380, 740, 380, 700, 380, 720, 400, 300, 780, 740, 360, 720, 400, 320, 760, 340, 760, 720, 380, 320, 780, 340, 740, 340, 760, 340, 780, 320, 760, 340, 760, 720, 360, 740, 380, 340, 760, 720, 380, 720, 380, 700, 420, 700, 360, 720, 380, 740, 360, 360, 740, 340, 780, 320, 760, 340, 780, 700, 380, 340, 740, 380, 740, 340, 740, 740, 380, 340, 760, 360, 740, 340, 740, 340, 760, 340, 760, 720, 400, 320, 760, 720, 380, 720, 400, 340, 740, 340, 760, 340, 740, 340, 780, 720, 360, 360, 740, 720, 400, 340, 760, 700, 400, 320, 760, 740, 360, 720, 360, 360, 760, 340, };
+*/
+            uint16_t buffer[] = {340, 400, 320, 420, 320, 380, 340, 400, 300, 400, 320, 420, 300, 420, 300, 400, 300, 440, 300, 400, 320, 400, 320, 3800, 720, 400, 680, 400, 700, 400, 700, 380, 720, 380, 720, 400, 720, 380, 700, 380, 720, 400, 680, 400, 720, 400, 700, 360, 360, 760, 720, 380, 720, 380, 340, 760, 680, 400, 700, 420, 700, 400, 700, 380, 720, 380, 700, 440, 680, 380, 700, 420, 320, 760, 720, 380, 340, 780, 680, 400, 720, 400, 680, 400, 700, 400, 720, 360, 720, 400, 320, 780, 320, 780, 300, 780, 340, 780, 700, 400, 320, 780, 300, 780, 320, 800, 700, 400, 320, 760, 320, 760, 320, 780, 340, 780, 320, 780, 700, 400, 320, 780, 680, 440, 660, 420, 300, 800, 300, 780, 300, 800, 320, 780, 720, 360, 320, 780, 700, 420, 320, 760, 700, 400, 320, 800, 700, 400, 680, 400, 320, 780, 340,};
+            
+            CArray<uint16_t> pulse;
+            pulse.Init(buffer, COUNT(buffer));
+            pulse.SetSize(COUNT(buffer));
+
+            AnalyseBuffer(pulse);
+
 		}
+#endif
 	}
 	
     void AnalyseBuffer(CArray<uint16_t>& pulse)
     {
         static int nRecordId = 1000;
-        
-        if (weather.Demodulate(pulse, attributes))
+        for (int i=0; i<COUNT(protocols); i++)
         {
-            //weather.Example(attributes);
-            attributes["timestamp"] = BIOS::SYS::GetTick();
-            attributes["uid"] = nRecordId++;
-            appData.AddCaptureRecord(&weather, attributes);
-            appData.GetWaveform(appData.GetCaptureRecords()-1, mDetails.GetWave());
-            return;
-        }
-        if (oregon.Demodulate(pulse, attributes))
-        {
-            //weather.Example(attributes);
-            attributes["timestamp"] = BIOS::SYS::GetTick();
-            attributes["uid"] = nRecordId++;
-            appData.AddCaptureRecord(&oregon, attributes);
-            appData.GetWaveform(appData.GetCaptureRecords()-1, mDetails.GetWave());
-            return;
+BIOS::DBG::Print("de<");
+
+            if (protocols[i]->Demodulate(pulse, attributes))
+            {
+                //weather.Example(attributes);
+                attributes["timestamp"] = BIOS::SYS::GetTick();
+                attributes["uid"] = nRecordId++;
+                appData.AddCaptureRecord(protocols[i], attributes);
+                appData.GetWaveform(appData.GetCaptureRecords()-1, mDetails.GetWave());
+                return;
+            }
+BIOS::DBG::Print(">");
+
         }
     }
     
@@ -381,11 +396,6 @@ public:
             mDetails.ShowWindow(data == 3);
             Invalidate();
         }
-
-//		if (pSender == &mColor)
-		{
-//			mPreview.SetColor(data);
-		}
 	}
 	
 private:
@@ -401,6 +411,11 @@ private:
 };
 
 CApplication app;
+
+bool analyse(CArray<uint16_t>& pulse)
+{
+    app.AnalyseBuffer(pulse);
+}
 
 void mainInit()
 {

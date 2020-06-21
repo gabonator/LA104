@@ -32,5 +32,7 @@ int streamerBufferMaxCounter;
 uint16_t streamerSecondary[64];
 uint32_t streamerSecondaryIndex;
 uint32_t streamerTick;
+volatile uint32_t streamerTotalHigh{0};
+volatile uint32_t streamerTotalLow{0};
 
 #endif
