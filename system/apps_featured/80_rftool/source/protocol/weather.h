@@ -16,9 +16,11 @@ public:
     return 3+9*4*2;
   }
 
+//440, 8820, 440, 1940, 420, 1960, 420, 3980, 440, 3980, 440,
+
   virtual bool Identify(CArray<int>& pulse) override
   {
-    auto IsSpacer = [](int l){ return l >= 18 && l <= 25; };
+    auto IsSpacer = [](int l){ return l >= 17 && l <= 25; };
     auto IsShort = [](int l){ return l >= 4 && l <= 5; };
     auto IsLong = [](int l){ return l >= 8 && l <= 10; };
     
@@ -133,15 +135,15 @@ private:
             return false;
 
         int nibble = 0, base = 0;
-        if (pulse[0] != 1)
+        if (PulseLen(pulse[0]) != 1)
             return false;
-        if (pulse[1] >= 10 && pulse[1] <= 15)
+        if (PulseLen(pulse[1]) >= 10 && PulseLen(pulse[1]) <= 20)
         {
             base = 2;
             if (pulse.GetSize()-base < 9*4*2)
                 return false;
         }
-        else if (pulse[1] != 4 && pulse[1] != 8)
+        else if (PulseLen(pulse[1]) != 4 && PulseLen(pulse[1]) != 8)
             return false;
 
         for (int i=0; i<9*4; i++)

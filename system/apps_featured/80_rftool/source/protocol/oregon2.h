@@ -1,4 +1,4 @@
-class COregon : public CProtocol
+class COregon2 : public CProtocol
 {
 public:
 	virtual int Frequency() override
@@ -45,7 +45,7 @@ public:
 
     attributes["length"] = length; // count of bits
     uint32_t data=0;
-    int bytes = (length+7)/8;
+    int bytes = b.GetSize(); //(length+7)/8;
     for (int i=0; i<bytes; i++) // per each byte
     {
       bool last = i==bytes-1;
@@ -53,6 +53,7 @@ public:
       data |= b[i];
       if ((i&3)==3 || last)
       {
+//std::cout << "zapisujem " << i << " na index " << i/4 << "\n";       
         switch (i/4) // store as dword
         {
           case 0: attributes["data64_0"] = data; break;
@@ -63,8 +64,71 @@ public:
         data = 0;
       }
     }
-      
+    Analyse(attributes);
     return true;
+  }
+
+  void Analyse(CAttributes& attributes)
+  {
+    if ((attributes["data64_0"] >> 16) == 0xaf82) // thgr810
+    {
+/*
+float get_os_temperature(unsigned char *message, unsigned int sensor_id)
+{
+    // sensor ID included    to support sensors with temp in different position
+    float temp_c = 0;
+    temp_c = (((message[5]>>4)*100)+((message[4]&0x0f)*10) + ((message[4]>>4)&0x0f)) / 10.0F;
+    if (message[5] & 0x0f)
+        temp_c = -temp_c;
+    return temp_c;
+}
+	
+unsigned int get_os_humidity(unsigned char *message, unsigned int sensor_id)
+{
+    // sensor ID included to support sensors with humidity in different position
+    int humidity = 0;
+    humidity = ((message[6]&0x0f)*10)+(message[6]>>4);
+    return humidity;
+}
+
+unsigned int get_os_rollingcode(unsigned char *message, unsigned int sensor_id)
+{
+    // sensor ID included to support sensors with rollingcode in different position
+    int rc = 0;
+    rc = (message[2]&0x0F) + (message[3]&0xF0);
+    return rc;
+}
+unsigned int get_os_channel(unsigned char *message, unsigned int sensor_id)
+{
+    // sensor ID included to support sensors with channel in different position
+    int channel = 0;
+    channel = ((message[2] >> 4)&0x0f);
+    if ((channel == 4) && (sensor_id & 0x0fff) != ID_RTGN318 && sensor_id != ID_THGR810)
+        channel = 3; // sensor 3 channel number is 0x04
+    return channel;
+}
+
+unsigned int get_os_battery(unsigned char *message, unsigned int sensor_id)
+{
+    // sensor ID included to support sensors with battery in different position
+    int battery_low = 0;
+    battery_low = (message[3] >> 2 & 0x01);
+    return battery_low;
+}
+
+
+
+                float temp_c = get_os_temperature(msg, sensor_id);
+                int humidity = get_os_humidity(msg, sensor_id);
+*/
+/*
+                    "id",                         "House Code", DATA_INT,        get_os_rollingcode(msg, sensor_id),
+                    "channel",                "Channel",        DATA_INT,        get_os_channel(msg, sensor_id),
+                    "battery",                "Battery",        DATA_STRING, get_os_battery(msg, sensor_id)?"LOW":"OK",
+                    "temperature_C",    "Celsius",        DATA_FORMAT, "%.02f C", DATA_DOUBLE, temp_c,
+                    "humidity",             "Humidity",     DATA_FORMAT, "%u %%", DATA_INT, humidity,
+*/
+    }
   }
 
   virtual bool Modulate(const CAttributes& attr, CArray<uint16_t>& pulse) override
@@ -113,66 +177,81 @@ private:
   bool PulseToBytes(const CArray<uint16_t>& pulse, CArray<int>& bytes, int& length)
   {
     int i;
-    for (i=0; i<pulse.GetSize(); i++)
+    for (i=0; i<pulse.GetSize()-4; i++)
     {
-      int ticks = PulseLen(pulse[i]);
-      if (ticks >= 9 && ticks <= 12)
-      {
-          i++;
+      int t = PulseLen(pulse[i]);
+      if (t == 2)
         break;
-      }
-      if (ticks != 1)
+      if (t != 1)
         return false;
     }
 
-    int num = 0;
+    if (i < 40) // should be 47 (45, 46, 47)
+      return false;
+
+    int l = 1;
     length = 0;
-    for (; i<pulse.GetSize()-1; i+=2)
+    int bits = 0;
+    for (; i<pulse.GetSize(); i++)
     {
-        int bit;
-      int t0 = PulseLen(pulse[i]);
-      int t1 = PulseLen(pulse[i+1]);
-      if (t0 == 1 && t1 == 2)
-        bit = 0;
-      else if (t0 == 2 && t1 == 1)
-        bit = 1;
-      else
-        return false;
-
-      num >>= 1;
-      num |= bit<<7;
-
-      if ((length & 7) == 7)
+      bool isLast = i == pulse.GetSize() - 1;
+      if (PulseLen(pulse[i]) == 1 && (isLast || PulseLen(pulse[i+1]) == 1))
       {
-        bytes.Add(num);
-        num = 0;
+        length++;
+        bits <<= 1;
+        bits |= l;
+        i++;
       }
-      length ++;
-    }
-    if ((length & 7) != 0)
-    {
-        bytes.Add(num);
+      else
+      if (PulseLen(pulse[i]) == 2)
+      {
+        length++;
+        l = 1-l;
+        bits <<= 1;
+        bits |= l;
+      }
+      else        
+      {
+        return false;
+      }
+
+      if ((length & 7) == 0)
+      {
+        // swap nibbles
+        bits = reverse(bits);
+        bits = (bits >> 4) | ((bits & 15) << 4);
+        bytes.Add(bits);
+        bits = 0;
+      }
     }
     return true;
   }
 
+  unsigned char reverse(unsigned char b) {
+     b = (b & 0xF0) >> 4 | (b & 0x0F) << 4;
+     b = (b & 0xCC) >> 2 | (b & 0x33) << 2;
+     b = (b & 0xAA) >> 1 | (b & 0x55) << 1;
+     return b;
+  }
+
   bool BytesToPulse(const CArray<int>& bytes, int length, CArray<uint16_t>& pulse)
   {                                   
-    const int preambule = 23;
+    const int preambule = 47; // parne cislo?
     for (int i=0; i<preambule; i++)
       pulse.Add(PulseDuration(1));
 
+    int l = 1;
     for (int i=0; i<length; i++)
     {
       int bit = (bytes[i/8] >> (7-(i&7)))&1;
-      if (bit == 0)
+      if (l==bit)
       {
         pulse.Add(PulseDuration(1));
-        pulse.Add(PulseDuration(2));
+        pulse.Add(PulseDuration(1));
       } else
       {
+        l = 1-l;
         pulse.Add(PulseDuration(2));
-        pulse.Add(PulseDuration(1));
       }
     }
     return true;

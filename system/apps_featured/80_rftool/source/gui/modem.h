@@ -212,12 +212,16 @@ public:
             return;
         
         enum TLast {Z, L, H, LH};
-        
+        /*
+        EVERY(100)
+        {
+            BIOS::LCD::Printf(0, 0, RGB565(ffffff), RGB565(000000), "%d-%d---", streamerTotalLow, streamerTotalHigh);
+        }*/
         static uint32_t lastHighs = 0;
         static uint32_t lastLows = 0;
         uint32_t nowHighs = streamerTotalHigh;
         uint32_t nowLows = streamerTotalLow;
-        int current = (int)(nowHighs-lastHighs) > (int)(nowLows-lastLows);
+        int current = framerGet(); //(int)(nowHighs-lastHighs) > (int)(nowLows-lastLows);
         lastHighs = nowHighs;
         lastLows = nowLows;
 
@@ -258,7 +262,11 @@ public:
         BIOS::LCD::BufferWrite(pixBuf, COUNT(pixBuf));
         if (++x >= m_rcClient.right-1)
             x = m_rcClient.left+1;
-        
+
+        memset(pixBuf, 0, sizeof(pixBuf));
+        BIOS::LCD::BufferBegin(CRect(x, m_rcClient.top+1, x+1, m_rcClient.bottom-1));
+        BIOS::LCD::BufferWrite(pixBuf, COUNT(pixBuf));
+
         last = current == 0 ? L : H;
         //highs = 0;
     }

@@ -41,6 +41,7 @@ public:
         mLastCount = appData.GetCaptureRecords();
         if (mLastCount == 0)
         {
+            mRedrawMask = 0;
             rcElement.bottom = m_rcClient.top + 6*nElementSpacing+1;
             GUI::Background(rcElement, RGB565(404040), RGB565(101010));
             
