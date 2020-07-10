@@ -5,9 +5,9 @@
 - Main idea for the operating system was to allow easy switching between any number of applications which are dynamically loaded and flashed on demand without restarting the device.
 - This operating system does not provide any advanced features a one should expect. It just loads linux .ELF files into RAM and FLASH, resolves imported methods and jumps to the application entry point. During startup the OS tries to load file **shell.elf** which can be simple file manager or graphical application switcher, or an application that should be executed right after startup.
 - There are at least two applications that need to be compiled and loaded onto the device to use it - operating system and shell
-- Building of the operating system will produce .hex file which needs to be flashed to the device using interal DFU flasher. It you are lucky, you will be able to copy the .hex file into the DFU's virtual mass storage device after connecting the device with your computer and turning it on while holding first button. If you will be having problems with this initial flashing, look for dfuload tool in [tools](tools) folder. All other applications compile into .elf file which can be copied to the mass storage disk when the device is in normal operation (not DFU)
+- Building of the operating system will produce .hex file which needs to be flashed to the device using interal DFU flasher. It you are lucky, you will be able to copy the .hex file into the DFU's virtual mass storage device after connecting the device with your computer and turning it on while holding first button. If you will be having problems with this initial flashing, look for dfuload tool in [/tools](/tools) folder. All other applications compile into .elf file which can be copied to the mass storage disk when the device is in normal operation (not DFU)
 - Regular .elf files contain lengthy parts, which are useless for the LA104, so after compilation process, this file is stripped to reduce it's size by [/tools/elfstrip](/tools/elfstrip) tool
-- Source code of the operating system is placed in [system/os_host](system/os_host) folder and simple file manager is in [apps_shell/test29_fileman](apps_shell/test29_fileman). For testing purpose one should compile also some simple application e.g. [apps/test15_charmap](apps/test15_charmap) or [apps_experiments/test2_import](apps_experiments/test2_import)
+- Source code of the operating system is placed in [/system/os_host](/system/os_host) folder and simple file manager is in [/apps_shell/test29_fileman](/apps_shell/test29_fileman). For testing purpose one should compile also some simple application e.g. [/apps/test15_charmap](/apps/test15_charmap) or [/apps_experiments/test2_import](/apps_experiments/test2_import)
 - All the codebase is written in C/C++ with small bits of assembly. LA104 is based on STM32F103 arm processor and to be able to build this code, you will need **arm eabi toolchain** which can be downloaded here for any common platform:
 https://developer.arm.com/open-source/gnu-toolchain/gnu-rm/downloads
 - In my case, I am using lightly outdated version (gcc-arm-none-eabi-7-2018-q2-update), but I suggest downloading lastest available version
@@ -15,7 +15,7 @@ https://developer.arm.com/open-source/gnu-toolchain/gnu-rm/downloads
 ## Mac OSX / Linux
 - Clone whole repository (git clone https://github.com/gabonator/LA104.git)
 - Building the OS: 
-    - From the [system/os_host](system/os_host) folder, run **build_la104.sh** or **build_ds203.sh** or **build_ds213.sh**
+    - From the [/system/os_host](/system/os_host) folder, run **build_la104.sh** or **build_ds203.sh** or **build_ds213.sh**
     - You will need to change the path to your arm toolchain by changing this line or exporing the arm toolchain path: ```export PATH="/Users/gabrielvalky/Downloads/gcc-arm-none-eabi-7-2018-q2-update/bin/":"$PATH"``` 
     - Check the output of the script, it should look like this
         ```~/Documents/git/LA104/system/os_host$ ./build_la104.sh 
@@ -24,19 +24,19 @@ https://developer.arm.com/open-source/gnu-toolchain/gnu-rm/downloads
         08008000 00000000 T _addressRomBegin
         08013060 00000000 T _addressRomEnd
         ```
-    - Check the build folder in [system/os_host](system/os_host), there should be file named **system_la104.hex**
+    - Check the build folder in [/system/os_host](/system/os_host), there should be file named **system_la104.hex**
 - Building the library
   - The applications refer to methods exported by operating system. For this purpose we need to build a fake library which exports all the available methods
-    - Go to [system/os_library](system/os_library) and run **build.sh**
+    - Go to [/system/os_library](/system/os_library) and run **build.sh**
     - In the build, there should appear three files: libbios_ds203.so, libbios_ds213.so, libbios_la104.so
 - Building shell:
-  - Go to [apps_shell/test29_fileman](apps_shell/test29_fileman)
+  - Go to [/apps_shell/test29_fileman](/apps_shell/test29_fileman)
   - Fix the path to arm toolchain in **build.sh**
   - Run the **build.sh**
   - It will produce three application files 29fileman_ds203.elf, 29fileman_ds213.elf, 29fileman_la104.elf
   - Take the **29fileman_la104.elf**, rename it to **shell.elf**
 - Building sample application: 
-  - Go to [apps_experiments/test2_import](apps_experiments/test2_import) which is the smallest available application which draws some fractals:
+  - Go to [/apps_experiments/test2_import](/apps_experiments/test2_import) which is the smallest available application which draws some fractals:
   ```C++
     #include <library.h>
     
@@ -122,7 +122,7 @@ https://developer.arm.com/open-source/gnu-toolchain/gnu-rm/downloads
     
     ## Flashing and first run
     - After finishing this tutorial you should have three files: **system_la104.hex**, **shell.elf** and **2import.elf**
-    - Flash it with DFU loader by holding first button when powering the device. Use the **cp_la104.sh** script if you are having troubles copying the file to DFU drive (you will need to build the dfuload tool from [tools/dfuload](tools/dfuload) folder)
+    - Flash it with DFU loader by holding first button when powering the device. Use the **cp_la104.sh** script if you are having troubles copying the file to DFU drive (you will need to build the dfuload tool from [/tools/dfuload](/tools/dfuload) folder)
     - Turn the device off and on, and the OS should ask for **shell.elf**
     - After reconnecting the device using USB cable, you should be able to copy new files to the internal eeprom (different from the virtual DFU drive)
     - copy **shell.elf** and **2import.elf**, press first button to reload the shell or power cycle the device
