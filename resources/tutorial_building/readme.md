@@ -7,7 +7,7 @@
 - There are at least two applications that need to be compiled and loaded onto the device to use it - operating system and shell
 - Building of the operating system will produce .hex file which needs to be flashed to the device using interal DFU flasher. It you are lucky, you will be able to copy the .hex file into the DFU's virtual mass storage device after connecting the device with your computer and turning it on while holding first button. If you will be having problems with this initial flashing, look for dfuload tool in [/tools](/tools) folder. All other applications compile into .elf file which can be copied to the mass storage disk when the device is in normal operation (not DFU)
 - Regular .elf files contain lengthy parts, which are useless for the LA104, so after compilation process, this file is stripped to reduce it's size by [/tools/elfstrip](/tools/elfstrip) tool
-- Source code of the operating system is placed in [/system/os_host](/system/os_host) folder and simple file manager is in [/apps_shell/test29_fileman](/apps_shell/test29_fileman). For testing purpose one should compile also some simple application e.g. [/apps/test15_charmap](/apps/test15_charmap) or [/apps_experiments/test2_import](/apps_experiments/test2_import)
+- Source code of the operating system is placed in [/system/os_host](/system/os_host) folder and simple file manager is in [/system/apps_shell/test29_fileman](/system/apps_shell/test29_fileman). For testing purpose one should compile also some simple application e.g. [/system/apps/test15_charmap](/system/apps/test15_charmap) or [/system/apps_experiments/test2_import](/system/apps_experiments/test2_import)
 - All the codebase is written in C/C++ with small bits of assembly. LA104 is based on STM32F103 arm processor and to be able to build this code, you will need **arm eabi toolchain** which can be downloaded here for any common platform:
 https://developer.arm.com/open-source/gnu-toolchain/gnu-rm/downloads
 - In my case, I am using lightly outdated version (gcc-arm-none-eabi-7-2018-q2-update), but I suggest downloading lastest available version
@@ -30,13 +30,13 @@ https://developer.arm.com/open-source/gnu-toolchain/gnu-rm/downloads
     - Go to [/system/os_library](/system/os_library) and run **build.sh**
     - In the build, there should appear three files: libbios_ds203.so, libbios_ds213.so, libbios_la104.so
 - Building shell:
-  - Go to [/apps_shell/test29_fileman](/apps_shell/test29_fileman)
+  - Go to [/system/apps_shell/test29_fileman](/system/apps_shell/test29_fileman)
   - Fix the path to arm toolchain in **build.sh**
   - Run the **build.sh**
   - It will produce three application files 29fileman_ds203.elf, 29fileman_ds213.elf, 29fileman_la104.elf
   - Take the **29fileman_la104.elf**, rename it to **shell.elf**
 - Building sample application: 
-  - Go to [/apps_experiments/test2_import](/apps_experiments/test2_import) which is the smallest available application which draws some fractals:
+  - Go to [/system/apps_experiments/test2_import](/system/apps_experiments/test2_import) which is the smallest available application which draws some fractals:
   ```C++
     #include <library.h>
     
