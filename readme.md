@@ -17,6 +17,10 @@ Go to release section on top of this page, download *system.hex*. Power on the L
 
 #### News
 
+##### Building tutorial
+
+Read more [here](resources/tutorial_building)
+
 ##### (LA104) Variable frequency drive visualizer
 
 This app uses RS485 adapter to talk to Invt Good drive inverters. Read more [here](system/apps_featured/74_invtvisual), besides the visualization tool, there is also [application](system/apps_experiments/75_invtemu) which emulates GD100 VFD (as seen on the picture)... Watch video:
@@ -134,7 +138,7 @@ Connect your midi keyboard with two wires (3V and P1 through 100-330 ohm resisto
 #### In this repository you will find
 
   - [resources](resources) - official resources from manufacturer, shematics and memory layout information
-  - [experiments](experiments) - the first simple applications to verify if we have proper toolchain, libraries, linker script and startup code
+  - [experiments](resources/experiments) - the first simple applications to verify if we have proper toolchain, libraries, linker script and startup code
       - blink - When getting familiar with new hardware platform, this is the most common application - just blink a LED attached to P1 port. It is worth noting that the P1..P4 pins are connected always to two different IO pins of the MCU. This allows you to use each pin as general purpose IO pin, or as UART or I2C bus signal. For example pin P1 is connected to MOSI_PB15 and T23_TX3_SCL2_PB10. And P2 is connected to MISO_PB14 and T24_RX3_SDA2_PB11. So be very careful when configuring the IO pins so you won't create a short circuit 
     - triangle_oldlib - code taken from DS203 project. Draws simple sierpinski fractal to test LCD in C language
     - triangle_newlib - the same code, but with new library (2012 instead of 2008), this library is taken from official LA104 firmware project  
@@ -142,7 +146,7 @@ Connect your midi keyboard with two wires (3V and P1 through 100-330 ohm resisto
     - worm - project taken from DS203, simple worm game but the controls are not very intuitive. Just a demonstration of simple event based window system
     - dynamic_simple - first step towards building own operating system, main application ELF just calls few imported functions (Test1, Test2, Test3, Test4). Imported library (shared object) has only empty implementation of those functions Test1..Test4 functions so the linker won't shout at us during compilation. Then by using [tools/elfdump](tools/elfdump) utility, a C code [dump.c](experiments/dynamic_simple/dump/dump.c) is generated which shows what will be loaded in which memory regions during ELF load process. [Secondary application](experiments/dynamic_simple/secondary/main.c) then calls this generated code and matches all imports into real functions
     - dynamic_advanced - the same, but this time the code is organized in three folders - library, host and client application. Instead of dummy functions, this time imported functions are putpixel and random.
-  - [official_fw_gcc](official_fw_gcc) - official LA104 firmware ported to use GCC compiler. No need to use IAR workbench. Only slight changes were done in the code - e.g. replacing sprintf function with malloc independent version of this function. 
+  - [official_fw_gcc](resources/official_fw_gcc) - official LA104 firmware ported to use GCC compiler. No need to use IAR workbench. Only slight changes were done in the code - e.g. replacing sprintf function with malloc independent version of this function. 
   - tools - various commandline tools
     - [dfuload](tools/dfuload) - DFU load utility mentioned before
     - [elfstrip](tools/elfstrip) - utlity to remove unnecessary parts from ELF file
