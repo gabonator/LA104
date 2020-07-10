@@ -8,7 +8,7 @@
 - Building of the operating system will produce .hex file which needs to be flashed to the device using interal DFU flasher. It you are lucky, you will be able to copy the .hex file into the DFU's virtual mass storage device after connecting the device with your computer and turning it on while holding first button. If you will be having problems with this initial flashing, look for dfuload tool in [/tools](/tools) folder. All other applications compile into .elf file which can be copied to the mass storage disk when the device is in normal operation (not DFU)
 - Regular .elf files contain lengthy parts, which are useless for the LA104. After compilation process, this file is stripped to reduce it's size by [/tools/elfstrip](/tools/elfstrip) tool
 - Source code of the operating system is placed in [/system/os_host](/system/os_host) folder and simple file manager is in [/system/apps_shell/test29_fileman](/system/apps_shell/test29_fileman). For testing purpose one should compile also some simple application e.g. [/system/apps/test15_charmap](/system/apps/test15_charmap) or [/system/apps_experiments/test2_import](/system/apps_experiments/test2_import)
-- All the codebase is written in C/C++ with small bits of assembly. LA104 is based on STM32F103 arm processor and to be able to build this code, you will need **arm eabi toolchain** which can be downloaded here for any common platform:
+- Whole codebase is written in C/C++ with small bits of assembly. LA104 is based on STM32F103 arm processor and to be able to build this code, you will need **arm eabi toolchain** which can be downloaded here for any common platform:
 https://developer.arm.com/open-source/gnu-toolchain/gnu-rm/downloads
 - In my case, I am using lightly outdated version (gcc-arm-none-eabi-7-2018-q2-update), but I suggest downloading lastest available version
 
@@ -16,7 +16,7 @@ https://developer.arm.com/open-source/gnu-toolchain/gnu-rm/downloads
 - Clone whole repository (git clone https://github.com/gabonator/LA104.git)
 - Building the OS: 
     - From the [/system/os_host](/system/os_host) folder, run **build_la104.sh** or **build_ds203.sh** or **build_ds213.sh**
-    - You will need to change the path to your arm toolchain by changing this line or exporing the arm toolchain path: ```export PATH="/Users/gabrielvalky/Downloads/gcc-arm-none-eabi-7-2018-q2-update/bin/":"$PATH"``` 
+    - You will need to change the path to your arm toolchain by changing this line or by exporing the arm toolchain path: ```export PATH="/Users/gabrielvalky/Downloads/gcc-arm-none-eabi-7-2018-q2-update/bin/":"$PATH"``` 
     - Check the output of the script, it should look like this
         ```~/Documents/git/LA104/system/os_host$ ./build_la104.sh 
         20000000 00000000 D _addressRamBegin
@@ -26,7 +26,7 @@ https://developer.arm.com/open-source/gnu-toolchain/gnu-rm/downloads
         ```
     - Check the build folder in [/system/os_host](/system/os_host), there should be file named **system_la104.hex**
 - Building the library
-  - The applications refer to methods exported by operating system. For this purpose we need to build a fake library which exports all the available methods
+  - Applications refer to methods exported by operating system. For this purpose we need to build a fake dynamic library which exports all available methods the operating system exposes for applications
     - Go to [/system/os_library](/system/os_library) and run **build.sh**
     - In the build, there should appear three files: libbios_ds203.so, libbios_ds213.so, libbios_la104.so
 - Building shell:
@@ -100,7 +100,7 @@ https://developer.arm.com/open-source/gnu-toolchain/gnu-rm/downloads
     
     ```
 
-    - Build it running **build.sh** script, it will compile the code, and link it with dummy library. Again you will need to fix the toolchain path:
+    - Build it running **build.sh** script, it will compile the code, link it with dummy library, and then remove unnecessary parts from the .elf file. Again you will need to fix the toolchain path:
     ```
     export PATH="/Users/gabrielvalky/Downloads/gcc-arm-none-eabi-7-2018-q2-update/bin/":"$PATH"
     mkdir -p build
