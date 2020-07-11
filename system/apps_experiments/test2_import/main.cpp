@@ -26,7 +26,7 @@ int main(void)
 { 
   CPRNG prng;
   int Width = BIOS::SYS::GetAttribute(BIOS::SYS::EAttribute::ScreenWidth);
-  int Height = BIOS::SYS::GetAttribute(BIOS::SYS::EAttribute::ScreenWidth);
+  int Height = BIOS::SYS::GetAttribute(BIOS::SYS::EAttribute::ScreenHeight);
 
   for (int x=0; x<Width; x++)
     for (int y=0; y<Height; y++)
