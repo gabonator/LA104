@@ -28,12 +28,12 @@ https://developer.arm.com/open-source/gnu-toolchain/gnu-rm/downloads
 - Building the library
   - Applications refer to methods exported by operating system. For this purpose we need to build a fake dynamic library which exports all available methods the operating system exposes for applications
     - Go to [/system/os_library](/system/os_library) and run **build.sh**
-    - In the build, there should appear three files: libbios_ds203.so, libbios_ds213.so, libbios_la104.so
+    - In the build folder, there should appear three files: libbios_ds203.so, libbios_ds213.so, libbios_la104.so
 - Building shell:
   - Go to [/system/apps_shell/test29_fileman](/system/apps_shell/test29_fileman)
   - Fix the path to arm toolchain in **build.sh**
   - Run the **build.sh**
-  - It will produce three application files 29fileman_ds203.elf, 29fileman_ds213.elf, 29fileman_la104.elf
+  - It will produce three application files: 29fileman_ds203.elf, 29fileman_ds213.elf, 29fileman_la104.elf
   - Take the **29fileman_la104.elf**, rename it to **shell.elf**
 - Building sample application: 
   - Go to [/system/apps_experiments/test2_import](/system/apps_experiments/test2_import) which is the smallest available application which draws some fractals:
@@ -65,7 +65,7 @@ https://developer.arm.com/open-source/gnu-toolchain/gnu-rm/downloads
     { 
       CPRNG prng;
       int Width = BIOS::SYS::GetAttribute(BIOS::SYS::EAttribute::ScreenWidth);
-      int Height = BIOS::SYS::GetAttribute(BIOS::SYS::EAttribute::ScreenWidth);
+      int Height = BIOS::SYS::GetAttribute(BIOS::SYS::EAttribute::ScreenHeight);
     
       for (int x=0; x<Width; x++)
         for (int y=0; y<Height; y++)
@@ -100,7 +100,7 @@ https://developer.arm.com/open-source/gnu-toolchain/gnu-rm/downloads
     
     ```
 
-    - Build it running **build.sh** script, it will compile the code, link it with dummy library, and then remove unnecessary parts from the .elf file. Again you will need to fix the toolchain path:
+    - Build it by running **build.sh** script, it will compile the code, link it with dummy library, and then remove unnecessary parts from the .elf file. Again you will need to fix the toolchain path:
     ```
     export PATH="/Users/gabrielvalky/Downloads/gcc-arm-none-eabi-7-2018-q2-update/bin/":"$PATH"
     mkdir -p build
