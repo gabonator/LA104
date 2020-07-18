@@ -12,12 +12,30 @@ void Hardware_Init(void);
 void Show_Startup_Info(void);
 void FPGA_Startup_Wave(void);
 void Set_SysParam(void);
+void SysTick_Handler(void);
 
 bool appRunning = true;
 void ExitApplication()
 {
-BIOS::DBG::Print("Exiting app");
+  BIOS::DBG::Print("Exiting app");
   appRunning = false;
+}
+
+BIOS::OS::TInterruptHandler pOldSysTick = nullptr;
+
+void Interrupt_Init()
+{
+  pOldSysTick = BIOS::OS::GetInterruptVector(BIOS::OS::ISysTick);
+
+  BIOS::OS::SetInterruptVector(BIOS::OS::ISysTick, [](){
+    pOldSysTick();
+    SysTick_Handler();
+  });
+}
+
+void Interrupt_Deinit()
+{
+  BIOS::OS::SetInterruptVector(BIOS::OS::ISysTick, pOldSysTick);
 }
 
 //===============================APP
@@ -32,7 +50,7 @@ int main(void)
 {
     u8  M_Flag = 0;
     u8  File_ST = 0;
-
+    Interrupt_Init();
     Hardware_Init();                             // Ӳ
     Show_Startup_Info();                         // 
     ReadParameter();                             // 
@@ -48,6 +66,7 @@ int main(void)
         ShortcutBMP();                           // K1
         if(Menu.flag)KeyQuickAct();              // T1
 
+        // shadowing original key value!
         int gKeyActv = BIOS::KEY::GetKey();
 
         if(gKeyActv)
@@ -584,7 +603,8 @@ int main(void)
         }
         StandbyAndPowerOff();
         ShowBattery();
-    }
+    }  
+    Interrupt_Deinit();
     return 0;
 }
 
