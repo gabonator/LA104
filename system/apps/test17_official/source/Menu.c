@@ -503,7 +503,7 @@ void ShowLeftTitle(void)
     {
         Set_Color(GRAY, WHT);
         memset(&Str[0], 0, 10);
-        memcpy(&Str[0], ProtocolStr[gItemParam[INTYPE] * 4] + i * 6, 6);
+        memcpy(&Str[0], ProtocolStr[gItemParam[INTYPE] * 4 + i], 6);
         Show_Str6x8(1, MENU_Y + 25 * (5 - i) + 1,  PRN,  BOLD, Str);
     }
     Set_Color(GRAY, WHT);

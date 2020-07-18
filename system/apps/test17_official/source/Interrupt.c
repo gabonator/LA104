@@ -6,13 +6,13 @@
 *******************************************************************************/
 
 #include "Interrupt.h"
-#include "USB_istr.h"
+//#include "USB_istr.h"
 #include "MyDefine.h"
 
 u16  BeepCnt, LastEnc, LastKey, KeyHold, gKeyActv, Counter, gmS;
 u32  VbtySum = 4200 * 64;
-vu16 Dly_mS;
-
+volatile u16 Dly_mS;
+#if 0
 void NMIException(void)
 { }
 
@@ -47,6 +47,7 @@ void SVCHandler(void)
 
 void PendSVC(void)
 { }
+#endif
 
 /*******************************************************************************
  * FunctionName : SysTick_Handler
@@ -80,8 +81,8 @@ void SysTick_Handler(void)
             VbtySum += __Bios(PWRCTRL, VBTYmV) - VbtySum / 64; // VBAT ƽ
             gBatVol = GetBatteryVol();
         }
-        if(BeepCnt > 1) BeepCnt -= 2;
-        else  __Bios(BUZZDEV, DSBL);                       // 
+//        if(BeepCnt > 1) BeepCnt -= 2;
+//        else  __Bios(BUZZDEV, DSBL);                       // 
     }
     if(Counter > 5000) Counter = 0;
     if(gmS >= 1000)
@@ -95,6 +96,7 @@ void SysTick_Handler(void)
 
 }
 
+#if 0
 /*******************************************************************************
  * FunctionName : Beep_mS
  * Description  : 
@@ -290,3 +292,4 @@ void DMA2_Channel4_5_IRQHandler(void)
 { }
 
 /********************************* END OF FILE ********************************/
+#endif

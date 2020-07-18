@@ -23,8 +23,9 @@ u16 gZC_Posi = 4096;
 u64 gNowX_Time = 0;
 u64 gLastX_Time = 0;
 u64 gTransTimeSum = 0;
-u32  VbtySum = 4200 * 64;
 
+extern u16 gKeyActv;
+extern u32 VbtySum;
 
 //-------------+-------+-------+-------+-------+-------+-------+-------+-------+
 uc16 OUT_PSC[] = {
@@ -971,8 +972,6 @@ void PIO_Init(u8 Type)
 *******************************************************************************/
 void KeyQuickAct(void)
 {
-/*
-// TODO: gabo multi key
     if (Menu.flag)
     {
         if ((READ_KEY == K4_HOLD) && (gKeyActv & ENCD_2p))
@@ -1047,6 +1046,6 @@ void KeyQuickAct(void)
             gKeyActv = 0;
         }
     } else if (Item.flag)
-    {}*/
+    {}
 }
 
