@@ -7,7 +7,7 @@
  * @brief	Descriptors for Virtual Com Port Demo
  ******************************************************************************
  **/
-#include <usb_lib.h>
+#include <USB_lib.h>
 #include "cdcusb_desc.h"
 #include "cdcusb_app.h"
 

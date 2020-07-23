@@ -1,7 +1,7 @@
 #ifndef __DISK_H
 #define __DISK_H
 
-#include "STM32F10x.h"
+#include "stm32f10x.h"
 #include "UsbTypes.h"
 
 extern u8 DiskBuf[];

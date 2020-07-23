@@ -1,4 +1,4 @@
-#include "../library/CMSIS/Device/STM32F10x/Include/STM32F10x.h"
+#include "../library/CMSIS/Device/STM32F10x/Include/stm32f10x.h"
 
 // based on https://svn.kapsi.fi/jpa/dsoquad/pawn/DS203/
 extern unsigned long _etext;

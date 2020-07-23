@@ -2,7 +2,7 @@
  File Name : USB_prop.c
  Version   : STM32 USB Disk Ver 3.4       Author : MCD Application Team & bure
 *******************************************************************************/
-#include <usb_lib.h>
+#include <USB_lib.h>
 #include "msdusb_desc.h"
 #include "../COMMON/commonusb_pwr.h"
 #include "msdusb_bot.h"

@@ -31,7 +31,7 @@
 #define __USB_REGS_H
 
 /* Includes ------------------------------------------------------------------*/
-#include "STM32F10x.h"    
+#include "stm32f10x.h"    
 
 /* Exported types ------------------------------------------------------------*/
 typedef enum _EP_DBUF_DIR
