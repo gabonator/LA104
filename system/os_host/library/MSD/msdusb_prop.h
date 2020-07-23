@@ -5,7 +5,7 @@
 #ifndef __usb_prop_H
 #define __usb_prop_H
 
-#include <USB_core.h>
+#include <usb_core.h>
 #include <stm32f10x.h>
 
 #define Mass_Storage_GetConfiguration          NOP_Process
