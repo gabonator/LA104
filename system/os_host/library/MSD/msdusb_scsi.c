@@ -5,7 +5,7 @@
 #include "msdusb_scsi.h"
 #include "msdusb_bot.h"
 #include <usb_regs.h>
-#include <usb_lib.h>
+#include <USB_lib.h>
 #include "source/bios/fat.h"
 #include "source/usb/Disk.h"
 
