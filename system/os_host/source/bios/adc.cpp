@@ -1,4 +1,4 @@
-#include "bios.h"
+#include "Bios.h"
 
 #if defined(DS203)
 #include "ds203/adc.cpp"
