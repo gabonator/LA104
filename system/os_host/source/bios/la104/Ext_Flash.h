@@ -1,6 +1,6 @@
 #ifndef __EXT_FLASH_H
 #define __EXT_FLASH_H
-#include "STM32F10x.h"
+#include "stm32f10x.h"
 
 #define SPIx            SPI1
 #define PAGE_SIZE       256 
