@@ -5,7 +5,7 @@
  * History     :
 *******************************************************************************/
 #include "MyDefine.h"
-//#include "usb_lib.h"
+//#include "USB_lib.h"
 
 
 // stubs!
