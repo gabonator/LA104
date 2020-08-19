@@ -4,7 +4,7 @@ export PATH="/Users/gabrielvalky/Downloads/gcc-arm-none-eabi-7-2018-q2-update/bi
 mkdir -p build
 cd build
 
-arm-none-eabi-g++ -Os -Werror -fno-common -mcpu=cortex-m3 -mthumb -msoft-float -fno-exceptions -fno-rtti -fno-threadsafe-statics -Wno-psabi -MD -D DS203 -D _ARM -D STM32F10X_HD -c \
+arm-none-eabi-g++ -Os -Werror -fno-common -mcpu=cortex-m3 -mthumb -msoft-float -fno-exceptions -fno-rtti -fno-threadsafe-statics -Wno-psabi -MD -D DS213 -D _ARM -D STM32F10X_HD -c \
   ../source/main.cpp \
   ../../../os_host/source/framework/Wnd.cpp \
   -I../../../os_library/include/ \
@@ -13,7 +13,7 @@ arm-none-eabi-g++ -Os -Werror -fno-common -mcpu=cortex-m3 -mthumb -msoft-float -
 arm-none-eabi-gcc -Os -fPIC -mcpu=cortex-m3 -mthumb -o output.elf -nostartfiles -T ../source/app.lds \
   ./main.o \
   ./Wnd.o \
-  -lbios_ds203 -L../../../os_library/build -lm
+  -lbios_ds213 -L../../../os_library/build -lm
 
 arm-none-eabi-objdump -d -S output.elf > output.asm
 arm-none-eabi-readelf -all output.elf > output.txt

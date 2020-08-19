@@ -4,10 +4,10 @@ export PATH="/Users/gabrielvalky/Downloads/gcc-arm-none-eabi-7-2018-q2-update/bi
 mkdir -p build
 cd build
 
-arm-none-eabi-g++ -Os -Werror -fno-common -mcpu=cortex-m3 -mthumb -msoft-float -fno-exceptions -fno-rtti -fno-threadsafe-statics -Wno-psabi -MD -D DS203 -D _ARM -D STM32F10X_HD -c \
+arm-none-eabi-g++ -Os -Werror -fno-common -mcpu=cortex-m3 -mthumb -msoft-float -fno-exceptions -fno-rtti -fno-threadsafe-statics -Wno-psabi -MD -D DS213 -D _ARM -D STM32F10X_HD -c \
   ../source/main.cpp \
   ../source/MainWnd.cpp \
-  ../source/Toolbar.cpp \
+  ../source/ToolBar.cpp \
   ../source/Shapes.cpp \
   ../source/Settings.cpp \
   ../source/Generator/Core/CoreGenerator.cpp \
@@ -32,7 +32,7 @@ arm-none-eabi-gcc -fPIC -mcpu=cortex-m3 -mthumb -o output.elf -nostartfiles -T .
   ./MyUtils.o ./Lcd.o \
   ./Settings.o ./Controls.o ./Serialize.o \
   ./CoreGenerator.o ./MenuGenEdit.o ./MenuGenMain.o \
-  -lbios_ds203 -L../../../os_library/build -lm
+  -lbios_ds213 -L../../../os_library/build -lm
 
 
 

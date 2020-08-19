@@ -1,4 +1,4 @@
-#include "Toolbar.h"
+#include "ToolBar.h"
 #include "MainWnd.h"
 
 /*static*/ const CWndToolBar::CBarItem* CWndToolBar::GetMenuItems()
