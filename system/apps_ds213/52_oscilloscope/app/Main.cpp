@@ -1,6 +1,6 @@
 #include "Sys.h"
 #include "DS213Bios.h"
-#include <Library.h>
+#include <library.h>
 
 HwDrvDef  Hw;
 u8  APP_VERSION[12] = { "Gabo1.22" };
