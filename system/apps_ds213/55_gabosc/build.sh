@@ -4,10 +4,10 @@ export PATH="/Users/gabrielvalky/Downloads/gcc-arm-none-eabi-7-2018-q2-update/bi
 mkdir -p build
 cd build
 
-arm-none-eabi-g++ -Os -Werror -fno-common -mcpu=cortex-m3 -mthumb -msoft-float -fno-exceptions -fno-rtti -fno-threadsafe-statics -Wno-psabi -MD -D DS203 -D _ARM -D STM32F10X_HD -c \
+arm-none-eabi-g++ -Os -Werror -fno-common -mcpu=cortex-m3 -mthumb -msoft-float -fno-exceptions -fno-rtti -fno-threadsafe-statics -Wno-psabi -MD -D DS213 -D _ARM -D STM32F10X_HD -c \
   ../source/main.cpp \
   ../source/MainWnd.cpp \
-  ../source/Toolbar.cpp \
+  ../source/ToolBar.cpp \
   ../source/Shapes.cpp \
   ../source/Settings.cpp \
   ../source/Oscilloscope/Controls/GraphOsc.cpp \
@@ -39,7 +39,7 @@ arm-none-eabi-gcc -fPIC -mcpu=cortex-m3 -mthumb -o output.elf -nostartfiles -T .
   ./GraphOsc.o ./CoreOscilloscope.o ./MenuDisp.o ./MenuInput.o ./MenuMarker.o ./MenuMask.o \
   ./ChannelMath.o ./FirFilter.o ./MenuMath.o ./MenuMeas.o ./Statistics.o \
   ./Sampler.o ./Settings.o ./Controls.o ./Serialize.o \
-  -lbios_ds203 -L../../../os_library/build -lm
+  -lbios_ds213 -L../../../os_library/build -lm
 
 arm-none-eabi-objdump -d -S output.elf > output.asm
 arm-none-eabi-readelf -all output.elf > output.txt
@@ -52,4 +52,5 @@ find . -type f -name '*.d' -delete
 nm --print-size --size-sort -gC output.elf | grep " B " > symbols_ram.txt
 nm --print-size --size-sort -gC output.elf | grep " T " > symbols_rom.txt
 nm --print-size --size-sort -gC output.elf > symbols_all.txt
+
 #objdump -s -j .dynamic output.elf
