@@ -6,6 +6,7 @@
 #include <string.h>
 #include <vector>
 #include <string>
+#include <cassert>
 
 #define EXPPROG 0
 

@@ -4,8 +4,8 @@ export PATH="/Users/gabrielvalky/Downloads/gcc-arm-none-eabi-7-2018-q2-update/bi
 mkdir -p build
 cd build
 
-arm-none-eabi-g++ -g3 -ggdb -Wall -Os -fno-common -mcpu=cortex-m3 -mthumb -msoft-float -fno-exceptions -fno-rtti -fno-threadsafe-statics -Wno-psabi -MD -D LA104 -D _ARM -D STM32F10X_HD -c ../main.cpp ../../../os_host/source/framework/Serialize.cpp -I../../../os_library/include/
-arm-none-eabi-gcc -g3 -ggdb -fPIC -mcpu=cortex-m3 -mthumb -o output.elf -nostartfiles -T ../app.lds ./main.o ./Serialize.o -lbios_la104 -L../../../os_library/build
+arm-none-eabi-g++ -g3 -ggdb -Wall -Os -fno-common -mcpu=cortex-m3 -mthumb -msoft-float -fno-exceptions -fno-rtti -fno-threadsafe-statics -Wno-psabi -MD -D DS213 -D _ARM -D STM32F10X_HD -c ../main.cpp ../../../os_host/source/framework/Serialize.cpp -I../../../os_library/include/
+arm-none-eabi-gcc -g3 -ggdb -fPIC -mcpu=cortex-m3 -mthumb -o output.elf -nostartfiles -T ../app.lds ./main.o ./Serialize.o -lbios_ds213 -L../../../os_library/build
 
 arm-none-eabi-objdump -d -S output.elf > output.asm
 arm-none-eabi-readelf -all output.elf > output.txt
