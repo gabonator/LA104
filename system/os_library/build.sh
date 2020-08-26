@@ -1,7 +1,7 @@
 #!/bin/bash
 #https://developer.arm.com/open-source/gnu-toolchain/gnu-rm/downloads
 
-export PATH="/Users/gabrielvalky/Downloads/gcc-arm-none-eabi-7-2018-q2-update/bin/":"$PATH"
+
 mkdir -p build
 cd build
 
