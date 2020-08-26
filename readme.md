@@ -273,3 +273,19 @@ Connect your midi keyboard with two wires (3V and P1 through 100-330 ohm resisto
   - direction control pins of buffer 1DIR, 2DIR connected to FPGA, so we can synthesize fast signals - e.g. modify packets on the fly, mitm attacks, canbus slave device, etc///
   - larger eeprom
   - open sourced FPGA code
+
+# Docker
+The la104 images can be build using docker
+
+The Dockerfile builds a container which runs build.sh.
+build.sh executes the steps in the tutorial in the order presented.
+build image using the dockerfile with the following commands.
+
+```bash
+docker build . -t la104
+id=$(docker run -d --rm la104 sleep 300)
+docker cp $id:/home/dev/output - > ./output.tar
+tar -xvf output.tar
+docker rm -v $id
+```
+
