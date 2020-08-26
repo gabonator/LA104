@@ -3,11 +3,11 @@
 set -x
 mkdir output
 
-cd ./system/os_host
+cd ./system/os_library
+./build.sh
+cd ../os_host
 ./build.sh
 cp ./build/system_la104.hex ../../output/
-cd ../os_library
-./build.sh 
 cd ../../tools/elfstrip
 ./build.sh
 cd ../../system/apps_shell/test29_fileman 
