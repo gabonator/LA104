@@ -8,3 +8,6 @@
 /system/**/_temp
 /temp/
 system/os_platform/win32_sdl/_build/
+
+output
+output.tar
