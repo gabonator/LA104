@@ -16,7 +16,7 @@ https://developer.arm.com/open-source/gnu-toolchain/gnu-rm/downloads
 - Clone whole repository (git clone https://github.com/gabonator/LA104.git)
 - Building the OS: 
     - From the [/system/os_host](/system/os_host) folder, run **build_la104.sh** or **build_ds203.sh** or **build_ds213.sh**
-    - You will need to change the path to your arm toolchain by changing this line or by exporing the arm toolchain path: `````` 
+    - You will need to export the arm toolchain path: ```export PATH="~/Downloads/gcc-arm-none-eabi-7-2018-q2-update/bin/":"$PATH"``` 
     - Check the output of the script, it should look like this
         ```~/Documents/git/LA104/system/os_host$ ./build_la104.sh 
         20000000 00000000 D _addressRamBegin
