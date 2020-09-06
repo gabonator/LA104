@@ -57,14 +57,12 @@ var MODEM = {
       COMM.onReceive = () => {COMM.onReceive = null; resolve(arr);}; 
     }) ),
 
+    Strobe: (arg) => BIOS.rpcCallR('CC1101::Strobe('+arg+');'), 
+    Write: (addr, value) => BIOS.rpcCallR('CC1101::Write('+addr+","+value+');'), 
+    Read: (addr) => BIOS.rpcCallR('CC1101::Read('+addr+');'), 
 }
 
 var APP =
-{
-  GetConfigPtr: () => BIOS.rpcCall('APP::GetConfigPtr();').then( json => BIOS.retval(json) )	
-};
-
-var BIOS =
 {
   Info: () => new Promise( (resolve, reject) => 
   {
@@ -73,7 +71,14 @@ var BIOS =
       .then( (ptr) => { clearTimeout(timeout); return BIOS.GetString(ptr); } )
       .then( resolve );
   }),
+  GetConfigPtr: () => BIOS.rpcCall('APP::GetConfigPtr();').then( json => BIOS.retval(json) ),
+  SetPrescaler: (arg) => BIOS.rpcCall('APP::SetPrescaler('+arg+');').then( json => BIOS.retval(json) ), 
+};
+
+var BIOS =
+{
   memRead32: (addr) => BIOS.rpcCallR('MEM::Read32(0x'+addr.toString(16)+');'),
+  memWrite32: (addr, val) => BIOS.rpcCallR('MEM::Write32(0x'+addr.toString(16)+','+val+');'),
   GetString: (addr, aux) =>
   {
     return BIOS.memRead32(addr).then( x =>

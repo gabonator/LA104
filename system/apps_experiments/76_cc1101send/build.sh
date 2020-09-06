@@ -9,37 +9,12 @@ arm-none-eabi-g++ -Os -Werror -fno-common -mcpu=cortex-m3 -mthumb -msoft-float -
   ../source/streamer/streamer.cpp \
   -I ../../../os_library/include/ \
   -I ../../../os_host/lib/CMSIS/Device/STM32F10x/Include \
-  -I ../../../os_host/lib/STM32F10x_StdPeriph_Driver/inc \
-  -I ../source/streamer/Drivers/CMSIS/Include \
-  -I ../source/streamer/Drivers/CMSIS/Device/ST/STM32F1xx/Include \
-  -I ../source/streamer/Drivers/CMSIS/Device/ST/STM32F1xx/Include \
-  -I ../source/streamer/Drivers/STM32F1xx_HAL_Driver/Inc \
-  -I ../source/streamer/Drivers
-
-#  ../source/streamer/dma2.cpp \
-#  ../source/streamer/Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal.c \
-#  ../source/streamer/Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_cortex.c \
-#  ../source/streamer/Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_tim.c \
-#  ../source/streamer/Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_tim_ex.c \
-#  ../source/streamer/Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_dma.c \
-#  ../source/streamer/Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_rcc.c \
-#  ../source/streamer/Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_gpio.c \
-
-#  -I ../../../os_host/lib/CMSIS/Include 
+  -I ../../../os_host/lib/STM32F10x_StdPeriph_Driver/inc
 
 arm-none-eabi-gcc -fPIC -mcpu=cortex-m3 -mthumb -o output.elf -nostartfiles -T ../source/app.lds \
   ./main.o \
   ./streamer.o \
   -lbios_la104 -L../../../os_library/build -lm
-
-#  ./stm32f1xx_hal.o \
-#  ./stm32f1xx_hal_cortex.o \
-#  ./stm32f1xx_hal_tim.o \
-#  ./stm32f1xx_hal_tim_ex.o \
-#  ./stm32f1xx_hal_dma.o \
-#  ./stm32f1xx_hal_gpio.o \
-#  ./stm32f1xx_hal_rcc.o \
-#
 
 arm-none-eabi-objdump -d -S output.elf > output.asm
 arm-none-eabi-readelf -all output.elf > output.txt

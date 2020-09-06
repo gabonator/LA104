@@ -147,16 +147,16 @@ class PreviewCanvas
       this.drawToOffset(this.calculateOffset());
   }
 
-  drawPulse(len, level, flag)
+  drawPulse(len, level)
   {
     if (len == 0)
       return;         
 
-    this.ctx1.strokeStyle = ["rgba(0, 0, 0, 0.5)", "#ff0000", "#00ff00", "#0000ff", "#ff00ff", "#ffff00", "#00ffff"][flag];
-    this.ctx2.strokeStyle = ["rgba(0, 0, 0, 0.5)", "#ff0000", "#00ff00", "#0000ff", "#ff00ff", "#ffff00", "#00ffff"][flag];
+    this.ctx1.strokeStyle = ["rgba(0, 0, 0, 0.5)", "#ff0000", "#00ff00", "#0000ff", "#ff00ff", "#ffff00", "#00ffff"][len>>24];
+    this.ctx2.strokeStyle = ["rgba(0, 0, 0, 0.5)", "#ff0000", "#00ff00", "#0000ff", "#ff00ff", "#ffff00", "#00ffff"][len>>24];
 
     var x0 = this.drawX;
-    this.drawX += len*this.zoom;
+    this.drawX += (len&0xffffff)*this.zoom;
     var x1 = this.drawX;
     if (this.drawX>=this.width*2)
       this.drawX -= this.width*2;
@@ -331,38 +331,51 @@ class DetailCanvas
   {
     this.Clear();
 
-    var sum = this.pulse.reduce((a,b) => a+b, 0)*this.zoom;
+    var sum = this.pulse.reduce((a,b) => a+(b&0xffffff), 0)*this.zoom;
     this.elem.width = sum;
 
     var x = 0;
     var y = 80;
-
-    this.ctx.strokeStyle = "rgba(0, 0, 0, 0.3)";
+    var c = "rgba(0, 0, 0, 0.3)";
+    this.ctx.strokeStyle = c;
+    var sum = 0;
 
     for (var i=0; i<this.pulse.length; i++)
     {
-      if (i==0 && this.pulse[i] == 0)
+      if (i==0 && (this.pulse[i] & 0xffffff) == 0)
         continue;
 
-      var nx = x + this.pulse[i]*this.zoom;
+      sum += this.pulse[i]  & 0xffffff;
+
+      var nx = x + (this.pulse[i] & 0xffffff) *this.zoom;
       var ny = (i&1) ? 80 : 20;
 
+      var flag = this.pulse[i] >> 24;
+      if (flag)
+        this.ctx.strokeStyle = ["rgba(0, 0, 0, 0.5)", "#ff0000", "#00ff00", "#0000ff", "#ff00ff", "#ffff00", "#00ffff"][flag];
+      else
+        this.ctx.strokeStyle = c;
+                                                                                                                                                                	
       if (i == this.range[0])
-        this.ctx.strokeStyle = "rgba(0, 0, 0, 1)";
+        this.ctx.strokeStyle = c = "rgba(0, 0, 0, 1)";
 
       if (i == this.range[1] && ny != 80)
-        this.ctx.strokeStyle = "rgba(0, 0, 0, 0.3)";
+        this.ctx.strokeStyle = c = "rgba(0, 0, 0, 0.3)";
 
       this.Line(x, y, x, ny);
 
       if (i == this.range[1] && ny == 80)
-        this.ctx.strokeStyle = "rgba(0, 0, 0, 0.3)";
+        this.ctx.strokeStyle = c = "rgba(0, 0, 0, 0.3)";
 
       this.Line(x, ny, nx, ny);
 
       // draw text?
       if (nx-x > 30)
-        this.Text((x+nx)/2, 50, this.pulse[i]);
+      {
+        this.Text((x+nx)/2, 50-14, this.pulse[i] & 0xffffff);
+        this.Text((x+nx)/2, 50+8, (this.pulse[i] & 0xffffff)/20);
+        this.Text(x, 50+8+25, sum/20);
+      }
       x = nx;
       y = ny;
     }

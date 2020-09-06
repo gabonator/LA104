@@ -1,5 +1,7 @@
 #include "app/attack.h"
 
+void streamerSetPrescaler(int psc);
+
 namespace APP
 {
   uint32_t Info()
@@ -22,5 +24,9 @@ namespace APP
   {
     streamerEnd();
     gModem.SetIdleState();
+  }
+  void SetPrescaler(int psc)
+  {
+    streamerSetPrescaler(psc);
   }
 }

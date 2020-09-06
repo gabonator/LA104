@@ -2,9 +2,14 @@
 
 struct appConfig_t
 {
+  const char* structure{R"(["structure", "enabled", "timer", "samples", "pulses", "minimumFirst", "maximumFirst", "minimumOdd", "maximumOdd",
+"minimumEven", "maximumEven", "reqPulses", "delay", "power", "inhibit", "duration"])"};
   uint32_t enabled{0};
-uint32_t statTime{0};
-uint32_t statTicks{0};
+
+  uint32_t timer{0};
+  uint32_t samples{0};
+  uint32_t pulses{0};
+
 /*
   uint32_t minimumEven{20};
   uint32_t maximumEven{28};
@@ -28,13 +33,14 @@ uint32_t statTicks{0};
   uint32_t minimumEven{380/20};
   uint32_t maximumEven{600/20};
 
-  uint32_t pulses{10};
+  uint32_t reqPulses{10};
   uint32_t delay{0};
   uint32_t power{0xb0};
 //  uint32_t scrambleBits{40};
 //  uint32_t scrambleBitrate{2000};
 //  uint32_t inhibit{200};
   uint32_t inhibit{200};
+  uint32_t duration{495};
 
   uint32_t impulseOfs{0};
   uint32_t impulses[128];
@@ -42,10 +48,13 @@ uint32_t statTicks{0};
 } appConfig;
 
 
-extern uint32_t streamerMeasTime;
-extern uint32_t streamerMeasTicks;
-extern uint32_t streamerMeasStartSamples;
-extern int totalSamples;
+//extern uint32_t streamerMeasTime;
+//extern uint32_t streamerMeasTicks;
+//extern uint32_t streamerMeasStartSamples;
+extern volatile int totalSamples;
+extern volatile int totalPulses;
+
+uint32_t streamerCurrent();
 
 // 10ms
 uint16_t attackBuffer[] = {5000, 0}; //{8000, 0, 8000, 0, 8000, 0, 1000};
@@ -81,12 +90,17 @@ int mcounter = 0;
 
 void DoAttack();
 
+char strThreadMessage[512] = {0};
+
 void secondaryPush(int c)
 {
-  appConfig.impulses[appConfig.impulseOfs++] = c;
-  if (appConfig.impulseOfs == COUNT(appConfig.impulses))
-    appConfig.impulseOfs = 0;
-
+/*
+  if (appConfig.enabled == 3)
+  {
+    for (int i=0; i<20; i++)
+      appConfig.impulses[i] = appConfig.impulses[i+1];
+    appConfig.impulses[20] = c;
+  }
   postAttackPulses++;
 
   if (waitAttack > 0)
@@ -94,32 +108,82 @@ void secondaryPush(int c)
     waitAttack -= c;
     return;
   }
-  if (c < 20 || c > 25)
+*/
+  if (eventAt)
+    return;
+  if (c != 0 && (c < 18 || c > 28))
   {
+/*
+    if (appConfig.enabled == 3 && mcounter>5)
+    {
+      sprintf(strThreadMessage, "c:%d,x:%d,d:[", mcounter, c);
+      char* p = strThreadMessage + strlen(strThreadMessage);
+      for (int i=0;i<21; i++)
+      {
+        sprintf(p, "%d,", appConfig.impulses[i]);
+        p += strlen(p);
+      }
+      strcat(p, "]\n");
+    }
+*/
     mcounter = 0;
     return;
   }
-  if (mcounter++ >= appConfig.pulses)
+  if (mcounter++ >= appConfig.reqPulses)
   {
 //    BIOS::SYS::Beep(10);
 
     streamerFlag = 0x1000;
-
+    eventAt = totalSamples+appConfig.duration; // 49500 -> 1s, 4950 -> 100ms
     // since start
-    eventAt = streamerLastTimestamp - ((long)streamerMeasTicks + (long)totalSamples - (long)streamerMeasStartSamples)/20;
-    eventAt += 20; // 10ms
+//    eventAt = streamerLastTimestamp - ((long)streamerMeasTicks + (long)totalSamples - (long)streamerMeasStartSamples)/20;
+//    eventAt += 20; // 10ms
 //    streamerLastTimestamp , streamerLastInterval
 
 //    postAttackPulses = 0;
-    waitAttack = appConfig.inhibit*20;
+//    waitAttack = appConfig.inhibit*20;
 //    performAttack = BIOS::SYS::GetTick();
     mcounter = 0;
 //    DoAttack();
   }
 }
 
+uint32_t streamerCCR();
+uint32_t streamerCurrent();
+
 void CheckAttack()
 {
+  if (appConfig.enabled==8)
+  {
+    int ccr = streamerCCR(); // 0..1023
+    ccr = (1024 - ccr)&511;
+    int add = totalSamples;
+    int sum = (ccr + add) / 10;
+    sum %= BIOS::LCD::Width;
+    int x0 = 0;
+    int x1 = max(0,sum-ccr/10);
+    int x2 = sum;
+    BIOS::LCD::Bar(x0, 40, x1, 45, RGB565(00D000));
+    BIOS::LCD::Bar(x1, 40, x2, 45, RGB565(b00000));
+    BIOS::LCD::Bar(x2, 40, BIOS::LCD::Width, 45, RGB565(808080));
+
+    int xx = (ccr/5) % BIOS::LCD::Width;
+    BIOS::LCD::Bar(0, 60, xx, 65, RGB565(ff0000));
+    BIOS::LCD::Bar(xx, 60, BIOS::LCD::Width, 65, RGB565(000000));
+    return;
+  }
+
+  appConfig.timer = BIOS::SYS::GetTick();
+  appConfig.samples = totalSamples;
+  appConfig.pulses = totalPulses;
+/*
+  if (strThreadMessage[0])
+  {
+    BIOS::DBG::Print(strThreadMessage);
+    strThreadMessage[0] = 0;
+    appConfig.enabled = 1;
+  }
+
   if (appConfig.enabled == 2)
   {
     int l = COUNT(appConfig.impulses);
@@ -132,16 +196,24 @@ int ii = postAttackPulses;
     BIOS::DBG::Print("               ---\n");
     appConfig.enabled = 1;
   }
-  appConfig.statTime = streamerMeasTime;
-  appConfig.statTicks = streamerMeasTicks;
+*/
   if (eventAt != 0)
   {
-    BIOS::SYS::Beep(100);
-    if (BIOS::SYS::GetTick() - eventAt >= 0)
+    streamerFlag = 0x2000;
+
+    while ((long)streamerCurrent() - eventAt < 0);
+
+//    if ((long)streamerCurrent() - eventAt >= 0)
     {
       streamerFlag = 0x0000;
       eventAt = 0; 
     }
+    gModem.FixWrite(0x36);
+    //gModem.SetIdleState(); 
+    BIOS::SYS::Beep(100);
+    BIOS::SYS::DelayMs(3);
+    gModem.FixWrite(0x34);
+    //gModem.SetRxState(); 
   }
 /*
 "[21,25,20,26,23,24,21,22,23,26,22,23,23,25,20,26,20,25,22,24,22,24,22,25,24,22,22,24,22,25,21,25,22,25,21,25,21,25,22,24,22,23,7,46,

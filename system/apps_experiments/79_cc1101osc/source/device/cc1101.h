@@ -49,11 +49,20 @@ public:
         mSpi.end();
     }
     
-    void Write(uint_fast8_t reg)
+    uint_fast8_t Write(uint_fast8_t reg)
     {
         mSpi.select();
         mSpi.wait();
-        mSpi.transfer(reg);
+        uint_fast8_t status = mSpi.transfer(reg);
+        mSpi.deselect();
+        return status;
+    }
+
+    void FixWrite(uint_fast8_t reg)
+    {
+        mSpi.select();
+//        mSpi.wait();
+        mSpi.fixtransfer(reg);
         mSpi.deselect();
     }
 
@@ -330,6 +339,8 @@ public:
 
     void SetRxState()
     {
+//BIOS::DBG::Print("srx ");
+
         enum {CC1101_SRX = 0x34};
         CCc1101Spi::Write(PKTCTRL0, 0x30); // RX: 0x30 - async serial, data out n GDOx, TX: 0x00 - use TX fifo
         CCc1101Spi::Write(IOCFG0, 0x0d); // RX: GDO0: serial data output, TX: 0x06 - optional transmission sync pulse
@@ -338,18 +349,21 @@ public:
 
     void SetTxState()
     {
+//BIOS::DBG::Print("stx ");
         enum {CC1101_STX = 0x35};
         CCc1101Spi::Write(CC1101_STX);
     }
 
     void PrepareTxState()
     {
+//BIOS::DBG::Print("ptx ");
         CCc1101Spi::Write(PKTCTRL0, 0x00); // RX: 0x30 - async serial, data out n GDOx, TX: 0x00 - use TX fifo
         CCc1101Spi::Write(IOCFG0, 0x06); // RX: GDO0: serial data output, TX: 0x06 - optional transmission sync pulse
     }
 
     void LeaveTxState()
     {
+//BIOS::DBG::Print("ltx ");
         FlushRxFifo();
         CCc1101Spi::Write(PKTCTRL0, 0x30); // RX: 0x30 - async serial, data out n GDOx, TX: 0x00 - use TX fifo
         CCc1101Spi::Write(IOCFG0, 0x0d); // RX: GDO0: serial data output, TX: 0x06 - optional transmission sync pulse
@@ -357,6 +371,8 @@ public:
 
     void SetIdleState()
     {
+//BIOS::DBG::Print("sis ");
+
         enum {CC1101_SIDLE = 0x36};
         CCc1101Spi::Write(CC1101_SIDLE);
     }
@@ -469,7 +485,9 @@ public:
         const int root2[] = {0, 1, 2, 2, 3, 3, 3, 3};
         int t = GetOscFrequency() / 8 / bw;
         int e = root2[min(t/12, 7)];
+        e = min(max(0, e), 3);
         int m = (t >> e) - 4;
+        m = min(max(0, e), 3);
 
         _ASSERT(m >= 0 && m <= 3 && e >= 0 && e <= 3);
         mRegisters[MDMCFG4] &= 0x0f;    // eemm....
@@ -487,7 +505,7 @@ public:
 
     void SetGain(int gain)
     {
-        int MAX_LNA_GAIN = -gain*7/17;
+        int MAX_LNA_GAIN = -(gain*7-3)/17;
         MAX_LNA_GAIN = max(0, min(MAX_LNA_GAIN, 7));
         mRegisters[AGCCTRL2] &= 0b11000111;
         mRegisters[AGCCTRL2] |= MAX_LNA_GAIN << 3;
@@ -507,5 +525,19 @@ public:
         uint8_t table[2] = {0, (uint8_t)power};
         CCc1101Spi::Write(PATABLE, table, 2);
     }
-};
 
+    int UserStrobe(int code)
+    {
+        return CCc1101Spi::Write(code); // returns status code
+    }
+
+    void UserWrite(int address, int value)
+    {
+        CCc1101Spi::Write(address, value);        
+    }
+
+    int UserRead(int address)
+    {
+	return CCc1101Spi::Read(address);
+    }
+};

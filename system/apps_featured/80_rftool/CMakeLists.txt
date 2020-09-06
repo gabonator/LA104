@@ -22,8 +22,8 @@ include_directories(${SDL2_INCLUDE_DIRS})
 include_directories("../../os_platform/common/include")
 
 file(GLOB main_src 
-    "../../os_platform/apple/source/sdlmain.cpp"
-    "../../os_platform/apple/source/sdlhal.h"
+    "../../os_platform/mac_sdl/source/sdlmain.cpp"
+    "../../os_platform/mac_sdl/source/sdlhal.h"
     "../../os_platform/common/include/library.h"
 )
 
