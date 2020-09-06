@@ -39,6 +39,8 @@ INTERFACE = {
   trigThreshold:128,
   trigSource:"CH1",
   trigState:"run",
+  trigAuto:true,
+  trigFull:false,
 
   genFlavour: "Sine",
   genFrequency: 10000,
@@ -226,6 +228,16 @@ INTERFACE = {
     gui.drawTrigger();
   },
 
+  setTriggerAuto: (auto) =>
+  {
+    INTERFACE.trigAuto = auto;
+  },
+
+  setTriggerFull: (full) =>
+  {
+    INTERFACE.trigFull = full;
+  },
+
   configureTrigger: () =>
   {
     var thresh = INTERFACE.trigThreshold;
@@ -383,7 +395,7 @@ INTERFACE = {
     INTERFACE.configureTrigger();
     INTERFACE.updateGenerator();
 
-    INTERFACE.wave = {
+    INTERFACE._wave = {
       scroll:recording.wave.scroll, 
       start:recording.wave.start, 
       len:recording.wave.len, 
@@ -391,7 +403,7 @@ INTERFACE = {
     };
 
     ////////////TODO: select wave range by trigger mode
-    INTERFACE.Transfer(_wave);
+    INTERFACE.Transfer(INTERFACE._wave);
 
     var dt = parseFloat(OSC.Enums[INTERFACE.timebase]);
     var dv = [50e-3, 100e-3, 200e-3, 500e-3, 1, 2, 5, 10][OSC.Enums[INTERFACE.ch1range]];
@@ -400,7 +412,7 @@ INTERFACE = {
       INTERFACE.process( () =>
         Promise.resolve()
   //          .then( () => new Promise( (resolve) => setTimeout(resolve, 50) ) )  // finish previous transfer
-          .then( () => INTERFACE._wave = _wave )
+//          .then( () => INTERFACE._wave = _wave )
           .then( () => meas.Calculate(INTERFACE.measSource, dt, dv, INTERFACE._wave.data) )
           .then( (measure) => controls.setMeasData(measure) ) 
           .then( () => canvas.OscilloscopeRedraw(INTERFACE._wave.scroll, INTERFACE._wave.data) )
@@ -411,7 +423,7 @@ INTERFACE = {
     {
       // TODO!
         Promise.resolve()
-          .then( () => INTERFACE._wave = _wave )
+//          .then( () => INTERFACE._wave = _wave )
           .then( () => meas.Calculate(INTERFACE.measSource, dt, dv, INTERFACE._wave.data) )
           .then( (measure) => controls.setMeasData(measure) ) 
           .then( () => canvas.OscilloscopeRedraw(INTERFACE._wave.scroll, INTERFACE._wave.data) )
@@ -551,8 +563,8 @@ INTERFACE = {
       var now = (new Date()).getTime();
       var streaming = INTERFACE.trigMode == "Streaming";
       var forceFreerunRedraw = INTERFACE.trigMode == "None" && now - last > 500 && !streaming;
-      var forceAutoRedraw = INTERFACE.trigState == "run" && now - last > 2000 && !streaming;
-      var forcePausedRedraw = INTERFACE.trigState == "paused" && lastRequest != scroll && now - last > 100;
+      var forceAutoRedraw = INTERFACE.trigState == "run" && INTERFACE.trigAuto && now - last > 2000 && !streaming;
+      var forcePausedRedraw = !INTERFACE.trigFull && INTERFACE.trigState == "paused" && lastRequest != scroll && now - last > 100;
 
       if (INTERFACE.trigState == "paused" && !forcePausedRedraw)
         return;
@@ -604,6 +616,14 @@ INTERFACE = {
             }
 
             var reqLen = 256*4+180*1; // screen width, ignore resampling, always take 1k
+
+            if (INTERFACE.trigFull)
+            {
+              reqStart = 30;
+              reqLen = maxSafe;
+              scroll = 0
+            }
+
             if (reqStart > maxSafe - 128)
               reqStart = maxSafe - 128;
             if (reqLen+reqStart > maxSafe)

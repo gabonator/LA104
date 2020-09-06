@@ -146,7 +146,8 @@ float:left;
     </select><br>
     <div class="hidden">Threshold:<input size=5 type="text" value="128" id="triggerThreshold"></div> 
     <span id="genTrigTime">Time:<input size=5 type="text" value="128" id="triggerTime"></span>
-
+    <input type="checkbox" id="triggerAuto">Auto
+    <input type="checkbox" id="triggerFull">Full transfer
   </div><div class="controlsSpacer"></div>
   <div class="controlsBlock blockGen">
     Generator:<br><br>
@@ -322,6 +323,12 @@ float:left;
     document.querySelector("#triggerTime").addEventListener('change', 
       (o) => INTERFACE.setTriggerTime(o.target.value));
 
+    document.querySelector("#triggerAuto").addEventListener('change', 
+      (o) => INTERFACE.setTriggerAuto(o.target.checked));
+
+    document.querySelector("#triggerFull").addEventListener('change', 
+      (o) => INTERFACE.setTriggerFull(o.target.checked));
+
     document.querySelector("#genFlavour").addEventListener('change', 
       (o) => {
         INTERFACE.setGeneratorFlavour(o.target.value)
@@ -443,6 +450,8 @@ float:left;
     document.querySelector("#triggerSource").value = INTERFACE.trigSource;
     document.querySelector("#triggerThreshold").value = INTERFACE.trigThreshold; 
     document.querySelector("#triggerTime").value = INTERFACE.trigTime;
+    document.querySelector("#triggerAuto").checked = INTERFACE.trigAuto;
+    document.querySelector("#triggerFull").checked = INTERFACE.trigFull;
     document.querySelector("#genTrigTime").style.display = INTERFACE.trigMode.indexOf("DT") != -1 ? "block" : "none";
 
     document.querySelector("#genFlavour").value = INTERFACE.genFlavour;

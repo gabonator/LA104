@@ -368,11 +368,10 @@ INTERFACE = {
       delete _wave.oscSettings;
 
       ////////////TODO: select wave range by trigger mode
-      var data = [new Array(_wave.data.length/5), new Array(_wave.data.length/5)];
-      for (var i =0; i<_wave.data.length; i+=5)
+      var data = [new Array(_wave.data.length/3), new Array(_wave.data.length/3)];
+      for (var i =0; i<_wave.data.length; i+=3)
       {
-        var s = parseInt("0x" + _wave.data.substr(i, 5));
-        var bundle = [s&255, (s>>8)&255, (s>>16)&1, (s>>17)&1];
+        var bundle = [_wave.data[0], _wave.data[1], _wave.data[2] & 1, _wave.data[2] & 2];
         data[0][i/5] = bundle[0];
         data[1][i/5] = bundle[1];
       }
@@ -387,7 +386,7 @@ INTERFACE = {
         ch2offset: INTERFACE.ch2offset,
         timebase: INTERFACE.timebase,
         trigThreshold: INTERFACE.trigThreshold,
-        trigSource: INTERFACE.trigSource,
+        trigSource: INTERFACE.trigSource
       }});
 
       for (var i in INTERFACE.extWindows)
@@ -543,7 +542,21 @@ INTERFACE = {
                 return Promise.resolve()
                 .then( () => OSC.Transfer(30, 4096-30) )
 //!!!!                  .then( (data) => {if (INTERFACE.trigState == "stop") throw "cancelled"; return data; } )
-                .then( (data) => INTERFACE._wave = {scroll:0, start:reqStart, len:reqLen, data:data} )
+                .then( (data) => 
+                {
+                  if (INTERFACE.trigMode == "Streaming")
+                  {
+                    var buffer = new Uint8Array(data.length*3);
+                    for (var i=0; i<data.length; i++)
+                    {
+                      buffer[i*3+0] = data[i];
+                      buffer[i*3+1] = 0;
+                      buffer[i*3+2] = 0;
+                    }
+                    data = buffer;
+                  }
+                  INTERFACE._wave = {scroll:0, start:reqStart, len:reqLen, data:data} 
+                })
 
                 .then( () => meas.Calculate(INTERFACE.measSource, dt, dv, INTERFACE._wave.data) )
                 .then( (measure) => controls.setMeasData(measure) ) 
@@ -572,9 +585,32 @@ INTERFACE = {
             if (reqLen+reqStart > maxSafe)
               reqLen = maxSafe - reqStart;
 
+            if (INTERFACE.trigMode == "Streaming")
+            {
+              reqStart = 0;
+              reqLen = 2048;
+              scroll = Math.max(120, scroll);
+            }
+
             return Promise.resolve()
             .then( () => OSC.Transfer(reqStart, reqLen) )
-            .then( (data) => INTERFACE._wave = {scroll:scroll, start:reqStart, len:reqLen, data:data} )
+                .then( (data) => 
+                {
+                  if (INTERFACE.trigMode == "Streaming")
+                  {
+                    var buffer = new Uint8Array(data.length*3);
+                    for (var i=0; i<data.length; i++)
+                    {
+                      buffer[i*3+0] = data[i];
+                      buffer[i*3+1] = 0;
+                      buffer[i*3+2] = 0;
+                    }
+                    data = buffer;
+                  }
+                  INTERFACE._wave = {scroll:scroll, start:reqStart, len:reqLen, data:data} 
+                })
+
+//            .then( (data) => INTERFACE._wave = {scroll:scroll, start:reqStart, len:reqLen, data:data} )
 
             .then( () => meas.Calculate(INTERFACE.measSource, dt, dv, INTERFACE._wave.data) )
             .then( (measure) => controls.setMeasData(measure) ) 
