@@ -41,8 +41,9 @@ void sfp_printchar(char **str, int c)
 
 #define PAD_RIGHT 1
 #define PAD_ZERO 2
+#define PAD_DECIMALS 4
 
-#ifdef EMSCRIPTEN 
+#if defined(EMSCRIPTEN) || defined(__APPLE__)
 #define register
 #endif
 
@@ -160,6 +161,24 @@ int sfp_printi(char **out, int i, int b, int sg, int width, int pad, int letbase
 	return pc + sfp_prints (out, s, width, pad);
 }
 
+int sfp_printf_decimals(char **out, float f, int width)
+{
+	int pc = 0;
+	if (f < 0)
+	{
+		pc += sfp_prints(out, "-", 0, 0);
+		f = -f;
+	}
+	pc += sfp_printi(out, (int)f, 10, false, 0, 0, 'a');
+	pc += sfp_prints(out, ".", 0, 0);
+	f -= (int)f;
+	for (int i=0; i<width; i++)
+		f *= 10.0f;
+
+	pc += sfp_printi(out, (int)f, 10, false, width, PAD_ZERO, 'a');
+	return pc;
+}
+
 int vsprintf(char *out_, const char *format, va_list args )
 {
 	register int width, pad;
@@ -181,12 +200,17 @@ int vsprintf(char *out_, const char *format, va_list args )
 				++format;
 				pad |= PAD_ZERO;
 			}
+			if (*format == '.')
+			{
+				++format;
+				pad |= PAD_DECIMALS;
+			}
 			for ( ; *format >= '0' && *format <= '9'; ++format) {
 				width *= 10;
 				width += *format - '0';
 			}
 			if( *format == 's' ) {
-				register char *s = (char *)va_arg( args, int );
+				register char *s = (char *)va_arg( args, long );
 				pc += sfp_prints (out, s?s:"(null)", width, pad);
 				continue;
 			}
@@ -195,10 +219,17 @@ int vsprintf(char *out_, const char *format, va_list args )
 				continue;
 			}
 			if( *format == 'f' ) {
-//				int f = va_arg( args, int );
-//				float* ff = (float*)&f;
+#ifdef _ARM
+				// TODO: check if we can avoid using "double"
 				float f = (float)va_arg( args, double );
-				pc += sfp_printf (out, f, width);
+#else
+				float f = (float)va_arg( args, double );
+#endif
+
+				if (pad & PAD_DECIMALS)
+					pc += sfp_printf_decimals(out, f, width);
+				else
+					pc += sfp_printf (out, f, width);
 				continue;
 			}
 			if( *format == 'x' ) {

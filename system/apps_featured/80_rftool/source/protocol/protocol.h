@@ -1,7 +1,7 @@
 struct TKeyValue
 {
   char* key;
-  int value;
+  uintptr_t value;
 };
 
 class CAttributes : public CArray<TKeyValue>
@@ -14,7 +14,7 @@ public:
 	{		
 	}
 	
-  int& operator[](const char* key)
+  uintptr_t& operator[](const char* key)
   {
     for (int i=0; i<GetSize(); i++)
       if (strcmp(CArray<TKeyValue>::operator[](i).key, key) == 0)

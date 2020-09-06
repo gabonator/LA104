@@ -5,7 +5,7 @@ class CDetails : public CWnd
     CSignalView mSignalView;
     CScroller mScroller{6, nullptr};
     int mAttributes{0};
-    int mCaptureIndex{0};
+    int mCaptureUid{0};
     bool mRedraw{false};
     
 public:
@@ -36,8 +36,13 @@ public:
         using namespace Layout;
         Color def(RGB565(b0b0b0), RGBTRANS);
         Color hig(RGB565(ffffff), RGBTRANS);
+        
+        int captureIndex = appData.GetCaptureIndex(mCaptureUid);
 
-        int attributes = appData.GetCaptureAttributesCount(mCaptureIndex);
+        if (captureIndex < 0)
+            return;
+        
+        int attributes = appData.GetCaptureAttributesCount(captureIndex);
         mScroller.SetCount(attributes, 2);
         mAttributes = attributes;// TODO: !
         
@@ -51,8 +56,8 @@ public:
         if (mRedraw)
         {
             mRedraw = false;
-            int ts;
-            appData.GetCaptureRecord(mCaptureIndex, ts, name, nullptr);
+            int ts, uid;
+            appData.GetCaptureRecord(captureIndex, ts, uid, name, nullptr);
             r << Window(name);
         } else
         {
@@ -76,9 +81,8 @@ public:
 
         for (int i=top; i<bottom; i++)
         {
-            appData.GetCaptureAttribute(mCaptureIndex, i, name, value, units);
-            if (name[0] != '_')
-                r << name << ":" << Select(HasFocus() && mScroller.mFocus + mScroller.mScroll == i) << Units(value, units) << Select(false) << def << NewLine();
+            appData.GetCaptureAttribute(captureIndex, i, name, value, units);
+            r << name << ":" << Select(HasFocus() && mScroller.mFocus + mScroller.mScroll == i) << Units(value, units) << Select(false) << def << NewLine();
         }
         r << Goto(m_rcClient.CenterX()) << Select(HasFocus() && mScroller.mFocus == mScroller.mRows) << Button((char*)"Transmit");
         
@@ -108,6 +112,11 @@ public:
     {
         //BIOS::LCD::Bar(rc, RGB565(000000));
     }
+    
+    void SetUid(int i)
+    {
+        mCaptureUid = i;
+    }
 
     virtual void OnKey(int key) override
     {
@@ -136,6 +145,23 @@ public:
                 mSignalView.mSettings_mSignalOffset += mSignalView.mSettings_mSignalScaleX*10;
                 mSignalView.mSettings_mSignalOffset = max(0, mSignalView.mSettings_mSignalOffset);
                 DrawScrollbar();
+            }
+        } else
+        if (mScroller.mFocus < mScroller.mRows)
+        {
+            if (key == BIOS::KEY::Left)
+            {
+                int captureIndex = appData.GetCaptureIndex(mCaptureUid);
+                if (captureIndex != -1)
+                    appData.DeltaCaptureAttribute(captureIndex, mScroller.mFocus + mScroller.mScroll, -1);
+                Invalidate();
+            }
+            if (key == BIOS::KEY::Right)
+            {
+                int captureIndex = appData.GetCaptureIndex(mCaptureUid);
+                if (captureIndex != -1)
+                    appData.DeltaCaptureAttribute(captureIndex, mScroller.mFocus + mScroller.mScroll, +1);
+                Invalidate();
             }
         }
         if (key == BIOS::KEY::Up)

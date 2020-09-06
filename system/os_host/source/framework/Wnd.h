@@ -49,6 +49,8 @@ public:
 //		WmMouse = 8,
         WmWillShow = 16,
         WmWillHide = 32,
+        WmWillGetFocus = 64,
+        WmWillLoseFocus = 128,
 
 		// Window style
 		WsHidden = 0,

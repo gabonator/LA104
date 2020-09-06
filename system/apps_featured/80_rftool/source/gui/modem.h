@@ -6,7 +6,6 @@ class CControlLayout : public CBlock
 public:
     const int Height = 22;
     int mFocus{0};
-    bool mLogging{false};
 
     virtual void OnPaint() override
     {
@@ -17,14 +16,14 @@ public:
             << Padding(8, 4, 8, 4)
             << Select(CWnd::HasFocus() && mFocus == 0) << Button((char*)"Pause")
             << Goto(m_rcClient.CenterX())
-            << Select(CWnd::HasFocus() && mFocus == 1) << Radio(mLogging, (char*)"Logging");
+            << Select(CWnd::HasFocus() && mFocus == 1) << Radio(appData.GetLogging(), (char*)"Logging");
     }
     
     virtual void OnKey(int key) override
     {
         if (key == BIOS::KEY::Enter && mFocus == 1)
         {
-            mLogging = !mLogging;
+            appData.SetLogging(!appData.GetLogging());
             Invalidate();
             return;
         }
@@ -141,9 +140,15 @@ public:
                 case 3: appData.DeltaGain(dir); break;
                 case 4: appData.DeltaDataRate(dir); break;
 			}
-            Invalidate();
+            DataChanged();
 		}
         
+        if (key == BIOS::KEY::Enter && mFocus == 1)
+        {
+            appData.ToggleFrequency();
+            DataChanged();
+        }
+
         if (key == BIOS::KEY::Enter && mFocus == 0)
         {
                 // dispatch to main
@@ -157,6 +162,16 @@ public:
                 appData.SetConnected(false);
             }
             Invalidate();
+        }
+        
+        if (key == BIOS::KEY::Enter && mFocus == 5)
+        {
+            SendMessage(GetParent(), 0, (uintptr_t)"load");
+        }
+
+        if (key == BIOS::KEY::Enter && mFocus == 6)
+        {
+            SendMessage(GetParent(), 0, (uintptr_t)"save");
         }
         
 		if (key == BIOS::KEY::Up)
@@ -179,6 +194,12 @@ public:
 		}
 		CBlock::OnKey(key);
 	}
+    
+    void DataChanged()
+    {
+        Invalidate();
+        SendMessage(GetParent(), 0, (uintptr_t)"update");
+    }
 };
 
 class CPreview : public CBlock

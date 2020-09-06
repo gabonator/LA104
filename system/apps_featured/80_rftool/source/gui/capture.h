@@ -4,6 +4,7 @@ class CCapture : public CWnd
     CScroller mScroller{6, &mRedrawMask};
     int mLastCount{0};
     int mRedrawMask{0};
+    int mCurrentUid{0};
 
 public:
     void Create( const char* pszId, int dwFlags, const CRect& rc, CWnd* pParent )
@@ -36,7 +37,12 @@ public:
     {
         int nElementSpacing = 32;
         int nElementHeight = nElementSpacing+1;
-        CRect rcElement(m_rcClient.left, m_rcClient.top, m_rcClient.right-8, m_rcClient.top + nElementHeight);
+        
+        CRect rcMenu(m_rcClient.left, m_rcClient.top+2, m_rcClient.right-8, m_rcClient.top + 16);
+        Layout::Render r(rcMenu);
+        r << Layout::Goto(90) << Layout::Button("Pause") << Layout::Button("Clear") << Layout::Button("Load") << Layout::Button("Save");
+        
+        CRect rcElement(m_rcClient.left, m_rcClient.top+18, m_rcClient.right-8, m_rcClient.top + 18 + nElementHeight);
 
         mLastCount = appData.GetCaptureRecords();
         if (mLastCount == 0)
@@ -45,7 +51,7 @@ public:
             rcElement.bottom = m_rcClient.top + 6*nElementSpacing+1;
             GUI::Background(rcElement, RGB565(404040), RGB565(101010));
             
-            CRect rcScrollbar(m_rcClient.right-2, m_rcClient.top, m_rcClient.right, m_rcClient.top + 6*nElementSpacing+1);
+            CRect rcScrollbar(m_rcClient.right-2, m_rcClient.top + 18, m_rcClient.right, m_rcClient.top + 6*nElementSpacing+1 + 18);
             BIOS::LCD::Bar(rcScrollbar, RGB565(606060));
             return;
         }
@@ -54,7 +60,7 @@ public:
         mScroller.SetCount(mLastCount, 0);
         mScroller.GetRange(nTopIndex, nBottomIndex);
         
-        CRect rcScrollbar(m_rcClient.right-2, m_rcClient.top, m_rcClient.right, m_rcClient.top + 6*nElementSpacing+1);
+        CRect rcScrollbar(m_rcClient.right-2, m_rcClient.top+18, m_rcClient.right, m_rcClient.top + 18 + 6*nElementSpacing+1);
         int nScrollTop = rcScrollbar.top + nTopIndex*rcScrollbar.Height()/mLastCount;
         int nScrollBottom = rcScrollbar.top + nBottomIndex*rcScrollbar.Height()/mLastCount;
         BIOS::LCD::Bar(rcScrollbar, RGB565(606060));
@@ -77,10 +83,11 @@ public:
             }
                 
             int ts;
+            int uid;
             char name[64];
             char desc[64];
             char time[8];
-            appData.GetCaptureRecord(mLastCount-1-i, ts, name, desc);
+            appData.GetCaptureRecord(mLastCount-1-i, ts, uid, name, desc);
             
             int alpha = 0;
             if (now - ts < 5000)
@@ -93,6 +100,10 @@ public:
             sprintf(time, "%02d:%02d", ts/60, ts%60);
                       
             bool focus = HasFocus() && mScroller.mFocus == index;
+            
+            if (focus)
+                mCurrentUid = uid;
+            
             Color def(focus ? RGB565(000000) : RGB565(b0b0b0));
             Color hig(RGB565(ffffff));
 
@@ -150,6 +161,10 @@ public:
                 Invalidate();
                 return;
             }
+        }
+        if (key == BIOS::KEY::Enter)
+        {
+            SendMessage(GetParent(), 0xabbb, mCurrentUid);
         }
         CWnd::OnKey(key);
     }

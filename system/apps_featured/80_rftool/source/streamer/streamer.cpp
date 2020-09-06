@@ -1,5 +1,7 @@
 // based on https://github.com/PetteriAimonen/dso-quad-logic.git
 
+#ifndef __APPLE__
+
 #include "streamer.h"
 #include <library.h>
 #include "stm32f10x.h"
@@ -232,3 +234,5 @@ void streamerSetPrescaler(int psc)
     TIM1->PSC = psc - 1;
     TIM1->ARR = psc/2 - 1;
 }
+
+#endif

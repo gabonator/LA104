@@ -242,8 +242,18 @@ public:
 	{
 		if (!f)
 		{
-			// TODO: use relative path!
-			f = fopen("/Users/gabrielvalky/Documents/git/LA104/system/os_platform/apple/data/la104.fat", "rb+");
+            char buf[1024];
+            getcwd(buf, 1024);
+            // /Users/gabrielvalky/Documents/git/LA104/system/apps_featured/80_rftool/build/Debug
+            char *psystem = strstr(buf, "system");
+            if (!psystem)
+            {
+                _ASSERT(0);
+                return;
+            }
+            strcpy(psystem, "/system/os_platform/apple/data/la104.fat");
+            
+			f = fopen(buf, "rb+");
 			_ASSERT(f);
 		}
 		fseek(f, offset, SEEK_SET);

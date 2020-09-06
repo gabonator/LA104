@@ -36,12 +36,14 @@ public:
 
   virtual bool Demodulate(const CArray<uint16_t>& pulse, CAttributes& attributes) override
   {
-    int nibblesData[16];
+    int nibblesData[24];
     CArray<int> b(nibblesData, COUNT(nibblesData));
 
     int length = 0;
+//                BIOS::DBG::Print("g");
     if (!PulseToBytes(pulse, b, length))
       return false;
+//                BIOS::DBG::Print("h");
 
     attributes["length"] = length; // count of bits
     uint32_t data=0;
@@ -53,6 +55,7 @@ public:
       data |= b[i];
       if ((i&3)==3 || last)
       {
+//                BIOS::DBG::Print("i");
 //std::cout << "zapisujem " << i << " na index " << i/4 << "\n";       
         switch (i/4) // store as dword
         {
@@ -64,15 +67,37 @@ public:
         data = 0;
       }
     }
+    //            BIOS::DBG::Print("j");
+
     Analyse(attributes);
     return true;
   }
 
   void Analyse(CAttributes& attributes)
   {
+      //50 FA28A428 20229083 4B46
     if ((attributes["data64_0"] >> 16) == 0xaf82) // thgr810
     {
-/*
+        const uint32_t d0 = attributes["data64_0"];
+        const uint32_t d1 = attributes["data64_1"];
+        uint8_t message[10] = {(uint8_t)(d0 >> 24), (uint8_t)(d0 >> 16), (uint8_t)(d0 >> 8), (uint8_t)(d0),
+            (uint8_t)(d1 >> 24), (uint8_t)(d1 >> 16), (uint8_t)(d1 >> 8), (uint8_t)(d1)};
+        
+        attributes["$model"] = (uintptr_t)"THGR810";
+
+        int temp_c = (((message[5]>>4)*100)+((message[4]&0x0f)*10) + ((message[4]>>4)&0x0f));
+        if (message[5] & 0x0f)
+            temp_c = -temp_c;
+
+        attributes["temperature10"] = temp_c;
+        attributes["humidity"] = ((message[6]&0x0f)*10)+(message[6]>>4);
+        
+        int channel = ((message[2] >> 4)&0x0f);
+        //if ((channel == 4) && (sensor_id & 0x0fff) != ID_RTGN318 && sensor_id != ID_THGR810)
+//            channel = 3; // sensor 3 channel number is 0x04
+        attributes["channel"] = channel;
+
+        /*
 float get_os_temperature(unsigned char *message, unsigned int sensor_id)
 {
     // sensor ID included    to support sensors with temp in different position
@@ -133,11 +158,12 @@ unsigned int get_os_battery(unsigned char *message, unsigned int sensor_id)
 
   virtual bool Modulate(const CAttributes& attr, CArray<uint16_t>& pulse) override
   {
-    int nibblesData[16];
+    int nibblesData[24];
     CArray<int> b(nibblesData, COUNT(nibblesData));
     int length = attr["length"];
     uint32_t data;
     int bytes = (length+7)/8;
+
     for (int i=0; i<bytes; i++)
     {
       if ((i&3) == 0)
@@ -221,6 +247,8 @@ private:
         bits = reverse(bits);
         bits = (bits >> 4) | ((bits & 15) << 4);
         bytes.Add(bits);
+          if (bytes.GetMaxSize() == bytes.GetSize())
+              return true;
         bits = 0;
       }
     }

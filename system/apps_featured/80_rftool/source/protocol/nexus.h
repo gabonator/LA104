@@ -1,9 +1,9 @@
-class CWeather : public CProtocol
+class CNexus : public CProtocol
 {
 public:
 	virtual int Frequency() override
 	{
-		return 433876000UL;
+		return 433876000UL; // not verified
 	}
 	
   virtual int MinIndentifyCount() override
@@ -20,28 +20,12 @@ public:
 
   virtual bool Identify(CArray<int>& pulse) override
   {
-    auto IsSpacer = [](int l){ return l >= 17 && l <= 25; };
-    auto IsShort = [](int l){ return l >= 4 && l <= 5; };
-    auto IsLong = [](int l){ return l >= 8 && l <= 10; };
-    
-    if (PulseLen(pulse[0]) == 1 && 
-        IsSpacer(PulseLen(pulse[1])) &&
-        PulseLen(pulse[2]) == 1 &&
-        (IsShort(PulseLen(pulse[3])) ||
-        IsLong(PulseLen(pulse[3]))))
-    {
-      return true;
-    }
     return false;
   }
 
   virtual int AttackPoint(CArray<int>& pulse) override
   {
-    if (pulse.GetSize() < 2 + 8*4*2)
-      return 0;
-    // points to CRC, min length 8*5ms, max length 8*9ms
-    // packet is sent 4 times!!!
-    return 2000000; // 2 s noise 
+    return 0;
   }
 
   virtual void Example(CAttributes& attributes) override
@@ -57,38 +41,65 @@ public:
 
   virtual bool Demodulate(const CArray<uint16_t>& pulse, CAttributes& attributes) override
   {
-    int nibblesData[9];
+    int nibblesData[20];
     CArray<int> b(nibblesData, COUNT(nibblesData));
 
-    if (!PulseToNibbles(pulse, b))
+    int length;
+
+    if (!PulseToBytes(pulse, b, length))
       return false;
 
-    int sum_nibbles = b[0] + b[1] + b[2] + b[3] + b[4] + b[5] + b[6] + b[7];
+    attributes["length"] = length;
 
-    /* IIIICCII B???TTTT TTTTTSSS HHHHHHH1 XXXX */
-    int negative_sign = (b[5] & 7);
-    int temp          = b[3] | (b[4]<<4) | ((b[5]>>3)<<8);
-    int humidity      = ((b[6] | (b[7]<<4)) & 0x7f) - 28;
-    int sensor_id     = b[0] | ((b[1] >> 2) << 4);
-    int battery_low   = b[2] & 1;
-    int channel       = Reverse2(b[1] >> 2);
-    int unk           = b[2] >> 1;
-    bool crcOk        = b[8] == (sum_nibbles & 0xF);
+    int bytes = b.GetSize();
+    int data = 0;
+    for (int i=0; i<bytes; i++)
+    {
+      bool last = i==bytes-1;
+      data <<= 8;
+      data |= b[i];
+      if ((i&3)==3 || last)
+      {
+        switch (i/4) // store as dword
+        {
+          case 0: attributes["data64_0"] = data; break;
+          case 1: attributes["data64_1"] = data; break;
+          case 2: attributes["data64_2"] = data; break;
+          default: _ASSERT(0);
+        }
+        data = 0;
+      }
+    }
+      if (length < 36)
+          return true;
+      if (b.GetSize() != 5) // kokotina, mame 36 bitov a 4 bajty!?!??! wtf!!
+          return true;
 
-    int tempC10 = negative_sign ? -( (1<<9) - temp ) : temp;
+        if ((b[3]&0xF0) != 0xF0)
+            return false;
 
-    attributes["temperature10"] = tempC10;
-    attributes["humidity"] = humidity;
-    attributes["id"] = sensor_id;
-    attributes["battery_low"] = battery_low;
-    attributes["channel"] = channel;
-    attributes["junk"] = unk;
-    attributes["valid"] = crcOk;
+        /* Nibble 0,1 contains id */
+        attributes["id"] = b[0];          // TODO: gabo, mame max 10 slotov|!
+
+        /* Nibble 2 is battery and channel */
+        attributes["battery"] = (b[1]&0x80) ? true : false;
+        attributes["channel"] = ((b[1]&0x30) >> 4) + 1;
+
+        /* Nibble 3,4,5 contains 12 bits of temperature
+         * The temperature is signed and scaled by 10 */
+        int temp = (int16_t)((uint16_t)(b[1] << 12) | (b[2] << 4));
+        temp = temp >> 4;
+        attributes["temperature10"] = temp;
+
+        /* Nibble 6,7 is humidity */
+        attributes["humidity"] = (uint8_t)(((b[3]&0x0F)<<4)|(b[4]>>4));
+
     return true;
   }
 
   virtual bool Modulate(const CAttributes& attr, CArray<uint16_t>& pulse) override
   {
+/*
     int temp = attr["temperature10"];
     int hum = (attr["humidity"] + 28) | 128;
 
@@ -107,18 +118,11 @@ public:
     nibbles.Add(Sum(nibbles) & 15);
 
     NibblesToPulse(nibbles, pulse);
+*/
     return true;
   }
 
 private:
-  int Sum(const CArray<int>& arr)
-  {
-    int sum = 0;
-    for (int i=0; i<arr.GetSize(); i++)
-      sum += arr[i];
-    return sum;
-  }
-
   int PulseLen(int microseconds)
   {
     return (microseconds+250)/500;
@@ -129,42 +133,63 @@ private:
       return ticks*500;
   }
 
-    bool PulseToNibbles(const CArray<uint16_t>& pulse, CArray<int>& nibbles)
+    bool PulseToBytes(const CArray<uint16_t>& pulse, CArray<int>& bytes, int& length)
     {
         if (pulse.GetSize() < 9*4*2)
             return false;
 
-        int nibble = 0, base = 0;
+        int base = 0;
+
         if (PulseLen(pulse[0]) != 1)
             return false;
-        if (PulseLen(pulse[1]) >= 10 && PulseLen(pulse[1]) <= 20)
+        if (PulseLen(pulse[1]) >= 7 && PulseLen(pulse[1]) <= 9)
         {
             base = 2;
             if (pulse.GetSize()-base < 9*4*2)
                 return false;
         }
-        else if (PulseLen(pulse[1]) != 4 && PulseLen(pulse[1]) != 8)
+        else if (PulseLen(pulse[1]) != 2 && PulseLen(pulse[1]) != 4)
             return false;
 
-        for (int i=0; i<9*4; i++)
+        length = 0;
+        int nibble = 0;
+        int i = 0;
+        for (i=0; i<9*4; i++)
         {
-            int spacer = PulseLen(pulse[base+i*2]);
-            int data = PulseLen(pulse[base+i*2+1]);
-            if (spacer != 1)
-                return false; //throw "wrong spacer value";
-            if (data != 4 && data != 8)
-                return false; //throw "wrong data value";
+            if (PulseLen(pulse[base++]) != 1) 
+                return false;
 
-            int bit = data == 4 ? 0 : 1;
-            int bitpos = i & 3;
+            int spacer = PulseLen(pulse[base++]);
 
-            nibble |= bit << bitpos;
-            if (bitpos == 3)
+            nibble <<= 1;
+            if (spacer == 2)
             {
-                nibbles.Add(nibble);
+            } else
+            if (spacer == 4)
+            {
+              nibble |= 1;
+            } else
+              return false;
+
+            length++;
+
+            if ((i&7) == 7)
+            {
+                bytes.Add(nibble);
+                if (bytes.GetMaxSize() == bytes.GetSize())
+                    return true;
                 nibble = 0;
             }
         }
+
+        if ((i&7) != 0) // TODO!
+        {
+            bytes.Add(nibble);
+            if (bytes.GetMaxSize() == bytes.GetSize())
+                return true;
+            nibble = 0;
+        }
+ 
         return true;
     }
 
@@ -174,15 +199,14 @@ private:
       return false;
 
     pulse.Add(PulseDuration(1));
-    pulse.Add(PulseDuration(18));
-    pulse.Add(PulseDuration(1));
+    pulse.Add(PulseDuration(8));
 
     for (int i=0; i<nibbles.GetSize(); i++)
     {
       for (int j=0; j<4; j++)
       {
-        pulse.Add(PulseDuration((nibbles[i] & (1<<j)) ? 8 : 4));
         pulse.Add(PulseDuration(1));
+        pulse.Add(PulseDuration((nibbles[i] & (1<<j)) ? 4 : 2));
       }
     }
 
@@ -196,12 +220,12 @@ private:
     
     virtual void GetName(char* name) override
     {
-        strcpy(name, "TFA-Twin-Plus-30.3049");
+        strcpy(name, "Nexus Temperature & Humidity");
     }
     
     virtual void GetDescription(CAttributes& attributes, char* desc) override
     {
-        sprintf(desc, "Ch: <%d> Temp: <%d.%d\xf8""C> Humidity: <%d%%>",
+        sprintf(desc, "Ch: <%d> Temp: <%d.%d'C> Humidity: <%d%%>",
                 attributes["channel"], attributes["temperature10"] / 10, attributes["temperature10"] % 10, attributes["humidity"]);
     }
 

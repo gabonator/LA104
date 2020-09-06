@@ -260,4 +260,10 @@ public:
 		return m_arrElements;
 	}
 
+    void Copy(const CArray<TYPE>& source)
+    {
+        SetSize(source.GetSize());
+        for (int i=0; i<source.GetSize(); i++)
+            m_arrElements[i] = source.m_arrElements[i];
+    }
 };

@@ -95,7 +95,7 @@ public:
         return mpString;
     }
     
-    void ToString(char* str, int maxLen) const
+    char* ToString(char* str, int maxLen) const
     {
         if (!mpString || mnLength == 0)
         {
@@ -113,6 +113,13 @@ public:
             nLen = maxLen-1;
         memcpy(str, pBeginPtr, nLen);
         str[nLen] = 0;
+        
+        return str;
+    }
+    
+    bool operator == (const char* comp)
+    {
+        return strncmp(GetBuffer(), comp, strlen(comp)) == 0;
     }
 };
 
@@ -135,6 +142,7 @@ public:
     {
         char temp[32];
         mString.ToString(temp, COUNT(temp));
+
         if (temp[0] == '0' && temp[1] == 'x')
         {
             char* p = temp+2;
@@ -151,7 +159,27 @@ public:
                 p++;
             }
             return aux;
-            //return strtol(temp+2, nullptr, 16);
+        } else if (temp[0] == '-' || (temp[0] >= '0' && temp[0] <= '9'))
+        {
+            bool neg = false;
+            
+            char* p = temp;
+            if (*p == '-')
+            {
+                neg = true;
+                p++;
+            }
+            
+            int aux = 0;
+            while (*p)
+            {
+                aux *= 10;
+                if (*p >= '0' && *p <= '9')
+                    aux += *p - '0';
+                p++;
+            }
+            return neg ? -aux : aux;
+
         }
         _ASSERT(0);
         return 0;

@@ -132,7 +132,9 @@ void CWnd::Create(const char* pszId, int dwFlags, const CRect& rc, CWnd* pParent
             if (pFocus->m_pFirst && !(pFocus->m_pFirst->m_dwFlags & CWnd::WsNoActivate))
 				pFocus = pFocus->m_pFirst;
 
+            pFocus->WindowMessage(WmWillGetFocus, 0);
 			pFocus->SetFocus();
+            this->WindowMessage(WmWillLoseFocus, 0);
 			this->Invalidate();
 			pFocus->Invalidate();
 		}
@@ -159,7 +161,9 @@ void CWnd::Create(const char* pszId, int dwFlags, const CRect& rc, CWnd* pParent
 
 			if (pFocus != this)
 			{ 
+                pFocus->WindowMessage(WmWillGetFocus, 0);
 				pFocus->SetFocus();
+                this->WindowMessage(WmWillLoseFocus, 0);
 				this->Invalidate();
 				pFocus->Invalidate();
 			}
@@ -175,7 +179,9 @@ void CWnd::Create(const char* pszId, int dwFlags, const CRect& rc, CWnd* pParent
 				if (pFocus->GetLast())
 					pFocus = pFocus->GetLast();	
 
+                pFocus->WindowMessage(WmWillGetFocus, 0);
 				pFocus->SetFocus();
+                this->WindowMessage(WmWillLoseFocus, 0);
 				this->Invalidate();
 				pFocus->Invalidate();
 			}

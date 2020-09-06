@@ -1,6 +1,5 @@
 #include "spi.h"
 //#include <math.h>
-#include "json.h"
 
 class CSampler
 {

@@ -56,14 +56,14 @@ static const char CShapes_check_box[] =
 "              ";
 static const char CShapes_check_on[] =
 "\x0e"
-"       ..     "
-"        ..    "
-"         ..   "
-"          ..  "
-"        ...   "
 "     ....     "
-"   ...        "
-"              ";
+"      ....    "
+"       ....   "
+"        ....  "
+"      .....   "
+"    .....     "
+"  .....       "
+".....         ";
 
 static const char CShapes_dot[] =
 "\x0e"

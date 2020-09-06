@@ -26,6 +26,11 @@ public:
 		return BIOS::FAT::Read( m_pData ) == BIOS::FAT::EOk;
 	}
     
+    ui8* GetBuffer()
+    {
+        return m_pData;
+    }
+
 	int GetFileSize()
 	{
 		return BIOS::FAT::GetFileSize();

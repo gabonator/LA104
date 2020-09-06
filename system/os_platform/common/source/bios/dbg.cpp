@@ -25,6 +25,9 @@ void BIOS::DBG::Print(const char * format, ...)
 #ifdef EMSCRIPTEN
   js_log(bbuf);
 #else
+#ifdef __APPLE__
+    fprintf(stderr, buf);
+#endif
 	for ( bbuf = buf; *bbuf; bbuf++ )
 	{
 		if ( *bbuf == '\n' || px >= BIOS::LCD::Width-4 )

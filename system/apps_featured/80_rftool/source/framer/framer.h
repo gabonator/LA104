@@ -13,14 +13,17 @@ namespace PULSE
     uint16_t arrSignalData[400];
     CArray<uint16_t> arrSignal(arrSignalData, COUNT(arrSignalData));
 
-    void dump(CArray<uint16_t>& data)
+    void uniqueName(char* name)
     {
         static int counter = 0;
-        char name[16];
         sprintf(name, "dump%03d.txt", counter++);
+    }
+
+    void dump(char* fname, CArray<uint16_t>& data)
+    {
         _ASSERT(sizeof(gFatSharedBuffer) >= BIOS::SYS::GetAttribute(BIOS::SYS::EAttribute::DiskSectorSize));
         BIOS::FAT::SetSharedBuffer(gFatSharedBuffer);
-        mWriter.Open(name);
+        mWriter.Open(fname);
 
         auto Print = [&](const char* format, ...)
         {
@@ -49,18 +52,7 @@ namespace PULSE
         {
             if (arrSignal.GetSize() > 100 && arrSignal.GetSize() < 500)
             {
-                BIOS::DBG::Print("<%d>", arrSignal.GetSize());
-
-/*
-                BIOS::DBG::Print("cnt: %d>", arrSignal.GetSize());
-                for (int i=0; i<10; i++)
-                    BIOS::DBG::Print("%d,", arrSignal[i]);
-                BIOS::DBG::Print("---\n");
-*/
-
-BIOS::SYS::Beep(50);
-                if (!analyse(arrSignal))
-                  dump(arrSignal);
+                analyse(arrSignal);
             }
                 
             arrSignal.RemoveAll();
@@ -92,7 +84,7 @@ BIOS::SYS::Beep(50);
         if (interval1 == 0)
             interval += interval2;
 
-        if (interval > 10000)
+        if (interval > 12000) // 12 ms max
         {
             if (!terminated)
             {

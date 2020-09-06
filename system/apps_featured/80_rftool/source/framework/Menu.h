@@ -77,6 +77,14 @@ public:
         }
     }
     
+    void Select(int i)
+    {
+        mItem = i;
+        mSelected = mItem;
+        Invalidate();
+        SendMessage(m_pParent, ToWord('M', 'S'), mItem);
+    }
+    
     virtual void OnKey(int nKey) override
     {
         if (nKey == BIOS::KEY::Left)

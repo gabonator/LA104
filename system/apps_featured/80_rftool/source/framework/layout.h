@@ -97,7 +97,7 @@ namespace Layout
                 case '>': mX += BIOS::LCD::Draw(mX, mRect.top, mB, mF, CShapes_sel_right); break;
                 case 'x': mX += BIOS::LCD::Draw(mX, mRect.top, mF, mB, CShapes_check_box); break;
                 case 'X': BIOS::LCD::Draw(mX, mRect.top, mF, mB, CShapes_check_box);
-                    mX += BIOS::LCD::Draw(mX, mRect.top, RGB565(00ff00), RGBTRANS, CShapes_check_on); break;
+                    mX += BIOS::LCD::Draw(mX, mRect.top, RGB565(ff0000), RGBTRANS, CShapes_check_on); break;
                 default:
                 {
                     char str[2] = {c, 0};

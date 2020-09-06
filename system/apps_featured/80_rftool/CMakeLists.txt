@@ -22,8 +22,8 @@ include_directories(${SDL2_INCLUDE_DIRS})
 include_directories("../../os_platform/common/include")
 
 file(GLOB main_src 
-    "../../os_platform/mac_sdl/source/sdlmain.cpp"
-    "../../os_platform/mac_sdl/source/sdlhal.h"
+    "../../os_platform/apple/source/sdlmain.cpp"
+    "../../os_platform/apple/source/sdlhal.h"
     "../../os_platform/common/include/library.h"
 )
 
@@ -56,6 +56,39 @@ file(GLOB application_src
     "source/*.h"
 )
 
+file(GLOB application_src_gui
+    "source/gui/*.cpp"
+    "source/gui/*.h"
+)
+
+file(GLOB application_src_modem
+    "source/modem/*.cpp"
+    "source/modem/*.h"
+)
+
+file(GLOB application_src_protocol
+    "source/protocol/*.cpp"
+    "source/protocol/*.h"
+)
+
+file(GLOB application_src_framer
+    "source/framer/*.cpp"
+    "source/framer/*.h"
+)
+
+file(GLOB application_src_framework
+    "source/framework/*.cpp"
+    "source/framework/*.h"
+)
+
+file(GLOB application_src_streamer
+    "source/streamer/*.cpp"
+    "source/streamer/*.h"
+)
+
+
+
+
 
 if (DESKTOP)           	
 
@@ -67,16 +100,24 @@ if (DESKTOP)
 source_group("platform\\main" FILES ${main_src})
 source_group("platform\\bios" FILES ${bios_src})
 source_group("platform\\framework" FILES ${framework_src})
-#source_group("source\\gui" FILES ${gui_src})
 endif()
 
 source_group("application" FILES ${application_src})
+source_group("application\\gui" FILES ${application_src_gui})
+source_group("application\\modem" FILES ${application_src_modem})
+source_group("application\\protocol" FILES ${application_src_protocol})
+source_group("application\\framer" FILES ${application_src_framer})
+source_group("application\\framework" FILES ${application_src_framework})
+source_group("application\\streamer" FILES ${application_src_streamer})
+
 source_group("include" FILES "../../os_platform/common/include")
 
 file(GLOB application_exec
   ${main_src} ${bios_src} ${framework_src} 
   ${gui_src} ${application_src} ${application_framework_src} ${application_windows_src} 
   ${application_oscilloscope_src} 
+  ${application_src_gui} ${application_src_modem} ${application_src_protocol}
+  ${application_src_framer} ${application_src_framework} ${application_src_streamer}
 )
 
 add_executable(application ${application_exec})
