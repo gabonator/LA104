@@ -26,17 +26,13 @@ namespace RPC
     EXPORT(CC1101::Send);
     EXPORT(CC1101::Calibrate);
 
-    if (strcmp(command, "CC1101::SetFrequency")==0)
-      return (uint32_t)CC1101::SetFrequency;
-    if (strcmp(command, "CC1101::SetBandwidth")==0)
-      return (uint32_t)BIOS::GPIO::DigitalWrite;
-    if (strcmp(command, "CC1101::SetBandwidth")==0)
-      return (uint32_t)BIOS::GPIO::DigitalRead;
+    EXPORT(CC1101::Strobe);
+    EXPORT(CC1101::Write);
+    EXPORT(CC1101::Read);
 
-    if (strcmp(command, "APP::Info")==0) // APP::Info
-      return (uint32_t)APP::Info;
-    if (strcmp(command, "APP::GetConfigPtr")==0)
-      return (uint32_t)APP::GetConfigPtr;
+    EXPORT(APP::Info);
+    EXPORT(APP::GetConfigPtr);
+    EXPORT(APP::SetPrescaler);
 
     if (strcmp(command, "DBG::Print")==0)
       return (uint32_t)BIOS::DBG::Print;

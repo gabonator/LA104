@@ -144,4 +144,21 @@ namespace CC1101
     gModem.Calibrate();
     return true;
   }
+
+  // direct modem control methods
+  int Strobe(int code)
+  {
+    return gModem.UserStrobe(code);
+  }
+
+  int Write(int address, int value)
+  {
+    gModem.UserWrite(address, value);
+    return gModem.UserRead(address);
+  }
+
+  int Read(int address)
+  {
+    return gModem.UserRead(address);
+  }
 }

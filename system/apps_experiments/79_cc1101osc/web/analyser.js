@@ -17,7 +17,7 @@ class Memory
   {
     this.counter += pulse.length;
     this.buffers[0] = this.buffers[0].concat(pulse);
-    this.sizes[0] += pulse.reduce((a,b) => a+b, 0);
+    this.sizes[0] += pulse.reduce((a,b) => a+(b & 0xffff), 0);
     if (this.sizes[0] > this.maxSize)
     {
 //      this.counter -= this.buffers[1].length;
@@ -40,7 +40,7 @@ class Memory
     var counter = this.counter;
     for (var i=buf.length-1; i>=0; i--)
     {
-      var cur = buf[i];
+      var cur = buf[i] & 0xffffff;
       if (!recording && cur + pos >= first)
       {
         // toggle!
@@ -48,7 +48,7 @@ class Memory
       }
 
       if (recording)
-        aux.push(cur);
+        aux.push(buf[i]);
 
       if (cur + pos >= last)
       {
@@ -63,9 +63,9 @@ class Memory
     aux.reverse();
     for (var i=2; i<aux.length; i++)
     {
-      if (aux[i]==0)
+      if ((aux[i] & 0xffffff)==0)
       {
-        aux[i-1] += aux[i+1];
+        aux[i-1] += aux[i+1] & 0xffffff;
         aux.splice(i, 2);
         i--;
       }
@@ -79,7 +79,7 @@ var memory = new Memory();
 function dumpRange(first, last)
 { 
   var buf = memory.getRange(-last, -first);
-  if (buf[0] == 0 && buf[1] > 2000)
+  if ((buf[0] & 0xffffff) == 0 && (buf[1] & 0xffffff) > 2000)
     buf[1] = 2000;
 
   var origbuf = [...buf];
@@ -98,6 +98,7 @@ function dumpRange(first, last)
     ofsend--;
   }
   detail.show(origbuf, ofsstart, ofsend);
+  buf = buf.map(x => x & 0xffffff);
   aaa = buf.map(x=>x/20);
   console.log("analyse: " + JSON.stringify(buf));
   analyse(buf);
@@ -106,10 +107,10 @@ function dumpRange(first, last)
 var scanEnabled = true;
 let startButton = document.querySelector("#start");
 startButton.addEventListener('click', function() {
-    BIOS.Info()
+    APP.Info()
       .then( console.log )
       .catch( () => 0 )
-      .then( () => BIOS.Info() )
+      .then( () => APP.Info() )
       .then( console.log )
       .then( onMain )
       .catch( () => console.log("Device not ready") )
@@ -211,13 +212,13 @@ function onMain()
           {
             if (data && data.length) 
             {
-              var flags = data.map(x=>x>>12);
-              data = data.map(x=>(x & 0x0fff)*21);
+//              var flags = data.map(x=>x>>12);
 //console.log(data);
+              data = data.map(x=>{ var val = (x & 0x0fff)*20; var flag = x>>12; return (flag << 24) | val; });
               memory.push(data);
               for (var i=0; i<data.length; i++)
               {
-                canvas.drawPulse(data[i], level, flags[i]);
+                canvas.drawPulse(data[i], level);
                 pulseMachine(data[i], level = 1-level);
               }
               canvas.drawPulseFinish();
@@ -587,6 +588,28 @@ function bitstreamToBytes(str)
   return bytes;
 }
 
+
+var configStruct, configPtr;
+function configInit()
+{
+  return APP.GetConfigPtr()
+    .then( _configPtr => { configPtr = _configPtr; return BIOS.memRead32(configPtr); } )
+    .then( structurePtr => BIOS.GetString(structurePtr) )
+    .then( json => configStruct = JSON.parse(json) )
+}
+
+function configGet(attr)
+{
+  var index = configStruct.indexOf(attr);
+  return BIOS.memRead32(configPtr + index*4);
+}
+
+function configSet(attr, val)
+{
+  var index = configStruct.indexOf(attr);
+  return BIOS.biosMemWrite(configPtr + index*4, [val & 0xff, (val >> 8) & 0xff, (val >> 16) & 0xff, (val >> 24) & 0xff]);
+}
+
 function attackEnable()
 {
   if (COMM.onReceive)
@@ -595,7 +618,7 @@ function attackEnable()
     return;
   }
 
-  APP.GetConfigPtr().then( configPtr => BIOS.biosMemWrite(configPtr, [1]) );
+  APP.GetConfigPtr().then( configPtr => BIOS.biosMemWrite(configPtr+4, [1]) );
 }
 
 function attackDisable()
@@ -606,7 +629,7 @@ function attackDisable()
     return;
   }
 
-  APP.GetConfigPtr().then( configPtr => BIOS.biosMemWrite(configPtr, [0]) );
+  APP.GetConfigPtr().then( configPtr => BIOS.biosMemWrite(configPtr+4, [0]) );
 }
 
 function calibrate()

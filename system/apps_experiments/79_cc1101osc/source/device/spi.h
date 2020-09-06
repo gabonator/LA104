@@ -95,6 +95,16 @@ public:
     return rec;
   }
 
+  void fixtransfer(uint8_t b) 
+  {
+    for (int i = 0; i < 8; i++) 
+    {
+        Set(CPinIoBase::MOSI, b & (1<<(7-i))); //MSB first
+        Set(CPinIoBase::SCK, true);
+        Set(CPinIoBase::SCK, false);
+    }
+  }
+
   void select() 
   {
       Set(CPinIoBase::CS, false);
