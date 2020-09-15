@@ -109,7 +109,8 @@ public:
     NibblesToPulse(nibbles, pulse);
     return true;
   }
-
+    virtual int PulseDivisor() override { return 500; }
+    
 private:
   int Sum(const CArray<int>& arr)
   {
@@ -205,5 +206,6 @@ private:
                 attributes["channel"], attributes["temperature10"] / 10, attributes["temperature10"] % 10, attributes["humidity"]);
     }
 
+    virtual const char* GetString(int i) override { return nullptr; }
 };
 

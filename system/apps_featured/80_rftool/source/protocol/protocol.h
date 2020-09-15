@@ -52,16 +52,20 @@ class CProtocol
 {
 public:
     virtual int Frequency() = 0;
-    virtual int MinIndentifyCount() = 0;
-    virtual int MinDemodulateCount() = 0;
-    virtual bool Identify(CArray<int>& pulse) = 0;
+    // TODO: remove
+    virtual int MinIndentifyCount() { return 0; }
+    virtual int MinDemodulateCount() { return 0; }
+    virtual int AttackPoint(CArray<int>& pulse) { return 0; }
+    virtual bool Identify(CArray<int>& pulse) { return false; }
+    
     virtual void Example(CAttributes& attributes) = 0;
     virtual bool Demodulate(const CArray<uint16_t>& pulse, CAttributes& attributes) = 0;
     virtual bool Modulate(const CAttributes& attr, CArray<uint16_t>& pulse) = 0;
-    virtual int AttackPoint(CArray<int>& pulse) = 0;
 
     virtual void GetName(char*) = 0;
     virtual void GetDescription(CAttributes& attributes, char* desc) = 0;
+    virtual const char* GetString(int i) = 0;
+    virtual int PulseDivisor() = 0;
 
   void PulseToBitstream(const CArray<uint16_t>& pulse, CArray<uint8_t>& bitstream, int interval)
   {
@@ -81,4 +85,51 @@ public:
       }
     }
   }
+    
+    void BitstreamToAttributes(CArray<uint8_t>& b, int bitLength, CAttributes& attributes)
+    {
+        attributes["length"] = bitLength; // count of bits
+        uint32_t data=0;
+        int bytes = b.GetSize();
+        for (int i=0; i<bytes; i++) // per each byte
+        {
+            bool last = i==bytes-1;
+            data |= b[i] << (8*(3-(i&3)));
+            if ((i&3)==3 || last)
+            {
+                switch (i/4) // store as dword
+                {
+                    case 0: attributes["data_0"] = data; break;
+                    case 1: attributes["data_1"] = data; break;
+                    case 2: attributes["data_2"] = data; break;
+                    default: _ASSERT(0);
+                }
+                data = 0;
+            }
+        }
+    }
+    
+    void AttributesToBitstream(const CAttributes& attributes, CArray<uint8_t>& b, int& bitLength)
+    {
+        bitLength = attributes["length"];
+        uint32_t data;
+        int bytes = (bitLength+7)/8;
+        for (int i=0; i<bytes; i++)
+        {
+            if ((i&3) == 0)
+            {
+                switch (i/4)
+                {
+                case 0: data = attributes["data_0"]; break;
+                case 1: data = attributes["data_1"]; break;
+                case 2: data = attributes["data_2"]; break;
+                default: _ASSERT(0);
+                }
+            }
+            b.Add(data >> 24);
+            data <<= 8;
+        }
+    }
+
+
 };

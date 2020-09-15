@@ -171,10 +171,13 @@ namespace Layout
     
     class Button : public Sublayout
     {
-        char* mValue;
+        const char* mValue;
     
     public:
-        Button(char* value) : mValue(value)
+        Button(char* value) : mValue((char*)value)
+        {
+        }
+        Button(const char* value) : mValue(value)
         {
         }
         virtual void Visit(Render* r) const
@@ -273,6 +276,15 @@ namespace Layout
         virtual void Visit(Render* r) const
         {
             BIOS::LCD::Bar(r->GetRectangle(), mColor);
+        }
+    };
+
+    class Background : public Sublayout
+    {
+    public:
+        virtual void Visit(Render* r) const
+        {
+            GUI::Background(r->GetRectangle(), RGB565(404040), RGB565(101010));
         }
     };
 }

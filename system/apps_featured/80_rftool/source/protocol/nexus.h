@@ -41,14 +41,15 @@ public:
 
   virtual bool Demodulate(const CArray<uint16_t>& pulse, CAttributes& attributes) override
   {
-    int nibblesData[20];
-    CArray<int> b(nibblesData, COUNT(nibblesData));
+    uint8_t nibblesData[20];
+    CArray<uint8_t> b(nibblesData, COUNT(nibblesData));
 
     int length;
 
     if (!PulseToBytes(pulse, b, length))
       return false;
-
+      /*
+//TODO: !!!!!!
     attributes["length"] = length;
 
     int bytes = b.GetSize();
@@ -70,19 +71,31 @@ public:
         data = 0;
       }
     }
+      */
+      BitstreamToAttributes(b, length, attributes);
+      Analyse(attributes, b, length);
+      return true;
+  }
+    
+    bool Analyse(CAttributes& attributes, CArray<uint8_t>& b, int length)
+    {
       if (length < 36)
-          return true;
-      if (b.GetSize() != 5) // kokotina, mame 36 bitov a 4 bajty!?!??! wtf!!
-          return true;
+          return false;
+        
+      if (b.GetSize() != 5)
+      {
+          _ASSERT(0);
+          return false;
+      }
 
         if ((b[3]&0xF0) != 0xF0)
             return false;
 
         /* Nibble 0,1 contains id */
-        attributes["id"] = b[0];          // TODO: gabo, mame max 10 slotov|!
+        attributes["id"] = b[0];
 
         /* Nibble 2 is battery and channel */
-        attributes["battery"] = (b[1]&0x80) ? true : false;
+        attributes["battery_low"] = (b[1]&0x80) ? true : false;
         attributes["channel"] = ((b[1]&0x30) >> 4) + 1;
 
         /* Nibble 3,4,5 contains 12 bits of temperature
@@ -121,6 +134,8 @@ public:
 */
     return true;
   }
+    
+    virtual int PulseDivisor() override { return 500; }
 
 private:
   int PulseLen(int microseconds)
@@ -133,7 +148,7 @@ private:
       return ticks*500;
   }
 
-    bool PulseToBytes(const CArray<uint16_t>& pulse, CArray<int>& bytes, int& length)
+    bool PulseToBytes(const CArray<uint16_t>& pulse, CArray<uint8_t>& bytes, int& length)
     {
         if (pulse.GetSize() < 9*4*2)
             return false;
@@ -220,14 +235,28 @@ private:
     
     virtual void GetName(char* name) override
     {
-        strcpy(name, "Nexus Temperature & Humidity");
+        strcpy(name, "Nexus Temperature & Hum");
     }
     
     virtual void GetDescription(CAttributes& attributes, char* desc) override
     {
-        sprintf(desc, "Ch: <%d> Temp: <%d.%d'C> Humidity: <%d%%>",
+        if (attributes.indexOf("temperature10") != -1)
+        {
+            if (attributes["humidity"] == 0)
+            {
+                sprintf(desc, "Ch: <%d> Temp: <%d.%d\xf8""C> Humidity: <%d%%>",
                 attributes["channel"], attributes["temperature10"] / 10, attributes["temperature10"] % 10, attributes["humidity"]);
+            } else
+            {
+                sprintf(desc, "Ch: <%d> Temp: <%d.%d\xf8""C>",
+                attributes["channel"], attributes["temperature10"] / 10, attributes["temperature10"] % 10);
+            }
+        } else
+        {
+            sprintf(desc, "%d bits: <%08x> <%08x>",
+                attributes["length"], attributes["data_0"], attributes["data_1"]);
+        }
     }
-
+    virtual const char* GetString(int i) override { return nullptr; }
 };
 

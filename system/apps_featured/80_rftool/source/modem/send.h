@@ -103,7 +103,7 @@ temp++;
 	} while ((marcState != 0x13) && (marcState != 0x14) && (marcState != 0x15));
 
 	long lBase2 = BIOS::SYS::GetTick();
-	streamerFlag = 0x3000;
+	//streamerFlag = 0x3000;
 	lBase = BIOS::SYS::GetTick();
 
 	int txbytes = 0;

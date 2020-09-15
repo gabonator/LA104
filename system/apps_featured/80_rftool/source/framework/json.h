@@ -14,6 +14,13 @@ public:
         mnLength = (int)strlen(mpString);
     }
 
+    CSubstring(const char* pString, int nLength)
+    {
+        mpString = pString;
+        mnBegin = 0;
+        mnLength = nLength;
+    }
+
     CSubstring(const CSubstring& begin, const CSubstring& end)
     {
         mpString = begin.mpString;
@@ -295,6 +302,20 @@ public:
         if (mString && mString[0] == '{')
         {
             TraverseObject(mString, callback);
+        } else
+        {
+            _ASSERT(0);
+        }
+    }
+
+    void ForEach(TValueCallback callback)
+    {
+        if (mString && mString[0] == '[')
+        {
+            TraverseArray(mString, callback);
+        } else
+        {
+            _ASSERT(0);
         }
     }
     

@@ -9,11 +9,13 @@ class CCapture : public CWnd
 public:
     void Create( const char* pszId, int dwFlags, const CRect& rc, CWnd* pParent )
     {
+        mScroller.mExtraTop = 5;
+
         CWnd::Create(pszId, dwFlags, rc, pParent);
         SetTimer(200);
     }
 
-    virtual void OnTimer() override
+    virtual void OnTimer() override 
     {
         int nNewCount = appData.GetCaptureRecords();
 
@@ -40,7 +42,17 @@ public:
         
         CRect rcMenu(m_rcClient.left, m_rcClient.top+2, m_rcClient.right-8, m_rcClient.top + 16);
         Layout::Render r(rcMenu);
-        r << Layout::Goto(90) << Layout::Button("Pause") << Layout::Button("Clear") << Layout::Button("Load") << Layout::Button("Save");
+        
+        if (mRedrawMask == -1)
+            r << Layout::Background();
+            
+        r << Layout::Goto(appData.GetPaused() ? 40 - 8 : 40)
+            << Layout::Select(HasFocus() && mScroller.mFocus == 0) << Layout::Button(appData.GetPaused() ? "Resume" : "Pause")
+            << Layout::Select(HasFocus() && mScroller.mFocus == 1) << Layout::Button("Clear")
+            << Layout::Select(HasFocus() && mScroller.mFocus == 2) << Layout::Button("Import")
+            << Layout::Select(HasFocus() && mScroller.mFocus == 3) << Layout::Button("Load")
+            << Layout::Select(HasFocus() && mScroller.mFocus == 4) << Layout::Button("Save")
+            << Layout::Select(false);
         
         CRect rcElement(m_rcClient.left, m_rcClient.top+18, m_rcClient.right-8, m_rcClient.top + 18 + nElementHeight);
 
@@ -99,7 +111,7 @@ public:
             ts /= 1000;
             sprintf(time, "%02d:%02d", ts/60, ts%60);
                       
-            bool focus = HasFocus() && mScroller.mFocus == index;
+            bool focus = HasFocus() && (mScroller.mFocus - mScroller.mExtraTop) == index;
             
             if (focus)
                 mCurrentUid = uid;
@@ -146,8 +158,27 @@ public:
     
     virtual void OnKey(int key) override
     {
+        if (key == BIOS::KEY::Right && mScroller.mFocus < mScroller.mExtraTop)
+        {
+            if (mScroller.Down())
+            {
+                Invalidate();
+                return;
+            }
+        }
+        if (key == BIOS::KEY::Left && mScroller.mFocus < mScroller.mExtraTop)
+        {
+            if (mScroller.Up())
+            {
+                Invalidate();
+                return;
+            }
+        }
         if (key == BIOS::KEY::Up)
         {
+            if (mScroller.mFocus < mScroller.mExtraTop)
+                mScroller.mFocus = 0;
+
             if (mScroller.Up())
             {
                 Invalidate();
@@ -156,6 +187,14 @@ public:
         }
         if (key == BIOS::KEY::Down)
         {
+            if (mScroller.mFocus < mScroller.mExtraTop)
+            {
+                mScroller.mFocus = mScroller.mExtraTop-1;
+                mScroller.Down();
+                Invalidate();
+                return;
+            }
+            
             if (mScroller.Down())
             {
                 Invalidate();
@@ -164,9 +203,36 @@ public:
         }
         if (key == BIOS::KEY::Enter)
         {
-            SendMessage(GetParent(), 0xabbb, mCurrentUid);
+            if (mScroller.mFocus < mScroller.mExtraTop)
+            {
+                switch (mScroller.mFocus)
+                {
+                    case 0:
+                        appData.SetPaused(!appData.GetPaused());
+                        mScroller.OnScrollChange();
+                        break; // pause, resume
+                    case 1:
+                        SendMessage(GetParent(), 0, (uintptr_t)"clearlist");
+                        mScroller.OnScrollChange();
+                        break; // clear
+                    case 2:
+                        SendMessage(GetParent(), 0, (uintptr_t)"import");
+                        mScroller.OnScrollChange();
+                        break; // import
+                    case 3:
+                        SendMessage(GetParent(), 0, (uintptr_t)"loadlist");
+                        mScroller.OnScrollChange();
+                        break; // load
+                    case 4:
+                        SendMessage(GetParent(), 0, (uintptr_t)"savelist");
+                        mScroller.OnScrollChange();
+                        break; // save
+                }
+            } else
+            {
+                SendMessage(GetParent(), 0xabbb, mCurrentUid);
+            }
         }
         CWnd::OnKey(key);
     }
-
 };
