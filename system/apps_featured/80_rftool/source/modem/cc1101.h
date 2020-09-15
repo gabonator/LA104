@@ -547,6 +547,6 @@ public:
 
     int UserRead(int address)
     {
-	return CCc1101Spi::Read(address);
+        return CCc1101Spi::Read(address);
     }
 };

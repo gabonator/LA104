@@ -3,22 +3,19 @@ CDeviceCC1101Interface gModem;
 bool analyse(CArray<uint16_t>&);
 
 
-#include "../../os_host/source/framework/BufferedIo.h"
-uint8_t gFatSharedBuffer[BIOS::FAT::SharedBufferSize];
-CBufferedWriter mWriter;
-
 // 500 420 480 460 940 940
 namespace PULSE
 {
     uint16_t arrSignalData[400];
     CArray<uint16_t> arrSignal(arrSignalData, COUNT(arrSignalData));
-
+/*
     void uniqueName(char* name)
     {
         static int counter = 0;
-        sprintf(name, "dump%03d.txt", counter++);
+        sprintf(name, "dump%03d.sig", counter++);
     }
-
+ */
+/*
     void dump(char* fname, CArray<uint16_t>& data)
     {
         _ASSERT(sizeof(gFatSharedBuffer) >= BIOS::SYS::GetAttribute(BIOS::SYS::EAttribute::DiskSectorSize));
@@ -44,7 +41,7 @@ namespace PULSE
         
         mWriter.Close();
         BIOS::FAT::SetSharedBuffer(nullptr);
-    }
+    }*/
 
     void push(int v)
     {

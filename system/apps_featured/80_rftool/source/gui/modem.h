@@ -151,7 +151,7 @@ public:
 
         if (key == BIOS::KEY::Enter && mFocus == 0)
         {
-                // dispatch to main
+            // dispatch to main
             if (!appData.GetConnected())
             {
                 appData.SetConnected(framerStart());

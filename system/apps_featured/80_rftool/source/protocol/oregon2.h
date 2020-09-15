@@ -1,5 +1,11 @@
 class COregon2 : public CProtocol
 {
+    enum {
+        String_THGR810 = 2000,
+        
+        ID_THGR810 = 0xaf82
+    };
+    
 public:
 	virtual int Frequency() override
 	{
@@ -26,18 +32,26 @@ public:
     return 0;
   }
 
+    virtual const char* GetString(int i) override
+    {
+        switch (i)
+        {
+            case String_THGR810: return "THGR810";
+        }
+        return nullptr;
+    }
   virtual void Example(CAttributes& attributes) override
   {
     // -512 (-51.2 C) ... 999 (+99.9 C)
     attributes["length"] = 64;
-    attributes["data64_0"] = 0x12345678;
-    attributes["data64_1"] = 0xabcdef01;
+    attributes["data_0"] = 0x12345678;
+    attributes["data_1"] = 0xabcdef01;
   }
 
   virtual bool Demodulate(const CArray<uint16_t>& pulse, CAttributes& attributes) override
   {
-    int nibblesData[24];
-    CArray<int> b(nibblesData, COUNT(nibblesData));
+    uint8_t nibblesData[24];
+    CArray<uint8_t> b(nibblesData, COUNT(nibblesData));
 
     int length = 0;
 //                BIOS::DBG::Print("g");
@@ -45,6 +59,8 @@ public:
       return false;
 //                BIOS::DBG::Print("h");
 
+      BitstreamToAttributes(b, length, attributes);
+      /*
     attributes["length"] = length; // count of bits
     uint32_t data=0;
     int bytes = b.GetSize(); //(length+7)/8;
@@ -66,7 +82,7 @@ public:
         }
         data = 0;
       }
-    }
+    }*/
     //            BIOS::DBG::Print("j");
 
     Analyse(attributes);
@@ -76,122 +92,50 @@ public:
   void Analyse(CAttributes& attributes)
   {
       //50 FA28A428 20229083 4B46
-    if ((attributes["data64_0"] >> 16) == 0xaf82) // thgr810
-    {
-        const uint32_t d0 = attributes["data64_0"];
-        const uint32_t d1 = attributes["data64_1"];
-        uint8_t message[10] = {(uint8_t)(d0 >> 24), (uint8_t)(d0 >> 16), (uint8_t)(d0 >> 8), (uint8_t)(d0),
-            (uint8_t)(d1 >> 24), (uint8_t)(d1 >> 16), (uint8_t)(d1 >> 8), (uint8_t)(d1)};
-        
-        attributes["$model"] = (uintptr_t)"THGR810";
+    const uint32_t d0 = attributes["data_0"];
+    const uint32_t d1 = attributes["data_1"];
+    uint8_t message[10] = {(uint8_t)(d0 >> 24), (uint8_t)(d0 >> 16), (uint8_t)(d0 >> 8), (uint8_t)(d0),
+        (uint8_t)(d1 >> 24), (uint8_t)(d1 >> 16), (uint8_t)(d1 >> 8), (uint8_t)(d1)};
 
-        int temp_c = (((message[5]>>4)*100)+((message[4]&0x0f)*10) + ((message[4]>>4)&0x0f));
-        if (message[5] & 0x0f)
+      auto nibble = [](uint8_t* p, int n)
+      {
+          int v = ((n&1)==0) ? p[n>>1] >> 4 : p[n>>1] & 0x0f;
+          _ASSERT(v <= 9);
+          return v;
+      };
+      
+        #define nib(i) nibble(message, i)
+      
+      int sensor_id = (message[0] << 8) | message[1];
+
+      if (sensor_id == ID_THGR810) // 0xaf824
+      {
+        attributes["$model"] = String_THGR810; //(uintptr_t)"THGR810";
+        int temp_c = nib(11)*100 + nib(10)*10 + nib(9);
+        if (nib(12) != 0)
             temp_c = -temp_c;
+        int hum = nib(14)*10 + nib(13);
 
         attributes["temperature10"] = temp_c;
-        attributes["humidity"] = ((message[6]&0x0f)*10)+(message[6]>>4);
-        
-        int channel = ((message[2] >> 4)&0x0f);
-        //if ((channel == 4) && (sensor_id & 0x0fff) != ID_RTGN318 && sensor_id != ID_THGR810)
-//            channel = 3; // sensor 3 channel number is 0x04
-        attributes["channel"] = channel;
-
-        /*
-float get_os_temperature(unsigned char *message, unsigned int sensor_id)
-{
-    // sensor ID included    to support sensors with temp in different position
-    float temp_c = 0;
-    temp_c = (((message[5]>>4)*100)+((message[4]&0x0f)*10) + ((message[4]>>4)&0x0f)) / 10.0F;
-    if (message[5] & 0x0f)
-        temp_c = -temp_c;
-    return temp_c;
-}
-	
-unsigned int get_os_humidity(unsigned char *message, unsigned int sensor_id)
-{
-    // sensor ID included to support sensors with humidity in different position
-    int humidity = 0;
-    humidity = ((message[6]&0x0f)*10)+(message[6]>>4);
-    return humidity;
-}
-
-unsigned int get_os_rollingcode(unsigned char *message, unsigned int sensor_id)
-{
-    // sensor ID included to support sensors with rollingcode in different position
-    int rc = 0;
-    rc = (message[2]&0x0F) + (message[3]&0xF0);
-    return rc;
-}
-unsigned int get_os_channel(unsigned char *message, unsigned int sensor_id)
-{
-    // sensor ID included to support sensors with channel in different position
-    int channel = 0;
-    channel = ((message[2] >> 4)&0x0f);
-    if ((channel == 4) && (sensor_id & 0x0fff) != ID_RTGN318 && sensor_id != ID_THGR810)
-        channel = 3; // sensor 3 channel number is 0x04
-    return channel;
-}
-
-unsigned int get_os_battery(unsigned char *message, unsigned int sensor_id)
-{
-    // sensor ID included to support sensors with battery in different position
-    int battery_low = 0;
-    battery_low = (message[3] >> 2 & 0x01);
-    return battery_low;
-}
-
-
-
-                float temp_c = get_os_temperature(msg, sensor_id);
-                int humidity = get_os_humidity(msg, sensor_id);
-*/
-/*
-                    "id",                         "House Code", DATA_INT,        get_os_rollingcode(msg, sensor_id),
-                    "channel",                "Channel",        DATA_INT,        get_os_channel(msg, sensor_id),
-                    "battery",                "Battery",        DATA_STRING, get_os_battery(msg, sensor_id)?"LOW":"OK",
-                    "temperature_C",    "Celsius",        DATA_FORMAT, "%.02f C", DATA_DOUBLE, temp_c,
-                    "humidity",             "Humidity",     DATA_FORMAT, "%u %%", DATA_INT, humidity,
-*/
+        attributes["humidity"] = hum;
     }
+#undef nib
   }
 
-  virtual bool Modulate(const CAttributes& attr, CArray<uint16_t>& pulse) override
-  {
-    int nibblesData[24];
-    CArray<int> b(nibblesData, COUNT(nibblesData));
-    int length = attr["length"];
-    uint32_t data;
-    int bytes = (length+7)/8;
-
-    for (int i=0; i<bytes; i++)
+    virtual bool Modulate(const CAttributes& attr, CArray<uint16_t>& pulse) override
     {
-      if ((i&3) == 0)
-      {
-        switch (i/4)
-        {
-          case 0: data = attr["data64_0"]; break;
-          case 1: data = attr["data64_1"]; break;
-          case 2: data = attr["data64_2"]; break;
-          default: _ASSERT(0);
-        }
-      }
-      b.Add(data >> 24);
-      data <<= 8;
+        uint8_t nibblesData[24];
+        CArray<uint8_t> b(nibblesData, COUNT(nibblesData));
+        int length;
+        AttributesToBitstream(attr, b, length);
+        return BytesToPulse(b, length, pulse);
     }
 
-    return BytesToPulse(b, length, pulse);
-  }
-
+    virtual int PulseDivisor() override { return 350; }
+    
 private:
-//var sig1 = [380,360,320,420,300,400,300,400,340,420,280,400,340,400,320,400,300,420,300,420,300,420,300,3820,700,380,740,360,720,400,720,380,700,380,720,400,700,400,680,400,700,420,680,420,700,360,720,400,340,760,700,400,700,380,360,740,720,380,340,780,700,400,700,380,720,380,340,760,720,380,320,780,720,380,720,380,320,760,720,380,720,400,700,380,720,400,700,400,700,380,340,760,340,780,300,800,300,780,720,360,340,780,320,780,300,800,720,360,340,780,340,740,360,760,300,780,340,760,700,400,340,780,680,400,700,400,340,780,320,760,320,760,340,760,720,380,320,780,720,380,340,760,720,400,300,780,700,400,720,400,320,760,340,760,300];
-
   int PulseLen(int microseconds)
   {
-      //169, 167 p
-    // 680-720 avg 700
-    // 280-420 avg 350
-    //return (microseconds+350/2)/350;
       return (microseconds+480/2)/480;
   }
 
@@ -200,7 +144,7 @@ private:
       return ticks*350;
   }
 
-  bool PulseToBytes(const CArray<uint16_t>& pulse, CArray<int>& bytes, int& length)
+  bool PulseToBytes(const CArray<uint16_t>& pulse, CArray<uint8_t>& bytes, int& length)
   {
     int i;
     for (i=0; i<pulse.GetSize()-4; i++)
@@ -223,18 +167,25 @@ private:
       bool isLast = i == pulse.GetSize() - 1;
       if (PulseLen(pulse[i]) == 1 && (isLast || PulseLen(pulse[i+1]) == 1))
       {
+        if (l)
+            bits |= 1 << (7-(length & 7));
+          
         length++;
-        bits <<= 1;
-        bits |= l;
+        //bits <<= 1;
+        //bits |= l;
         i++;
       }
       else
       if (PulseLen(pulse[i]) == 2)
       {
-        length++;
-        l = 1-l;
-        bits <<= 1;
-        bits |= l;
+          l = 1-l;
+          if (l)
+              bits |= 1 << (7-(length & 7));
+
+          length++;
+        //l = 1-l;
+        //bits <<= 1;
+        //bits |= l;
       }
       else        
       {
@@ -252,6 +203,18 @@ private:
         bits = 0;
       }
     }
+      
+      if ((length & 7) != 0)
+      {
+        // swap nibbles
+        bits = reverse(bits);
+        bits = (bits >> 4) | ((bits & 15) << 4);
+        bytes.Add(bits);
+          if (bytes.GetMaxSize() == bytes.GetSize())
+              return true;
+        bits = 0;
+      }
+
     return true;
   }
 
@@ -262,7 +225,7 @@ private:
      return b;
   }
 
-  bool BytesToPulse(const CArray<int>& bytes, int length, CArray<uint16_t>& pulse)
+  bool BytesToPulse(const CArray<uint8_t>& bytes, int length, CArray<uint16_t>& pulse)
   {                                   
     const int preambule = 47; // parne cislo?
     for (int i=0; i<preambule; i++)
@@ -287,12 +250,21 @@ private:
 
     virtual void GetName(char* name) override
     {
-        strcpy(name, "OregonScientific");
+        strcpy(name, "OregonScientific-2");
     }
     
     virtual void GetDescription(CAttributes& attributes, char* desc) override
     {
-        sprintf(desc, "%d bits: <%08x %08x>", attributes["length"], attributes["data64_0"], attributes["data64_1"]);
+        int model = 0;
+        if (attributes.indexOf("$model") != -1)
+            model = attributes["$model"];
+        
+        if (model == String_THGR810)
+        {
+            sprintf(desc, "<THGR810:> temp <%d.%d\xf8""C> hum <%d%%>", attributes["temperature10"] / 10, attributes["temperature10"] % 10, attributes["humidity"]);
+        }
+        else
+            sprintf(desc, "%d bits: <%08x %08x>", attributes["length"], attributes["data_0"], attributes["data_1"]);
     }
 
 };

@@ -4,21 +4,31 @@ class CDetails : public CWnd
 {
     CSignalView mSignalView;
     CScroller mScroller{6, nullptr};
-    int mAttributes{0};
     int mCaptureUid{0};
     bool mRedraw{false};
+    uint8_t mAttrIndices[16];
+    int mAttrCount{0};
     
 public:
     void Create( const char* pszId, int dwFlags, const CRect& rc, CWnd* pParent )
     {
         CWnd::Create(pszId, dwFlags, rc, pParent);
-        mSignalView.Create("signalview", CWnd::WsVisible | CWnd::WsNoActivate, CRect(m_rcClient.left+4, m_rcClient.bottom-32-6, m_rcClient.right-4, m_rcClient.bottom-6), this);
-        mAttributes = 0; //appData.GetCaptureAttributesCount(mCaptureIndex);
+        mSignalView.Create("signalview", CWnd::WsNoActivate, CRect(m_rcClient.left+4, m_rcClient.bottom-32-6, m_rcClient.right-4, m_rcClient.bottom-6), this);
+        mAttrCount = 0;
     }
 
     CArray<uint16_t>& GetWave()
     {
         return mSignalView.GetWave();
+    }
+    
+    CProtocol* GetProtocol()
+    {
+        int index = appData.GetCaptureIndex(mCaptureUid);
+        _ASSERT(index >= 0);
+        CProtocol* p = appData.GetRecordProtocol(index);
+        _ASSERT(p);
+        return p;
     }
     
     virtual void WindowMessage(int nMsg, int nParam /*=0*/) override
@@ -42,15 +52,11 @@ public:
         if (captureIndex < 0)
             return;
         
-        int attributes = appData.GetCaptureAttributesCount(captureIndex);
-        mScroller.SetCount(attributes, 2);
-        mAttributes = attributes;// TODO: !
+        mScroller.SetCount(mAttrCount, 4);
         
         char name[64];
         char value[32];
         char units[8];
-        //int ts;
-        //appData.GetCaptureRecord(mCaptureIndex, ts, nullptr, nullptr);
 
         Render r(m_rcClient);
         if (mRedraw)
@@ -81,17 +87,24 @@ public:
 
         for (int i=top; i<bottom; i++)
         {
-            appData.GetCaptureAttribute(captureIndex, i, name, value, units);
+            appData.GetCaptureAttribute(captureIndex, mAttrIndices[i], name, value, units);
             r << name << ":" << Select(HasFocus() && mScroller.mFocus + mScroller.mScroll == i) << Units(value, units) << Select(false) << def << NewLine();
         }
-        r << Goto(m_rcClient.CenterX()) << Select(HasFocus() && mScroller.mFocus == mScroller.mRows) << Button((char*)"Transmit");
+        //r << Goto(m_rcClient.CenterX()) << Select(HasFocus() && mScroller.mFocus == mScroller.mRows) << Button((char*)"Transmit");
         
-        DrawScrollbar();
+        int last = min(mScroller.mRows, mAttrCount);
+        
+        r << Goto(m_rcClient.left + 15)
+          << Select(HasFocus() && mScroller.mFocus == last) << Button((char*)"Delete")
+          << Select(HasFocus() && mScroller.mFocus == last+1) << Button((char*)"Export")
+          << Select(HasFocus() && mScroller.mFocus == last+2) << Button((char*)"Transmit");
+        
+        DrawScrollbar(HasFocus() && mScroller.mFocus == last+3);
     }
     
-    void DrawScrollbar()
+    void DrawScrollbar(bool focus)
     {
-        bool focus = HasFocus() && mScroller.mFocus == mScroller.mRows+1;
+        //bool focus = HasFocus() && mScroller.mFocus == mScroller.mRows+3;
                    
         CRect rcScrollbar(mSignalView.m_rcClient.left+4, mSignalView.m_rcClient.bottom-1, mSignalView.m_rcClient.right-4, mSignalView.m_rcClient.bottom+1);
         BIOS::LCD::Bar(rcScrollbar, focus ? RGB565(808080) : RGB565(202020));
@@ -113,14 +126,46 @@ public:
         //BIOS::LCD::Bar(rc, RGB565(000000));
     }
     
-    void SetUid(int i)
+    void SetUid(int uid)
     {
-        mCaptureUid = i;
+        mCaptureUid = uid;
+        int index = appData.GetCaptureIndex(uid);
+        mAttrCount = 0;
+
+        const CAttributes& attr = appData.GetAttributes(index);
+        for (int j = 0; j<attr.GetSize(); j++)
+        {
+            if (attr[j].key[0] != '_')
+                mAttrIndices[mAttrCount++] = j;
+        }
+        mSignalView.ShowWindow(true);
     }
 
     virtual void OnKey(int key) override
     {
-        if (mScroller.mFocus == mScroller.mRows+1)
+        int last = min(mScroller.mRows, mAttrCount);
+
+        if (key == BIOS::KEY::Escape)
+        {
+            SendMessage(GetParent(), 0, (uintptr_t)"close");
+            return;
+        }
+        if (key == BIOS::KEY::Enter)
+        {
+            if (mScroller.mFocus == last)
+            {
+                SendMessage(GetParent(), 0, (uintptr_t)"delete");
+            }
+            else if (mScroller.mFocus == last+1)
+            {
+                SendMessage(GetParent(), 0, (uintptr_t)"export");
+            }
+            else if (mScroller.mFocus == last+2)
+            {
+                SendMessage(GetParent(), 0, (uintptr_t)"transmit");
+            }
+        }
+        if (mScroller.mFocus == last+3)
         {
             if (key == BIOS::KEY::Enter)
             {
@@ -132,22 +177,22 @@ public:
                     case 50: mSignalView.mSettings_mSignalScaleX = 100; break;
                     case 100: mSignalView.mSettings_mSignalScaleX = 200; break;
                 }
-                DrawScrollbar();
+                DrawScrollbar(true);
             }
             if (key == BIOS::KEY::Left)
             {
                 mSignalView.mSettings_mSignalOffset -= mSignalView.mSettings_mSignalScaleX*10;
                 mSignalView.mSettings_mSignalOffset = max(0, mSignalView.mSettings_mSignalOffset);
-                DrawScrollbar();
+                DrawScrollbar(true);
             }
             if (key == BIOS::KEY::Right)
             {
                 mSignalView.mSettings_mSignalOffset += mSignalView.mSettings_mSignalScaleX*10;
                 mSignalView.mSettings_mSignalOffset = max(0, mSignalView.mSettings_mSignalOffset);
-                DrawScrollbar();
+                DrawScrollbar(true);
             }
         } else
-        if (mScroller.mFocus < mScroller.mRows)
+        if (mScroller.mFocus < last)
         {
             if (key == BIOS::KEY::Left)
             {
