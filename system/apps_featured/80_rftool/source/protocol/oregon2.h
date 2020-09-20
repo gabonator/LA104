@@ -12,26 +12,6 @@ public:
 		return 433876000UL;
 	}
 	
-  virtual int MinIndentifyCount() override
-  {
-    return 0;
-  }
-
-  virtual int MinDemodulateCount() override
-  {
-    return 0;
-  }
-
-  virtual bool Identify(CArray<int>& pulse) override
-  {
-    return false;
-  }
-
-  virtual int AttackPoint(CArray<int>& pulse) override
-  {
-    return 0;
-  }
-
     virtual const char* GetString(int i) override
     {
         switch (i)
@@ -54,36 +34,10 @@ public:
     CArray<uint8_t> b(nibblesData, COUNT(nibblesData));
 
     int length = 0;
-//                BIOS::DBG::Print("g");
     if (!PulseToBytes(pulse, b, length))
       return false;
-//                BIOS::DBG::Print("h");
 
-      BitstreamToAttributes(b, length, attributes);
-      /*
-    attributes["length"] = length; // count of bits
-    uint32_t data=0;
-    int bytes = b.GetSize(); //(length+7)/8;
-    for (int i=0; i<bytes; i++) // per each byte
-    {
-      bool last = i==bytes-1;
-      data <<= 8;
-      data |= b[i];
-      if ((i&3)==3 || last)
-      {
-//                BIOS::DBG::Print("i");
-//std::cout << "zapisujem " << i << " na index " << i/4 << "\n";       
-        switch (i/4) // store as dword
-        {
-          case 0: attributes["data64_0"] = data; break;
-          case 1: attributes["data64_1"] = data; break;
-          case 2: attributes["data64_2"] = data; break;
-          default: _ASSERT(0);
-        }
-        data = 0;
-      }
-    }*/
-    //            BIOS::DBG::Print("j");
+    BitstreamToAttributes(b, length, attributes);
 
     Analyse(attributes);
     return true;
@@ -121,6 +75,49 @@ public:
     }
 #undef nib
   }
+    
+    virtual void Synthesize(CAttributes& attributes) override
+    {
+        auto setnib = [&](int nibble, int value)
+        {
+            const char* key = "data_0";
+            if (nibble < 16)
+                key = "data_2";
+            else if (nibble < 8)
+                key = "data_1";
+            
+            int i = attributes.indexOf(key);
+            if (i==-1)
+            {
+                _ASSERT(0);
+                return;
+            }
+            
+            TKeyValue& kv = attributes[i];
+
+            _ASSERT(value >= 0 && value <= 15);
+            int bitofs = (7-(nibble&7))*4;
+            kv.value &= ~(0xf<<bitofs);
+            kv.value |= value<<bitofs;
+        };
+        
+        if (attributes.indexOf("$model") != -1 && attributes["$model"] == String_THGR810)
+        {
+            int temp = (int)attributes["temperature10"];
+            if (temp < 0)
+                setnib(12, 0xf);
+            else
+                setnib(12, 0x0);
+            temp = abs(temp);
+            setnib(11, (temp/100)%10);
+            setnib(10, (temp/10)%10);
+            setnib(9, temp%10);
+            
+            int hum = abs((int)attributes["humidity"]);
+            setnib(14, (hum/10)%10);
+            setnib(13, hum%10);
+        }
+    }
 
     virtual bool Modulate(const CAttributes& attr, CArray<uint16_t>& pulse) override
     {
@@ -261,10 +258,10 @@ private:
         
         if (model == String_THGR810)
         {
-            sprintf(desc, "<THGR810:> temp <%d.%d\xf8""C> hum <%d%%>", attributes["temperature10"] / 10, attributes["temperature10"] % 10, attributes["humidity"]);
+            sprintf(desc, "<THGR810:> temp <%d.%d\xf8""C> hum <%d%%>", (int)attributes["temperature10"] / 10, (int)attributes["temperature10"] % 10, (int)attributes["humidity"]);
         }
         else
-            sprintf(desc, "%d bits: <%08x %08x>", attributes["length"], attributes["data_0"], attributes["data_1"]);
+            sprintf(desc, "%d bits: <%08x %08x>", (int)attributes["length"], (int)attributes["data_0"], (int)attributes["data_1"]);
     }
 
 };

@@ -39,6 +39,11 @@ public:
         return CArray<TKeyValue>::operator[](i);
     }
 
+    TKeyValue& operator[](int i)
+    {
+        return CArray<TKeyValue>::operator[](i);
+    }
+
   int indexOf(const char* key)
   {
     for (int i=0; i<GetSize(); i++)
@@ -52,15 +57,17 @@ class CProtocol
 {
 public:
     virtual int Frequency() = 0;
+    /*
     // TODO: remove
     virtual int MinIndentifyCount() { return 0; }
     virtual int MinDemodulateCount() { return 0; }
     virtual int AttackPoint(CArray<int>& pulse) { return 0; }
     virtual bool Identify(CArray<int>& pulse) { return false; }
-    
+    */
     virtual void Example(CAttributes& attributes) = 0;
     virtual bool Demodulate(const CArray<uint16_t>& pulse, CAttributes& attributes) = 0;
     virtual bool Modulate(const CAttributes& attr, CArray<uint16_t>& pulse) = 0;
+    virtual void Synthesize(CAttributes& attr) {}
 
     virtual void GetName(char*) = 0;
     virtual void GetDescription(CAttributes& attributes, char* desc) = 0;
