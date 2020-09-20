@@ -16,7 +16,7 @@
 uint8_t bitstreamData[500];
 CArray<uint8_t> bitstream(bitstreamData, COUNT(bitstreamData));
 
-bool sendPacket(uint8_t* buffer, int length);
+bool sendPacket(uint8_t* buffer, int length, int dataRate);
 void PulseToBitstream(const CArray<uint16_t>& pulse, CArray<uint8_t>& bitstream, int interval);
 
 bool SendPulses(const CArray<uint16_t>& pulse, int divisor)
@@ -24,7 +24,7 @@ bool SendPulses(const CArray<uint16_t>& pulse, int divisor)
   bitstream.SetSize(0);
   PulseToBitstream(pulse, bitstream, divisor);
   //BIOS::DBG::Print("(p:%d,%d,n:%d,P:%d)", pulse[0], pulse[1], pulse.GetSize(), bitstream.GetSize());
-  return sendPacket(bitstream.GetData(), bitstream.GetSize());
+  return sendPacket(bitstream.GetData(), bitstream.GetSize(), 1000000/divisor);
 }
 
 void PulseToBitstream(const CArray<uint16_t>& pulse, CArray<uint8_t>& bitstream, int interval)
@@ -46,12 +46,13 @@ void PulseToBitstream(const CArray<uint16_t>& pulse, CArray<uint8_t>& bitstream,
   }
 }
 
-bool sendPacket(uint8_t* buffer, int length)
+bool sendPacket(uint8_t* buffer, int length, int dataRate)
 {
-	//_ASSERT(length < 64);
-	//_ASSERT(length < 256);
 	long lBase0 = BIOS::SYS::GetTick();
-
+    
+    gModem.SetDataRate(dataRate);
+    gModem.SetOutputPower(0xb0); // configure low/high levels
+    
 	gModem.PrepareTxState();          // 8 ms
 	gModem.FlushRxFifo();
 	long lBase01 = BIOS::SYS::GetTick();     
@@ -151,10 +152,10 @@ temp++;
 	long lBase4 = BIOS::SYS::GetTick();
 
 //	BIOS::DBG::Print("Send=%dms, ", BIOS::SYS::GetTick() - lBase0);
-	BIOS::DBG::Print("Send=%dms, ", BIOS::SYS::GetTick() - lBase0);
-	BIOS::DBG::Print("Send[%d,%d[%d,%d,%d],%d,%d,%d]", temp, lBase1-lBase0, 
-          lBase01-lBase0, lBase02-lBase01, lBase03-lBase02,
-          lBase2-lBase1, lBase3-lBase2, lBase4-lBase3);
+	//BIOS::DBG::Print("Send=%dms, ", BIOS::SYS::GetTick() - lBase0);
+	//BIOS::DBG::Print("Send[%d,%d[%d,%d,%d],%d,%d,%d]", temp, lBase1-lBase0,
+    //      lBase01-lBase0, lBase02-lBase01, lBase03-lBase02,
+    //      lBase2-lBase1, lBase3-lBase2, lBase4-lBase3);
 // 1, 19,4, 4, 3
 // 1, 20[8,6,4], 6, 4
 

@@ -1,10 +1,10 @@
-#include "protocol/protocol.h"
-#include "protocol/weather.h"
-#include "protocol/oregon2.h"
-#include "protocol/key360.h"
-#include "protocol/vw.h"
-#include "protocol/nexus.h"
-#include "protocol/gate.h"
+#include "protocol.h"
+#include "weather.h"
+#include "oregon2.h"
+#include "key360.h"
+#include "vw.h"
+#include "nexus.h"
+#include "gate.h"
 
 CWeather weather;
 COregon2 oregon;

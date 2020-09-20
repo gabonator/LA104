@@ -1,3 +1,4 @@
+#include <stdint.h>
 
 void streamerBegin();
 void streamerEnd();

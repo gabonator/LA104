@@ -5,7 +5,7 @@ public:
 	{
 		return 433876000UL; // not verified
 	}
-	
+	/*
   virtual int MinIndentifyCount() override
   {
     return 4;
@@ -27,7 +27,7 @@ public:
   {
     return 0;
   }
-
+*/
   virtual void Example(CAttributes& attributes) override
   {
     // -512 (-51.2 C) ... 999 (+99.9 C)
@@ -245,16 +245,16 @@ private:
             if (attributes["humidity"] == 0)
             {
                 sprintf(desc, "Ch: <%d> Temp: <%d.%d\xf8""C> Humidity: <%d%%>",
-                attributes["channel"], attributes["temperature10"] / 10, attributes["temperature10"] % 10, attributes["humidity"]);
+                (int)attributes["channel"], (int)attributes["temperature10"] / 10, (int)attributes["temperature10"] % 10, (int)attributes["humidity"]);
             } else
             {
                 sprintf(desc, "Ch: <%d> Temp: <%d.%d\xf8""C>",
-                attributes["channel"], attributes["temperature10"] / 10, attributes["temperature10"] % 10);
+                (int)attributes["channel"], (int)attributes["temperature10"] / 10, (int)attributes["temperature10"] % 10);
             }
         } else
         {
             sprintf(desc, "%d bits: <%08x> <%08x>",
-                attributes["length"], attributes["data_0"], attributes["data_1"]);
+                (int)attributes["length"], (int)attributes["data_0"], (int)attributes["data_1"]);
         }
     }
     virtual const char* GetString(int i) override { return nullptr; }

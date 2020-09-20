@@ -2,10 +2,10 @@
 
 #ifndef __APPLE__
 
+#include "../framework/ringbuf.h"
 #include "streamer.h"
 #include <library.h>
 #include "stm32f10x.h"
-#include "ringbuf.h"
 #include "dma.h"
 
 // Note: Uses optimize("O2") to work around this bug:

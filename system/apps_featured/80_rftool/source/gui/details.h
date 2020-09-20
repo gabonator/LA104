@@ -3,7 +3,7 @@
 class CDetails : public CWnd
 {
     CSignalView mSignalView;
-    CScroller mScroller{6, nullptr};
+    CScroller mScroller{5, nullptr};
     int mCaptureUid{0};
     bool mRedraw{false};
     uint8_t mAttrIndices[16];
@@ -42,7 +42,6 @@ public:
 
     virtual void OnPaint() override
     {
-        // TODO: Capture Index zmenit za uid
         using namespace Layout;
         Color def(RGB565(b0b0b0), RGBTRANS);
         Color hig(RGB565(ffffff), RGBTRANS);
@@ -69,8 +68,11 @@ public:
         {
             r << Padding(8, 20, 8, 40) << Bar(RGB565(404040));
         }
-
+        
         r << def;
+        //ShowRawData(r, appData.GetAttributes(captureIndex));
+        //r << def << NewLine();
+        
         int top, bottom;
         mScroller.GetRange(top, bottom);
         
@@ -100,6 +102,32 @@ public:
           << Select(HasFocus() && mScroller.mFocus == last+2) << Button((char*)"Transmit");
         
         DrawScrollbar(HasFocus() && mScroller.mFocus == last+3);
+    }
+    
+    void ShowRawData(Layout::Render& r, const CAttributes& attr)
+    {
+        int bits = attr["length"];
+        int ofs = 0;
+        char temp[16];
+        sprintf(temp, "%d", bits);
+        r << temp << " bits: " << Layout::Color(RGB565(ffffff), RGBTRANS);;
+        int word = 0;
+        uint32_t d = 0;
+        do
+        {
+            switch(word++)
+            {
+                case 0: d = attr["data_0"]; break;
+                case 1: d = attr["data_1"]; break;
+                case 2: d = attr["data_2"]; break;
+            }
+            int shownibs = (min(bits-ofs, 32)+3)/4;
+            char fmt[8];
+            sprintf(fmt, "%%0%dx", shownibs); // %0?x
+            sprintf(temp, fmt, d >> ((8-shownibs)*4));
+            r << temp << Layout::Spacer(2);
+            ofs += shownibs*4;
+        } while (ofs<bits);
     }
     
     void DrawScrollbar(bool focus)
@@ -135,7 +163,8 @@ public:
         const CAttributes& attr = appData.GetAttributes(index);
         for (int j = 0; j<attr.GetSize(); j++)
         {
-            if (attr[j].key[0] != '_')
+            const char* key = attr[j].key;
+            if (key[0] != '_' /* && strstr(key, "data_") == nullptr && strcmp(key, "length") != 0*/)
                 mAttrIndices[mAttrCount++] = j;
         }
         mSignalView.ShowWindow(true);
@@ -198,14 +227,14 @@ public:
             {
                 int captureIndex = appData.GetCaptureIndex(mCaptureUid);
                 if (captureIndex != -1)
-                    appData.DeltaCaptureAttribute(captureIndex, mScroller.mFocus + mScroller.mScroll, -1);
+                    appData.DeltaCaptureAttribute(captureIndex, mAttrIndices[mScroller.mFocus + mScroller.mScroll], -1);
                 Invalidate();
             }
             if (key == BIOS::KEY::Right)
             {
                 int captureIndex = appData.GetCaptureIndex(mCaptureUid);
                 if (captureIndex != -1)
-                    appData.DeltaCaptureAttribute(captureIndex, mScroller.mFocus + mScroller.mScroll, +1);
+                    appData.DeltaCaptureAttribute(captureIndex, mAttrIndices[mScroller.mFocus + mScroller.mScroll], +1);
                 Invalidate();
             }
         }

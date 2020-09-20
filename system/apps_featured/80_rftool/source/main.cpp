@@ -22,6 +22,9 @@ using namespace BIOS;
 //#define TEST
 #ifdef TEST
 #include "testwave.h"
+#ifndef __APPLE__
+#error test should be not run on target
+#endif
 #endif
 
 uint8_t gFatSharedBuffer[BIOS::FAT::SharedBufferSize];
@@ -263,7 +266,15 @@ public:
             }
             else if (strcmp((char*)data, "transmit") == 0)
             {
+                int dataRate = CC1101::GetDataRate();
+                int32_t l0 = BIOS::SYS::GetTick();
                 SendPulses(mDetails.GetWave(), mDetails.GetProtocol()->PulseDivisor());
+                int32_t l1 = BIOS::SYS::GetTick();
+                CC1101::SetDataRate(dataRate);
+                
+                char message[64];
+                sprintf(message, "Signal sent in %d ms", l1-l0);
+                ShowStatus(message);
             }
         }
 
@@ -396,6 +407,12 @@ public:
         auto TestDump = [this](CArray<uint16_t>& arr) -> CProtocol*
         {
             int uid = _AnalyseBuffer(arr);
+            if (uid == -1)
+            {
+                BIOS::DBG::Print("pulse %d - not identified\n", arr.GetSize());
+                return nullptr;
+            }
+            
             int index = appData.GetCaptureIndex(uid);
             CProtocol* pProtocol = appData.GetRecordProtocol(index);
             char protocolName[32] = "Unknown";
@@ -419,13 +436,22 @@ public:
             return pProtocol;
         };
 
-        CArray<uint16_t> arr(sample3, COUNT(sample3));
+        CArray<uint16_t> arr(sample13, COUNT(sample13));
         arr.SetSize(arr.GetMaxSize());
+        
+        //SendPulses(arr, 250);
 
         CProtocol* proto = TestDump(arr);
+        if (!proto)
+            return;
         
         PULSE::arrSignal.RemoveAll();
         proto->Modulate(attributes, PULSE::arrSignal);
+        char buf[2048] = "";
+        for (int i=0; i<PULSE::arrSignal.GetSize(); i++)
+            sprintf(buf+strlen(buf), "%d,", PULSE::arrSignal[i]);
+        fprintf(stderr, buf);
+        
         TestDump(PULSE::arrSignal);
 /*
         char* json = R"([{_protocol:"Vw keyfob","length":78,"data_0":0x41ffd0b4,"data_1":0xf4ab438,"data_2":0x881f,"_timestamp":256875,"_uid":1000}])";

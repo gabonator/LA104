@@ -25,6 +25,15 @@ namespace Layout
         {
         }
     };
+    
+    class Spacer
+    {
+    public:
+        int mW;
+        Spacer(int w) : mW(w)
+        {
+        }
+    };
 
     class Padding
     {
@@ -128,6 +137,11 @@ namespace Layout
             mX = g.mX;
             return *this;
         }
+        Render& operator << (const Spacer& s)
+        {
+            mX += s.mW;
+            return *this;
+        }
         Render& operator << (const Select& s)
         {
             mSelected = s.mSelected;
@@ -184,8 +198,8 @@ namespace Layout
         {
             if (!r->IsSelected())
             {
-                *r << Color(RGBTRANS, RGB565(b0b0b0)) << '<' << mValue << Select(false);
-                *r << Color(RGBTRANS, RGB565(b0b0b0)) << '>';
+                *r << Color(RGBTRANS, RGB565(808080)) << '<' << mValue << Select(false);
+                *r << Color(RGBTRANS, RGB565(808080)) << '>';
             } else
             {
                 *r << Color(RGBTRANS, RGB565(ffffff)) << '<' << mValue << Select(false);
