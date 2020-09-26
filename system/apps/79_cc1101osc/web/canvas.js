@@ -372,9 +372,9 @@ class DetailCanvas
       // draw text?
       if (nx-x > 30)
       {
-        this.Text((x+nx)/2, 50-14, this.pulse[i] & 0xffffff);
-        this.Text((x+nx)/2, 50+8, (this.pulse[i] & 0xffffff)/20);
-        this.Text(x, 50+8+25, sum/20);
+        this.Text((x+nx)/2, 50-4, this.pulse[i] & 0xffffff);
+//        this.Text((x+nx)/2, 50+8, (this.pulse[i] & 0xffffff)/20);
+//        this.Text(x, 50+8+25, sum/20);
       }
       x = nx;
       y = ny;
