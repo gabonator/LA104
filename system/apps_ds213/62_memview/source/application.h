@@ -165,7 +165,7 @@ public:
 	
 	void ReadMemory(uint32_t address, uint8_t* data)
 	{
-		if (address < 0x8)
+		//if (address < 0x8)
 		for (int i=0; i<8; i++)
 		{
 #ifndef __APPLE__

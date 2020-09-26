@@ -47,7 +47,7 @@ void SysTickHandler(void)
 
   if (keyMaskOld != keyMask)
   {
-    lastChar = 0;
+//    lastChar = 0;
     if (keyMask & KeyUp)
       lastChar = '>';
     if (keyMask & KeyDown)

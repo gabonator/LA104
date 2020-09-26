@@ -1,5 +1,6 @@
 var canvas = new PreviewCanvas(900, 100);
 var detail = new DetailCanvas(900, 100);
+var gui = new RemoteGui();
 var aaa;
 
 class Memory
@@ -135,10 +136,10 @@ document.querySelector("#dreconstruct").addEventListener('click', () => {
 document.querySelector("#dendminus").addEventListener('click', () => { detail.trim(-1); });
 document.querySelector("#dendplus").addEventListener('click', () => { detail.trim(+1); });
 document.querySelector("#dsend").addEventListener('click', () => { sendPulse(detail.trim(0)); });
-document.querySelector("#dexample").addEventListener('click', () => { example(); });
-document.querySelector("#aenable").addEventListener('click', () => { attackEnable(); });
-document.querySelector("#adisable").addEventListener('click', () => { attackDisable(); });
-document.querySelector("#calibrate").addEventListener('click', () => { calibrate(); });
+//document.querySelector("#dexample").addEventListener('click', () => { example(); });
+//document.querySelector("#aenable").addEventListener('click', () => { attackEnable(); });
+//document.querySelector("#adisable").addEventListener('click', () => { attackDisable(); });
+//document.querySelector("#calibrate").addEventListener('click', () => { calibrate(); });
 
 
 var started = false;
@@ -159,7 +160,8 @@ function onStart()
     console.log("Try later");
     return;
   }
-  MODEM.Start().then( () => started = true);
+  MODEM.Start().then( () => syncInfo()).then( () => started = true)
+  .then(() => INTERFACE.Update()).then(() => INTERFACE.Finish());
 }
 
 function onStop()
@@ -170,7 +172,8 @@ function onStop()
     console.log("Try later");
     return;
   }
-  MODEM.Stop().then( () => started = false);
+  MODEM.Stop().then( () => started = false)
+  .then(() => INTERFACE.Update()).then(() => INTERFACE.Finish());
 }
 
 function onMain()
@@ -188,6 +191,7 @@ function onMain()
 //      .then( () => MODEM.SetFrequency(433942000)) // conrad, OS/temp
 //      .then( () => MODEM.SetFrequency(433900000)) // conrad, OS/temp
        .then( () => MODEM.Calibrate()) //conrad
+//       .then( () => syncInfo()) //conrad
       .then( () =>
       {
         setInterval(() =>
@@ -365,6 +369,7 @@ function analyse(buf)
   {
     console.log(JSON.stringify(buf));
     console.log(JSON.stringify(d));
+    logadd(JSON.stringify(d));
   }
 
 /*
@@ -473,7 +478,7 @@ function example()
   detail.show(aligned, 2, aligned.length+1);
 }
 
-
+/*
 function analysekeyfob(nsig)
 {
   var q = nsig.map(x => Math.floor((x+120)/240)).join("");
@@ -587,7 +592,7 @@ function bitstreamToBytes(str)
   }
   return bytes;
 }
-
+*/
 
 var configStruct, configPtr;
 function configInit()
@@ -641,4 +646,140 @@ function calibrate()
   }
 
   MODEM.Calibrate();
+}
+
+
+function mupdate(o)
+{
+  if (o.id == "mfrequency") 
+  {
+    MODEM.SetFrequency(Math.floor(parseFloat(o.value)*1e6))
+    .then( () => MODEM.GetFrequency() ) 
+    .then( (freq) =>
+    {
+      INTERFACE.SetFrequency(freq);
+      o.value = INTERFACE.GetFreqText();
+      INTERFACE.Update();
+      return INTERFACE.Finish();
+    });
+  }
+
+  if (o.id == "mbandwidth")
+  {
+    MODEM.SetBandwidth(Math.floor(parseFloat(o.value)*1e3))
+    .then( () => MODEM.GetBandwidth() ) 
+    .then( (bw) =>
+    {
+      INTERFACE.SetBandwidth(bw);
+      o.value = INTERFACE.GetBandText();
+      INTERFACE.Update();
+      return INTERFACE.Finish();
+    });
+  }
+
+  if (o.id == "mgain")
+  {
+    MODEM.SetGain(Math.floor(parseFloat(o.value)))
+    .then( () => MODEM.GetGain() ) 
+    .then( (gain) =>
+    {
+      INTERFACE.SetGain(gain);
+      o.value = INTERFACE.GetGainText();
+      INTERFACE.Update();
+      return INTERFACE.Finish();
+    });
+  }
+}
+
+class Interface {
+  constructor()
+  {
+    this.tasks = [];
+    this.frequency = 100e6;
+    this.bandwidth = 100e3;
+    this.gain = -10;
+  }
+  process(x)
+  {
+    this.tasks.push(x);
+  }
+  Finish()
+  {
+    if (this.tasks.length > 0)
+      return this.tasks.shift()().then( () => INTERFACE.Finish() );
+    return Promise.resolve();
+  }
+  GetFrequency()
+  {
+    return INTERFACE.frequency;  
+  }
+  SetFrequency(f)
+  {
+    INTERFACE.frequency = f
+  }
+
+  GetBandwidth()
+  {
+    return INTERFACE.bandwidth;  
+  }
+  SetBandwidth(f)
+  {
+    INTERFACE.bandwidth = f
+  }
+
+  GetGain()
+  {
+    return INTERFACE.gain;  
+  }
+  SetGain(f)
+  {
+    INTERFACE.gain = f
+  }
+
+  GetFreqText()
+  {
+    return (INTERFACE.frequency / 1e6).toFixed(2);
+  }
+  GetBandText()
+  {
+    return (INTERFACE.bandwidth / 1e3).toFixed(1);
+  }
+  GetGainText()
+  {
+    return INTERFACE.gain;
+  }
+  Update()
+  {
+    gui.drawModem();
+    gui.drawStreaming();
+  }
+  GetStreaming()
+  {
+    return started;
+  }
+}
+
+var INTERFACE = new Interface();
+ 
+function syncInfo()
+{
+  var q = e => document.querySelector("#"+e);
+
+  return MODEM.GetFrequency()
+    .then(freq => { INTERFACE.SetFrequency(freq); q("mfrequency").value = (freq / 1e6).toFixed(2) })
+    .then(() => MODEM.GetBandwidth())
+    .then(bw => { INTERFACE.SetBandwidth(bw); q("mbandwidth").value = (bw / 1e3).toFixed(1) })
+    .then(() => MODEM.GetGain())
+    .then(gain => { INTERFACE.SetGain(gain); q("mgain").value = gain } )
+    .then(() => gui.redraw());
+//    .then(() => INTERFACE.Finish());
+}
+
+    var loginfo = document.createElement("textarea");
+    loginfo.style = "width:90%; height:200px";
+    document.documentElement.appendChild(loginfo)
+
+function logadd(msg)
+{
+  loginfo.value = msg + "\n" + loginfo.value;
 }

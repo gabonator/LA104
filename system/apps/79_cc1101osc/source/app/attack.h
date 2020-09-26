@@ -94,6 +94,9 @@ char strThreadMessage[512] = {0};
 
 void secondaryPush(int c)
 {
+  if (appConfig.enabled == 0)
+    return;
+
 /*
   if (appConfig.enabled == 3)
   {

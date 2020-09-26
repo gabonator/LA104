@@ -1,9 +1,13 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title>WebUSB-interface</title>
+    <title>WebUSB CC1101 interface</title>
+    <style>
+      button {height: 40px; width:100px;}
+    </style>
   </head>
   <body>
+    <h1>CC1101 analyzer</h1>
     <p style="">
       <button id="connect">Connect</button> [<span id="status"></span>]
       <button id="start">Init</button>
@@ -13,28 +17,34 @@
       <button id="zoomin">Zoom +</button>
       <button id="zoomout">Zoom -</button>
 <br>
+      <button id="toggle">Toggle scan</button>
       <button id="dzoomin">Detail Zoom +</button>
       <button id="dzoomout">Detail Zoom -</button>
       <button id="dquantize">Quantize</button>
       <button id="dreconstruct">Reconstruct</button>
       <button id="dendminus">Trim &lt;</button>
       <button id="dendplus">Trim &gt;</button>
-      <button id="dexample">Example</button>
+<!--      <button id="dexample">Example</button>-->
       <button id="dsend">Send</button>
+<!--
 <br>
       <button id="aenable">Enable attack</button>
       <button id="adisable">Disable attack</button>
       <button id="calibrate">Calibrate</button>
-
+-->
+<br><br>
+      Frequency: <input type=text id="mfrequency" value="433.9" onChange="mupdate(this)" size=6> MHz,
+      Bandwidth: <input type=text id="mbandwidth" value="115" onChange="mupdate(this)" size=5> kHz
+      Gain: <input type=text id="mgain" value="-10" onChange="mupdate(this)" size=5> dB
+<br>
     </p>
-<input type="button" id="toggle" value="Toggle scanning">
-
 
     <script src="serial.js"></script>
     <script src="comm.js"></script>
     <script src="bios.js"></script>
     <script src="decoder.js"></script>
     <script src="canvas.js"></script>
+    <script src="remotegui.js"></script>
     <script src="analyser.js"></script>
     <script src="protocol/weather.js"></script>
     <script src="simulator.js"></script>

@@ -332,7 +332,10 @@ namespace I2C
               I2C_EVENT_MASTER_TRANSMITTER_MODE_SELECTED))
           {
             if (Timeout())
+            {
+                er("d1");
                 return false;
+            }
           }
       }
       else if (direction == I2C_Direction_Receiver)
@@ -341,7 +344,10 @@ namespace I2C
               I2C_EVENT_MASTER_RECEIVER_MODE_SELECTED))
           {
             if (Timeout())
+            {
+                er("d2");
                 return false;
+            }
           }
       }
       return true;
@@ -369,7 +375,7 @@ namespace I2C
       // It means that the data has been received in I2C data register
       SetTimeout(50);
       while (!I2C_CheckEvent(I2Cx, I2C_EVENT_MASTER_BYTE_RECEIVED))
-            if (Timeout()) {er("r1"); return 0x00;};
+            if (Timeout()) {er("r1"); return 0x00;}; // TODO: should notify problem
    
       // Read and return data byte from I2C data register
       return I2C_ReceiveData(I2Cx);
@@ -695,7 +701,10 @@ namespace BIOS
           if (!::I2C::i2c_start())
               return false;
           if (!::I2C::i2c_address_direction(address << 1, I2C_Direction_Transmitter))
+          {
+              ::I2C::i2c_stop();
               return false;
+          }
 
         mAddress = address;
 //        mTransmitting = false;
