@@ -358,12 +358,13 @@ function pulseMachine(interval, level)
 
 function analyse(buf)
 {
+/*
   var resp;
   if ((resp = analysekeyfob(buf)))
   {
     return resp;
   }        
-
+*/
   var d = decoder.decode(buf);
   if (d.length)
   {
