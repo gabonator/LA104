@@ -44,7 +44,7 @@ int main(void)
 
   rcClient.bottom = 14;
   GUI::Background(rcClient, RGB565(4040b0), RGB565(404040));
-  BIOS::LCD::Print(8, rcClient.top, RGB565(ffffff), RGBTRANS, "WebUsb interface");
+  BIOS::LCD::Print(8, rcClient.top, RGB565(ffffff), RGBTRANS, "CC1101 WebUsb interface");
 
   rcClient.bottom = BIOS::LCD::Height;
   rcClient.top = BIOS::LCD::Height-14;
