@@ -89,7 +89,8 @@ public:
             int i = attributes.indexOf(key);
             if (i==-1)
             {
-                _ASSERT(0);
+                BIOS::DBG::Print("oregon-2 synth error");
+                //_ASSERT(0);
                 return;
             }
             

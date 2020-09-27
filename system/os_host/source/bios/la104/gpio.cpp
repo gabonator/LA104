@@ -7,6 +7,25 @@
 
 #include "../imports.h" // for FPGA commands
 
+enum GpioStatus {
+  Ok = 0,
+  I2cErrorBegin,
+  I2cBusy,
+  I2cErrorStart,
+  I2cErrorStop,
+  I2cErrorAddressAck,
+  I2cErrorReceiveTimeout,
+  I2cErrorTransmitTimeout,
+  UartWrongParity,
+  UartWrongDataBits,
+  UartWrongStopBits,
+  UartInternalError,
+  NotImplemented
+};
+
+uint32_t gGpioStatusCode = GpioStatus::Ok;
+
+
 namespace PIN
 {
   enum {
@@ -45,17 +64,6 @@ namespace PIN
     StateSimpleOutput = StateOutput2Mhz | StateOutputPushPull
   };
 
-  /*
-  #define PERIPH_BASE           ((u32)0x40000000)
-  #define APB2PERIPH_BASE       (PERIPH_BASE + 0x10000)
-  #define GPIOA_BASE            (APB2PERIPH_BASE + 0x0800)
-  #define GPIOB_BASE            (APB2PERIPH_BASE + 0x0C00)
-  #define GPIOC_BASE            (APB2PERIPH_BASE + 0x1000)
-  #define GPIOD_BASE            (APB2PERIPH_BASE + 0x1400)
-  #define GPIOE_BASE            (APB2PERIPH_BASE + 0x1800)
-  #define GPIOF_BASE            (APB2PERIPH_BASE + 0x1C00)
-  #define GPIOG_BASE            (APB2PERIPH_BASE + 0x2000)
-  */
   const static uint32_t arrGpioBase[] = {GPIOA_BASE, GPIOB_BASE, GPIOC_BASE, GPIOD_BASE, GPIOE_BASE, GPIOF_BASE, GPIOG_BASE};
 
   uint32_t* GetRegister(int nPort, int nReg)
@@ -241,11 +249,6 @@ namespace I2C
     return Dly_mS == 0;
   }
 
-  void er(const char* m)
-  {
-    BIOS::DBG::Print("#%s", m);
-  }
-
   void i2c_init()
   {
       // Initialization struct
@@ -290,10 +293,14 @@ namespace I2C
       // Wait until I2Cx is not busy anymore
       SetTimeout(50);
       while (I2C_GetFlagStatus(I2Cx, I2C_FLAG_BUSY))
+      {
         if (Timeout()) 
+        {
+          gGpioStatusCode = GpioStatus::I2cBusy;
           return false;
-      
-   
+        }      
+      }
+
       // Generate start condition
       I2C_GenerateSTART(I2Cx, ENABLE);
    
@@ -301,9 +308,13 @@ namespace I2C
       // It means that the start condition has been correctly released 
       // on the I2C bus (the bus is free, no other devices is communicating))
       while (!I2C_CheckEvent(I2Cx, I2C_EVENT_MASTER_MODE_SELECT))
+      {
         if (Timeout())
+        {
+          gGpioStatusCode = GpioStatus::I2cErrorStart;
           return false;
-
+        }
+      }
       return true;
   }
    
@@ -314,7 +325,13 @@ namespace I2C
       // Wait until I2C stop condition is finished
       SetTimeout(50);
       while (I2C_GetFlagStatus(I2Cx, I2C_FLAG_STOPF))
-        if (Timeout()) return false;
+      {
+        if (Timeout()) 
+        { 
+          gGpioStatusCode = GpioStatus::I2cErrorStop;
+          return false; 
+        }
+      }
       return true;
   }
    
@@ -333,7 +350,7 @@ namespace I2C
           {
             if (Timeout())
             {
-                er("d1");
+                gGpioStatusCode = GpioStatus::I2cErrorAddressAck;
                 return false;
             }
           }
@@ -345,7 +362,7 @@ namespace I2C
           {
             if (Timeout())
             {
-                er("d2");
+                gGpioStatusCode = GpioStatus::I2cErrorAddressAck;
                 return false;
             }
           }
@@ -362,8 +379,13 @@ namespace I2C
       // output on the bus)
       SetTimeout(50);
       while (!I2C_CheckEvent(I2Cx, I2C_EVENT_MASTER_BYTE_TRANSMITTED))
-            if (Timeout())
-              return false;
+      {
+        if (Timeout())
+        {
+          gGpioStatusCode = GpioStatus::I2cErrorTransmitTimeout;
+          return false;
+        }
+      }
       return true;
   }
    
@@ -375,8 +397,14 @@ namespace I2C
       // It means that the data has been received in I2C data register
       SetTimeout(50);
       while (!I2C_CheckEvent(I2Cx, I2C_EVENT_MASTER_BYTE_RECEIVED))
-            if (Timeout()) {er("r1"); return 0x00;}; // TODO: should notify problem
-   
+      {
+        if (Timeout()) 
+        {
+          gGpioStatusCode = GpioStatus::I2cErrorReceiveTimeout;
+          return 0x00;
+        }
+      }
+
       // Read and return data byte from I2C data register
       return I2C_ReceiveData(I2Cx);
   }
@@ -389,7 +417,13 @@ namespace I2C
       // It means that the data has been received in I2C data register
       SetTimeout(50);
       while (!I2C_CheckEvent(I2Cx, I2C_EVENT_MASTER_BYTE_RECEIVED))
-            if (Timeout()) {er("r2"); return 0x00;};
+      {
+        if (Timeout()) 
+        {
+          gGpioStatusCode = GpioStatus::I2cErrorReceiveTimeout;
+          return 0x00;
+        }
+      }
    
       // Read and return data byte from I2C data register
       return I2C_ReceiveData(I2Cx);
@@ -423,13 +457,13 @@ namespace UART
           case 'E': dataBits++; USART_InitStructure.USART_Parity = USART_Parity_Even; break;
           case 'O': dataBits++; USART_InitStructure.USART_Parity = USART_Parity_Odd; break;
           case 0:   USART_InitStructure.USART_Parity = USART_Parity_No; break;
-          default: _ASSERT(0);
+          default: gGpioStatusCode = GpioStatus::UartWrongParity;
         }
         switch (dataBits)
         {
           case 8: USART_InitStructure.USART_WordLength = USART_WordLength_8b; break;
           case 9: USART_InitStructure.USART_WordLength = USART_WordLength_9b; break;
-          default: _ASSERT(0);
+          default: gGpioStatusCode = GpioStatus::UartWrongDataBits;
         }
   	switch (stopBits)
         {
@@ -437,7 +471,7 @@ namespace UART
           case 1: USART_InitStructure.USART_StopBits = USART_StopBits_1; break;
           case 15: USART_InitStructure.USART_StopBits = USART_StopBits_1_5; break;
           case 2: USART_InitStructure.USART_StopBits = USART_StopBits_2; break;
-          default: _ASSERT(0);
+          default: gGpioStatusCode = GpioStatus::UartWrongStopBits;
         }
   	USART_InitStructure.USART_HardwareFlowControl = USART_HardwareFlowControl_None;
   	USART_InitStructure.USART_Mode = USART_Mode_Rx | USART_Mode_Tx;
@@ -488,6 +522,7 @@ namespace UART
   void uart_deinit()
   {
 // TODO: called unexpectedly!!!
+        gGpioStatusCode = GpioStatus::UartInternalError;
         if (1) return;
   	RCC_APB1PeriphClockCmd(RCC_APB1Periph_USART3, DISABLE);
 
@@ -596,6 +631,7 @@ namespace BIOS
 
     int AnalogRead(EPin pin)
     {
+      gGpioStatusCode = GpioStatus::NotImplemented;
       _ASSERT(0);
       return 0;
     }
@@ -694,7 +730,6 @@ namespace BIOS
     {
       int mCount{0};
       uint8_t mAddress;
-      bool mTransmitting{false};
 
       bool BeginTransmission(uint8_t address)
       {
@@ -707,7 +742,6 @@ namespace BIOS
           }
 
         mAddress = address;
-//        mTransmitting = false;
         return true;
       }
 
@@ -724,16 +758,6 @@ namespace BIOS
 
       bool Write(uint8_t data)
       {
-/*
-        if (!mTransmitting)
-        {
-          if (::I2C::i2c_start())
-            return false;
-          if (::I2C::i2c_address_direction(mAddress << 1, I2C_Direction_Transmitter))
-            return false;
-          mTransmitting = true;
-        }
-*/
         return ::I2C::i2c_transmit(data);
       }
 

@@ -258,7 +258,8 @@ public:
     static const char* FixedString(char* s)
     {
         const char* fixed[] = {"temperature10", "humidity", "id", "battery_low", "channel", "junk", "valid", "_timestamp", "_uid",
-            "length", "data_0", "data_1", "data_2", "$model", "$opcode"};
+            "length", "data_0", "data_1", "data_2", "$model", "$opcode", "key", "counter"};
+        
         for (int i=0; i<COUNT(fixed); i++)
             if (strcmp(fixed[i], s) == 0)
                 return fixed[i];

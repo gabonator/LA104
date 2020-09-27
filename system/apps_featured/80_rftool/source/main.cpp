@@ -436,7 +436,7 @@ public:
             return pProtocol;
         };
 
-        CArray<uint16_t> arr(sample13, COUNT(sample13));
+        CArray<uint16_t> arr(sample15, COUNT(sample15));
         arr.SetSize(arr.GetMaxSize());
         
         //SendPulses(arr, 250);
