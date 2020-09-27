@@ -7,7 +7,9 @@ static_assert((int)BIOS::SYS::EAttribute::DiskSectorCount == (int)EAttribute::Di
 //extern const unsigned char font[256*14];
 //extern const unsigned char* font;
 extern const void* ptrFont;
-
+#ifdef LA104
+extern uint32_t gGpioStatusCode;
+#endif
 extern "C" volatile char lastChar;
 
 namespace BIOS
@@ -18,7 +20,7 @@ namespace BIOS
     {
       switch (attribute)
       {
-        case EAttribute::BiosVersion: return 0x0102;
+        case EAttribute::BiosVersion: return 0x0103;
 
         case EAttribute::CharRom: return (uintptr_t)ptrFont;
         case EAttribute::LastChar: return (uintptr_t)&lastChar;
@@ -46,6 +48,9 @@ namespace BIOS
 
         case EAttribute::DiskSectorSize: return BIOS::FAT::SectorSize;
         case EAttribute::DiskSectorCount: return BIOS::FAT::SectorCount;
+#ifdef LA104
+        case EAttribute::GpioStatus: return (uintptr_t)&gGpioStatusCode;
+#endif
         default:
           _ASSERT(0);
           return (uintptr_t)nullptr;

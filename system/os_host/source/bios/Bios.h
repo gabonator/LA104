@@ -16,7 +16,8 @@ namespace BIOS
       BuildRevision, BuildDate, BuildUser, BuildSystem, 
       VersionDfu, VersionHardware, VersionSystem, VersionFpga,
       SerialNumber, LicenseNumber, LicenseValid, DisplayType, DiskType,
-      DiskSectorSize, DiskSectorCount};
+      DiskSectorSize, DiskSectorCount,
+      GpioStatus};
 
     uintptr_t GetAttribute(EAttribute eInternal);
   }
