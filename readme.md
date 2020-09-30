@@ -17,6 +17,16 @@ Go to release section on top of this page, download *system.hex*. Power on the L
 
 #### News
 
+##### RF Toolkit
+
+Ultimate toolkit for hacking OOK/ASK wireless devices (weather stations, wireless keys...) using CC1101 transceiver
+
+[![LA104 RF Toolkit](https://img.youtube.com/vi/Gwyi00NKBNg/0.jpg)](https://www.youtube.com/watch?v=Gwyi00NKBNg "LA104 RF Toolkit")
+
+- RF Toolit application: [80_rftool](system/apps_featured/80_rftool/)
+- Spectrum analyser: [82_specan](system/apps/82_specan/)
+- Web usb signal analyser: [79_cc1101osc](system/apps/79_cc1101osc/)
+
 ##### Building tutorial
 
 Read more [here](resources/tutorial_building)
