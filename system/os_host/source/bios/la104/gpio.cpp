@@ -771,7 +771,7 @@ namespace BIOS
           return ::I2C::i2c_receive_nack();
       }
 
-      bool EndTransmission()
+      bool EndTransmission(bool stop)
       {
         return ::I2C::i2c_stop();
       }

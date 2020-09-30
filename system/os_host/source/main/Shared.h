@@ -96,7 +96,7 @@ uint32_t GetProcAddress(char* symbol)
     case 0x00005476: return (uint32_t)static_cast<bool(*)(BIOS::GPIO::EPin)>(BIOS::GPIO::DigitalRead); //_ZN4BIOS4GPIO11DigitalReadENS0_4EPinE
     case 0x00007bbc: return (uint32_t)static_cast<void(*)(BIOS::GPIO::EPin, bool)>(BIOS::GPIO::DigitalWrite); //_ZN4BIOS4GPIO12DigitalWriteENS0_4EPinEb
     case 0x0000916d: return (uint32_t)static_cast<bool(*)(unsigned char, unsigned char)>(BIOS::GPIO::I2C::RequestFrom); //_ZN4BIOS4GPIO3I2C11RequestFromEhh
-    case 0x0000089b: return (uint32_t)static_cast<bool(*)()>(BIOS::GPIO::I2C::EndTransmission); //_ZN4BIOS4GPIO3I2C15EndTransmissionEv
+    case 0x00000887: return (uint32_t)static_cast<bool(*)(bool)>(BIOS::GPIO::I2C::EndTransmission); //_ZN4BIOS4GPIO3I2C15EndTransmissionEb
     case 0x0000e295: return (uint32_t)static_cast<bool(*)(unsigned char)>(BIOS::GPIO::I2C::BeginTransmission); //_ZN4BIOS4GPIO3I2C17BeginTransmissionEh
     case 0x0000f648: return (uint32_t)static_cast<uint8_t(*)()>(BIOS::GPIO::I2C::Read); //_ZN4BIOS4GPIO3I2C4ReadEv
     case 0x00009ffe: return (uint32_t)static_cast<bool(*)(unsigned char)>(BIOS::GPIO::I2C::Write); //_ZN4BIOS4GPIO3I2C5WriteEh

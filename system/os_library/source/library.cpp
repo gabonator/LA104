@@ -105,7 +105,7 @@ namespace BIOS
       bool RequestFrom(uint8_t address, uint8_t bytes) {return false;}
       bool Write(uint8_t data) {return false;}
       uint8_t Read() {return 0;}
-      bool EndTransmission() {return false;}
+      bool EndTransmission(bool) {return false;}
     }
 
     namespace UART

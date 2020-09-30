@@ -239,3 +239,4 @@ private:
     
     virtual const char* GetString(int i) override { return nullptr; }
 };
+

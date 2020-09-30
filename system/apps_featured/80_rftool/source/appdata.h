@@ -224,26 +224,10 @@ public:
             strcpy(units, "");
             return;
         }
-
-        if (strncmp(attr.key, "data_0", 6) == 0)
-        {
-            strcpy(name, attr.key);
-            sprintf(value, "%08x", (uint32_t)attr.value);
-            strcpy(units, "");
-            return;
-        }
-        if (strncmp(attr.key, "data_1", 6) == 0)
-        {
-            strcpy(name, attr.key);
-            sprintf(value, "%08x", (uint32_t)attr.value);
-            strcpy(units, "");
-            return;
-        }
-
         if (strncmp(attr.key, "data_", 5) == 0)
         {
             strcpy(name, attr.key);
-            sprintf(value, "%08x", (int)attr.value);
+            sprintf(value, "%08x", (uint32_t)attr.value);
             strcpy(units, "");
             return;
         }
