@@ -453,17 +453,6 @@ public:
         fprintf(stderr, buf);
         
         TestDump(PULSE::arrSignal);
-/*
-        char* json = R"([{_protocol:"Vw keyfob","length":78,"data_0":0x41ffd0b4,"data_1":0xf4ab438,"data_2":0x881f,"_timestamp":256875,"_uid":1000}])";
-        
-        LoadListJson(json);
-        CProtocol* proto = appData.GetRecordProtocol(0);
-        const CAttributes& attr = appData.GetAttributes(0);
-        PULSE::arrSignal.RemoveAll();
-        proto->Modulate(attr, PULSE::arrSignal);
-        
-        TestDump(PULSE::arrSignal);
- */
     }
 #endif
 };
