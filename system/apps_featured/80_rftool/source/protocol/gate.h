@@ -5,41 +5,13 @@ public:
 	{
 		return 868280000UL; // not verified
 	}
-	/*
-  virtual int MinIndentifyCount() override
-  {
-    return 4;
-  }
 
-  virtual int MinDemodulateCount() override
-  {
-    return 3+9*4*2;
-  }
-
-//440, 8820, 440, 1940, 420, 1960, 420, 3980, 440, 3980, 440,
-
-  virtual bool Identify(CArray<int>& pulse) override
-  {
-    return false;
-  }
-
-  virtual int AttackPoint(CArray<int>& pulse) override
-  {
-    return 0;
-  }
-*/
   virtual void Example(CAttributes& attributes) override
   {
-    // -512 (-51.2 C) ... 999 (+99.9 C)
-    attributes["temperature10"] = 171; // 17.1 C
-    attributes["humidity"] = 99; // 99 %
-    attributes["id"] = 38;
-	attributes["battery_low"] = 0;
-    attributes["channel"] = 1;
-    attributes["junk"] = 2;
+    attributes["length"] = 64;
+    attributes["data_0"] = 0x12345678;
+    attributes["data_1"] = 0x12345678;
   }
-
-//// 1 10 2 1 1 2 1 1 2 1 1 1 1 1 1 1 1 2 2 2 1 1 2 1 1 2 2 2 2 1 1 2 2 2 1 1 2 2 2 2 2 2 2 1 1 2 2 1 1 1 1 1 1 2 1 1 2 1 1 2 1 1 2 1 1 2 2 1
 
   virtual bool Demodulate(const CArray<uint16_t>& pulse, CAttributes& attributes) override
   {
@@ -65,7 +37,6 @@ public:
       AttributesToBitstream(attr, b, length);
       NibblesToPulse(b, length, pulse);
 
-
     return true;
   }
     
@@ -85,7 +56,6 @@ private:
 
     bool PulseToBytes(const CArray<uint16_t>& pulse, CArray<uint8_t>& bytes, int& length)
     {
-        // 1 10 2 1 1 2 1 1 2 1 1 1 1 1 1 1 1 2 2 2 1 1 2 1 1 2 2 2 2 1 1 2 2 2 1 1 2 2 2 2 2 2 2 1 1 2 2 1 1 1 1 1 1 2 1 1 2 1 1 2 1 1 2 1 1 2 2 1
         if (pulse.GetSize() < 20)
             return false;
 
@@ -144,9 +114,6 @@ private:
 
   bool NibblesToPulse(const CArray<uint8_t>& nibbles, int length, CArray<uint16_t>& pulse)
   {
-    //pulse.Add(PulseDuration(1));
-    //pulse.Add(PulseDuration(9)); // 9..11
-
       int pulseLong = PulseDuration(2);
       int pulseShort = PulseDuration(1);
 
@@ -159,7 +126,6 @@ private:
           
           pulse.Add(bit ? pulseLong : pulseShort);
       }
-      //pulse.Add(PulseDuration(1)); // asi na konci
     return true;
   }
 

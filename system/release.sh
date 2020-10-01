@@ -1,3 +1,7 @@
+# prepares filesystem for LA104, all files from approot.zip should be unpacked into the device root
+# uses visual shell, which is not maintained and I just switched to file manager for more rapid
+# development
+
 echo Building release package
 
 cp release/bin/28shell.elf release/shell.elf

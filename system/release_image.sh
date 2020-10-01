@@ -1,4 +1,7 @@
-# run buildall.sh
+# prepares filesystem for LA104, all files be copied into the device root
+# contains latest and most useful applications to show capabilities of LA104
+
+# at first run buildall.sh
 
 FROM=release/bin
 TO=release/image_la104/

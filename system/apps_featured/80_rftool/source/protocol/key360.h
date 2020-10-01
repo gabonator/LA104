@@ -5,27 +5,7 @@ public:
 	{
 		return 433920000UL;
 	}
-	/*
-  virtual int MinIndentifyCount() override
-  {
-    return 0;
-  }
 
-  virtual int MinDemodulateCount() override
-  {
-    return 0;
-  }
-
-  virtual bool Identify(CArray<int>& pulse) override
-  {
-    return false;
-  }
-
-  virtual int AttackPoint(CArray<int>& pulse) override
-  {
-    return 0;
-  }
-*/
   virtual void Example(CAttributes& attributes) override
   {
     // -512 (-51.2 C) ... 999 (+99.9 C)
@@ -44,29 +24,6 @@ public:
       return false;
       
     BitstreamToAttributes(b, length, attributes);
-
-/*
-    attributes["length"] = length; // count of bits
-    uint32_t data=0;
-    int bytes = b.GetSize(); //(length+7)/8;
-    for (int i=0; i<bytes; i++) // per each byte
-    {
-      bool last = i==bytes-1;
-      data <<= 8;
-      data |= b[i];
-      if ((i&3)==3 || last)
-      {
-//std::cout << "zapisujem " << i << " na index " << i/4 << "\n";       
-        switch (i/4) // store as dword
-        {
-          case 0: attributes["data64_0"] = data; break;
-          case 1: attributes["data64_1"] = data; break;
-          case 2: attributes["data64_2"] = data; break;
-          default: _ASSERT(0);
-        }
-        data = 0;
-      }
-    }*/
     Analyse(attributes);
     return true;
   }
@@ -84,30 +41,6 @@ public:
 
   virtual bool Modulate(const CAttributes& attr, CArray<uint16_t>& pulse) override
   {
-      /*
-    uint8_t nibblesData[16];
-    CArray<uint8_t> b(nibblesData, COUNT(nibblesData));
-    int length = attr["length"];
-    uint32_t data;
-    int bytes = (length+7)/8;
-    for (int i=0; i<bytes; i++)
-    {
-      if ((i&3) == 0)
-      {
-        switch (i/4)
-        {
-          case 0: data = attr["data64_0"]; break;
-          case 1: data = attr["data64_1"]; break;
-          case 2: data = attr["data64_2"]; break;
-          default: _ASSERT(0);
-        }
-      }
-      b.Add(data >> 24);
-      data <<= 8;
-    }
-
-    return BytesToPulse(b, length, pulse);
-       */
       uint8_t nibblesData[16];
       CArray<uint8_t> b(nibblesData, COUNT(nibblesData));
 

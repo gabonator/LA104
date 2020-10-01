@@ -12,3 +12,8 @@ If you want to format the 8MB eeprom drive, use *format.sh* or call 'sudo newfs_
 
 Credits:
     * based on this project: https://github.com/qihaiyan/fat12.git
+
+
+More tools:
+  - format.sh - formats the internal storage of LA104, results in clean disk
+  - snapshot.sh - downloads whole filesystem from LA104 (DSxxx) into single file for use in emulated environment (running LA104 apps from mac/pc, look for la104.fat file in repository)
