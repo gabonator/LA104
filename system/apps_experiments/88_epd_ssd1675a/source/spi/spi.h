@@ -24,9 +24,8 @@ public:
             case CPinIoBase::MOSI: return BIOS::GPIO::EPin::P1;
             case CPinIoBase::SCK: return BIOS::GPIO::EPin::P2;
             case CPinIoBase::CS: return BIOS::GPIO::EPin::P3;
-//            case CPinIoBase::MISO: return BIOS::GPIO::EPin::P4;
-            case CPinIoBase::BUSY: return BIOS::GPIO::EPin::CH4;
             case CPinIoBase::RESET: return BIOS::GPIO::EPin::P4;
+            case CPinIoBase::BUSY: return BIOS::GPIO::EPin::CH4;
             default:
                 _ASSERT(0);
                 return BIOS::GPIO::EPin::P1;
@@ -68,6 +67,7 @@ public:
       Set(CPinIoBase::CS, true);
       Set(CPinIoBase::SCK, true);
       Set(CPinIoBase::MOSI, false);
+      Set(CPinIoBase::RESET, true);
       deselect();
   }
     
@@ -80,50 +80,21 @@ public:
         PinMode(CPinIoBase::RESET, CPinIoBase::Input);
     }
 
-  uint8_t transfer(uint8_t b) 
-  {
-    uint8_t rec = 0;
-
-    for (int i = 0; i < 8; i++) 
-    {
-        Set(CPinIoBase::MOSI, b & (1<<(7-i))); //MSB first
-        Set(CPinIoBase::SCK, true);
-//        if (Get(CPinIoBase::MISO))
-//          rec |= 1<<(7-i);
-        Set(CPinIoBase::SCK, false);
-    }
-      
-    return rec;
-  }
-
   uint8_t transfer9(uint16_t b) 
   {
     uint8_t rec = 0;
 
-    if (b & 0x100)  
-      Set(CPinIoBase::RESET, 1);
-    else
-      Set(CPinIoBase::RESET, 0);
-    for (int i = 0; i < 8; i++) 
+    for (int i = 0; i < 9; i++) 
     {
-        Set(CPinIoBase::MOSI, b & (1<<(7-i))); //MSB first
+        Set(CPinIoBase::MOSI, b & (1<<(8-i))); //MSB first
+_Delay();
         Set(CPinIoBase::SCK, true);
-//        if (Get(CPinIoBase::MISO))
-//          rec |= 1<<(7-i);
+_Delay();
         Set(CPinIoBase::SCK, false);
+_Delay();
     }
       
     return rec;
-  }
-
-  void fixtransfer(uint8_t b) 
-  {
-    for (int i = 0; i < 8; i++) 
-    {
-        Set(CPinIoBase::MOSI, b & (1<<(7-i))); //MSB first
-        Set(CPinIoBase::SCK, true);
-        Set(CPinIoBase::SCK, false);
-    }
   }
 
   void select() 
@@ -136,13 +107,17 @@ public:
       Set(CPinIoBase::CS, true);
   }
 
- void reset() 
+  void reset() 
   {
       Set(CPinIoBase::RESET, false);
-  BIOS::SYS::DelayMs(200);
+      BIOS::SYS::DelayMs(200);
       Set(CPinIoBase::RESET, true);
-  BIOS::SYS::DelayMs(200);
+      BIOS::SYS::DelayMs(200);
+  }
 
+  void _Delay()
+  {
+    for (volatile int i=0; i<10; i++);
   }
 
   void wait()
@@ -160,26 +135,5 @@ EVERY(500) {
       }
     }
   }
-/*
-  bool wait()
-  {
-    int32_t tick = BIOS::SYS::GetTick();
-    int iter = 0;
-    while (Get(CPinIoBase::MISO))
-    {
-      if (iter++ > 1000)
-      {
-        iter = 0;
-        int32_t delta = BIOS::SYS::GetTick() - tick;
-        if (delta > 100)
-{
-BIOS::DBG::Print("[WAIT FAIL!]");
-          return false;
-}
-      }
-    }
-    return true;
-  }
-*/
 };
 
