@@ -69,7 +69,7 @@ void epdtest()
   epd.DisplayFrame();
 
   // This displays an image
-  epd.DisplayFrame(IMAGE_BLACK, IMAGE_RED);
+//  epd.DisplayFrame(IMAGE_BLACK, IMAGE_RED); // wrong resolution
 
   // Deep sleep
 //  epd.Sleep();

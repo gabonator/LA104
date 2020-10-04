@@ -30,11 +30,11 @@
 #include "epdif.h"
 
 // Display resolution
-#define EPD_WIDTH       104
-#define EPD_HEIGHT      212
+//#define EPD_WIDTH       104
+//#define EPD_HEIGHT      212
 
-//#define EPD_WIDTH       128
-//#define EPD_HEIGHT      296
+#define EPD_WIDTH       128
+#define EPD_HEIGHT      296
 
 // commands
 #define DRIVER_OUTPUT                               0x01
