@@ -39,7 +39,13 @@ namespace CONSOLE
             BIOS::LCD::Bar(window.left, cursor.y, window.right, cursor.y + 14, colorBack);
         }
 #endif
-
+        if (c == 0x08)
+        {
+          cursor.x -= 8;
+          if (cursor.x < window.left)
+            cursor.x = window.left;
+          return;
+        }
         if (c != 0x0d && c != 0x0a)
         {
             cursor.x += BIOS::LCD::Print(cursor.x, cursor.y, colorFront, colorBack, c);

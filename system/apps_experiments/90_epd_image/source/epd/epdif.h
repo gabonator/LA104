@@ -36,7 +36,7 @@ public:
 
   void SendCommand(unsigned char command);
   void SendData(unsigned char data);
-  void WaitUntilIdle(void);
+  bool Ready(void);
   void Reset(void);
 };
 

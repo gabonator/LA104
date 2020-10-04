@@ -4,51 +4,59 @@
 #include "../../os_host/source/framework/Serialize.h"
 #include "assert.h"
 #include "epd/epd.h"
-
 #include "bitmap/bitmap.h"
-
 using namespace BIOS;
+
+#include "file/shapes.h"
+#include "file/layout.h"
+#include "file/file.h"
 
 Epd epd;
 uint8_t mFileSystemBuffer[BIOS::FAT::SectorSize];
 uint16_t pixelBuffer[256];
 
-void CenterOnScreen(CRect& rcImage)
+CRect CenterOnScreen(const CRect& rcImage_)
 {
     CRect rcScreen(0, 0, BIOS::LCD::Width, BIOS::LCD::Height);
+    CRect rcImage(rcImage_);
     rcImage.Offset((rcScreen.Width() - rcImage.Width()) / 2, (rcScreen.Height() - rcImage.Height()) / 2);
+    return rcImage;
 }
 
-void DrawBitmap(char* name)
+
+void DrawBitmap(char* name, CRect(*place)(const CRect&))
 {
     BIOS::FAT::SetSharedBuffer(mFileSystemBuffer);
     CRect rcImage = GetImageSize(name);
-    CenterOnScreen(rcImage);
 
+    rcImage = place(rcImage);
     DrawImage(name, rcImage.left, rcImage.top);
 
     BIOS::FAT::SetSharedBuffer(nullptr);
 }
 
-int processPixelColor(uint16_t clr)
+
+int processPixelColor(uint16_t clr, int p)
 {
   int r = Get565R(clr);
-  int g = Get565R(clr);
+  int g = Get565G(clr);
   int b = Get565B(clr);
 
-  if (r + g + b < 180*3)
+  if (r > g+40 && r > b+40)
   {
-    // black
-    return 0; 
-  } else
-  if (r + r > g + b)
-  {
-    // red
-    // 249, 183, 183 -> 249*2
-    return 2;
+    return 2; // red
   }
-  // white
-  return 1;
+  else if (r + g + b < 50*3)
+  {
+    return 0; // black
+  }
+  else if (r + g + b < 200*3)
+  {
+    //return p&1; // gray
+    return 0;
+  }
+
+  return 1; // white
 }
 
 void BeginPass(int x, int y, int w, int h, int index)
@@ -60,37 +68,76 @@ void BeginPass(int x, int y, int w, int h, int index)
   epd.SendCommand(DATA_START_TRANSMISSION_1 + index*2);
 }
 
-void Transfer(char* name)
+CRect LoadAndProcess(char* name)
 {
   CRect rcEpd(0, 0, EPD_HEIGHT, EPD_WIDTH);
-  CenterOnScreen(rcEpd);
+  rcEpd = CenterOnScreen(rcEpd);
   BIOS::LCD::Bar(rcEpd, RGB565(d0d0d0));
+
+  static CPoint cpAnchor;
+  cpAnchor = CPoint(rcEpd.left, rcEpd.top);
+
   CRect rcFrame(rcEpd);
   rcFrame.Inflate(1, 1, 1, 1);
-  BIOS::LCD::Rectangle(rcFrame, RGB565(404040));
+  BIOS::LCD::Rectangle(rcFrame, RGB565(000000));
+  rcFrame.Inflate(1, 1, 1, 1);
+  BIOS::LCD::Rectangle(rcFrame, RGB565(000000));
 
-  DrawBitmap(name);
-  uint16_t newColor[3] = {RGB565(202020), RGB565(ffffff), RGB565(ff0000)};
+  static CRect rcFrame_;
+  rcFrame_ = rcEpd;
+
+  BIOS::LCD::Printf(rcFrame_.left+4, rcFrame_.top+4+16*0, RGB565(ff0000), RGBTRANS, "SSD1675 on LA104");
+  BIOS::LCD::Printf(rcFrame_.left+4, rcFrame_.top+4+16*1, RGB565(ff0000), RGBTRANS, "LA104");
+  BIOS::LCD::Printf(rcFrame_.left+4, rcFrame_.top+4+16*2, RGB565(000000), RGBTRANS, "%s", name);
+  BIOS::LCD::Printf(rcFrame_.right-70, rcFrame_.bottom-16, RGB565(ff0000), RGBTRANS, "valky.eu");
+
+  DrawBitmap(name, [](const CRect& rcImage) {
+    BIOS::LCD::Printf(rcFrame_.left+4, rcFrame_.top+4+16*3, RGB565(000000), RGBTRANS, "%dx%d", rcImage.Width(), rcImage.Height());
+    return CenterOnScreen(rcImage);
+  });
+/*
+// {
+
+    BIOS::FAT::SetSharedBuffer(mFileSystemBuffer);
+    CRect rcImage = GetImageSize(name);
+
+
+    CenterOnScreen(rcImage);
+
+    DrawImage(name, rcImage.left, rcImage.top);
+
+    BIOS::FAT::SetSharedBuffer(nullptr);
+
+// }
+*/
+  static const uint16_t newColor[3] = {RGB565(202020), RGB565(ffffff), RGB565(ff0000)};
   int height = rcEpd.Height();
 
+  // Process image 
   for (int x=rcEpd.left; x<rcEpd.right; x++)
   {
     BIOS::LCD::BufferBegin(CRect(x, rcEpd.top, x+1, rcEpd.bottom));
-    for (int y=0; y<height; y++)
-      pixelBuffer[y] = BIOS::LCD::GetPixel(x, y + rcEpd.top);
-    //BIOS::LCD::BufferRead(pixelBuffer, COUNT(pixelBuffer));
+    BIOS::LCD::BufferRead(pixelBuffer, COUNT(pixelBuffer));
     BIOS::LCD::BufferEnd();
 
     for (int i=0; i<height; i++) 
-      pixelBuffer[i] = newColor[processPixelColor(pixelBuffer[i])];
+      pixelBuffer[i] = newColor[processPixelColor(pixelBuffer[i], x+i)];
 
     BIOS::LCD::BufferBegin(CRect(x, rcEpd.top, x+1, rcEpd.bottom));
-    for (int y=0; y<height; y++)
-      BIOS::LCD::PutPixel(x, y+rcEpd.top, pixelBuffer[y]);
-//    BIOS::LCD::BufferWrite(pixelBuffer, COUNT(pixelBuffer));
+    BIOS::LCD::BufferWrite(pixelBuffer, COUNT(pixelBuffer));
     BIOS::LCD::BufferEnd();
   }
 
+  return rcEpd;
+}
+
+void Transfer(const CRect& rcEpd)
+{
+  static const uint16_t newColor[3] = {RGB565(202020), RGB565(ffffff), RGB565(ff0000)};
+  int height = rcEpd.Height();
+
+  // Transfer 2 sub images
+  _ASSERT(epd.Ready());
   for (int pass=0; pass<2; pass++)
   {
     BeginPass(0, 0, rcEpd.Width(), rcEpd.Height(), pass);
@@ -98,8 +145,7 @@ void Transfer(char* name)
     for (int x=rcEpd.left; x<rcEpd.right; x++)
     {
       BIOS::LCD::BufferBegin(CRect(x, rcEpd.top, x+1, rcEpd.bottom));
-      for (int y=0; y<height; y++)
-        pixelBuffer[y] = BIOS::LCD::GetPixel(x, y + rcEpd.top);
+      BIOS::LCD::BufferRead(pixelBuffer, COUNT(pixelBuffer));
       BIOS::LCD::BufferEnd();
 
       uint32_t buf = 0;
@@ -108,11 +154,11 @@ void Transfer(char* name)
         buf <<= 1;
         if (pass == 0) // bw
         {
-          if (pixelBuffer[height-1-y] == newColor[1])
+          if (pixelBuffer[y] == newColor[1])
             buf |= 1;
         } else // red
         {
-          if (pixelBuffer[height-1-y] == newColor[2])
+          if (pixelBuffer[y] == newColor[2])
             buf |= 1;
         }
 
@@ -122,39 +168,85 @@ void Transfer(char* name)
     }
     epd.DelayMs(2);
   }
+
+  // display
   epd.DisplayFrame();
 }
 
-void epdtest() 
+bool Wait()
 {
-  enum {
-    COLORED = 0,
-    UNCOLORED = 1,
-  };
+  CONSOLE::Print("      ");
+  long begin = BIOS::SYS::GetTick();
+  int phase = 0;
+  while (!epd.Ready())
+  { 
+    long duration = (BIOS::SYS::GetTick() - begin)/1000;
+    BIOS::SYS::DelayMs(500);
+    CONSOLE::Print("\x08\x08\x08\x08\x08\x08");
+    switch (phase++ % 3)
+    {
+      case 0: CONSOLE::Print("%2d .  ", duration); break;
+      case 1: CONSOLE::Print("%2d .. ", duration); break;
+      case 2: CONSOLE::Print("%2d ...", duration); break;
+    }
+    if (KEY::GetKey() != KEY::EKey::None)
+    {
+      CONSOLE::Print("\x08\x08\x08\x08\x08\x08");
+      CONSOLE::Print(" Cancel!\n");
+      return false;
+    }
+  }
+  CONSOLE::Print("\x08\x08\x08\x08\x08\x08");
+  CONSOLE::Print(" Done!\n");
+  return true;
+}
 
+CFileDialog mFile;
 
-  if (epd.Init() != 0) {
+void epdinit()
+{
+  CONSOLE::cursor = CPoint(0, 16);
+
+  if (!epd.Init()) {
     CONSOLE::Print("e-Paper init failed\n");
     return;
   }
+                               
+  CONSOLE::Print("e-Paper Ready,");
+  CONSOLE::Print(" Clearing screen ");
 
-  CONSOLE::Print("e-Paper init success\n");
-
-  /* This clears the SRAM of the e-paper display */
   epd.ClearFrame();
   epd.DisplayFrame();
-
-  Transfer((char*)"macka.bmp");
 }
 
-void setup()
+bool epdtest() 
 {
-}
+  CFileFilterSuffix filter(".BMP");
+  if (mFile.ModalShow(nullptr, "Load bitmap", &filter))
+  {
+    CRect rcClient(0, 16, LCD::Width, LCD::Height-16);
+    LCD::Bar(rcClient, RGB565(0000b0));
+    CONSOLE::cursor = CPoint(0, 16);
 
-void loop()
-{
-  epdtest();
-  BIOS::SYS::DelayMs(15000);
+    CRect rcEpd = LoadAndProcess(mFile.GetFilename());
+
+    if (!epd.Ready())
+    {
+      CONSOLE::Print("Clearing ");  
+
+      if (!Wait())
+        return true;
+    }
+
+    CONSOLE::Print("Transferring ");
+    Transfer(rcEpd);
+    if (!Wait())
+      return true;
+
+    return true;
+  }
+
+  return false;
 }
 
 #ifdef _ARM
@@ -168,18 +260,19 @@ int _main(void)
     CRect rc1(rcClient);
     rc1.bottom = 14;
     GUI::Background(rc1, RGB565(4040b0), RGB565(404040));    
-    LCD::Print(8, rc1.top, RGB565(ffffff), RGBTRANS, "SSD1675A - eInk display");
+    LCD::Print(8, rc1.top, RGB565(ffffff), RGBTRANS, "eInk display test application");
 
     CRect rc2(rcClient);
     rc2.top = rc2.bottom-14;
     GUI::Background(rc2, RGB565(404040), RGB565(202020));
-    LCD::Print(8, rc2.top, RGB565(808080), RGBTRANS, "...");
+    LCD::Printf(8, rc2.top, RGB565(808080), RGBTRANS, "SSD1675A %dx%d", EPD_WIDTH, EPD_HEIGHT);
 
-    setup();
+    epdinit();
     KEY::EKey key;
     while ((key = KEY::GetKey()) != KEY::EKey::Escape)
     {
-      loop();
+      if (!epdtest())
+        break;
     }
     return 0;
 }

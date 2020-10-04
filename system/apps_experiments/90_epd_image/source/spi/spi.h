@@ -87,11 +87,8 @@ public:
     for (int i = 0; i < 9; i++) 
     {
         Set(CPinIoBase::MOSI, b & (1<<(8-i))); //MSB first
-_Delay();
         Set(CPinIoBase::SCK, true);
-_Delay();
         Set(CPinIoBase::SCK, false);
-_Delay();
     }
       
     return rec;
@@ -110,30 +107,14 @@ _Delay();
   void reset() 
   {
       Set(CPinIoBase::RESET, false);
-      BIOS::SYS::DelayMs(200);
+      BIOS::SYS::DelayMs(50);
       Set(CPinIoBase::RESET, true);
-      BIOS::SYS::DelayMs(200);
+      BIOS::SYS::DelayMs(50);
   }
 
-  void _Delay()
+  bool ready()
   {
-    for (volatile int i=0; i<10; i++);
-  }
-
-  void wait()
-  {
-    enum { HIGH = 1, LOW = 0 };
-    int busy_value = HIGH;
-
-    while(1){
-EVERY(500) {
-  BIOS::DBG::Print("#");
-}
-      busy_value = Get(CPinIoBase::BUSY);
-      if(busy_value == LOW){
-        break;
-      }
-    }
+      return !Get(CPinIoBase::BUSY);
   }
 };
 

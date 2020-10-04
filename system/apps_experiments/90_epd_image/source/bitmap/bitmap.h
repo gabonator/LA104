@@ -48,7 +48,14 @@ void DrawImage(char* path, int bx, int by)
     reader >> CStream(&header, sizeof(header));
     reader.Seek(header.dwBfOffset);
     
+    CRect rcLine(bx, by+header.dwBiHeight-1, bx+header.dwBiWidth, by+header.dwBiHeight);
+
     for (int y=0; y<(int)header.dwBiHeight; y++)
+    {
+        BIOS::LCD::BufferBegin(rcLine);
+        rcLine.top--;
+        rcLine.bottom--;
+
         for (int x=0; x<(int)header.dwBiWidth; x++)
         {
             uint8_t color[4];
@@ -58,13 +65,18 @@ void DrawImage(char* path, int bx, int by)
             int c = RGB565RGB(color[2], color[1], color[0]);
             if (color[3] > 250)
             {
-                BIOS::LCD::PutPixel(bx+x, by+header.dwBiHeight-1-y, c);
+//                BIOS::LCD::PutPixel(bx+x, by+header.dwBiHeight-1-y, c);
+                BIOS::LCD::BufferWrite(c);
                 continue;
             }
+
             int c0 = BIOS::LCD::GetPixel(bx+x, by+header.dwBiHeight-1-y);
             int c1 = InterpolateColor(c0, c, color[3]);
-            BIOS::LCD::PutPixel(bx+x, by+header.dwBiHeight-1-y, c1);
+//            BIOS::LCD::PutPixel(bx+x, by+header.dwBiHeight-1-y, c1);
+            BIOS::LCD::BufferWrite(c1);
         }
+        BIOS::LCD::BufferEnd();
+    }
     reader.Close();
 }
 

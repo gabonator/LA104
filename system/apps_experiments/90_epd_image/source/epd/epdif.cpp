@@ -37,7 +37,7 @@ void EpdIf::DelayMs(unsigned int delaytime) {
 
 int EpdIf::IfInit(void) {
   spi.begin();
-  return 0;
+  return true;
 }
 
 void EpdIf::SendCommand(unsigned char command)
@@ -54,9 +54,9 @@ void EpdIf::SendData(unsigned char data)
   spi.deselect();
 }
 
-void EpdIf::WaitUntilIdle(void)
+bool EpdIf::Ready(void)
 {
-  spi.wait();
+  return spi.ready();
 }
 
 void EpdIf::Reset(void)

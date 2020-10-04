@@ -140,33 +140,48 @@ uint32_t sharedPixel;
 
 uint32_t ReadPixel(void)
 {
+  // reading word from ILI934 
+  // three reads to obtain two pixel information
+  //
+  // 1.   pixel: [BBBB BBBB GGGG GGGG]  
+  // 1&2. pixel: [RRRR RRRR bbbb bbbb] 
+  // 2.   pixel: [gggg gggg rrrr rrrr]
+
+  // RGB565 model:
+  // MSB             LSB
+  // bbbb bggg gggr rrrr
+
   uint32_t Tmp;
   if (sharedPixel != -1)
   {
+    // take .... .... BBBB B... blue component from previous read 
     Tmp = (sharedPixel & 0x00f8) << 8;
 
-    uint32_t Tmp2 = GPIOE->IDR;
+    uint32_t Tmp2 = GPIOE->IDR;  // GGGG GGGG RRRR RRRR
 
-    GPIOD->BSRR = GPIO_Pin_10;//    LCD_nRD = 1; 
+    GPIOD->BSRR = GPIO_Pin_10;   // LCD_nRD = 1; 
     sharedPixel = -1;
-    Tmp |= ((Tmp2 & 0xF800)>>11) | ((Tmp2 & 0x00FC)<<3); 
-    GPIOD->BRR = GPIO_Pin_10;//    LCD_nRD = 0; 
+    Tmp |= (Tmp2 & 0xFC00) >> 5; // join GGGG GG.. .... .... green component
+    Tmp |= (Tmp2 & 0x00F8) >> 3; // join .... .... RRRR R... red component
+    GPIOD->BRR = GPIO_Pin_10;    // LCD_nRD = 0; 
     return Tmp;
   } else
-  {
-    Tmp = (GPIOE->IDR);
-    GPIOD->BSRR = GPIO_Pin_10;//    LCD_nRD = 1; 
+  {   
+    Tmp = GPIOE->IDR;            // BBBB BBBB GGGG GGGG
 
-    GPIOD->BRR = GPIO_Pin_10;//    LCD_nRD = 0; 
-    Tmp = (Tmp & 0xF800) | ((Tmp & 0x00FC) << 3);
+    GPIOD->BSRR = GPIO_Pin_10;   // LCD_nRD = 1; 
+    GPIOD->BRR = GPIO_Pin_10;    // LCD_nRD = 0; 
+    Tmp = (Tmp & 0xF800) | ((Tmp & 0x00FC) << 3);  
+    // keep BBBB B... .... .... blue component 
+    // take .... .... GGGG GG.. green component and shift to left 3 bits
     asm("nop");
     asm("nop");
     asm("nop");
-    sharedPixel = GPIOE->IDR;
+    sharedPixel = GPIOE->IDR;    // RRRR RRRR bbbb bbbb
 
-    GPIOD->BSRR = GPIO_Pin_10;//    LCD_nRD = 1; 
-    Tmp |= ((sharedPixel) >> 11);
-    GPIOD->BRR = GPIO_Pin_10;//    LCD_nRD = 0; 
+    GPIOD->BSRR = GPIO_Pin_10;   // LCD_nRD = 1; 
+    Tmp |= (sharedPixel) >> 11;  // shift to red and join
+    GPIOD->BRR = GPIO_Pin_10;    // LCD_nRD = 0; 
     return Tmp;
   }
 }
@@ -209,6 +224,8 @@ void Set_Block(int x1, int y1, int x2, int y2)
 {
   x2--;
   y2--;
+
+  if (x2==x1) x2++; // workaround for reading pixels in single column 
 
   LCD_CMD_W(0x2A);
   LCD_DAT_W(y1 >> 8);

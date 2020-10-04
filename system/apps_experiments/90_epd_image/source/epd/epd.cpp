@@ -39,15 +39,18 @@ Epd::Epd() {
   height = EPD_HEIGHT;
 };
 
-int Epd::Init(void) {
+bool Epd::Init(void) {
   /* this calls the peripheral hardware interface, see epdif */
-  if (IfInit() != 0) {
-    return -1;
+  if (!IfInit()) {
+    return false;
   }
   /* EPD hardware init start */
   Reset();
   SendCommand(SW_RESET);
-  WaitUntilIdle();
+
+  if (!Ready())
+    return false;
+
   SendCommand(ANALOG_BLOCK);
   SendData(0x54);
   SendCommand(DIGITAL_BLOCK);
@@ -75,7 +78,7 @@ int Epd::Init(void) {
     SendData(init_data[i]);
   }
   /* EPD hardware init end */
-  return 0;
+  return true;
 }
 
 /**
@@ -151,35 +154,6 @@ void Epd::SetPartialWindowAux(const unsigned char* buffer, int x, int y, int w, 
 }
 
 /**
- *  @brief: Wait until the busy_pin goes HIGH
- */
-/*
-void Epd::WaitUntilIdle(void) {
-  enum { HIGH = 1, LOW = 0 };
-  int busy_value = HIGH;
-
-  while(1){
-    busy_value = digitalRead(BUSY_PIN);
-    if(busy_value == LOW){
-      break;
-    }
-  }
-}
-*/
-/**
- *  @brief: module reset.
- *          often used to awaken the module in deep sleep,
- *          see Epd::Sleep();
- */
-/*
-void Epd::Reset(void) {
-  DigitalWrite(reset_pin, LOW);
-  DelayMs(200);
-  DigitalWrite(reset_pin, HIGH);
-  DelayMs(200);
-}
-*/
-/**
  *  @brief: transmit partial data to the SRAM
  */
 void Epd::SetPartialWindow(const unsigned char* buffer_black, const unsigned char* buffer_red, int x, int y, int w, int l) {
@@ -233,7 +207,7 @@ void Epd::DisplayFrame(void) {
   SendCommand(DISPLAY_UPDATE_SEQUENCE_CFG);
   SendData(0xC7);    //Load LUT from MCU(0x32), Display update
   SendCommand(DISPLAY_UPDATE_SEQUENCE_RUN);
-  WaitUntilIdle();
+  //WaitUntilIdle();
 }
 
 /**

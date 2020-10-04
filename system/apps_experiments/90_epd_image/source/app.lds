@@ -1,6 +1,10 @@
 MEMORY
 {
-  rom (rx)  : ORIGIN = 0x0801ed00, LENGTH = 60K
+/*  rom (rx)  : ORIGIN = 0x0801ed00, LENGTH = 60K*/
+/*  rom (rx) : ORIGIN = 0x08064280, LENGTH = 80K*/
+  rom (rx) : ORIGIN = 0x08040300, LENGTH = 256K
+
+
   ram (rwx) : ORIGIN = 0x20004800, LENGTH = 16K
   null (rwx): ORIGIN = 0x00001000, LENGTH = 4K
 }
