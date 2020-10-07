@@ -68,6 +68,11 @@ void BeginPass(int x, int y, int w, int h, int index)
   epd.SendCommand(DATA_START_TRANSMISSION_1 + index*2);
 }
 
+void FinishPass()
+{
+  epd.DelayMs(2);
+}
+
 CRect LoadAndProcess(char* name)
 {
   CRect rcEpd(0, 0, EPD_HEIGHT, EPD_WIDTH);
@@ -86,30 +91,20 @@ CRect LoadAndProcess(char* name)
   static CRect rcFrame_;
   rcFrame_ = rcEpd;
 
-  BIOS::LCD::Printf(rcFrame_.left+4, rcFrame_.top+4+16*0, RGB565(ff0000), RGBTRANS, "SSD1675 on LA104");
-  BIOS::LCD::Printf(rcFrame_.left+4, rcFrame_.top+4+16*1, RGB565(ff0000), RGBTRANS, "LA104");
-  BIOS::LCD::Printf(rcFrame_.left+4, rcFrame_.top+4+16*2, RGB565(000000), RGBTRANS, "%s", name);
+  char *showName = strstr(name, "/");
+  showName = showName ? showName+1 : name;
+
+  BIOS::LCD::Printf(rcFrame_.left+4, rcFrame_.top+4+16*0, RGB565(ff0000), RGBTRANS, "SSD1675");
+  BIOS::LCD::Printf(rcFrame_.left+4, rcFrame_.top+4+16*1, RGB565(ff0000), RGBTRANS, "on LA104");
+  BIOS::LCD::Printf(rcFrame_.left+4, rcFrame_.top+4+16*2, RGB565(000000), RGBTRANS, "%s", showName);
+  BIOS::LCD::Printf(rcFrame_.right-70, rcFrame_.bottom-16, RGB565(000000), RGBTRANS, "  2020");
   BIOS::LCD::Printf(rcFrame_.right-70, rcFrame_.bottom-16, RGB565(ff0000), RGBTRANS, "valky.eu");
 
   DrawBitmap(name, [](const CRect& rcImage) {
     BIOS::LCD::Printf(rcFrame_.left+4, rcFrame_.top+4+16*3, RGB565(000000), RGBTRANS, "%dx%d", rcImage.Width(), rcImage.Height());
     return CenterOnScreen(rcImage);
   });
-/*
-// {
 
-    BIOS::FAT::SetSharedBuffer(mFileSystemBuffer);
-    CRect rcImage = GetImageSize(name);
-
-
-    CenterOnScreen(rcImage);
-
-    DrawImage(name, rcImage.left, rcImage.top);
-
-    BIOS::FAT::SetSharedBuffer(nullptr);
-
-// }
-*/
   static const uint16_t newColor[3] = {RGB565(202020), RGB565(ffffff), RGB565(ff0000)};
   int height = rcEpd.Height();
 
@@ -152,21 +147,15 @@ void Transfer(const CRect& rcEpd)
       for (int y=0; y<height; y++)
       {
         buf <<= 1;
-        if (pass == 0) // bw
-        {
-          if (pixelBuffer[y] == newColor[1])
-            buf |= 1;
-        } else // red
-        {
-          if (pixelBuffer[y] == newColor[2])
-            buf |= 1;
-        }
+
+        if (pixelBuffer[y] == newColor[pass+1])
+          buf |= 1;
 
         if ((y&7) == 7)
           epd.SendData(buf & 0xff);
       }
     }
-    epd.DelayMs(2);
+    FinishPass();
   }
 
   // display
@@ -212,8 +201,8 @@ void epdinit()
     return;
   }
                                
-  CONSOLE::Print("e-Paper Ready,");
-  CONSOLE::Print(" Clearing screen ");
+  CONSOLE::Print("e-Paper Ready, ");
+  CONSOLE::Print("Clearing screen ");
 
   epd.ClearFrame();
   epd.DisplayFrame();
@@ -232,7 +221,7 @@ bool epdtest()
 
     if (!epd.Ready())
     {
-      CONSOLE::Print("Clearing ");  
+      CONSOLE::Print("Busy ");  
 
       if (!Wait())
         return true;

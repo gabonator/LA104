@@ -17,6 +17,10 @@ Go to release section on top of this page, download *system.hex*. Power on the L
 
 #### News
 
+##### EInk display image loader
+
+- Application [90_epd_image](system/apps_featured/90_epd_image/) loads BMP images and transfers them into the eink display
+
 ##### RF Toolkit
 
 Ultimate toolkit for hacking OOK/ASK wireless devices (weather stations, wireless keys...) using CC1101 transceiver
@@ -165,7 +169,6 @@ Connect your midi keyboard with two wires (3V and P1 through 100-330 ohm resisto
     - [bin](system/bin) - here you will find main firmware HEX file (manager.hex) and few interesting applications. At first flash the manager.hex in DFU mode and after reboot, copy these ELF files to the device using USB cable
     - os_host - operating system implementation with file manager and ELF loader
     - os_library - dummy library used by client applications during linking
-    - apps_experiments - TBD
       - test1_noimport - simple application without importing any symbols. Just uses LA104 bios to draw some image. For testing whether the ELF file was properly generated and stripped and if it loads succesfully
       - test2_import - the same application, but it imports BIOS::KEY::GetKey to properly exit the application when pressing second button and BIOS::LCD::PutPixel instead of using LA104 bios function
       - test3_gui - some simple GUI rendering, with text drawing and windows
@@ -176,16 +179,12 @@ Connect your midi keyboard with two wires (3V and P1 through 100-330 ohm resisto
       - test10_i2c_direct - again with core library files to configure I2C transceiver to interface with BMP180 (BMP085) barometric pressure sensor. After merging this support code into host app, test11_i2c_api was made
       - test12_uart_api - after adding support code to host, this is the api test for UART on pins P1 & P2 (no other pins support HW uart on LA104)
       - test16_cc1101 - CC1101 transceiver sniffing Oregon scientific weather station sensors
-    - apps_arduino - demonstration how to use arduino libraries in LA104
       - test11_i2c_api - interfacing BMP180 (BMP085) arduino library with I2C api calls
       - test14_apds9960 - again I2C communication with APDS9960 color sensor / gesture recognizer. This time with original sparkfun arduino library and sample code without almost any changes. Showing how to run your arduino code directly on LA104
-    - apps - some applications worth trying
       - test4_snake - just snake game, not easy to control with the rotating encoders
       - test7_pwm_app - gui application for controlling PWM outputs, great tool for playing with RGB leds
       - test13_mp3 - mp3 player gui application, works with MD_YX5300 module
       - test15_charmap - shows ASCII character table used by OS
-    - hybrid - run any application as OSX native app for debugging and designing layouts
-  - this list wasn't updated for longer time
 
 ![Hybrid app on mac OSX](resources/hybridmp3.png)
 
@@ -235,38 +234,13 @@ Connect your midi keyboard with two wires (3V and P1 through 100-330 ohm resisto
   - ESP8266 AP webserver using AT commands (100% simple webserver with file system listing, using promises)
   - GPIO tool (simple 8 channel visualizer/controller) with 4 channel PWM generator (100%)
 
-#### In progress
-  - usb apps & screenshotter do not work reliably after last changes (partially fixed, needs more testing)
-  - advanced IR remote control (record & play)
-  - add manuals to all folders with brief description what which program does
-  - CC1101 RF waveform recorder / player (15% 41alchemy, stability problems with larger codebase)
-  - Setup debugging environment to determine the reason why app crashes at start when reaches some specific codebase size
-
-#### TODO list              
-  - ESP8266 AP scanner & password guesser (integration with UPC automatic password generator) 
-  - SIMCOM test app
-  - demonstration of hybrid app - SIMCOM test app running on PC/MAC and communicatiog through USB to UART
-  - sometimes loading of elf crashes when it was recently rewritten (invalidating cached buffer should help)
+#### TODO list
+  - sometimes flashing new image fails, entry point address change usually helps
   - soft USB disconnection, so we do not need to disconnect cable to switch USB profiles
-  - create CMakeLists for new applications
-  - original firmware freezes when test signal generator is running
-  - itegrate SUMP protocol to stock logic analyser application, including sampling speed and trigger
-  - move attribute section entry directive to library.h
-  - when switching USB profiles, disconnection is required. Some sort of software disconnection should be enough
-  - swapping UART/PWM/GPIO modes could cause troubles and short circuit by improper configuration of peripherals
-  - combining of GPIO and UART at the same time is not possible now
-  - add screenshots of gui & some video showing how it performs
   - finish conversion of original firmware into ELF (80%)
-  - optimize memory usage, switch to 500 byte clusters instead of 4k (2 buffers required => 8kb wasted)
-  - hybrid app use relative paths
+  - optimize memory usage, switch to 500 byte clusters instead of 4k (2 buffers required => 8kb wasted), or share disk IO buffer from bios
   - obtain FPGA code from manufacturer 
   - setup FPGA build environment
-  - tutorials: what toolchain to use, how to build
-  - add desc: toolchain, building, ld script?
-  - add blank states for gui shell/file manager, add error message to system.elf when shell was not found
-  - simple application for testing addressable RGB leds
-  - OK: beeper
-  - OK: faster pixel operations and custom lcd initialization (not available, since Bios functions are not open sourced)
 
 #### Ideas
   - floppy disk drive over USB 
