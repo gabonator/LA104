@@ -70,36 +70,25 @@ void DrawImage(char* path, int bx, int by)
 
 void SaveImage(char* path, CRect rc)
 {
-#ifdef __APPLE__
-    return;
-#endif
-
     CBufferedWriter writer;
-    //LCD::BufferBegin(rc); // TODO: not working
+    LCD::BufferBegin(rc);
     
     writer.Open(path);
-#ifdef __APPLE__
-    for (int y=rc.bottom-1; y>=rc.top; y--)
-        for (int x=rc.left; x<rc.right; x++)
-#else
     for (int x=rc.left; x<rc.right; x++)
         for (int y=rc.bottom-1; y>=rc.top; y--)
-#endif
-            writer << (uint16_t)LCD::GetPixel(x, y);
-    
+            writer << (uint16_t)LCD::BufferRead();
+
+    LCD::BufferEnd();
+
     writer.Close();
 }
 
 bool LoadImage(char* path, CRect rc)
 {
-#ifdef __APPLE__
-    return false;
-#endif
     CBufferedReader reader;
     if (!reader.Open(path))
         return false;
     
-//    int offset = 0;
     int fileOffset = 0;
     int pixelCount = BIOS::FAT::SectorSize/2;
     uint16_t* pixelData = (uint16_t*)BIOS::FAT::GetSharedBuffer();
@@ -117,19 +106,6 @@ bool LoadImage(char* path, CRect rc)
             reader.Seek(fileOffset);
         }
     }
-/*
-    for (int y=rc.top; y<rc.bottom; y++)
-        for (int x=rc.left; x<rc.right; x++)
-        {
-            int nCount = pixelCount - offset;
-            LCD::BufferWrite(pixelData[offset++]);
-            if (offset >= pixelCount)
-            {
-                fileOffset += BIOS::FAT::SectorSize;
-                reader.Seek(fileOffset);
-                offset = 0;
-            }
-        }
-*/
+    LCD::BufferEnd();
     return true;
 }

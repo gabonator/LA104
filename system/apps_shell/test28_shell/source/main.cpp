@@ -11,6 +11,7 @@ using namespace BIOS;
 #include "bitmap.h"
 #include "menu.h"
 
+uint8_t gFatSharedBuffer[BIOS::FAT::SharedBufferSize];
 
 #ifndef __APPLE__
 __attribute__((__section__(".persistent")))
@@ -26,7 +27,7 @@ void SetCookie(char* cookie)
 char* GetCookie()
 {
 #ifdef __APPLE__
-    return (char*) "experime/fractal";
+    return (char*) ""; //"experime/fractal";
 #endif
     if (mPersistentConfig[0] != 'G' || mPersistentConfig[1] != 'A' || mPersistentConfig[2] != 'B' || mPersistentConfig[3] != 's')
         return nullptr;
@@ -46,6 +47,7 @@ class CDirInfo
     char mIconName[16];
     char mExecName[64];
     static char* mRoot;
+    int mOrder;
 
 public:
     CDirInfo()
@@ -61,6 +63,7 @@ public:
         strcpy(mShortName, "");
         strcpy(mIconName, "");
         strcpy(mExecName, "");
+        mOrder = 0;
 
         mRoot = path;
         strcpy(mFileName, name);
@@ -68,11 +71,20 @@ public:
         bool hasIndex = false;
         CBufferedReader reader;
         {
-            strcpy(fullPath, path);
-            strcat(fullPath, "/");
-            strcat(fullPath, name);
-            strcat(fullPath, "/index.jsn");
-            hasIndex = reader.Open(fullPath);
+            if (strstr(name, ".LNK") == nullptr)
+            {
+                strcpy(fullPath, path);
+                strcat(fullPath, "/");
+                strcat(fullPath, name);
+                strcat(fullPath, "/index.lnk");
+                hasIndex = reader.Open(fullPath);
+            } else
+            {
+                strcpy(fullPath, path);
+                strcat(fullPath, "/");
+                strcat(fullPath, name);
+                hasIndex = reader.Open(fullPath);
+            }
         }
         if (hasIndex)
         {
@@ -99,6 +111,7 @@ public:
                 {
                     strcpy(mShortName, name);
                 }
+                mOrder = json["order"].GetNumber();
             } else
             {
                 strcpy(mShortName, name);
@@ -114,24 +127,25 @@ public:
         }
     }
     
-    char* GetRoot()
+    const char* GetRoot() const
     {
         return mRoot;
     }
-    char* GetShortName()
+    const char* GetShortName() const
     {
         return mShortName;
     }
-    char* GetFileName()
+    const char* GetFileName() const
     {
         return mFileName;
     }
-    char* GetIconName()
+    const char* GetIconName() const
     {
         return mIconName;
     }
     char* GetExecutable()
     {
+        /*
         if (mExecName[0] == 0)
         {
 #ifdef __APPLE__
@@ -139,6 +153,7 @@ public:
 #else
             char testExecName[64];
 #endif
+            // TODO!
             strcpy(testExecName, GetRoot());
             strcat(testExecName, "/");
             strcat(testExecName, GetFileName());
@@ -154,7 +169,12 @@ public:
                 FAT::Close(result);
             }
         }
+         */
         return mExecName;
+    }
+    int GetOrder()
+    {
+        return mOrder;
     }
 };
 
@@ -192,7 +212,7 @@ public:
     virtual CTopMenu::TItem GetItem(int i) override
     {
         if (i==0)
-            return CTopMenu::TItem{"LA104 apps", CTopMenu::TItem::EState::Default};
+            return CTopMenu::TItem{"LA104 ", CTopMenu::TItem::EState::Default};
         
         i--;
         if (i < mFolderStack.GetSize())
@@ -212,23 +232,27 @@ public:
         DrawIcons();
     }
     
-    void DrawIcon(int bx, int by, CDirInfo& info, bool on = false)
-    {
+    void DrawIcon(int bx, int by, CDirInfo& info, bool on, int row)
+    {        
         CRect rcIcon(bx-4, by-4, bx+64+4, by+64+4);
         char imgSrc[128];
-        strcpy(imgSrc, info.GetRoot());
-/*
-        for (int i=0; i<mFolderStack.GetSize(); i++)
+        if (strstr(info.GetFileName(), ".LNK"))
         {
+            strcpy(imgSrc, info.GetRoot());
             strcat(imgSrc, "/");
-            strcat(imgSrc, mFolderStack[i]);
+            strcat(imgSrc, info.GetIconName());
+        } else
+        {
+            strcpy(imgSrc, info.GetRoot());
+            strcat(imgSrc, "/");
+            strcat(imgSrc, info.GetFileName());
+            strcat(imgSrc, "/");
+            strcat(imgSrc, info.GetIconName());
         }
-*/
-        strcat(imgSrc, "/");
-        strcat(imgSrc, info.GetFileName());
-        strcat(imgSrc, "/");
-        char* pimgSrcFile = imgSrc + strlen(imgSrc);
-        strcpy(pimgSrcFile, on ? "folder1.tmp" : "folder0.tmp");
+    
+        char* suffix = imgSrc + strlen(imgSrc) - 4; // .BMP
+        _ASSERT(suffix[0] == '.');
+        strcpy(suffix, row == 0 ? (on ? ".TM1" : ".TM0") : (on ? ".TM3" : ".TM2"));
         
         if (!LoadImage(imgSrc, rcIcon))
         {
@@ -262,19 +286,20 @@ public:
             {
                 GUI::Background(rcIcon, RGB565(b0b0b0), RGB565(808080));
             }
+            
             if (info.GetIconName()[0])
             {
-                strcpy(pimgSrcFile, info.GetIconName());
+                strcpy(suffix, ".BMP");
                 DrawImage(imgSrc, bx, by);
             }
-            strcpy(pimgSrcFile, on ? "folder1.tmp" : "folder0.tmp");
+            strcpy(suffix, row == 0 ? (on ? ".TM1" : ".TM0") : (on ? ".TM3" : ".TM2"));
             SaveImage(imgSrc, rcIcon);
         }
         
         char line0[16];
         char line1[16];
         char line2[16];
-        int lines = FitText(info.GetShortName(), 15, line0, line1, line2);
+        int lines = FitText((char*)info.GetShortName(), 15, line0, line1, line2);
         
         if (on)
         {
@@ -309,31 +334,61 @@ public:
     {
         mItems.RemoveAll();
         
-//#ifdef __APPLE__
-//        static char* rootPath = (char*)"/Users/gabrielvalky/Documents/git/LA104/system/release/apps";
-//#else
-        static char* rootPath = (char*)"APPS";
-//#endif
-        
+        static char* rootPath = (char*)""; //(char*)"APPS";
+
         strcpy(mCurrentDir, rootPath);
         for (int i=0; i<mFolderStack.GetSize(); i++)
         {
             strcat(mCurrentDir, "/");
             strcat(mCurrentDir, mFolderStack[i]);
         }
-        
+
+        // TODO: collect files at first!!! CDirInfo ctor reads fs
+
         FAT::EResult eOpen = FAT::OpenDir(mCurrentDir);
         if (eOpen == FAT::EResult::EOk)
         {
             FAT::TFindFile file;
             while (FAT::FindNext(&file) == FAT::EResult::EOk)
             {
+                if (file.nAtrib & FAT::EAttribute::EHidden)
+                    continue;
+                
                 if (file.strName[0] == '.' || !(file.nAtrib & FAT::EAttribute::EDirectory))
                     continue;
                 
                 mItems.Add(CDirInfo(mCurrentDir, file.strName));
             }
         }
+
+        eOpen = FAT::OpenDir(mCurrentDir);
+        if (eOpen == FAT::EResult::EOk)
+        {
+            FAT::TFindFile file;
+            while (FAT::FindNext(&file) == FAT::EResult::EOk)
+            {
+                if (file.nAtrib & FAT::EAttribute::EHidden)
+                    continue;
+                if (file.strName[0] == '.' || (file.nAtrib & FAT::EAttribute::EDirectory))
+                    continue;
+                if (strstr(file.strName, ".LNK") == nullptr || strstr(file.strName, "INDEX") != nullptr)
+                    continue;
+
+                mItems.Add(CDirInfo(mCurrentDir, file.strName));
+            }
+        }
+        
+        SortItems();
+    }
+    
+    void SortItems()
+    {
+        mItems.Sort([](CDirInfo& a, CDirInfo& b) -> int {
+            int order = a.GetOrder() - b.GetOrder();
+            if (order != 0)
+                return order;
+            return strcmp(a.GetShortName(), b.GetShortName());
+        });
     }
     
     void DrawIcons()
@@ -346,7 +401,7 @@ public:
                 if (index < mItems.GetSize())
                 {
                     CDirInfo& item = mItems[index];
-                    DrawIcon(15+98*x, 30+104*y, item, HasFocus() && mCursor == index);
+                    DrawIcon(15+98*x, 30+104*y, item, HasFocus() && mCursor == index, y);
                 }
                 index++;
             }
@@ -361,7 +416,7 @@ public:
                 if (index < mItems.GetSize() && index == pos)
                 {
                     CDirInfo& item = mItems[index];
-                    DrawIcon(15+98*x, 30+104*y, item, select);
+                    DrawIcon(15+98*x, 30+104*y, item, select, y);
                 }
                 index++;
             }
@@ -384,7 +439,7 @@ public:
             if (mItems[mCursor].GetExecutable()[0])
             {
                 Save();
-                Execute(mItems[mCursor].GetRoot(), mItems[mCursor].GetFileName(), mItems[mCursor].GetExecutable());
+                Execute(mItems[mCursor].GetRoot(), mItems[mCursor].GetExecutable());
                 return;
             }
 
@@ -473,8 +528,9 @@ public:
         }
     }
 
-    void Execute(char* root, char* folder, char* file)
+    void Execute(const char* root, const char* file)
     {
+        /*
 	char fixedPath[64];
 	strcpy(fixedPath, root);
         strcat(fixedPath, "/");
@@ -503,6 +559,14 @@ public:
         }
         strcat(fixedPath, "/");
         strcat(fixedPath, file);
+         */
+        
+        char fixedPath[64];
+        strcpy(fixedPath, root);
+        strcat(fixedPath, "/");
+        strcat(fixedPath, file);
+
+        //BIOS::DBG::Print("[%s]n\n", fixedPath);
         BIOS::OS::SetArgument(fixedPath);
     }
 
@@ -615,7 +679,14 @@ CApplication app;
 __attribute__((__section__(".entry")))
 #endif
 int _main(void)
-{    
+{
+#ifdef __APPLE__
+    BIOS::FAT::Init();
+    //BIOS::OS::SetArgument((char*)"RFTOOL/RFTOOL.ELF");
+#endif
+    _ASSERT(sizeof(gFatSharedBuffer) >= BIOS::SYS::GetAttribute(BIOS::SYS::EAttribute::DiskSectorSize));
+    BIOS::FAT::SetSharedBuffer(gFatSharedBuffer);
+
     app.Create();
     app.WindowMessage( CWnd::WmPaint );
 
@@ -634,6 +705,8 @@ int _main(void)
     }
     
     app.Destroy();
+    BIOS::FAT::SetSharedBuffer(nullptr);
+
     return 0;
 }
 

@@ -25,8 +25,12 @@ namespace CONSOLE
             CRect rcTarget(window.left, y, window.right, y+1);
             BIOS::LCD::BufferBegin(rcOrigin);
             BIOS::LCD::BufferRead(buffer, rcOrigin.Width());
+            BIOS::LCD::BufferEnd();
+
             BIOS::LCD::BufferBegin(rcTarget);
             BIOS::LCD::BufferWrite(buffer, rcOrigin.Width());
+            BIOS::LCD::BufferEnd();
+
         }
     }
 #endif

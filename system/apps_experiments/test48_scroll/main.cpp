@@ -13,8 +13,11 @@ using namespace BIOS;
             CRect rcTarget(window.left, y, window.right, y+maxlines);
             BIOS::LCD::BufferBegin(rcOrigin);
             BIOS::LCD::BufferRead(buffer, rcOrigin.Width()*maxlines);
+            BIOS::LCD::BufferEnd();
+
             BIOS::LCD::BufferBegin(rcTarget);
             BIOS::LCD::BufferWrite(buffer, rcOrigin.Width()*maxlines);
+            BIOS::LCD::BufferEnd();
         }
     }
 

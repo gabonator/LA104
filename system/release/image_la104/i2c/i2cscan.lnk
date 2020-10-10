@@ -1,0 +1,1 @@
+{"description":{"short":"I2C scanner","long":"I2C bus scanner"},"icon":"i2cscan.bmp",execute:"i2cscan.elf",order:10}

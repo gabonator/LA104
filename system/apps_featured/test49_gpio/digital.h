@@ -173,6 +173,7 @@ public:
 			LCD::BufferWrite((uint16_t*)bufferOn, 10);
 		else
 			LCD::BufferWrite((uint16_t*)bufferOff, 10);
+		LCD::BufferEnd();
 
 		row.prev = row.logic;
 
@@ -181,8 +182,10 @@ public:
 		{
 			LCD::BufferBegin(CRect(rcLevel.left+1, y, rcLevel.right, y+1));
 			LCD::BufferRead(buffer, rcLevel.Width()-1);
+			LCD::BufferEnd();
 			LCD::BufferBegin(CRect(rcLevel.left, y, rcLevel.right-1, y+1));
 			LCD::BufferWrite(buffer, rcLevel.Width()-1);
+			LCD::BufferEnd();
 		}
 
 	}

@@ -1,0 +1,1 @@
+{"description":{short:"ESP8266",long:"ESP8266 uart wifi server"},"icon":"chip.bmp","execute":"esp8266.elf"}

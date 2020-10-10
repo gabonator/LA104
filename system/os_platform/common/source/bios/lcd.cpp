@@ -303,6 +303,18 @@ void Set_Pixel(uint16_t Color)
 int Get_Pixel()
 {
     int c = gHal->GetPixel(lcdX, lcdY);
+    lcdY++;
+    if (lcdY >= lcdY2)
+    {
+        lcdY = lcdY1;
+        lcdX++;
+        if (lcdX >= lcdX2)
+        {
+            lcdX = lcdX1;
+        }
+    }
+
+    /*
     lcdX++;
     if (lcdX >= lcdX2)
     {
@@ -313,6 +325,7 @@ int Get_Pixel()
             lcdY = lcdY1;
         }
     }
+     */
     return c;
 }
 

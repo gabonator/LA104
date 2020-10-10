@@ -1,0 +1,1 @@
+{"description":{short:"DS3231",long:"DS3231 real time clock"},"icon":"chip.bmp","execute":"ds3231.elf"}

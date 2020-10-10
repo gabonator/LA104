@@ -177,9 +177,13 @@ uint8_t _Round(int x, int y)
 	return 0;
 }
 
+bool reading = false;
+
 void BIOS::LCD::BufferBegin(const CRect& rc)
 {
+  _ASSERT(!reading);
   Set_Block(rc.left, FLIP(rc.bottom)+1, rc.right, FLIP(rc.top)+1);
+  reading = false;
 }
 
 void BIOS::LCD::BufferWrite(uint16_t clr)
@@ -195,22 +199,35 @@ void BIOS::LCD::BufferWrite(uint16_t* buffer, int length)
 
 uint16_t BIOS::LCD::BufferRead()
 {
-  ReadStart();
+  if (!reading)
+  {
+    reading = true;
+    ReadStart();
+  }
+
   uint32_t c = ReadPixel();
-  ReadFinish();
   return c;
 }
 
 void BIOS::LCD::BufferRead(uint16_t* buffer, int length)
 {
-  ReadStart();
+  if (!reading)
+  {
+    reading = true;
+    ReadStart();
+  }
+
   while (length--)
     *buffer++ = ReadPixel();
-  ReadFinish();
 }
 
 void BIOS::LCD::BufferEnd()
 {
+  if (reading)
+  {
+    ReadFinish();
+    reading = false;
+  }
 }
 
 int BIOS::LCD::Draw(int x, int y, unsigned short clrf, unsigned short clrb, const char *p)

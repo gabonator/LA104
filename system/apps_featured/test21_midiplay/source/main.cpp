@@ -258,6 +258,16 @@ public:
     virtual void OnChannelPan(int channel, int value) = 0;
     virtual void OnKeyPress(int channel, int key) = 0;
     virtual void OnKeyRelease(int channel, int key) = 0;
+
+    void Begin()
+    {
+        mOutput.Begin();
+    }
+
+    void End()
+    {
+        mOutput.End();
+    }
 };
 
 class CBarVisualizer
@@ -533,7 +543,7 @@ public:
     }
 };
 
-class CMidiPlayer : private CMidiReader
+class CMidiPlayer : public CMidiReader
 {
     CBarVisualizer mVisualizer;
     CKeyboardVisualizer mKeyboard;
@@ -1147,7 +1157,7 @@ int _main(void)
     char strDisplay[40];
     bool loaded{false};
 	
-	char* fileName = GetFileToPlay();
+    char* fileName = GetFileToPlay();
 	
     if (!fileName || strlen(fileName) == 0)
     {
@@ -1170,7 +1180,8 @@ int _main(void)
             }
         }
     }
-    
+
+    midi.Begin();
     midi.Draw();
 
     CRect rcDisplay(0, 16, BIOS::LCD::Width, 16+16);
@@ -1186,6 +1197,8 @@ int _main(void)
         BIOS::LCD::Bar(rcDisplay, RGB565(404040));
         BIOS::LCD::Print( (BIOS::LCD::Width-(int)strlen(strDisplay)*8)/2, 16, RGB565(ffffff), RGBTRANS, strDisplay);
     }
+
+    midi.End();
 
     Nop();
     BIOS::SYS::DelayMs(1500);

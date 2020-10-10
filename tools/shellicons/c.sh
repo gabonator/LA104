@@ -29,6 +29,8 @@ magick convert -composite compo1.png compo2.png fmeasure.bmp
 
 magick convert manager.png -resize 60x60 -background transparent -gravity Center -extent 64x64 manager.bmp
 
+magick convert chip.png -resize 60x60 -background transparent -gravity Center -extent 64x64 chip.bmp
+
 #https://www.clipartmax.com/download/m2i8H7K9N4i8N4m2_free-vector-or-logic-functions-digital-electronics-digital-electronics/
 
 rm compo1.png

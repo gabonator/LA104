@@ -286,7 +286,8 @@ void CWndUserManager::DrawLine( BIOS::FAT::TFindFile& fileInfo, int y, bool bSel
 	ui16 clr = bSelected ? RGB565(000000) : RGB565(00ffff);
 	if ( bDir )
 		clr = RGB565(ffffff);
-	if ( fileInfo.nAtrib & BIOS::FAT::EHidden || stricmp( strExt, "tmp" ) == 0)
+	if ( fileInfo.nAtrib & BIOS::FAT::EHidden || stricmp( strExt, "tmp" ) == 0 || 
+             stricmp( strExt, "tm0" ) == 0 || stricmp( strExt, "tm1" ) == 0)
 		clr = RGB565(008080);
 	ui16 clrBack = bSelected ? RGB565(00b0b0) : RGB565(0000b0);
 

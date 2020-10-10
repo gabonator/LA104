@@ -2,7 +2,10 @@
 class CMidiDevice
 {
 public:
-    CMidiDevice()
+    void Begin()
+    {
+    }
+    void End()
     {
     }
     void Send(int v)
@@ -16,11 +19,16 @@ public:
 class CMidiDevice
 {
 public:
-    CMidiDevice()
+    void Begin()
     {
       BIOS::GPIO::PinMode(BIOS::GPIO::P1, BIOS::GPIO::Uart);
       BIOS::GPIO::PinMode(BIOS::GPIO::P2, BIOS::GPIO::Uart);
       BIOS::GPIO::UART::Setup(31250, BIOS::GPIO::UART::length8);
+    }
+    void End()
+    {
+      BIOS::GPIO::PinMode(BIOS::GPIO::P1, BIOS::GPIO::Input);
+      BIOS::GPIO::PinMode(BIOS::GPIO::P2, BIOS::GPIO::Input);
     }
     void Send(int v)
     {
@@ -38,9 +46,13 @@ class CMidiDevice
     };
 
 public:
-    CMidiDevice()
+    void Begin()
     {
         BIOS::DAC::SetMode((BIOS::DAC::EMode)LogicOne, nullptr, 0);
+    }
+
+    void End()
+    {
     }
 
     void Send(int v)

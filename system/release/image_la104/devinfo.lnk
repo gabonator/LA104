@@ -1,0 +1,1 @@
+{"description":{"short":"Dev info","long":"Device info"},"icon":"devinfo.bmp","execute":"devinfo.elf",order:-10}

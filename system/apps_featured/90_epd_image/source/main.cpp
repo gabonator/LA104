@@ -97,8 +97,8 @@ CRect LoadAndProcess(char* name)
   BIOS::LCD::Printf(rcFrame_.left+4, rcFrame_.top+4+16*0, RGB565(ff0000), RGBTRANS, "SSD1675");
   BIOS::LCD::Printf(rcFrame_.left+4, rcFrame_.top+4+16*1, RGB565(ff0000), RGBTRANS, "on LA104");
   BIOS::LCD::Printf(rcFrame_.left+4, rcFrame_.top+4+16*2, RGB565(000000), RGBTRANS, "%s", showName);
-  BIOS::LCD::Printf(rcFrame_.right-70, rcFrame_.bottom-16, RGB565(000000), RGBTRANS, "  2020");
-  BIOS::LCD::Printf(rcFrame_.right-70, rcFrame_.bottom-16, RGB565(ff0000), RGBTRANS, "valky.eu");
+  BIOS::LCD::Printf(rcFrame_.right-70, rcFrame_.bottom-16*2, RGB565(000000), RGBTRANS, "    2020");
+  BIOS::LCD::Printf(rcFrame_.right-70, rcFrame_.bottom-16*1, RGB565(ff0000), RGBTRANS, "valky.eu");
 
   DrawBitmap(name, [](const CRect& rcImage) {
     BIOS::LCD::Printf(rcFrame_.left+4, rcFrame_.top+4+16*3, RGB565(000000), RGBTRANS, "%dx%d", rcImage.Width(), rcImage.Height());

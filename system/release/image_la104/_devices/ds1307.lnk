@@ -1,0 +1,1 @@
+{"description":{short:"DS1307",long:"DS1307 real time clock"},"icon":"chip.bmp","execute":"ds1307.elf"}

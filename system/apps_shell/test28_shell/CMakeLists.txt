@@ -2,9 +2,9 @@ cmake_minimum_required(VERSION 2.8)
 cmake_policy(SET CMP0054 NEW)
 cmake_policy(SET CMP0025 NEW)
 project(LA140_emulator)
-
+set(CMAKE_CXX_COMPILER clang)
 set(CMAKE_SUPPRESS_REGENERATION true)
-set (CMAKE_CXX_STANDARD 17)
+set (CMAKE_CXX_STANDARD 11)
 
 # call "brew install sdl2"
 
@@ -13,6 +13,8 @@ if (ARM)
 include_directories("../../os_platform/common/include")
 endif()
 
+include_directories("../../os_host/source")
+
 if (DESKTOP)           	
 find_package(SDL2 REQUIRED)
 include_directories(${SDL2_INCLUDE_DIRS})
@@ -20,8 +22,8 @@ include_directories(${SDL2_INCLUDE_DIRS})
 include_directories("../../os_platform/common/include")
 
 file(GLOB main_src 
-    "../../os_platform/apple/source/sdlmain.cpp"
-    "../../os_platform/apple/source/sdlhal.h"
+    "../../os_platform/mac_sdl/source/sdlmain.cpp"
+    "../../os_platform/mac_sdl/source/sdlhal.h"
     "../../os_platform/common/include/library.h"
 )
 
@@ -43,12 +45,11 @@ file(GLOB main_src
 )
 
 file(GLOB linker_script
-    "app.lds"
+    "source/app.lds"
 )
 endif()
 
 include_directories("source/")
-include_directories("../../os_host/source")
 
 file(GLOB application_src
     "source/*.cpp"
@@ -56,26 +57,29 @@ file(GLOB application_src
 )
 
 
+
 if (DESKTOP)           	
 
 #file(GLOB application_sdl
-#    "../os_platform/apple/sdlmain.cpp"
-#    "../os_platform/apple/sdlhal.h"
+#    "../os_platform/mac_sdl/sdlmain.cpp"
+#    "../os_platform/mac_sdl/sdlhal.h"
 #)
 
 source_group("platform\\main" FILES ${main_src})
 source_group("platform\\bios" FILES ${bios_src})
 source_group("platform\\framework" FILES ${framework_src})
-#source_group("source\\gui" FILES ${gui_src})
 endif()
 
 source_group("application" FILES ${application_src})
+
 source_group("include" FILES "../../os_platform/common/include")
 
 file(GLOB application_exec
   ${main_src} ${bios_src} ${framework_src} 
   ${gui_src} ${application_src} ${application_framework_src} ${application_windows_src} 
   ${application_oscilloscope_src} 
+  ${application_src_gui} ${application_src_modem} ${application_src_protocol}
+  ${application_src_framer} ${application_src_framework} ${application_src_streamer}
 )
 
 add_executable(application ${application_exec})

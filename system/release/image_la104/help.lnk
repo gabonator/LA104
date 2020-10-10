@@ -1,0 +1,1 @@
+{"description":{short:"Help",long:"Help"},"icon":"help.bmp","execute":"viewtxt.elf help.txt",order:10}

@@ -34,6 +34,9 @@ int _main(void)
         CONSOLE::Print("%02x ", data);
       }
     }
+
+    GPIO::PinMode(GPIO::P1, GPIO::Input);
+    GPIO::PinMode(GPIO::P2, GPIO::Input);
     
     return 0;
 }

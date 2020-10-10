@@ -1,0 +1,1 @@
+{"description":{short:"DS1820",long:"DS1820 temperature grapher"},"icon":"dstemper.bmp","execute":"dstemper.elf",order:70}

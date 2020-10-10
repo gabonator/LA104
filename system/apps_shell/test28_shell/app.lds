@@ -31,7 +31,7 @@ MEMORY
 */
   persistent (rwx) :   ORIGIN = 0x20004f00, LENGTH = 64K
   rom (rx) :   ORIGIN = 0x0801f000, LENGTH = 20K
-  ram (rwx) :  ORIGIN = 0x20005000, LENGTH = 12K
+  ram (rwx) : ORIGIN = 0x20004800, LENGTH = 16K
   null (rwx) : ORIGIN = 0xf0000000, LENGTH = 10K
 
 }

@@ -521,9 +521,7 @@ namespace UART
 
   void uart_deinit()
   {
-// TODO: called unexpectedly!!!
         gGpioStatusCode = GpioStatus::UartInternalError;
-        if (1) return;
   	RCC_APB1PeriphClockCmd(RCC_APB1Periph_USART3, DISABLE);
 
   	/* NVIC Configuration */
