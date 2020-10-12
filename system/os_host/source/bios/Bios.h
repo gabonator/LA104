@@ -17,7 +17,7 @@ namespace BIOS
       VersionDfu, VersionHardware, VersionSystem, VersionFpga,
       SerialNumber, LicenseNumber, LicenseValid, DisplayType, DiskType,
       DiskSectorSize, DiskSectorCount,
-      GpioStatus};
+      GpioStatus, KeyMask};
 
     uintptr_t GetAttribute(EAttribute eInternal);
   }

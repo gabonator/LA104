@@ -1,5 +1,5 @@
 # https://learn.adafruit.com/i2c-addresses/the-list
-# added PCF8574, PCF8591
+# added PCF8574, PCF8591, 24C256
 #
 0x00 Reserved - General Call Address
 0x01 Reserved for CBUS Compatibility
@@ -157,11 +157,15 @@
 0x4F INA219 High-Side DC Current/Voltage sensor
      PCF8591 AD Converter
 0x50 MB85RC I2C FRAM
+     24C256 EEPROM
 0x51 MB85RC I2C FRAM
+     24C256 EEPROM
 0x52 MB85RC I2C FRAM
+     24C256 EEPROM
      Nintendo Nunchuck controller
 0x53 ADXL345 3-axis accelerometer
      MB85RC I2C FRAM
+     24C256 EEPROM
 0x54 MB85RC I2C FRAM
 0x55 MB85RC I2C FRAM
 0x56 MB85RC I2C FRAM

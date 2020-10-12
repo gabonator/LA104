@@ -10,6 +10,7 @@ extern const void* ptrFont;
 #ifdef LA104
 extern uint32_t gGpioStatusCode;
 #endif
+extern "C" uint32_t gKeyMask;
 extern "C" volatile char lastChar;
 
 namespace BIOS
@@ -51,6 +52,8 @@ namespace BIOS
 #ifdef LA104
         case EAttribute::GpioStatus: return (uintptr_t)&gGpioStatusCode;
 #endif
+        case EAttribute::KeyMask: return (uintptr_t)&gKeyMask;
+
         default:
           _ASSERT(0);
           return (uintptr_t)nullptr;

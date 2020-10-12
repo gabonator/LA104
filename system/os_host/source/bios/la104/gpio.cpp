@@ -19,12 +19,16 @@ enum GpioStatus {
   UartWrongParity,
   UartWrongDataBits,
   UartWrongStopBits,
-  UartInternalError,
+  UartErrorInternal,
+  UartErrorOverrun,
+  UartErrorNoise,
+  UartErrorFraming,
+  UartErrorParity,
+  UartErrorOverflow,
   NotImplemented
 };
 
 uint32_t gGpioStatusCode = GpioStatus::Ok;
-
 
 namespace PIN
 {
@@ -521,7 +525,7 @@ namespace UART
 
   void uart_deinit()
   {
-        gGpioStatusCode = GpioStatus::UartInternalError;
+        //gGpioStatusCode = GpioStatus::UartInternalError;
   	RCC_APB1PeriphClockCmd(RCC_APB1Periph_USART3, DISABLE);
 
   	/* NVIC Configuration */
@@ -827,7 +831,19 @@ extern "C"
   void UartPushByte(uint8_t data)
   {
      if (BIOS::GPIO::UART::mUartBuffer.isFull())
-       BIOS::DBG::Print("uart buffer overflow");
+       gGpioStatusCode = GpioStatus::UartErrorOverflow;
      BIOS::GPIO::UART::mUartBuffer.push(data);
+  }
+
+  void UartPushError(uint16_t error) 
+  {
+    if (error & USART_FLAG_ORE)
+      gGpioStatusCode = GpioStatus::UartErrorOverrun;
+    if (error & USART_FLAG_NE)
+      gGpioStatusCode = GpioStatus::UartErrorNoise;
+    if (error & USART_FLAG_FE)
+      gGpioStatusCode = GpioStatus::UartErrorFraming;
+    if (error & USART_FLAG_PE)
+      gGpioStatusCode = GpioStatus::UartErrorParity;
   }
 }

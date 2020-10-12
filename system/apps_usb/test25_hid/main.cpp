@@ -32,6 +32,8 @@ void dbgPrint(const char* msg)
 
 }
 
+bool demo = false;
+
 extern "C" void InitUsb();
 
 using namespace BIOS;
@@ -111,6 +113,34 @@ int _main(void)
     {
       kb_report.modifiers = KB_MOD_NONE;
       kb_report.keymap[0] = 0;
+    }
+
+    if (key == KEY::F4)
+    {
+      demo = !demo; 
+    }
+    if (demo)
+    {
+      EVERY(200)
+      {
+        static int phase = 0;
+        mouse_report.dx = 0;
+        mouse_report.dy = 0;
+
+        if (phase < 10)
+          mouse_report.dx = 10;
+        else if (phase < 20)
+          mouse_report.dy = 10;
+        else if (phase < 30)
+          mouse_report.dx = -10;
+        else if (phase < 40)
+          mouse_report.dy = -10;
+
+        USB_ARC_MOUSE_tx(&mouse_report);
+
+        if (++phase >= 40)
+          phase = 0;
+      }
     }
   }
 

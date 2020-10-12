@@ -10,8 +10,9 @@
 volatile uint32_t gCounter = 0;
 volatile uint32_t Dly_mS = 0;
 volatile uint32_t gBeepCounter = 0;
-
 volatile char lastChar = 0;
+uint32_t gKeyMask = 0;
+
 char GetLastChar()
 {
   char t = lastChar;
@@ -43,11 +44,8 @@ void SysTickHandler(void)
   // keyboard
   uint32_t keyMask = GetKeys();
 
-  static uint32_t keyMaskOld = 0;
-
-  if (keyMaskOld != keyMask)
+  if (gKeyMask != keyMask)
   {
-//    lastChar = 0;
     if (keyMask & KeyUp)
       lastChar = '>';
     if (keyMask & KeyDown)
@@ -65,7 +63,7 @@ void SysTickHandler(void)
     if (keyMask & KeyF4)
       lastChar = '4';
 
-    keyMaskOld = keyMask;
+    gKeyMask = keyMask;
   }
 }
 
@@ -83,14 +81,20 @@ void TIM3_IRQHandler(void)
 #endif
 
 extern void UartPushByte(uint8_t data);
+extern void UartPushError(uint16_t error);
 
 void USART3_IRQHandler(void)
 {
 #ifdef LA104
-  if ((USART3->SR & USART_FLAG_RXNE) != (u16)RESET)
+  if (USART3->SR & USART_FLAG_RXNE)
   {
     UartPushByte(USART_ReceiveData(USART3));
   }
+  if (USART3->SR & (USART_FLAG_ORE | USART_FLAG_NE | USART_FLAG_FE | USART_FLAG_PE))
+  {
+    UartPushError(USART3->SR);
+  }
+
 #endif
 }
 

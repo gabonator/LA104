@@ -20,6 +20,10 @@ echo -n "{\"description\":{short:\"File manager\",long:\"File manager\"},\"icon\
 cp $FROM/28shell.elf $TO/gui.elf
 
 # root
+cp $FROM/17analys.elf $TO/analyser.elf
+cp $ICON/official.bmp $TO/analyser.bmp
+echo -n "{\"description\":{short:\"Logic analyser\",long:\"Logic analyser\"},\"icon\":\"analyser.bmp\",\"execute\":\"analyser.elf\",order:15}" > $TO/analyser.lnk
+
 cp $FROM/35viewla.elf $TO/viewtxt.elf
 cp $ICON/genie.bmp $TO/help.bmp
 cp help.txt $TO/help.txt
@@ -84,7 +88,7 @@ cp apps_featured/90_epd_image/res/*.bmp $TO/eink/
 
 #tools 
 mkdir $TO/tools
-cp $ICON/fsett.bmp $TO/tools/tools.bmp
+cp $ICON/fatom.bmp $TO/tools/tools.bmp
 echo -n "{\"description\":\"Tools\",\"icon\":\"tools.bmp\",order:9}" > $TO/tools/index.lnk
 
 cp $FROM/30dcf77.elf $TO/tools/dcf77.elf
@@ -96,19 +100,27 @@ cp $FROM/15charla.elf $TO/tools/charmap.elf
 cp $FROM/63ws_la.elf $TO/tools/ws2812.elf
 cp $FROM/49gpio.elf $TO/tools/gpio.elf
 
-#charmap.bmp {"description":{short:"Character map",long:"Character map"},"icon":"charmap.bmp","execute":"charmap.elf",order:50}
-#dcf77.bmp {"description":{short:"DCF77",long:"DCF77 decoder"},"icon":"dcf77.bmp","execute":"dcf77.elf",order:40}
-#temper.bmp {"description":{short:"DS1820",long:"DS1820 temperature grapher"},"icon":"dstemper.bmp","execute":"dstemper.elf",order:70}
-#sigmal.bmp {"description":{short:"GPIO",long:"GPIO and PWM controller"},"icon":"gpio.bmp","execute":"gpio.elf",order:90}
-#fatom.bmp {"description":"Tools","icon":"folder.bmp",order:9}
-#sequence.bmp {"description":{short:"Sequencer",long:"Sequencer and analyser"},"icon":"sequence.bmp","execute":"sequence.elf",order:60}
-#serial.bmp {"description":{short:"UART monitor",long:"UART monitor"},"icon":"uartmon.bmp","execute":"uartmon.elf"}
-#motor.bmp {"description":{short:"VFD Invt",long:"Invt VFD RS485 visualizer"},"icon":"vfd_invt.bmp","execute":"vfd_invt.elf"}
-#ws2812.bmp {"description":{short:"WS2812",long:"WS2812 addressable led tester"},"icon":"ws2812.bmp","execute":"ws2812.elf",order:100}
+echo -n "{\"description\":{short:\"Character map\",long:\"Character map\"},\"icon\":\"charmap.bmp\",\"execute\":\"charmap.elf\",order:50}" > $TO/tools/charmap.lnk
+echo -n "{\"description\":{short:\"DCF77\",long:\"DCF77 decoder\"},\"icon\":\"dcf77.bmp\",\"execute\":\"dcf77.elf\",order:40}" > $TO/tools/dcf77.lnk
+echo -n "{\"description\":{short:\"DS1820\",long:\"DS1820 temperature grapher\"},\"icon\":\"dstemper.bmp\",\"execute\":\"dstemper.elf\",order:70}" > $TO/tools/dstemper.lnk
+echo -n "{\"description\":{short:\"GPIO\",long:\"GPIO and PWM controller\"},\"icon\":\"gpio.bmp\",\"execute\":\"gpio.elf\",order:90}" > $TO/tools/gpio.lnk
+echo -n "{\"description\":{short:\"Sequencer\",long:\"Sequencer and analyser\"},\"icon\":\"sequence.bmp\",\"execute\":\"sequence.elf\",order:60}" > $TO/tools/sequence.lnk
+echo -n "{\"description\":{short:\"UART monitor\",long:\"UART monitor\"},\"icon\":\"uartmon.bmp\",\"execute\":\"uartmon.elf\"}" > $TO/tools/uartmon.lnk
+echo -n "{\"description\":{short:\"VFD Invt\",long:\"Invt VFD RS485 visualizer\"},\"icon\":\"vfd_invt.bmp\",\"execute\":\"vfd_invt.elf\"}" > $TO/tools/vfd_invt.lnk
+echo -n "{\"description\":{short:\"WS2812\",long:\"WS2812 addressable led tester\"},\"icon\":\"ws2812.bmp\",\"execute\":\"ws2812.elf\",order:100}" > $TO/tools/ws2812.lnk
+
+cp $ICON/charmap.bmp $TO/tools/charmap.bmp
+cp $ICON/dcf77.bmp $TO/tools/dcf77.bmp
+cp $ICON/temper.bmp $TO/tools/dstemper.bmp
+cp $ICON/signal.bmp $TO/tools/gpio.bmp
+cp $ICON/sequence.bmp $TO/tools/sequence.bmp
+cp $ICON/serial.bmp $TO/tools/uartmon.bmp
+cp $ICON/motor.bmp $TO/tools/vfd_invt.bmp
+cp $ICON/ws2812.bmp $TO/tools/ws2812.bmp
 
 #devices
 mkdir $TO/devices
-cp $ICON/fchip.bmp $TO/tools/devices.bmp
+cp $ICON/fchip.bmp $TO/devices/devices.bmp
 echo -n "{\"description\":{\"short\":\"Devices\",\"long\":\"Device drivers\"},\"icon\":\"devices.bmp\",order:7}" > $TO/devices/index.lnk
 
 cp $FROM/45simcom.elf $TO/devices/simcom.elf
@@ -122,17 +134,68 @@ cp $FROM/36espwww.elf $TO/devices/esp8266.elf
 cp $FROM/84maxdis.elf $TO/devices/max7219.elf
 cp $FROM/13mp3.elf $TO/devices/yx5300.elf
 
-#chip.bmp {"description":{short:"APDS9960",long:"APDS9960 color gesture sensor"},"icon":"chip.bmp","execute":"apds9960.elf"}
-#{"description":{short:"BMP085",long:"BMP085 Barometric sensor"},"icon":"chip.bmp","execute":"bmp085.elf"}
-#{"description":{short:"DHT22",long:"DHT11/DHT22 temperature humidity"},"icon":"chip.bmp","execute":"dht22.elf"}
-#{"description":{short:"DS1307",long:"DS1307 real time clock"},"icon":"chip.bmp","execute":"ds1307.elf"}
-#{"description":{short:"DS3231",long:"DS3231 real time clock"},"icon":"chip.bmp","execute":"ds3231.elf"}
-#{"description":{short:"ESP8266",long:"ESP8266 uart wifi server"},"icon":"chip.bmp","execute":"esp8266.elf"}
-#{"description":{short:"MAX7219",long:"MAX7219 display driver"},"icon":"chip.bmp","execute":"max7219.elf"}
-#{"description":{short:"PCF8591t",long:"PCF8591t I2C ADC"},"icon":"chip.bmp","execute":"pcf8591t.elf"}
-#{"description":{short:"SIMCOM",long:"SIMCOM gprs modem"},"icon":"chip.bmp","execute":"simcom.elf"}
-#{"description":{short:"YX5300",long:"YX5300 MP3 player"},"icon":"chip.bmp","execute":"yx5300.elf"}
+echo -n "{\"description\":{short:\"APDS9960\",long:\"APDS9960 color gesture sensor\"},\"icon\":\"chip.bmp\",\"execute\":\"apds9960.elf\"}" > $TO/devices/apds9960.lnk
+echo -n "{\"description\":{short:\"BMP085\",long:\"BMP085 Barometric sensor\"},\"icon\":\"chip.bmp\",\"execute\":\"bmp085.elf\"}" > $TO/devices/bmp085.lnk
+echo -n "{\"description\":{short:\"DHT22\",long:\"DHT11/DHT22 temperature humidity\"},\"icon\":\"chip.bmp\",\"execute\":\"dht22.elf\"}" > $TO/devices/dht22.lnk
+echo -n "{\"description\":{short:\"DS1307\",long:\"DS1307 real time clock\"},\"icon\":\"chip.bmp\",\"execute\":\"ds1307.elf\"}" > $TO/devices/ds1307.lnk
+echo -n "{\"description\":{short:\"DS3231\",long:\"DS3231 real time clock\"},\"icon\":\"chip.bmp\",\"execute\":\"ds3231.elf\"}" > $TO/devices/ds3231.lnk
+echo -n "{\"description\":{short:\"ESP8266\",long:\"ESP8266 uart wifi server\"},\"icon\":\"chip.bmp\",\"execute\":\"esp8266.elf\"}" > $TO/devices/esp8266.lnk
+echo -n "{\"description\":{short:\"MAX7219\",long:\"MAX7219 display driver\"},\"icon\":\"chip.bmp\",\"execute\":\"max7219.elf\"}" > $TO/devices/max7219.lnk
+echo -n "{\"description\":{short:\"PCF8591t\",long:\"PCF8591t I2C ADC\"},\"icon\":\"chip.bmp\",\"execute\":\"pcf8591t.elf\"}" > $TO/devices/pcf8591t.lnk
+echo -n "{\"description\":{short:\"SIMCOM\",long:\"SIMCOM gprs modem\"},\"icon\":\"chip.bmp\",\"execute\":\"simcom.elf\"}" > $TO/devices/simcom.lnk
+echo -n "{\"description\":{short:\"YX5300\",long:\"YX5300 MP3 player\"},\"icon\":\"chip.bmp\",\"execute\":\"yx5300.elf\"}" > $TO/devices/yx5300.lnk
 
+cp $ICON/chip.bmp $TO/devices/chip.bmp
+
+#cp $ICON/chip.bmp $TO/tools/bmp085.bmp
+#cp $ICON/chip.bmp $TO/tools/dht22.bmp
+#cp $ICON/chip.bmp $TO/tools/ds1307.bmp
+#cp $ICON/chip.bmp $TO/tools/ds3231.bmp
+#cp $ICON/chip.bmp $TO/tools/esp8266.bmp
+#cp $ICON/chip.bmp $TO/tools/max7219.bmp
+#cp $ICON/chip.bmp $TO/tools/pcf8591t.bmp
+#cp $ICON/chip.bmp $TO/tools/simcom.bmp
+#cp $ICON/chip.bmp $TO/tools/yx5300.bmp
+
+# usb
+mkdir $TO/usb
+cp $ICON/fusb.bmp $TO/usb/usb.bmp
+echo -n "{\"description\":{\"short\":\"USB Applications\",\"long\":\"USB Applications\"},\"icon\":\"usb.bmp\",order:2}" > $TO/usb/index.lnk
+
+cp $FROM/24ncdc.elf $TO/usb/cdc.elf
+cp $FROM/25hid.elf $TO/usb/hid.elf
+cp $FROM/26midi.elf $TO/usb/midi.elf
+
+echo -n "{\"description\":{short:\"Serial link\",long:\"Serial link\"},\"icon\":\"cdc.bmp\",\"execute\":\"cdc.elf\"}" > $TO/usb/cdc.lnk
+echo -n "{\"description\":{short:\"HID\",long:\"Human interface device\"},\"icon\":\"hid.bmp\",\"execute\":\"hid.elf\"}" > $TO/usb/hid.lnk
+echo -n "{\"description\":{short:\"MIDI\",long:\"Midi to uart\"},\"icon\":\"midi.bmp\",\"execute\":\"midi.elf\"}" > $TO/usb/midi.lnk
+
+cp $ICON/serial.bmp $TO/usb/cdc.bmp
+cp $ICON/mouse.bmp $TO/usb/hid.bmp
+cp $ICON/midi.bmp $TO/usb/midi.bmp
+
+cat > $TO/help.txt <<- EOM
+LA104 
+-------
+Hello, this is readme file for logic analyser "LA104" produced by Chinese company e-Design. This firmware was programmed by Gabriel Valky with help of github community and it tries to show full potential of this versatile device. Whole project is open sourced here: https://github.com/gabonator/LA104
+
+Use encoders move around icons to choose the application you would like to run. Press first button "SMPL" to open folder or execute program. When you want to exit running application, press second button "MENU".
+
+Application groups
+--------------------
+  - "File manager" - easy access to the file system, use this shell to run your own programs. To make it default, copy "fileman.elf" to "shell.elf". To revert it to this visual shell rename "gui.elf" to "shell.elf"
+  - "Help" - short manual should be present in all application groups for short description of all available programs
+  - "Tools" - set of very handy applications for hardware testing and logging (e.g. temperature logger, addressable led tester...) 
+  - "I2C bus tools" - contains I2C bus scanner and eeprom viewer
+  - "Device drivers" - various applications for testing of specific components
+  - "RF toolkit" - radio frequency analyser and synthesizer with CC1101 transceiver, including spectrum analyser and WebUsb analyser
+  - "eInk display tools" - this application allows you to test your eInk display
+  - "MIDI tools" - midi player over uart
+
+Version information
+---------------------
+oct/2020 release
+EOM
 
 cd release/image_la104
 rm la104apps.zip
