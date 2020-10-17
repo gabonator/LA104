@@ -24,6 +24,10 @@ extern void ExtFlash_CS_LOW(void);
 extern void ExtFlash_CS_HIGH(void);
 volatile bool eepromAccessMutex = false;
 
+uint32_t gFlashReadRange[2] = {-1, 0};
+uint32_t gFlashWriteRange[2] = {-1, 0};
+uint32_t gFlashAlertRange[2] = {-1, 0};
+
 u8   ExtFlashReadByte(void);
 u8   ExtFlashSendByte(u8 byte);
 void ExtFlashWrCtrl(u8 Cmd);
@@ -87,6 +91,16 @@ void ExtFlashSectorErase(u32 SecAddr)
 *******************************************************************************/
 bool ExtFlashSecWr(u8 *pBuf, u32 WrAddr)
 {
+    gFlashWriteRange[0] = min(gFlashWriteRange[0], WrAddr);
+    gFlashWriteRange[1] = max(gFlashWriteRange[1], WrAddr);
+    if (gFlashAlertRange[0] >= gFlashAlertRange[1])
+    {
+      if (gFlashAlertRange[0] >= WrAddr && gFlashAlertRange[0] >= gFlashAlertRange[1])
+      {
+        gFlashAlertRange[0] = -1;
+        gFlashAlertRange[1] = 0;
+      }
+    }
     u16 SecSize = SEC_SIZE;
     u32 i, Addr = WrAddr &  (~(SecSize - 1));
     ExtFlashSectorErase(Addr);
@@ -137,6 +151,8 @@ bool ExtFlashPageProg(u8 *pBuf, u32 WrAddr, u8 WrCmd)
 bool ExtFlashDataRd(u8 *pBuf, u32 RdAddr, u16 Lenght)
 {
     eepromAccessMutex = true;
+    gFlashReadRange[0] = min(gFlashReadRange[0], RdAddr);
+    gFlashReadRange[1] = max(gFlashReadRange[1], RdAddr);
 
 // disabling isr disconnects usb
 //  NVIC_DisableIRQ(USB_LP_CAN1_RX0_IRQn);

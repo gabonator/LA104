@@ -95,12 +95,14 @@ namespace BIOS
   {
     uintptr_t GetAttribute(BIOS::SYS::EAttribute eAttribute)
     {
+      static uint32_t dummy = 0;
       switch (eAttribute)
       {
         case EAttribute::CharRom: return (uintptr_t)font;
         case EAttribute::ScreenWidth: return 320;
         case EAttribute::ScreenHeight: return 240;
         case EAttribute::DiskSectorSize: return BIOS::FAT::SectorSize;
+        case EAttribute::GpioStatus: return (uintptr_t)&dummy;
 //        case EInternal::LastChar: return (uintptr_t)&lastChar;
         default:
           break;

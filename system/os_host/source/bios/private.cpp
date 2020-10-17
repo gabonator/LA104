@@ -9,6 +9,9 @@ static_assert((int)BIOS::SYS::EAttribute::DiskSectorCount == (int)EAttribute::Di
 extern const void* ptrFont;
 #ifdef LA104
 extern uint32_t gGpioStatusCode;
+extern uint32_t gFlashReadRange[2];
+extern uint32_t gFlashWriteRange[2];
+extern uint32_t gFlashAlertRange[2];
 #endif
 extern "C" uint32_t gKeyMask;
 extern "C" volatile char lastChar;
@@ -51,6 +54,9 @@ namespace BIOS
         case EAttribute::DiskSectorCount: return BIOS::FAT::SectorCount;
 #ifdef LA104
         case EAttribute::GpioStatus: return (uintptr_t)&gGpioStatusCode;
+        case EAttribute::FlashReadRange: return (uintptr_t)gFlashReadRange;
+        case EAttribute::FlashWriteRange: return (uintptr_t)gFlashWriteRange;
+        case EAttribute::FlashAlertRange: return (uintptr_t)gFlashAlertRange;
 #endif
         case EAttribute::KeyMask: return (uintptr_t)&gKeyMask;
 

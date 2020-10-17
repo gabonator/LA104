@@ -17,7 +17,8 @@ namespace BIOS
       VersionDfu, VersionHardware, VersionSystem, VersionFpga,
       SerialNumber, LicenseNumber, LicenseValid, DisplayType, DiskType,
       DiskSectorSize, DiskSectorCount,
-      GpioStatus, KeyMask};
+      GpioStatus, KeyMask, 
+      FlashReadRange, FlashWriteRange, FlashAlertRange};
 
     uintptr_t GetAttribute(EAttribute eInternal);
   }
@@ -226,6 +227,9 @@ namespace BIOS
     {
       enum EConfig {length8 = 0, length9 = 0x10, stopBits1 = 0, stopBits15 = 0x1, stopBits2 = 0x2,
         parityNone = 0, parityEven = 0x4, parityOdd = 0x08, flowNone = 0, flowHw = 0x20};
+      enum EConfigMask {length = EConfig::length8 | EConfig::length9, stopBits = EConfig::stopBits1 | EConfig::stopBits15 |
+          EConfig::stopBits2, parity = EConfig::parityNone | EConfig::parityEven | EConfig::parityOdd, flow = EConfig::flowNone | EConfig::flowHw
+      };
       void Setup(int baudrate, EConfig config);
       bool Available();
       uint8_t Read();

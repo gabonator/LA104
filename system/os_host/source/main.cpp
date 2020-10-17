@@ -2,6 +2,8 @@
 #include "source/bios/Bios.h"
 #include "source/main/Execute.h"
 
+void InvalidateFat();
+
 class CTokenizer
 {
   char* mString;
@@ -35,24 +37,6 @@ public:
   }
 };
 
-void DumpRoot()
-{
-    BIOS::FAT::EResult res = BIOS::FAT::OpenDir((char*)"");
-    if (res != BIOS::FAT::EOk)
-    {
-      BIOS::DBG::Print("Open dir failed!\n");
-      return;
-    }
-
-      BIOS::DBG::Print("Files:<");
-    BIOS::FAT::TFindFile f;
-    while ((res = BIOS::FAT::FindNext(&f)) == BIOS::FAT::EOk)
-    {
-      BIOS::DBG::Print("'%s', ", f.strName);
-    }
-      BIOS::DBG::Print(">\n");
-}
-
 int main()
 {                   
   // TODO: move to ds203 startup code
@@ -67,9 +51,6 @@ int main()
 #endif
 
   BIOS::OS::SetArgument((char*)"");
-  BIOS::LCD::Print(0, 0, RGB565(ffffff), RGB565(00000), "OS Revision: " __GITREVISION__);
-  BIOS::LCD::Print(0, 16, RGB565(ffffff), RGB565(00000), "Build date: " __DATE__ " " __TIME__);
-  BIOS::LCD::Print(0, 32, RGB565(ffffff), RGB565(00000), "Built by: " __USER__ " on " __OSTYPE__);
 
   char shell[64] = "shell.elf";
 

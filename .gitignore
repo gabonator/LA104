@@ -6,6 +6,7 @@
 /system/apps/test41_alchemy/root
 /system/**/build
 /system/**/_temp
+/tools/shellicons/*.bmp
 /temp/
 system/os_platform/win32_sdl/_build/
 

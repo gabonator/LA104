@@ -9,6 +9,8 @@
 
 int nSelected = 0;
 int nScroll = 0;
+bool mCheckAutorun = false;
+bool redrawTimer = false;
 
 const char CShapes_sel_left[] =
 "\x0e"
@@ -32,25 +34,59 @@ const char CShapes_sel_right[] =
 "              "
 "              ";
 
-char tolower(char c)
+void CFolder::Init()
 {
-  if(c >=65 && c<=90)
-    return c+32;
-  return c;
+        mpFlashReadRange = (uint32_t*)BIOS::SYS::GetAttribute(BIOS::SYS::EAttribute::FlashReadRange);
+        mpFlashWriteRange = (uint32_t*)BIOS::SYS::GetAttribute(BIOS::SYS::EAttribute::FlashWriteRange);
+        mpFlashAlertRange = (uint32_t*)BIOS::SYS::GetAttribute(BIOS::SYS::EAttribute::FlashAlertRange);
+
+	_ASSERT(mpFlashReadRange && mpFlashWriteRange && mpFlashAlertRange);
+	mpFlashWriteRange[0] = -1;
+	mpFlashWriteRange[1] = 0;
 }
 
-int stricmp(const char* s1, const char* s2) {
-  _ASSERT(s1 != NULL);
-  _ASSERT(s2 != NULL);
+void CFolder::BeginRead()
+{
+	mpFlashReadRange[0] = -1;
+	mpFlashReadRange[1] = 0;
+}
 
-  while (tolower((unsigned char) *s1) == tolower((unsigned char) *s2)) {
-    if (*s1 == '\0')
-      return 0;
-    s1++; s2++;
-  }
+void CFolder::EndRead()
+{
+	mCurrentFolderMin = mpFlashReadRange[0];
+	mCurrentFolderMax = mpFlashReadRange[1];
+	mpFlashAlertRange[0] = mCurrentFolderMin;
+	mpFlashAlertRange[1] = mCurrentFolderMax;
+	mAlertSet = mCurrentFolderMin <= mCurrentFolderMax;
+}
 
-  return (int) tolower((unsigned char) *s1) -
-    (int) tolower((unsigned char) *s2);
+
+void CFolder::Test()
+{
+/*
+	int y = BIOS::LCD::Height-14;
+        CRect rcBack( 0, y, BIOS::LCD::Width, y+14);
+	GUI::Background(rcBack, RGB565(404040), RGB565(404040));
+	BIOS::LCD::Printf( 4, y, RGB565(808080), RGBTRANS, "Access: RD %d..%d WR %d..%d AL %d..%d", (int)mCurrentFolderMin/BIOS::FAT::SectorSize, (int)mCurrentFolderMax/BIOS::FAT::SectorSize,
+(int)mpFlashWriteRange[0]/BIOS::FAT::SectorSize, (int)mpFlashWriteRange[1]/BIOS::FAT::SectorSize,
+(int)mpFlashAlertRange[0]/BIOS::FAT::SectorSize, (int)mpFlashAlertRange[1]/BIOS::FAT::SectorSize);
+
+mpFlashReadRange[0] = -1;
+mpFlashReadRange[1] = 0;
+mpFlashWriteRange[0] = -1;
+mpFlashWriteRange[1] = 0;
+*/
+}
+
+bool CFolder::CheckModification()
+{
+	if (!mAlertSet)
+		return false;
+	if (mpFlashAlertRange[0] <= mpFlashAlertRange[1])
+		return false;
+	mAlertSet = false;
+	BIOS::SYS::Beep(20);
+	return true;
 }
 
 void CWndUserManager::InitFileList()
@@ -60,8 +96,10 @@ void CWndUserManager::InitFileList()
 
 bool CWndUserManager::LoadFileList(char* strPath)
 {
+	CFolder::BeginRead();
 	if ( BIOS::FAT::OpenDir(strPath) != BIOS::FAT::EOk )
 	{
+		CFolder::EndRead();
 		return false;
 	}
 
@@ -86,12 +124,25 @@ bool CWndUserManager::LoadFileList(char* strPath)
 		if ( m_arrFiles.GetSize() >= m_arrFiles.GetMaxSize() )
 			break;
 	}
+	CFolder::EndRead();
 	return true;
 }
 
 void CWndUserManager::SortFileList()
 {
 	m_arrFiles.Sort( CompareFile );
+/*
+	if (!mCheckAutorun)
+		return;
+	mCheckAutorun = false;
+	// TODO: check duplicity
+	for (int i=0; i<m_arrFiles.GetSize(); i++)
+		if (strcmp(m_arrFiles[i].strName, "AUTORUN.ELF") == 0)
+		{
+			Exec(m_strCurrentPath, m_arrFiles[i].strName);
+			return;
+		}
+*/
 }
 
 CWndUserManager::CWndUserManager()
@@ -103,34 +154,44 @@ void CWndUserManager::Create(CWnd *pParent, ui16 dwFlags)
 {
 	CWnd::Create("CWndManager", dwFlags, CRect(0, 16, BIOS::LCD::Width, BIOS::LCD::Height), pParent);
 	InitFileList();
-	m_dwExecuteAddress = 0;
 	strcpy(mExtraArgument, "");
+	CFolder::Init();
+        SetTimer(150);
 }
 
 /*static*/ int CWndUserManager::CompareFile( BIOS::FAT::TFindFile& fA, BIOS::FAT::TFindFile& fB )
 {
-	int nTest = (fA.nAtrib & BIOS::FAT::EDirectory) - (fB.nAtrib & BIOS::FAT::EDirectory);
-	if ( nTest != 0 )
-		return nTest;
-	if ( strcmp(fA.strName, "..") == 0 )
-		return 1;
-	if ( strcmp(fB.strName, "..") == 0 )
-		return -1;
-	char* strExtA = strstr( fA.strName, "." );
-	char* strExtB = strstr( fB.strName, "." );
-	if ( strExtA != NULL && strExtB != NULL )
+	auto copyext = [](char* ext, char* to) 
+        { 
+        	if (!ext)
+		{
+			*to = 0;
+			return;
+		}
+		strcpy(to, ext+1);
+        };
+
+	auto prefix = [](BIOS::FAT::TFindFile& f)
 	{
-		nTest = strcmp( strExtA, strExtB );
-		if ( nTest != 0 )
-			return nTest;
-	} else
-	if ( strExtA == NULL && strExtB == NULL )
-	{
-	} else
-	if ( strExtA == NULL )
-		return 1;
-	nTest = strcmp( fA.strName, fB.strName );
-	return nTest;
+		if (f.strName[0] == '.')
+			return '0';
+	        if (f.nAtrib & BIOS::FAT::EDirectory)
+			return '1';
+		return '2';
+	};
+
+	char fileA[8];
+	char fileB[8];
+	fileA[0] = prefix(fA);
+	fileB[0] = prefix(fB);
+	copyext(strstr(fA.strName, "."), fileA+1);
+	copyext(strstr(fB.strName, "."), fileB+1);
+
+        int diff = strcmp(fileB, fileA);
+        if (diff != 0)
+          return diff;
+
+	return strcmp(fB.strName, fA.strName);
 }
 
 void DrawDelimLines(int y, ui16 clr)
@@ -191,7 +252,6 @@ void CWndUserManager::OnPaint()
 	}
 	for ( ; i < MaxLines; i++)
 	{
-//		BIOS::LCD::Bar( 0, y, /*320*/400-8, y+14, RGB565(0000b0) );
           CRect rcBack( 0, y, /*320*/BIOS::LCD::Width-8, y+14);
 
 	  GUI::Background(rcBack, RGB565(101010), RGB565(404040));
@@ -286,8 +346,7 @@ void CWndUserManager::DrawLine( BIOS::FAT::TFindFile& fileInfo, int y, bool bSel
 	ui16 clr = bSelected ? RGB565(000000) : RGB565(00ffff);
 	if ( bDir )
 		clr = RGB565(ffffff);
-	if ( fileInfo.nAtrib & BIOS::FAT::EHidden || stricmp( strExt, "tmp" ) == 0 || 
-             stricmp( strExt, "tm0" ) == 0 || stricmp( strExt, "tm1" ) == 0)
+	if ((fileInfo.nAtrib & BIOS::FAT::EHidden) || strncmp(strExt, "TM", 2) == 0)
 		clr = RGB565(008080);
 	ui16 clrBack = bSelected ? RGB565(00b0b0) : RGB565(0000b0);
 
@@ -302,8 +361,8 @@ void CWndUserManager::DrawLine( BIOS::FAT::TFindFile& fileInfo, int y, bool bSel
   	}
         clrBack = RGBTRANS;
 
-	if ( stricmp( strExt, "hex" ) == 0 || stricmp( strExt, "elf" ) == 0 || 
-		 stricmp( strExt, "adr" ) == 0 || stricmp( strExt, "exe" ) == 0 )
+	if ( strcmp( strExt, "HEX" ) == 0 || strcmp( strExt, "ELF" ) == 0 || 
+		 strcmp( strExt, "ADR" ) == 0 || strcmp( strExt, "EXE" ) == 0 )
 	{
 		clr = RGB565(00ff00);
 	}
@@ -347,8 +406,9 @@ void CWndUserManager::OnKey(int nKey)
 			nSelected++;
 			if ( FixScrollPosition() )
 			{
-				KillTimer();
-				SetTimer(150);
+				//KillTimer();
+				//SetTimer(150);
+				redrawTimer = true;
 				DrawLine( nSelected, true );
 				DrawProgress();
 			}
@@ -372,8 +432,7 @@ void CWndUserManager::OnKey(int nKey)
 			nSelected--;
 			if ( FixScrollPosition() )
 			{
-				KillTimer();
-				SetTimer(150);
+				redrawTimer = true;
 				DrawLine( nSelected, true );
 				DrawProgress();
 			}
@@ -432,15 +491,27 @@ void CWndUserManager::OnKey(int nKey)
 			Invalidate();
 		} else
 		{
-			Exec(m_strCurrentPath, m_arrFiles[nSelected].strName, m_arrFiles[nSelected].nFileLength);
+			Exec(m_strCurrentPath, m_arrFiles[nSelected].strName);
 		}
 	}
 }
 
 void CWndUserManager::OnTimer()
 {
-	Invalidate();
-	KillTimer();
+        if (CFolder::CheckModification())
+	{
+		LoadFileList(m_strCurrentPath);
+		SortFileList();
+
+		mCheckAutorun = true;
+		redrawTimer = true;
+	}
+
+	if (redrawTimer)
+	{
+		Invalidate();	
+		redrawTimer = false;
+	}
 }
 
 void CWndUserManager::SelectFile(char* strName)
@@ -473,7 +544,7 @@ void CWndUserManager::OnMessage(CWnd* pSender, int code, uintptr_t data)
 	}
 }
 
-void CWndUserManager::Exec(char* strPath, char* strFile, int nLength)
+void CWndUserManager::Exec(char* strPath, char* strFile)
 {
 	char strFullName[128];
 	if ( strPath[0] == 0 )
@@ -487,40 +558,7 @@ void CWndUserManager::Exec(char* strPath, char* strFile, int nLength)
 	strcat(strFullName, strFile);
 
 	char* strSuffix = strrchr(strFile, '.');
-	enum {
-		ENone,
-		EHex,
-		EElf,
-		EBmp,
-		EWav,
-		EAdr,
-		ETxt,
-		EExe,
-		ETmp
-	} eType = ENone;
-
-	if ( strSuffix )
-	{
-		strSuffix++;
-		if ( stricmp( strSuffix, "hex" ) == 0 )
-			eType = EHex;
-		else if ( stricmp( strSuffix, "elf" ) == 0 )
-			eType = EElf;
-		else if ( stricmp( strSuffix, "bmp" ) == 0 )
-			eType = EBmp;
-		else if ( stricmp( strSuffix, "wav" ) == 0 )
-			eType = EWav;
-		else if ( stricmp( strSuffix, "adr" ) == 0 )
-			eType = EAdr;
-		else if ( stricmp( strSuffix, "txt" ) == 0 )
-			eType = ETxt;
-		else if ( stricmp( strSuffix, "exe" ) == 0 )
-			eType = EExe;
-		else if ( stricmp( strSuffix, "tmp" ) == 0 )
-			eType = ETmp;
-	}
-
-	if ( eType != EElf )
+	if (!strSuffix || strcmp(strSuffix, ".ELF") != 0)
 	{
 		m_wndMessage.Show(this, "Manager", "Unknown file suffix", RGB565(FF0000));
 		return;
@@ -532,77 +570,4 @@ void CWndUserManager::Exec(char* strPath, char* strFile, int nLength)
 	  strcat(strFullName, mExtraArgument);
 	}
         BIOS::OS::SetArgument(strFullName);
-
-/*
-	if ( eType == EElf )
-	{
-		m_dwExecuteAddress = ElfExecute( strFullName );
-	}
-	if ( eType == EHex )
-	{
-		ui32 dwEntry, dwBegin, dwEnd;
-		if ( !HexGetInfo(strFullName, dwEntry, dwBegin, dwEnd) )
-		{
-			m_wndMessage.Show(this, "Manager", "Failed to load!", RGB565(FF0000));
-			return;
-		}
-		if ( IsModuleLoaded( strFile, nLength, dwEntry, dwBegin, dwEnd ) )
-		{
-			//CCookies::SetCookie( (char*)"gui.manager.last", strFullName ); 
-			//Settings.Save();
-			BIOS::SYS::Execute( dwEntry );
-			// on win32 it continues...
-			Invalidate();
-			return;
-		}
-		if ( CheckModuleConflict( dwBegin, dwEnd ) )
-		{
-			AddModule( strFile, nLength, dwEntry, dwBegin, dwEnd );
-			SaveModuleList();
-			if ( !HexLoad( strFullName ) )
-			{
-				m_wndMessage.Show(this, "Manager", "Failed to execute!", RGB565(FF0000));
-			} else
-			{
-				//CCookies::SetCookie( (char*)"gui.manager.last", strFullName ); 
-				//Settings.Save();
-BIOS::DBG::Print("Entry=%08x\n", dwEntry);
-
-				BIOS::SYS::Execute( dwEntry );
-				// on win32 it continues...
-				Invalidate();
-			}
-		} else
-			m_wndMessage.Show(this, "Manager", "Module conflict, won't load", RGB565(FFFF00));
-	}
-	if ( eType == EAdr )
-	{
-		ui32 dwBegin, dwEnd;
-		FpgaGetInfo(strFullName, dwBegin, dwEnd);
-		if ( FpgaLoad(strFullName) )
-		{
-			m_wndMessage.Show(this, "Manager", "Image flashed successfully", RGB565(FFFF00));
-			AddModule( strFile, nLength, (ui32)-1, dwBegin, dwEnd );
-			SaveModuleList();
-		}
-		else
-			m_wndMessage.Show(this, "Manager", "Error flashing", RGB565(FF0000));
-
-	}
-	if ( eType == EExe )
-	{
-#ifdef _WINDOWS
-		char pszFileName[256];
-		GetModuleFileName( NULL, pszFileName, 256 );
-		char* strModuleName = strrchr( pszFileName, '\\' );
-		strModuleName = strModuleName ? strModuleName + 1 : pszFileName;
-		if ( stricmp(strFullName + strlen(strFullName) - strlen(strModuleName), strModuleName ) == 0 )
-			m_wndMessage.Show(this, "Manager", "Already running!", RGB565(FF0000));
-		else
-			ShellExecuteA( NULL, "open", strFullName, NULL, NULL, CWnd::SwShow );
-#else
-		m_wndMessage.Show(this, "Manager", "Cannot execute Win32 app", RGB565(FF0000));
-#endif
-	}
-*/
 }

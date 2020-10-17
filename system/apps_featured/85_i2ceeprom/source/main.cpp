@@ -1,6 +1,5 @@
 #include <library.h>
 #include "application.h"
-#include "assert.h"
 
 CApplication app;
 

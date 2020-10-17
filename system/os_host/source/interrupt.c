@@ -86,13 +86,13 @@ extern void UartPushError(uint16_t error);
 void USART3_IRQHandler(void)
 {
 #ifdef LA104
-  if (USART3->SR & USART_FLAG_RXNE)
-  {
-    UartPushByte(USART_ReceiveData(USART3));
-  }
   if (USART3->SR & (USART_FLAG_ORE | USART_FLAG_NE | USART_FLAG_FE | USART_FLAG_PE))
   {
     UartPushError(USART3->SR);
+  }
+  if (USART3->SR & USART_FLAG_RXNE)
+  {
+    UartPushByte(USART_ReceiveData(USART3));
   }
 
 #endif

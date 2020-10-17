@@ -413,7 +413,7 @@ uintptr_t GetAttribute(enum EAttribute attribute)
     case VersionFpga: return (uintptr_t)(char*)0;
     case SerialNumber: return (uintptr_t)(uint32_t)__Bios(SYSINFO, PRDT_SN);
     case LicenseNumber: return (uintptr_t)0;
-    case LicenseValid: return (uintptr_t)0;
+    case LicenseValid: return (uintptr_t)(uint32_t)__Bios(SYSINFO, LICENCE);
     case DisplayType: return (uintptr_t)(char*)"ili9341";
     case DiskType: return (uintptr_t)0;
     default: return 0;

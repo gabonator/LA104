@@ -285,7 +285,7 @@ namespace I2C
       RCC_APB1PeriphClockCmd(I2Cx_RCC, DISABLE);
       I2C_Cmd(I2Cx, DISABLE);
    
-      RCC_APB2PeriphClockCmd(I2C_GPIO_RCC, DISABLE);
+//      RCC_APB2PeriphClockCmd(I2C_GPIO_RCC, DISABLE); // internal eeprom wont work
       GPIO_InitStruct.GPIO_Pin = I2C_PIN_SCL | I2C_PIN_SDA;
       GPIO_InitStruct.GPIO_Mode = GPIO_Mode_IN_FLOATING;
       GPIO_InitStruct.GPIO_Speed = GPIO_Speed_50MHz;

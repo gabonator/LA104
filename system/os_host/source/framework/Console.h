@@ -35,7 +35,7 @@ namespace CONSOLE
     void Putch(char c)
     {
 #ifdef CONSOLE_MODE_B
-        if (cursor.y >= window.bottom)
+        if (cursor.y + 14 > window.bottom)
         {
             cursor.y -= 14;
             Scroll(window, 14);
@@ -52,7 +52,7 @@ namespace CONSOLE
         if (c != 0x0d && c != 0x0a)
         {
             cursor.x += BIOS::LCD::Print(cursor.x, cursor.y, colorFront, colorBack, c);
-            if (cursor.x+8 < window.right)
+            if (cursor.x+7 < window.right)
                 return;
         }
 

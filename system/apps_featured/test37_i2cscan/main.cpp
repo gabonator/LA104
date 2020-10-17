@@ -23,6 +23,12 @@ void InitIo()
     BIOS::GPIO::PinMode(BIOS::GPIO::P2, BIOS::GPIO::I2c);
 }
 
+void DeinitIo()
+{
+    BIOS::GPIO::PinMode(BIOS::GPIO::P1, BIOS::GPIO::Input);
+    BIOS::GPIO::PinMode(BIOS::GPIO::P2, BIOS::GPIO::Input);
+}
+
 bool Test(int address)
 {
 #ifdef __APPLE__
@@ -279,6 +285,7 @@ int _main(void)
         devices[nAddress] = 0;
     }
     
+    DeinitIo();
     return 0;
 }
 

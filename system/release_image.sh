@@ -133,6 +133,7 @@ cp $FROM/56ds1307.elf $TO/devices/ds1307.elf
 cp $FROM/36espwww.elf $TO/devices/esp8266.elf
 cp $FROM/84maxdis.elf $TO/devices/max7219.elf
 cp $FROM/13mp3.elf $TO/devices/yx5300.elf
+cp $FROM/92bmp180.elf $TO/devices/bmp180.elf
 
 echo -n "{\"description\":{short:\"APDS9960\",long:\"APDS9960 color gesture sensor\"},\"icon\":\"chip.bmp\",\"execute\":\"apds9960.elf\"}" > $TO/devices/apds9960.lnk
 echo -n "{\"description\":{short:\"BMP085\",long:\"BMP085 Barometric sensor\"},\"icon\":\"chip.bmp\",\"execute\":\"bmp085.elf\"}" > $TO/devices/bmp085.lnk
@@ -144,6 +145,7 @@ echo -n "{\"description\":{short:\"MAX7219\",long:\"MAX7219 display driver\"},\"
 echo -n "{\"description\":{short:\"PCF8591t\",long:\"PCF8591t I2C ADC\"},\"icon\":\"chip.bmp\",\"execute\":\"pcf8591t.elf\"}" > $TO/devices/pcf8591t.lnk
 echo -n "{\"description\":{short:\"SIMCOM\",long:\"SIMCOM gprs modem\"},\"icon\":\"chip.bmp\",\"execute\":\"simcom.elf\"}" > $TO/devices/simcom.lnk
 echo -n "{\"description\":{short:\"YX5300\",long:\"YX5300 MP3 player\"},\"icon\":\"chip.bmp\",\"execute\":\"yx5300.elf\"}" > $TO/devices/yx5300.lnk
+echo -n "{\"description\":{short:\"BMP180\",long:\"BMP180/BMP085 barometer\"},\"icon\":\"chip.bmp\",\"execute\":\"bmp180.elf\"}" > $TO/devices/bmp180.lnk
 
 cp $ICON/chip.bmp $TO/devices/chip.bmp
 

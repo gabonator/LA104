@@ -142,7 +142,7 @@ temp++;
 	do {
 		marcState = gModem.Read(CC1101_MARCSTATE | CC1101_STATUS_REGISTER) & 0x1F;
 		BIOS::SYS::DelayMs(1);
-		if (BIOS::SYS::GetTick() - lBase > 20)
+		if (BIOS::SYS::GetTick() - lBase > 100)
 		{
 			BIOS::DBG::Print("--TX fail 3-- marc=%d", marcState);
 			return false;
