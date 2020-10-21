@@ -106,6 +106,9 @@ enum
     LICENCE, //    1
 };
 
+#define VIN_ST          0xFFFC0000
+#define VBTYmV          0xFFFB0000
+
 #define INIT            0xFFFF0000
 #define ENBL 1
 #define DSBL            0
@@ -416,6 +419,10 @@ uintptr_t GetAttribute(enum EAttribute attribute)
     case LicenseValid: return (uintptr_t)(uint32_t)__Bios(SYSINFO, LICENCE);
     case DisplayType: return (uintptr_t)(char*)"ili9341";
     case DiskType: return (uintptr_t)0;
+    case BatteryVoltage: return (uintptr_t)__Bios(PWRCTRL, VBTYmV); 
+    // voltage in millivolts
+    // 2954 - empty, device unable to start, 3956 - fully charged
+    // 4000..4680 - charging
     default: return 0;
   }
 }

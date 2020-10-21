@@ -21,10 +21,13 @@ extern "C"
   };
 
   enum EAttribute {BiosVersion, CharRom, LastChar, ScreenWidth, ScreenHeight, DeviceType,
-    BuildRevision, BuildDate, BuildUser, BuildSystem, 
-    VersionDfu, VersionHardware, VersionSystem, VersionFpga,
-    SerialNumber, LicenseNumber, LicenseValid, DisplayType, DiskType,
-    DiskSectorSize, DiskSectorCount};
+      BuildRevision, BuildDate, BuildUser, BuildSystem, 
+      VersionDfu, VersionHardware, VersionSystem, VersionFpga,
+      SerialNumber, LicenseNumber, LicenseValid, DisplayType, DiskType,
+      DiskSectorSize, DiskSectorCount,
+      GpioStatus, KeyMask, 
+      FlashReadRange, FlashWriteRange, FlashAlertRange,
+      BatteryVoltage};
 
   void Set_Posi(uint_fast16_t x, uint_fast16_t y);
   void Set_Pixel(uint_fast16_t Color);

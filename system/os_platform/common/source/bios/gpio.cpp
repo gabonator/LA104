@@ -48,7 +48,7 @@ namespace BIOS
         return 0;
       }
 
-      bool EndTransmission()
+      bool EndTransmission(bool)
       {
         return true;
       }

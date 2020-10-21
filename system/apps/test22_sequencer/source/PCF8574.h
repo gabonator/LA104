@@ -23,6 +23,12 @@ namespace Arduino
       BIOS::GPIO::PinMode(BIOS::GPIO::P2, BIOS::GPIO::I2c);
     }
 
+    void end()
+    {
+      BIOS::GPIO::PinMode(BIOS::GPIO::P1, BIOS::GPIO::Input);
+      BIOS::GPIO::PinMode(BIOS::GPIO::P2, BIOS::GPIO::Input);
+    }
+
     void beginTransmission(uint8_t address)
     {
       BIOS::GPIO::I2C::BeginTransmission(address);

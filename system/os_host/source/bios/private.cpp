@@ -48,6 +48,7 @@ namespace BIOS
         case EAttribute::LicenseValid:
         case EAttribute::DisplayType:
         case EAttribute::DiskType:
+        case EAttribute::BatteryVoltage:
           return (uintptr_t)::GetAttribute((::EAttribute)attribute);
 
         case EAttribute::DiskSectorSize: return BIOS::FAT::SectorSize;

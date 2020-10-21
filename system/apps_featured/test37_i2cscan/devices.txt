@@ -1,5 +1,5 @@
 # https://learn.adafruit.com/i2c-addresses/the-list
-# added PCF8574, PCF8591, 24C256
+# added PCF8574, PCF8591, 24C256, SHT20
 #
 0x00 Reserved - General Call Address
 0x01 Reserved for CBUS Compatibility
@@ -101,6 +101,7 @@
      TMP006 IR Temperature sensor
      PCA9685 16-channel PWM driver default address
      INA219 High-Side DC Current/Voltage sensor
+     SHT20 Humidity/Temp Sensor
 0x41 HDC1008 Humidity/Temp sensor
      TMP007 IR Temperature sensor
      TMP006 IR Temperature sensor

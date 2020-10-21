@@ -20,6 +20,8 @@ class CPort
     uint8_t mDataWrite[2] {0xff, 0xff};
     uint8_t mDataRead[2] {0xff, 0xff};
     
+    uint32_t* mGpioStatus{nullptr};
+    
 public:
     enum EMode {Input, Output};
     
@@ -29,14 +31,26 @@ public:
         Wire.begin();
         mPCF1.begin();
         mPCF2.begin();
+        mGpioStatus = (uint32_t*)BIOS::SYS::GetAttribute(BIOS::SYS::EAttribute::GpioStatus);
+        _ASSERT(mGpioStatus);
+        *mGpioStatus = 0;
+    }
+    
+    void Deinit()
+    {
+        Wire.end();
     }
 
-    void Sync()
+    bool Sync()
     {
         mDataRead[0] = mPCF1.read8();
         mDataRead[1] = mPCF2.read8();
         mPCF1.write8(mDataWrite[0]);
         mPCF2.write8(mDataWrite[1]);
+        if (*mGpioStatus == 0)
+            return true;
+        *mGpioStatus = 0;
+        return false;
     }
     
     bool Read(int pin)
@@ -82,7 +96,7 @@ public:
 public:
     virtual TItem GetItem(int i) = 0;
     
-    virtual void OnPaint()
+    virtual void OnPaint() override
     {
         GUI::Background(m_rcClient, RGB565(4040b0), RGB565(404040));
         
@@ -271,6 +285,11 @@ public:
         mPort.Init();
     }
     
+    void Deinit()
+    {
+        mPort.Deinit();
+    }
+    
     void Write(int index)
     {
         for (int i=0; i<COUNT(mChannel); i++)
@@ -281,12 +300,12 @@ public:
                 mPort.Write(channel.channel, channel.sequence & (1<<(19-index)));
             }
         }
-        mPort.Sync();
+        mPort.Sync();   // TODO: Handle failure
     }
     
     void Read()
     {
-        mPort.Sync();
+        mPort.Sync();   // TODO: Handle failure
         for (int i=0; i<COUNT(mChannel); i++)
         {
             TChannelInfo& channel = mChannel[i];
@@ -317,6 +336,11 @@ public:
     {
         CWnd::Create(pszId, dwFlags, rc, pParent);
         CSequencer::Init();
+    }
+    
+    void Destroy()
+    {
+        CSequencer::Deinit();
     }
 
     void DrawStep(int x, bool highlight)
@@ -490,7 +514,7 @@ public:
         }
     }
     
-    virtual void OnPaint()
+    virtual void OnPaint() override
     {
 //        int32_t t0 = SYS::GetTick();
         DrawRange();
@@ -585,7 +609,7 @@ public:
         return -1;
     }
 
-    virtual void OnTimer()
+    virtual void OnTimer() override
     {
         if (mPlayX == -1)
         {
@@ -747,7 +771,7 @@ public:
 class CButton : public CWnd
 {
 public:
-    virtual void OnPaint()
+    virtual void OnPaint() override
     {
         if (GetFocus() == this)
         {
@@ -818,14 +842,14 @@ public:
         mSequencer.Create("Player", CWnd::WsVisible, CRect(0, 14+32, BIOS::LCD::Width, BIOS::LCD::Height), this);
     }
 
-    virtual void OnPaint()
+    virtual void OnPaint() override
     {
         CRect rcTop(m_rcClient);
         rcTop.bottom = rcTop.top + 32;
         GUI::Background(m_rcClient, RGB565(404040), RGB565(101010));
     }
     
-    virtual void OnMessage(CWnd* pSender, int code, uint32_t data)
+    virtual void OnMessage(CWnd* pSender, int code, uintptr_t data) override
     {
         if (pSender == &mPlay)
             mSequencer.Play();
@@ -854,6 +878,7 @@ public:
 
     void Destroy()
     {
+        mSequencer.Destroy();
     }
 };
 

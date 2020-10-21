@@ -75,10 +75,11 @@ done
 for d in apps/*/ ; do
     buildApp "$d"
 done
-for d in apps_arduino/*/ ; do
+for d in apps_usb/*/ ; do
     buildApp "$d"
 done
-for d in apps_usb/*/ ; do
+
+for d in apps_ds213/*/ ; do
     buildApp "$d"
 done
 
@@ -104,9 +105,9 @@ done
 for d in apps/*/ ; do
     cleanApp "$d"
 done
-for d in apps_arduino/*/ ; do
+for d in apps_usb/*/ ; do
     cleanApp "$d"
 done
-for d in apps_usb/*/ ; do
+for d in apps_ds213/*/ ; do
     cleanApp "$d"
 done

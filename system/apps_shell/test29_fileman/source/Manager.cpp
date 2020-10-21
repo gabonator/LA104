@@ -9,7 +9,7 @@
 
 int nSelected = 0;
 int nScroll = 0;
-bool mCheckAutorun = false;
+//bool mCheckAutorun = false;
 bool redrawTimer = false;
 
 const char CShapes_sel_left[] =
@@ -53,8 +53,15 @@ void CFolder::BeginRead()
 
 void CFolder::EndRead()
 {
-	mCurrentFolderMin = mpFlashReadRange[0];
-	mCurrentFolderMax = mpFlashReadRange[1];
+	if (mpFlashReadRange[0] <= mpFlashReadRange[1])
+	{
+		mCurrentFolderMin = mpFlashReadRange[0];
+		mCurrentFolderMax = mpFlashReadRange[1];
+	} else 
+	{
+		// nothing was read - probably accessed from cache?
+	}
+
 	mpFlashAlertRange[0] = mCurrentFolderMin;
 	mpFlashAlertRange[1] = mCurrentFolderMax;
 	mAlertSet = mCurrentFolderMin <= mCurrentFolderMax;
@@ -135,7 +142,7 @@ void CWndUserManager::SortFileList()
 	if (!mCheckAutorun)
 		return;
 	mCheckAutorun = false;
-	// TODO: check duplicity
+	// TODO: check duplicity or rename?
 	for (int i=0; i<m_arrFiles.GetSize(); i++)
 		if (strcmp(m_arrFiles[i].strName, "AUTORUN.ELF") == 0)
 		{
@@ -503,7 +510,7 @@ void CWndUserManager::OnTimer()
 		LoadFileList(m_strCurrentPath);
 		SortFileList();
 
-		mCheckAutorun = true;
+//		mCheckAutorun = true;
 		redrawTimer = true;
 	}
 

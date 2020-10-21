@@ -1,0 +1,1 @@
+{"description":{short:"BMP180",long:"BMP180/BMP085 barometer"},"icon":"chip.bmp","execute":"bmp180.elf"}

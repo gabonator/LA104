@@ -18,7 +18,8 @@ namespace BIOS
       SerialNumber, LicenseNumber, LicenseValid, DisplayType, DiskType,
       DiskSectorSize, DiskSectorCount,
       GpioStatus, KeyMask, 
-      FlashReadRange, FlashWriteRange, FlashAlertRange};
+      FlashReadRange, FlashWriteRange, FlashAlertRange,
+      BatteryVoltage};
 
     uintptr_t GetAttribute(EAttribute eInternal);
   }
