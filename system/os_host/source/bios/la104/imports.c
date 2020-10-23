@@ -423,6 +423,7 @@ uintptr_t GetAttribute(enum EAttribute attribute)
     // voltage in millivolts
     // 2954 - empty, device unable to start, 3956 - fully charged
     // 4000..4680 - charging
+    case Charging: return (uintptr_t)__Bios(PWRCTRL, VIN_ST); 
     default: return 0;
   }
 }

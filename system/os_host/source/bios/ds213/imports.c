@@ -2,6 +2,20 @@
 #include "library/STM32F10x_StdPeriph_Driver/inc/misc.h"
 #include "DS213HwDriver.h"
 
+#define max(a,b) \
+   ({ __typeof__ (a) _a = (a); \
+       __typeof__ (b) _b = (b); \
+     _a > _b ? _a : _b; })
+#define min(a,b) \
+   ({ __typeof__ (a) _a = (a); \
+       __typeof__ (b) _b = (b); \
+     _a < _b ? _a : _b; })
+
+volatile bool eepromAccessMutex = false;
+uint32_t gFlashReadRange[2] = {-1, 0};
+uint32_t gFlashWriteRange[2] = {-1, 0};
+uint32_t gFlashAlertRange[2] = {-1, 0};
+
 #define _SEC_SIZE         4096 // TODO: JOIN
 
 HwDrvDef  Hw;
@@ -36,14 +50,6 @@ uint16_t Get_Pixel()
   return ReadPixel();
 }
 
-void ExtFlash_CS_LOW(void)
-{
-}
-
-void ExtFlash_CS_HIGH(void)
-{
-}
-
 void Set_Block(int x1, int y1, int x2, int y2)
 { 
   lastBlockX1 = x1;
@@ -54,9 +60,12 @@ void Set_Block(int x1, int y1, int x2, int y2)
 // Hw.pLCD_R_Block(x1, y1, x2, y2);
 }
 
-
 void xBeep(bool b)
 {
+  if (b)
+    *Hw.pBuz_Dev |= ENABLE;
+  else
+    *Hw.pBuz_Dev &= ~ENABLE;
 }
 
 void Set_Posi(uint_fast16_t x, uint_fast16_t y)
@@ -85,37 +94,46 @@ void HardwareInit()
   Delay_mS(500);
   Hw.pDevInit(USB_DEV);
 
-
-//BIOS::DBG::Print("\n\n\n\n\nsect=%d,amnt=%d\n", Hw.DiskSecSize, Hw.DiskSecAmnt);
-  #if 0
-  SectorSize  = Hw.DiskSecSize;
-  SectorAmnt  = Hw.DiskSecAmnt;
-  V32         = (u32*)&DiskBuf[SectorSize+0x04];
-  Var         = (u8*) &DiskBuf[SectorSize+0x24];
-  Data        = (u8*) &DiskBuf[SectorSize+0x24]+SEG_DATA;
-  V32[WR_CNT] = 0;
-  V32[RD_CNT] = 0;
+  *Hw.pPwm_Bkl = 50;
+  *Hw.pBuz_Vol = 50;
+  *Hw.pBuz_Dev &= ~ENABLE;
 }
 
-/*******************************************************************************
-  Description  : USB Disk sector write  
-*******************************************************************************/
-void ProgDiskSect(u8 *pBuf, u32 Addr)
+uint8_t encoderXstate[4] = {0xff, 0xff, 0xff, 0xff};
+uint8_t encoderYstate[4] = {0xff, 0xff, 0xff, 0xff};
+
+uint32_t ProcessEncoder(int a, int b, uint8_t* state, uint32_t increment, uint32_t decrement)
 {
-  Hw.pSpiFlashSecW((u32)&pBuf[0], Addr, SectorSize);
-}
+  a |= b<<1;
 
-/*******************************************************************************
-  Description  : Virtual Disk sector read   
-*******************************************************************************/
-void ReadDiskData(u8 *pBuf, u32 Addr, u16 n)
-{
-  Hw.pSpiFlashSecW((u32)&pBuf[0], Addr, SectorSize);
-  Hw.pSpiFlashRead((u32)&pBuf[0], Addr, n);
-}
+  // filter out glitches
+  if (a!=state[0] || a!=state[1] || a!=state[2])
+  {
+    state[0] = state[1];
+    state[1] = state[2];
+    state[2] = a;
+    return 0;
+  }
 
-#endif
+  // stable reading for 4ms (4 runs)
+  if (state[3] == a)
+    return 0;
 
+  // dec: 00 11 10 00
+  // inc: 00 10 11 00
+  int code = (state[3] << 2) | a;
+  state[3] = a;
+  switch (code)
+  {
+    case 0b0011:
+    case 0b1110: 
+      return decrement;
+    case 0b1011:
+    case 0b1100: 
+      return increment;
+    default:
+      return 0;
+  }
 }
 
 uint32_t GetKeys()
@@ -126,29 +144,8 @@ uint32_t GetKeys()
   keys |= (!*Hw.pK3_St)<<2;
   keys |= (!*Hw.pK4_St)<<3;
 
-  static uint32_t LastEnc 	= 0;
-
-  uint32_t EncdInp = ((*Hw.pEa_St) << 12)|((*Hw.pEb_St) << 13)|
-                ((*Hw.pEc_St) << 14)|((*Hw.pEd_St) << 15);
-  #define ENC1a           0x1000
-  #define ENC1b           0x2000
-  #define ENC2a           0x4000
-  #define ENC2b           0x8000
-
-  uint32_t EncActP = EncdInp & ~LastEnc;
-  uint32_t EncActN = ~EncdInp & LastEnc;
-  LastEnc = EncdInp;
-
-  #define ENCD_1p (1<<8)
-  #define ENCD_1n (1<<9)
-  #define ENCD_2p (1<<10)
-  #define ENCD_2n (1<<11)
-
-    if(EncActN & ENC1a) keys |= (EncdInp & ENC1b) ? ENCD_1p : ENCD_1n;
-    if(EncActN & ENC2a) keys |= (EncdInp & ENC2b) ? ENCD_2n : ENCD_2p;
-    if(EncActP & ENC1b) keys |= (EncdInp & ENC1a) ? ENCD_1p : ENCD_1n;
-    if(EncActP & ENC2b) keys |= (EncdInp & ENC2a) ? ENCD_2n : ENCD_2p;
-
+  keys |= ProcessEncoder(*Hw.pEa_St, *Hw.pEb_St, encoderXstate, KeyRight, KeyLeft);
+  keys |= ProcessEncoder(*Hw.pEc_St, *Hw.pEd_St, encoderYstate, KeyUp, KeyDown);
   return keys;
 }
 
@@ -186,16 +183,37 @@ void USB_DevInit(void)
 
 bool ExtFlashSecWr(uint8_t* pBuffer, uint32_t WriteAddr)
 {
-  // TODO: Interruption not handled properly!
+  gFlashWriteRange[0] = min(gFlashWriteRange[0], WriteAddr);
+  gFlashWriteRange[1] = max(gFlashWriteRange[1], WriteAddr);
+  if (gFlashAlertRange[0] >= gFlashAlertRange[1])
+  {
+    if (gFlashAlertRange[0] >= WriteAddr && WriteAddr >= gFlashAlertRange[1])
+    {
+      gFlashAlertRange[0] = -1;
+      gFlashAlertRange[1] = 0;
+    }
+  }
+
+  eepromAccessMutex = true;
+
   Hw.pSpiFlashSecW((uint32_t)pBuffer, WriteAddr, _SEC_SIZE);
-  return 1;
+
+  bool aux = eepromAccessMutex; // was this function interrupted? Needs atomic operation
+  eepromAccessMutex = false;
+  return aux;
 }
 
 bool ExtFlashDataRd(uint8_t* pBuffer, uint32_t ReadAddr, uint16_t Length)
 {
-  // TODO: Interruption not handled properly!
+  eepromAccessMutex = true;
+  gFlashReadRange[0] = min(gFlashReadRange[0], ReadAddr);
+  gFlashReadRange[1] = max(gFlashReadRange[1], ReadAddr);
+
   Hw.pSpiFlashRead((uint32_t)pBuffer, ReadAddr, _SEC_SIZE);
-  return 1;
+
+  bool aux = eepromAccessMutex;
+  eepromAccessMutex = false;
+  return aux;
 }
 
 uintptr_t GetAttribute(enum EAttribute attribute)
@@ -212,6 +230,8 @@ uintptr_t GetAttribute(enum EAttribute attribute)
     case LicenseValid: return (uintptr_t)(uint32_t) Hw.LicenceOk;
     case DisplayType: return (uintptr_t)(uint32_t)Hw.pLcdcTypStr;
     case DiskType: return (uintptr_t)(uint32_t)Hw.pDiskTypStr;
+    case BatteryVoltage: return (uintptr_t)*Hw.pAdc_Vbty*375/256*8; // unverified 
+    case Charging: return (uintptr_t)*Hw.pSt_Vin; // pSt_Chg
     default: return 0;
   }
 }

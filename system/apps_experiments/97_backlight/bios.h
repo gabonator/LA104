@@ -77,4 +77,6 @@ enum
     EXT_RXD, // ??? PIO ???     Var: PIOCFG+PinDef      Rtn: SUCC
     EXT_TXD, // ??? PIO ???     Var: PIOCFG+PinDef      Rtn: SUCC
 };
+
 #define VBTYmV          0xFFFB0000
+#define VIN_ST          0xFFFC0000

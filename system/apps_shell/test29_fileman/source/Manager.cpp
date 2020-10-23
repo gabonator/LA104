@@ -361,7 +361,11 @@ void CWndUserManager::DrawLine( BIOS::FAT::TFindFile& fileInfo, int y, bool bSel
 
 	if (bSelected)
         {
+#ifdef DS213
+	  GUI::Background(rcBack, RGB565(008080), RGB565(00b0b0));
+#else
 	  GUI::Background(rcBack, RGB565(004040), RGB565(007070));
+#endif
 	} else {
 	  GUI::Background(rcBack, RGB565(101010), RGB565(404040));
 //  	  BIOS::LCD::Bar( 0, y, /*320*/400-8, y+14, clrBack );

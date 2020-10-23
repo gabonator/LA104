@@ -24,7 +24,9 @@ namespace BIOS
       constexpr int CH_B = 1;
 
       u32 Status = FPGA_CtrlRW(CH_A, SMPL_ST) | FPGA_CtrlRW(CH_B, SMPL_ST);
-      return Status & TRIGG; //  if(Status & SCRNF) ScrnF = 1;
+      // TRIGG - triggered, stable signal
+      // SCRNF - no trigger, but we can show the signal in "Auto mode", otherwise we cant read samples from fpga!
+      return (Status & TRIGG) | (Status & SCRNF); //  if(Status & SCRNF) ScrnF = 1;
     }
 
     BIOS::ADC::ERunState GetState() 

@@ -38,6 +38,7 @@ void loop(BIOS::KEY::EKey key)
     __Bios(DISPDEV, val);
   }
 
+  int power = __Bios(PWRCTRL, VIN_ST);
   int battery = __Bios(PWRCTRL, VBTYmV);
   if (avi==-1)
   {
@@ -51,7 +52,7 @@ void loop(BIOS::KEY::EKey key)
   int sum = 0;
   for (int i=0; i<COUNT(average); i++) 
     sum += average[i];
-  CONSOLE::Print("battery = %d, average = %d\n", battery, sum / COUNT(average));
+  CONSOLE::Print("battery=%d, avg=%d, power=%d\n", battery, sum / COUNT(average), power);
 }
 
 #ifdef _ARM

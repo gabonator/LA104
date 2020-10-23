@@ -27,7 +27,7 @@ extern "C"
       DiskSectorSize, DiskSectorCount,
       GpioStatus, KeyMask, 
       FlashReadRange, FlashWriteRange, FlashAlertRange,
-      BatteryVoltage};
+      BatteryVoltage, Charging};
 
   void Set_Posi(uint_fast16_t x, uint_fast16_t y);
   void Set_Pixel(uint_fast16_t Color);

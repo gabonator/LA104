@@ -95,7 +95,7 @@ bool ExtFlashSecWr(u8 *pBuf, u32 WrAddr)
     gFlashWriteRange[1] = max(gFlashWriteRange[1], WrAddr);
     if (gFlashAlertRange[0] >= gFlashAlertRange[1])
     {
-      if (gFlashAlertRange[0] >= WrAddr && gFlashAlertRange[0] >= gFlashAlertRange[1])
+      if (gFlashAlertRange[0] >= WrAddr && WrAddr >= gFlashAlertRange[1])
       {
         gFlashAlertRange[0] = -1;
         gFlashAlertRange[1] = 0;

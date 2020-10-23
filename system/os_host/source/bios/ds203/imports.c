@@ -46,14 +46,6 @@ uint32_t ReadPixel()
     return Data;
 }
 
-void ExtFlash_CS_LOW(void)
-{
-}
-
-void ExtFlash_CS_HIGH(void)
-{
-}
-
 void Set_Block(int x1, int y1, int x2, int y2)
 {
     x2--; y2--;

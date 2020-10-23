@@ -7,8 +7,10 @@ static_assert((int)BIOS::SYS::EAttribute::DiskSectorCount == (int)EAttribute::Di
 //extern const unsigned char font[256*14];
 //extern const unsigned char* font;
 extern const void* ptrFont;
-#ifdef LA104
+#if defined(LA104)
 extern uint32_t gGpioStatusCode;
+#endif
+#if defined(LA104) || defined(DS213)
 extern uint32_t gFlashReadRange[2];
 extern uint32_t gFlashWriteRange[2];
 extern uint32_t gFlashAlertRange[2];
@@ -53,8 +55,10 @@ namespace BIOS
 
         case EAttribute::DiskSectorSize: return BIOS::FAT::SectorSize;
         case EAttribute::DiskSectorCount: return BIOS::FAT::SectorCount;
-#ifdef LA104
+#if defined(LA104)
         case EAttribute::GpioStatus: return (uintptr_t)&gGpioStatusCode;
+#endif
+#if defined(LA104) || defined(DS213)
         case EAttribute::FlashReadRange: return (uintptr_t)gFlashReadRange;
         case EAttribute::FlashWriteRange: return (uintptr_t)gFlashWriteRange;
         case EAttribute::FlashAlertRange: return (uintptr_t)gFlashAlertRange;
