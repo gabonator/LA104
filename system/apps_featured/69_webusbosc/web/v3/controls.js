@@ -229,6 +229,13 @@ float:left;
     <button id="connect">Connect</button><br>
     <div id="status"></div>
   </div>
+
+  <div class="controlsSpacer"></div>
+  <div id="controlPanel" class="controlsBlock blockControl" style="display:none;">
+    Control:<br><br>
+    Attribute:<input size=8 type="text" value="0" id="controlAttribute"><br>
+    Value:<input size=8 type="text" value="0" id="controlValue"><br>
+
 <!--
   <div class="controlsSpacer"></div>
   <div class="controlsBlock blockControl">
@@ -398,8 +405,8 @@ float:left;
       (o) => INTERFACE.memorySave());
 //    document.querySelector("#memExport").addEventListener('click', 
 //      (o) => INTERFACE.memoryExport());
-//    document.querySelector("#controlValue").addEventListener('change', 
-//      (o) => INTERFACE.setControl(document.querySelector("#controlAttribute").value, o.target.value));
+    document.querySelector("#controlValue").addEventListener('change', 
+      (o) => INTERFACE.setControl(document.querySelector("#controlAttribute").value, o.target.value));
 
   }
 
@@ -499,5 +506,10 @@ float:left;
       Poly(data1, "#ffff00")
     if (data2.length)
       Poly(data2, "#00ffff");
+  }
+
+  showControlPanel()
+  {
+    document.querySelector("#controlPanel").style.display = "";
   }
 }

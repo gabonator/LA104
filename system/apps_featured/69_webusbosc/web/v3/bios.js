@@ -40,7 +40,7 @@ var OSC = {
     "1ms":1, "2ms":1, "5ms":1, "10ms":1, "20ms":1, "50ms":1, "100ms":1, "200ms":1, "500ms":1, "1s":1
   },
 
-  Enable: (enable) => BIOS.rpcCall('OSC::Enable('+enable+');'),
+  Enable: (enable) => BIOS.rpcCall('OSC::Enable('+(enable?1:0)+');'),
   ConfigureTrigger: (time, value, type, source) => BIOS.rpcCall('OSC::ConfigureTrigger('+time+','+value+','+type+','+source+');'),
   ConfigureTimebase: (timebase) => BIOS.rpcCall('OSC::ConfigureTimebase('+timebase+');'),
   ConfigureInput: (input, couple, res, offset) => BIOS.rpcCall('OSC::ConfigureInput('+input+','+couple+','+res+','+offset+');'),
