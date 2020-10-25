@@ -1,0 +1,1 @@
+{"description":{short:"SHT20",long:"SHT20 temperature humidity"},"icon":"chip.bmp","execute":"sht20.elf"}

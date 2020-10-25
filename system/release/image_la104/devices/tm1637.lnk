@@ -1,0 +1,1 @@
+{"description":{short:"TM1637",long:"TM1637 7-segment display"},"icon":"chip.bmp","execute":"tm1637.elf"}

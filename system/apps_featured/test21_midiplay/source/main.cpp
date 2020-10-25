@@ -3,6 +3,8 @@
 #include "shapes.h"
 #include "mididevice.h"
 
+uint8_t gFatSharedBuffer[BIOS::FAT::SharedBufferSize];
+
 void Nop()
 {
 }
@@ -1061,7 +1063,10 @@ int ListFiles(char* path, const CRect& rcWindow, int index, int scroll)
 	int top = rcWindow.top + 20;
 	int bottom = rcWindow.bottom - 6;
 	BIOS::LCD::Bar(rcWindow.right-10, top, rcWindow.right-6, bottom, RGB565(d0d0d0));
-	BIOS::LCD::Bar(rcWindow.right-10, top + first * (bottom - top) / total, rcWindow.right-6, top + last * (bottom - top) / total, RGB565(808080));
+    if (total > 0)
+    {
+        BIOS::LCD::Bar(rcWindow.right-10, top + first * (bottom - top) / total, rcWindow.right-6, top + last * (bottom - top) / total, RGB565(808080));
+    }
 	return i;
 }
 
@@ -1148,9 +1153,12 @@ int _main(void)
 {
 #if defined(__APPLE__) || defined(WIN32)
 	BIOS::FAT::Init();
-	BIOS::OS::SetArgument((char*)"/APPS/SYNTH/MIDI/PLAYER.ELF");
+	//BIOS::OS::SetArgument((char*)"/APPS/SYNTH/MIDI/PLAYER.ELF");
+    BIOS::OS::SetArgument((char*)"/MIDI/PLAYER.ELF");
 #endif
-	
+    _ASSERT(sizeof(gFatSharedBuffer) >= BIOS::SYS::GetAttribute(BIOS::SYS::EAttribute::DiskSectorSize));
+    BIOS::FAT::SetSharedBuffer(gFatSharedBuffer);
+
     BIOS::LCD::Clear(RGB565(404040));
     
     CMidiPlayer midi;
@@ -1201,6 +1209,8 @@ int _main(void)
     midi.End();
 
     Nop();
+    BIOS::FAT::SetSharedBuffer(nullptr);
+
     BIOS::SYS::DelayMs(1500);
     return 0;
 }

@@ -37,7 +37,7 @@ public:
 };
 #endif
 
-#ifdef DS203
+#if defined(DS203) || defined(DS213)
 class CMidiDevice
 {
     enum {

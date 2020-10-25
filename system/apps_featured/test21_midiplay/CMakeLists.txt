@@ -22,8 +22,8 @@ include_directories(${SDL2_INCLUDE_DIRS})
 include_directories("../../os_platform/common/include")
 
 file(GLOB main_src 
-    "../../os_platform/apple/source/sdlmain.cpp"
-    "../../os_platform/apple/source/sdlhal.h"
+    "../../os_platform/mac_sdl/source/sdlmain.cpp"
+    "../../os_platform/mac_sdl/source/sdlhal.h"
     "../../os_platform/common/include/library.h"
 )
 
@@ -56,12 +56,44 @@ file(GLOB application_src
     "source/*.h"
 )
 
+file(GLOB application_framework_src
+    "source/Framework/*.cpp"
+    "source/Framework/*.h"
+)
+
+file(GLOB application_windows_src
+    "source/Windows/*.cpp"
+    "source/Windows/*.h"
+)
+
+file(GLOB application_oscilloscope_src
+    "source/Oscilloscope/*.cpp"
+    "source/Oscilloscope/*.h"
+    "source/Oscilloscope/Controls/*.cpp"
+    "source/Oscilloscope/Controls/*.h"
+    "source/Oscilloscope/Core/*.cpp"
+    "source/Oscilloscope/Core/*.h"
+    "source/Oscilloscope/Disp/*.cpp"
+    "source/Oscilloscope/Disp/*.h"
+    "source/Oscilloscope/Input/*.cpp"
+    "source/Oscilloscope/Input/*.h"
+    "source/Oscilloscope/Marker/*.cpp"
+    "source/Oscilloscope/Marker/*.h"
+    "source/Oscilloscope/Mask/*.cpp"
+    "source/Oscilloscope/Mask/*.h"
+    "source/Oscilloscope/Math/*.cpp"
+    "source/Oscilloscope/Math/*.h"
+    "source/Oscilloscope/Meas/*.cpp"
+    "source/Oscilloscope/Meas/*.h"
+    "source/Oscilloscope/Meas/Decoders/*.cpp"
+    "source/Oscilloscope/Meas/Decoders/*.h"
+)
 
 if (DESKTOP)           	
 
 #file(GLOB application_sdl
-#    "../os_platform/apple/sdlmain.cpp"
-#    "../os_platform/apple/sdlhal.h"
+#    "../os_platform/mac_sdl/sdlmain.cpp"
+#    "../os_platform/mac_sdl/sdlhal.h"
 #)
 
 source_group("platform\\main" FILES ${main_src})
@@ -71,6 +103,9 @@ source_group("platform\\framework" FILES ${framework_src})
 endif()
 
 source_group("application" FILES ${application_src})
+source_group("application\\framework" FILES ${application_framework_src})
+source_group("application\\windows" FILES ${application_windows_src})
+source_group("application\\oscilloscope" FILES ${application_oscilloscope_src})
 source_group("include" FILES "../../os_platform/common/include")
 
 file(GLOB application_exec

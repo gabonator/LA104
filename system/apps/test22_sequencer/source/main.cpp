@@ -1,6 +1,7 @@
 #include <library.h>
 #include "../../os_host/source/framework/BufferedIo.h"
 #include "shapes.h"
+#include <gui/MessageBox.h>
 
 using namespace BIOS;
 
@@ -10,12 +11,21 @@ void _HandleAssertion(const char* file, int line, const char* cond)
     while (1);
 }
 
+#define BLINK(a) ((BIOS::SYS::GetTick() / a)&1)
+
 #include "PCF8574.h"
 
 class CPort
 {
-    PCF8574 mPCF1{0x38};
-    PCF8574 mPCF2{0x39};
+public:
+    enum {
+        PcfAddress1 = 0x38,
+        PcfAddress2 = 0x39
+    };
+    
+private:
+    PCF8574 mPCF1{PcfAddress1};
+    PCF8574 mPCF2{PcfAddress2};
 
     uint8_t mDataWrite[2] {0xff, 0xff};
     uint8_t mDataRead[2] {0xff, 0xff};
@@ -26,14 +36,21 @@ public:
     enum EMode {Input, Output};
     
 public:
-    void Init()
+    bool Init()
     {
-        Wire.begin();
-        mPCF1.begin();
-        mPCF2.begin();
         mGpioStatus = (uint32_t*)BIOS::SYS::GetAttribute(BIOS::SYS::EAttribute::GpioStatus);
         _ASSERT(mGpioStatus);
         *mGpioStatus = 0;
+
+        Wire.begin();
+        mPCF1.begin();
+        mPCF2.begin();
+
+        //return BLINK(5000);
+        if (*mGpioStatus == 0)
+            return true;
+        *mGpioStatus = 0;
+        return false;
     }
     
     void Deinit()
@@ -47,6 +64,8 @@ public:
         mDataRead[1] = mPCF2.read8();
         mPCF1.write8(mDataWrite[0]);
         mPCF2.write8(mDataWrite[1]);
+        
+        //return BLINK(5000);
         if (*mGpioStatus == 0)
             return true;
         *mGpioStatus = 0;
@@ -200,8 +219,8 @@ public:
         {
             case 0: return TItem{"Sequencer", TItem::Static};
             case 1: return TItem{"Editor", TItem::Default};
-            case 2: return TItem{"Settings", TItem::Default};
-            case 3: return TItem{"File", TItem::Default};
+//            case 2: return TItem{"Settings", TItem::Default};
+//            case 3: return TItem{"File", TItem::Default};
             default: return TItem{nullptr, TItem::None};
         }
     }
@@ -259,6 +278,7 @@ protected:
 
     uint32_t mMask {0b11111111111111110000};
     CPort mPort;
+    bool mOnline{false};
     
 public:
     CSequencer()
@@ -280,9 +300,10 @@ public:
             mChannel[i] = {0, 0b00000000000000000000, nullptr, mPalette[i%COUNT(mPalette)], TChannelInfo::Disabled};
     }
     
-    void Init()
+    bool Init()
     {
-        mPort.Init();
+        mOnline = mPort.Init();
+        return mOnline;
     }
     
     void Deinit()
@@ -290,8 +311,11 @@ public:
         mPort.Deinit();
     }
     
-    void Write(int index)
+    bool Write(int index)
     {
+        if (!mOnline)
+            return false;
+        
         for (int i=0; i<COUNT(mChannel); i++)
         {
             TChannelInfo& channel = mChannel[i];
@@ -300,12 +324,17 @@ public:
                 mPort.Write(channel.channel, channel.sequence & (1<<(19-index)));
             }
         }
-        mPort.Sync();   // TODO: Handle failure
+        
+        mOnline = mPort.Sync();
+        return mOnline;
     }
     
-    void Read()
+    bool Read()
     {
-        mPort.Sync();   // TODO: Handle failure
+        if (!mOnline)
+            return false;
+
+        mOnline = mPort.Sync();
         for (int i=0; i<COUNT(mChannel); i++)
         {
             TChannelInfo& channel = mChannel[i];
@@ -316,6 +345,12 @@ public:
                 channel.sequence |= mPort.Read(channel.channel);
             }
         }
+        return mOnline;
+    }
+    
+    bool IsOnline()
+    {
+        return mOnline;
     }
 };
 
@@ -330,12 +365,14 @@ class CSequencerGui : public CSequencer, public CWnd
     bool mPlay{false};
     bool mFollow{false};
     bool mFollowing{false};
+    bool mNotified{false};
 
 public:
     void Create( const char* pszId, ui16 dwFlags, const CRect& rc, CWnd* pParent )
     {
         CWnd::Create(pszId, dwFlags, rc, pParent);
-        CSequencer::Init();
+        if (!CSequencer::Init())
+            NotifyOffline();
     }
     
     void Destroy()
@@ -597,6 +634,8 @@ public:
                 mMask ^= 1<<(19-mCursorX);
                 Invalidate();
             }
+            if (mCursorX == -1)
+                SendMessage(GetParent(), 3, 0);
         }
     }
 
@@ -608,9 +647,35 @@ public:
         
         return -1;
     }
+    
+    void CheckOnline()
+    {
+        if (mNotified)
+        {
+            if (CSequencer::Init())
+            {
+                mNotified = false;
+                SendMessage(GetParent(), 2, 0);
+            } else
+            {
+                SendMessage(GetParent(), 1, 0);
+            }
+        }
+    }
+    
+    void NotifyOffline()
+    {
+        if (mNotified)
+            return;
+        mNotified = true;
+        SendMessage(GetParent(), 1, 0);
+    }
 
     virtual void OnTimer() override
     {
+        if (mPaused)
+            return;
+        
         if (mPlayX == -1)
         {
             // find first step;
@@ -626,7 +691,8 @@ public:
             }
         }
         
-        Read();
+        if (!Read())
+            NotifyOffline();
         for (int i=0; i<9; i++)
         {
             TChannelInfo& channel = mChannel[mScrollY+i];
@@ -646,7 +712,9 @@ public:
         {
             int step = mPlayX / 16;
             
-            Write(step);
+            if (!Write(step))
+                NotifyOffline();
+            
             DrawStep(mLastDrawnStep, false);
             DrawStep(step, true);
             mLastDrawnStep = step;
@@ -691,6 +759,7 @@ public:
     {
         if (mPlay)
             return;
+        CheckOnline();
         if (mFollow)
         {
             mFollow = false;
@@ -741,6 +810,7 @@ public:
             KillTimer();
             SendMessage(GetParent(), 0, 0);
         }
+        CheckOnline();
         mFollow = true;
     }
     
@@ -766,6 +836,17 @@ public:
     // no print 530ms
     // no sequence 424ms
     // only sequence no background 265
+    
+    bool mPaused{false};
+    void Pause(bool p = true)
+    {
+        mPaused = p;
+    }
+    
+    bool IsPaused()
+    {
+        return mPaused;
+    }
 };
 
 class CButton : public CWnd
@@ -813,6 +894,8 @@ class CSelect : public CButton
 class CApplication : public CWnd
 {
     CMenuMain mMenu;
+    CWndMessageBox mMessageBox;
+
     // Tab1
     CButton mPlay;
     CButton mLoop;
@@ -820,6 +903,7 @@ class CApplication : public CWnd
     CSequencerGui mSequencer;
     
     // Tab2
+    // TODO: not implemented
     
 public:
     void Create()
@@ -840,6 +924,8 @@ public:
         mFollow.Create("Follow", CWnd::WsVisible, CRect(_x, _y, _x+width, _y+16), this);
 
         mSequencer.Create("Player", CWnd::WsVisible, CRect(0, 14+32, BIOS::LCD::Width, BIOS::LCD::Height), this);
+        
+        SetTimer(100);
     }
 
     virtual void OnPaint() override
@@ -847,6 +933,15 @@ public:
         CRect rcTop(m_rcClient);
         rcTop.bottom = rcTop.top + 32;
         GUI::Background(m_rcClient, RGB565(404040), RGB565(101010));
+    }
+    
+    virtual void OnTimer() override
+    {
+        if (mSequencer.IsPaused())
+        {
+            if (!mMessageBox.IsVisible())
+                mSequencer.Pause(false);
+        }
     }
     
     virtual void OnMessage(CWnd* pSender, int code, uintptr_t data) override
@@ -860,7 +955,22 @@ public:
         if (pSender == &mFollow)
             mSequencer.Follow();
         
-        if (pSender == &mFollow || pSender == &mLoop ||pSender == &mSequencer)
+        if (pSender == &mSequencer && code == 3)
+        {
+            this->SetFocus();
+            mMessageBox.Show(this, "Not implemented", "Check source code", RGB565(FFFF00));
+        } else if (pSender == &mSequencer && code == 2)
+        {
+            this->SetFocus();
+            mMessageBox.Show(this, "Online mode", "Connection recovered!", RGB565(00FF00));
+            mSequencer.Pause();
+        } else if (pSender == &mSequencer && code == 1)
+        {
+            this->SetFocus();
+            mMessageBox.Show(this, "Offline mode", "PCF8574 expanders not found!", RGB565(FFFF00));
+            mSequencer.Pause();
+        }
+        else if (pSender == &mFollow || pSender == &mLoop || pSender == &mSequencer)
         {
             if (mSequencer.Following())
                 mFollow.m_pszId = "\xfb" "Follow";

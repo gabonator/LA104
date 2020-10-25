@@ -294,6 +294,9 @@ namespace I2C
    
   bool i2c_start()
   {
+      // In cases when we need to quickly switch from one transaction to
+      // another without stopping (MLX90614), this would indicate failure
+/*
       // Wait until I2Cx is not busy anymore
       SetTimeout(50);
       while (I2C_GetFlagStatus(I2Cx, I2C_FLAG_BUSY))
@@ -304,6 +307,8 @@ namespace I2C
           return false;
         }      
       }
+*/
+      SetTimeout(50);
 
       // Generate start condition
       I2C_GenerateSTART(I2Cx, ENABLE);
@@ -322,10 +327,10 @@ namespace I2C
       return true;
   }
    
-  bool i2c_stop()
+  bool i2c_stop(bool stop)
   {
       // Generate I2C stop condition
-      I2C_GenerateSTOP(I2Cx, ENABLE);
+      I2C_GenerateSTOP(I2Cx, stop ? ENABLE : DISABLE); // STOP / RESET
       // Wait until I2C stop condition is finished
       SetTimeout(50);
       while (I2C_GetFlagStatus(I2Cx, I2C_FLAG_STOPF))
@@ -335,6 +340,15 @@ namespace I2C
           gGpioStatusCode = GpioStatus::I2cErrorStop;
           return false; 
         }
+      }
+
+      while (I2C_GetFlagStatus(I2Cx, I2C_FLAG_BUSY))
+      {
+        if (Timeout()) 
+        {
+          gGpioStatusCode = GpioStatus::I2cBusy;
+          return false;
+        }      
       }
       return true;
   }
@@ -370,6 +384,9 @@ namespace I2C
                 return false;
             }
           }
+      } else
+      {
+        _ASSERT(0);
       }
       return true;
   }
@@ -731,7 +748,6 @@ namespace BIOS
     namespace I2C
     {
       int mCount{0};
-      uint8_t mAddress;
 
       bool BeginTransmission(uint8_t address)
       {
@@ -739,11 +755,10 @@ namespace BIOS
               return false;
           if (!::I2C::i2c_address_direction(address << 1, I2C_Direction_Transmitter))
           {
-              ::I2C::i2c_stop();
+              ::I2C::i2c_stop(true);
               return false;
           }
 
-        mAddress = address;
         return true;
       }
 
@@ -775,7 +790,7 @@ namespace BIOS
 
       bool EndTransmission(bool stop)
       {
-        return ::I2C::i2c_stop();
+        return ::I2C::i2c_stop(stop);
       }
     }
 

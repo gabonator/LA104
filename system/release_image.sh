@@ -26,7 +26,7 @@ echo -n "{\"description\":{short:\"Logic analyser\",long:\"Logic analyser\"},\"i
 
 cp $FROM/35viewla.elf $TO/viewtxt.elf
 cp $ICON/genie.bmp $TO/help.bmp
-cp help.txt $TO/help.txt
+#cp help.txt $TO/help.txt
 echo -n "{\"description\":{short:\"Help\",long:\"Help\"},\"icon\":\"help.bmp\",\"execute\":\"viewtxt.elf help.txt\",order:10}" > $TO/help.lnk
 
 cp $FROM/61devin.elf $TO/devinfo.elf
@@ -134,6 +134,9 @@ cp $FROM/36espwww.elf $TO/devices/esp8266.elf
 cp $FROM/84maxdis.elf $TO/devices/max7219.elf
 cp $FROM/13mp3.elf $TO/devices/yx5300.elf
 cp $FROM/92bmp180.elf $TO/devices/bmp180.elf
+cp $FROM/95sht20.elf $TO/devices/sht20.elf
+cp $FROM/96tm1637.elf $TO/devices/tm1637.elf
+cp $FROM/87mlx906.elf $TO/devices/mlx90614.elf
 
 echo -n "{\"description\":{short:\"APDS9960\",long:\"APDS9960 color gesture sensor\"},\"icon\":\"chip.bmp\",\"execute\":\"apds9960.elf\"}" > $TO/devices/apds9960.lnk
 echo -n "{\"description\":{short:\"BMP085\",long:\"BMP085 Barometric sensor\"},\"icon\":\"chip.bmp\",\"execute\":\"bmp085.elf\"}" > $TO/devices/bmp085.lnk
@@ -146,6 +149,9 @@ echo -n "{\"description\":{short:\"PCF8591t\",long:\"PCF8591t I2C ADC\"},\"icon\
 echo -n "{\"description\":{short:\"SIMCOM\",long:\"SIMCOM gprs modem\"},\"icon\":\"chip.bmp\",\"execute\":\"simcom.elf\"}" > $TO/devices/simcom.lnk
 echo -n "{\"description\":{short:\"YX5300\",long:\"YX5300 MP3 player\"},\"icon\":\"chip.bmp\",\"execute\":\"yx5300.elf\"}" > $TO/devices/yx5300.lnk
 echo -n "{\"description\":{short:\"BMP180\",long:\"BMP180/BMP085 barometer\"},\"icon\":\"chip.bmp\",\"execute\":\"bmp180.elf\"}" > $TO/devices/bmp180.lnk
+echo -n "{\"description\":{short:\"SHT20\",long:\"SHT20 temperature humidity\"},\"icon\":\"chip.bmp\",\"execute\":\"sht20.elf\"}" > $TO/devices/sht20.lnk
+echo -n "{\"description\":{short:\"TM1637\",long:\"TM1637 7-segment display\"},\"icon\":\"chip.bmp\",\"execute\":\"tm1637.elf\"}" > $TO/devices/tm1637.lnk
+echo -n "{\"description\":{short:\"MLX90614\",long:\"MLX90614 non cotact thermo\"},\"icon\":\"chip.bmp\",\"execute\":\"mlx90614.elf\"}" > $TO/devices/mlx90614.lnk
 
 cp $ICON/chip.bmp $TO/devices/chip.bmp
 

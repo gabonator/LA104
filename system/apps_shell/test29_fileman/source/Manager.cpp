@@ -9,6 +9,7 @@
 
 int nSelected = 0;
 int nScroll = 0;
+bool bFirstAccess = false;
 //bool mCheckAutorun = false;
 bool redrawTimer = false;
 
@@ -65,6 +66,11 @@ void CFolder::EndRead()
 	mpFlashAlertRange[0] = mCurrentFolderMin;
 	mpFlashAlertRange[1] = mCurrentFolderMax;
 	mAlertSet = mCurrentFolderMin <= mCurrentFolderMax;
+
+	if (bFirstAccess)
+	{
+		BeginRead();
+	}
 }
 
 
@@ -87,6 +93,16 @@ mpFlashWriteRange[1] = 0;
 
 bool CFolder::CheckModification()
 {
+	if (bFirstAccess && (
+             (mpFlashReadRange[0] <= mpFlashReadRange[1]) ||
+             (mpFlashWriteRange[0] <= mpFlashWriteRange[1])
+           ))
+	{
+		// host os reads of writes fs for the first time - usb device is attached and ready to access
+		bFirstAccess = false;
+		BIOS::SYS::Beep(20);		
+	}
+
 	if (!mAlertSet)
 		return false;
 	if (mpFlashAlertRange[0] <= mpFlashAlertRange[1])

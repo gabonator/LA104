@@ -221,7 +221,7 @@ namespace BIOS
       bool RequestFrom(uint8_t address, uint8_t bytes);
       bool Write(uint8_t data);
       uint8_t Read();
-      bool EndTransmission(bool stop = false);
+      bool EndTransmission(bool stop = true);
     }
 
     namespace UART
