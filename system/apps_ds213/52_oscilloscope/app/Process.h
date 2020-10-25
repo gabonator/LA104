@@ -4,7 +4,7 @@
 #ifndef __Process_h
 #define __Process_h
 
-  #include "Platform.h"
+#include "Platform.h"
 
   #define CH_A       0
   #define CH_B       1

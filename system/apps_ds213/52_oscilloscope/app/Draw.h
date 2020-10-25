@@ -4,7 +4,7 @@
 #ifndef __DRAW_H
 #define __DRAW_H
 
-  #include "Platform.h"
+#include "Platform.h"
 
   typedef enum {
     TRCK1, TRCK2, TRCK3, TRCK4, DARK1, DARK2, DARK3, DARK4, 

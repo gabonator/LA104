@@ -64,7 +64,7 @@
   extern vu16 PD_Cnt;
 
   extern vu16 BeepCnt, Dly_mS, LED_Pwm;//, TestCnt
-  extern u8   Flashing, PwrDownEn;
+  extern u8   Flashing, PwrDownEn; //gabo , DiskBuf[];
   extern u16  Fps, nKeySt, KeyAct, Vsum; //SleepEn, 
   extern uc16 Wait[];
   extern u32  SectorSize;

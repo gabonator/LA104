@@ -4,7 +4,7 @@
 #ifndef __MENU_H
 #define __MENU_H
 
-  #include "Platform.h"
+#include "Platform.h"
 
   typedef struct {
     uc8* STR;      // 
