@@ -72,14 +72,13 @@ struct bpb33* check_bootsector(int fd)
     dprintf("OemName: %s\n", bootsect->bsOemName);
 
     if (bootsect->bsBootSectSig0 == BOOTSIG0
-	&& bootsect->bsBootSectSig0 == BOOTSIG0) 
+	&& bootsect->bsBootSectSig1 == BOOTSIG1)
     {
 	//Good boot sector sig;
     } else {
-	fprintf(stderr, "Boot boot sector signature %x%x\n", 
+	fprintf(stderr, "Ignoring wrong boot sector signature %02x%02x\n", 
 		bootsect->bsBootSectSig0, 
 		bootsect->bsBootSectSig1);
-        return NULL;
     }
 
     bpb = (struct byte_bpb33*)&(bootsect->bsBPB[0]);
@@ -108,8 +107,10 @@ bool checkCompatibility(int fdi, bpb33* bpb)
       return false;
     }
 
-    if (bpb->bpbBytesPerSec != 512 || bpb->bpbSecPerClust != 1 || bpb->bpbSectors != 4096)
+    if (bpb->bpbBytesPerSec != 512 || bpb->bpbSecPerClust != 1 || (bpb->bpbSectors != 4096 && bpb->bpbSectors != 1024) )
     {
+      fprintf(stderr, "Bytes per sector: %d, sectors per cluster: %d, sectors: %d\n",
+        bpb->bpbBytesPerSec, bpb->bpbSecPerClust, bpb->bpbSectors);
       fprintf(stderr, "Incompatible device\n");
       return false;
     }

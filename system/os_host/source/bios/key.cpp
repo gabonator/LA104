@@ -1,6 +1,10 @@
 #include "Bios.h"
 #include "imports.h"
 
+#ifdef DS203
+extern uint32_t gKeyMask;
+#endif
+
 namespace BIOS {
   namespace KEY {
 
@@ -62,8 +66,27 @@ namespace BIOS {
     EKey GetKey() 
     {
 #ifdef DS203
-      char c = PeekLastChar();
-      processor << c;
+      char lastChar = 0;
+      if (gKeyMask & KeyUp)
+        lastChar = '>';
+      if (gKeyMask & KeyDown)
+        lastChar = '<';
+      if (gKeyMask & KeyRight)
+        lastChar = '+';
+      if (gKeyMask & KeyLeft)
+        lastChar = '-';
+      if (gKeyMask & KeyF1)
+        lastChar = '1';
+      if (gKeyMask & KeyF2)
+        lastChar = '2';
+      if (gKeyMask & KeyF3)
+        lastChar = '3';
+      if (gKeyMask & KeyF4)
+        lastChar = '4';
+
+      processor << lastChar;
+
+      char c;
       processor >> c;
 #else
       char c = GetLastChar();
@@ -84,12 +107,6 @@ namespace BIOS {
         case '4': return F4;
         default: return None;
       }
-    }
-
-    bool KeyPressed()
-    {
-      char c = PeekLastChar();
-      return !!c;
     }
   }
 }

@@ -54,7 +54,6 @@ namespace BIOS
   namespace KEY
   {
     EKey GetKey() { return None; }
-    bool KeyPressed() { return false; }
   }
 
   namespace DBG

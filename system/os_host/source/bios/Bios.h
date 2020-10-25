@@ -72,7 +72,6 @@ namespace BIOS
   {
     enum EKey { None, Down, Up, Left, Right, F1, F2, F3, F4, Escape = F2, Enter = F1 };
     EKey GetKey();
-    bool KeyPressed();
   }
 
   namespace DBG

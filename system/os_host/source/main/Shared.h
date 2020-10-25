@@ -53,7 +53,6 @@ uint32_t GetProcAddress(char* symbol)
     case 0x0000c6c0: return (uint32_t)static_cast<BIOS::FAT::EResult(*)(unsigned char*)>(BIOS::FAT::Write); //_ZN4BIOS3FAT5WriteEPh
     case 0x000034ef: return (uint32_t)static_cast<BIOS::FAT::EResult(*)(char*)>(BIOS::FAT::OpenDir); //_ZN4BIOS3FAT7OpenDirEPc
     case 0x0000deaf: return (uint32_t)static_cast<BIOS::FAT::EResult(*)(BIOS::FAT::TFindFile*)>(BIOS::FAT::FindNext); //_ZN4BIOS3FAT8FindNextEPNS0_9TFindFileE
-    case 0x0000a964: return (uint32_t)static_cast<bool(*)()>(BIOS::KEY::KeyPressed); //_ZN4BIOS3KEY10KeyPressedEv
     case 0x00000b63: return (uint32_t)static_cast<BIOS::KEY::EKey(*)()>(BIOS::KEY::GetKey); //_ZN4BIOS3KEY6GetKeyEv
     case 0x00008f74: return (uint32_t)static_cast<void(*)(unsigned short*, int)>(BIOS::LCD::BufferRead); //_ZN4BIOS3LCD10BufferReadEPti
     case 0x00000cc5: return (uint32_t)static_cast<uint16_t(*)()>(BIOS::LCD::BufferRead); //_ZN4BIOS3LCD10BufferReadEv

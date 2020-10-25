@@ -20,11 +20,6 @@ char GetLastChar()
   return t;
 }
 
-char PeekLastChar()
-{
-  return lastChar;
-}
-
 void SysTickHandler(void)
 {
   gCounter++;

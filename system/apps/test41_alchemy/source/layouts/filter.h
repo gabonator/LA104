@@ -88,7 +88,8 @@ public:
     
     bool Interrupt()
     {
-        return BIOS::KEY::KeyPressed();
+        return false; // TODO: fix
+//        return BIOS::KEY::KeyPressed();
     }
     
     void OnToggle(void(*handler)())

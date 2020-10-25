@@ -41,19 +41,29 @@ void CFolder::Init()
         mpFlashWriteRange = (uint32_t*)BIOS::SYS::GetAttribute(BIOS::SYS::EAttribute::FlashWriteRange);
         mpFlashAlertRange = (uint32_t*)BIOS::SYS::GetAttribute(BIOS::SYS::EAttribute::FlashAlertRange);
 
+	if (!mpFlashReadRange)
+		return;
+
 	_ASSERT(mpFlashReadRange && mpFlashWriteRange && mpFlashAlertRange);
+
 	mpFlashWriteRange[0] = -1;
 	mpFlashWriteRange[1] = 0;
 }
 
 void CFolder::BeginRead()
 {
+	if (!mpFlashReadRange)
+		return;
+
 	mpFlashReadRange[0] = -1;
 	mpFlashReadRange[1] = 0;
 }
 
 void CFolder::EndRead()
 {
+	if (!mpFlashReadRange)
+		return;
+
 	if (mpFlashReadRange[0] <= mpFlashReadRange[1])
 	{
 		mCurrentFolderMin = mpFlashReadRange[0];
@@ -93,6 +103,9 @@ mpFlashWriteRange[1] = 0;
 
 bool CFolder::CheckModification()
 {
+	if (!mpFlashReadRange)
+		return false;
+
 	if (bFirstAccess && (
              (mpFlashReadRange[0] <= mpFlashReadRange[1]) ||
              (mpFlashWriteRange[0] <= mpFlashWriteRange[1])

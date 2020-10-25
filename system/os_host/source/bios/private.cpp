@@ -62,6 +62,10 @@ namespace BIOS
         case EAttribute::FlashReadRange: return (uintptr_t)gFlashReadRange;
         case EAttribute::FlashWriteRange: return (uintptr_t)gFlashWriteRange;
         case EAttribute::FlashAlertRange: return (uintptr_t)gFlashAlertRange;
+#else
+        case EAttribute::FlashReadRange: return (uintptr_t)nullptr;
+        case EAttribute::FlashWriteRange: return (uintptr_t)nullptr;
+        case EAttribute::FlashAlertRange: return (uintptr_t)nullptr;
 #endif
         case EAttribute::KeyMask: return (uintptr_t)&gKeyMask;
 
