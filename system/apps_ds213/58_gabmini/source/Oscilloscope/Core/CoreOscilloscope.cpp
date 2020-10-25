@@ -28,7 +28,9 @@
 	//ui16 nTimePsc = arrPsc[ (NATIVEENUM)Settings.Time.Resolution ];
 	//ui16 nTimeArr = arrArr[ (NATIVEENUM)Settings.Time.Resolution ];
 	
+#ifdef DS203
 	BIOS::ADC::Enable(true);
+#endif
 	BIOS::ADC::ConfigureInput( BIOS::ADC::EInput::CH1, (BIOS::ADC::ECouple)nACouple, (BIOS::ADC::EResolution)nARange, nAOffset);
 	BIOS::ADC::ConfigureInput( BIOS::ADC::EInput::CH2, (BIOS::ADC::ECouple)nBCouple, (BIOS::ADC::EResolution)nBRange, nBPosition);
 	BIOS::ADC::ConfigureTimebase(fTimePerDiv);

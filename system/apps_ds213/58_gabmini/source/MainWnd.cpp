@@ -25,11 +25,23 @@ void CMainWnd::Create()
 	SendMessage( &mWndToolBar, ToWord('g', 'i'), nMenuItem);
 	m_wndMenuInput.SetFocus();
 
+#if defined(DS203)
 	// Start in scan mode
 	Settings.Trig.Sync = CSettings::Trigger::_Scan;
 	CCoreOscilloscope::ConfigureTrigger();
 	CCoreOscilloscope::ConfigureAdc();
 	BIOS::ADC::Restart();
+#elif defined(DS213)
+	// Strange DS213 startup procedure
+        BIOS::ADC::Enable( true );
+	BIOS::ADC::Restart();
+	while (!BIOS::ADC::Ready()); Sampler::Copy(); BIOS::ADC::Restart();
+	while (!BIOS::ADC::Ready()); Sampler::Copy(); BIOS::ADC::Restart();
+	CCoreOscilloscope::ConfigureAdc();
+	CCoreOscilloscope::ConfigureTrigger();
+#else
+#error Unknown target
+#endif
 }
 
 /*virtual*/ void CMainWnd::OnMessage(CWnd* pSender, int code, uintptr_t data)
@@ -87,7 +99,11 @@ bool CMainWnd::IsRunning()
 	{
 		if ( m_lLastAcquired != -1 && BIOS::SYS::GetTick() - m_lLastAcquired > 150 )
 		{
+#ifdef DS203
 			bool bScreenReady = BIOS::ADC::GetPointer() > (300 + Settings.Time.InvalidFirst);
+#else
+			bool bScreenReady = false; // not implemented on DS213!!
+#endif
 			Sampler::Copy();
 
 			// redraw the screen even when the sampler is not full

@@ -124,19 +124,19 @@ void CSettings::Reset()
 	CH1.pszName = "CH1";
 	CH1.pszFullName = "Analog input: CH1";
 	CH1.Coupling = AnalogChannel::_DC;
-	CH1.Resolution = AnalogChannel::_200mV;
+	CH1.Resolution = AnalogChannel::_1V;
 	CH1.Probe = AnalogChannel::_1X;
 	CH1.u16Color = RGB565(ffff00);
-	CH1.u16Position = 55;
+	CH1.u16Position = 172;
 	CH1.Enabled = AnalogChannel::_YES;
 	
 	CH2.pszName = "CH2";
 	CH2.pszFullName = "Analog input: CH2";
-	CH2.Coupling = AnalogChannel::_AC;
-	CH2.Resolution = AnalogChannel::_50mV;
-	CH2.Probe = AnalogChannel::_10X;
+	CH2.Coupling = AnalogChannel::_DC;
+	CH2.Resolution = AnalogChannel::_1V;
+	CH2.Probe = AnalogChannel::_1X;
 	CH2.u16Color = RGB565(00ffff);
-	CH2.u16Position = 100;
+	CH2.u16Position = 122;
 	CH2.Enabled = AnalogChannel::_YES;
 	
 	CH3.pszName = "CH3";
@@ -159,11 +159,11 @@ void CSettings::Reset()
 	// first samples are some noise, cut them out, length matching one div
 	Time.Shift = Time.InvalidFirst;
 	
-	Trig.Sync = Trigger::_Auto;
+	Trig.Sync = Trigger::_Norm;
 	Trig.Type = Trigger::_EdgeLH;
 	Trig.Source = Trigger::_CH1;
 	Trig.State = Trigger::_Run;
-	Trig.nLevel = 128;
+	Trig.nLevel = 80;
 	Trig.nTime = 30*5;
 	Trig.nHoldOff = 0;
 	Trig.nPosition = 150;

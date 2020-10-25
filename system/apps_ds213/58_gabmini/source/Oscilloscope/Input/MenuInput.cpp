@@ -72,8 +72,10 @@ CWndMenuInput::CWndMenuInput()
 
 		if ( pSender == &m_wndListTrigger.m_itmSync )
 		{
+#ifdef DS203
 			BIOS::ADC::Enable( true );
 			BIOS::ADC::Restart();
+#endif
 		}
 
 		Settings.Trig.State = (Settings.Trig.Sync == CSettings::Trigger::_Single) ? 
