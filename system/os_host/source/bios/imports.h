@@ -31,24 +31,21 @@ extern "C"
 
   void Set_Posi(uint_fast16_t x, uint_fast16_t y);
   void Set_Pixel(uint_fast16_t Color);
-
+  void Set_Area(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2);
+  void Set_Block(int x1, int y1, int x2, int y2);
   void ReadStart(void);
   void ReadFinish(void);
   uint32_t ReadPixel(void);
 
   bool ExtFlashSecWr(uint8_t* pBuffer, uint32_t WriteAddr);
   bool ExtFlashDataRd(uint8_t* pBuffer, uint32_t ReadAddr, uint16_t Lenght);
-  void Set_Block(int x1, int y1, int x2, int y2);
-  void xBeep(bool on);
-  char GetLastChar();
-  char PeekLastChar();
-  void Set_Area(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2);
   void EnableUsb(bool enable);
   void HardwareInit();
-  uint32_t GetKeys();
+  void xBeep(bool on);
 
-  uint32_t FPGA32(uint8_t Cmd, uint16_t Cnt, uint32_t Data); // TODO: remove
-  uint16_t FPGA16(uint8_t Cmd, uint16_t Cnt, uint16_t Data); // TODO: remove
+  uint32_t GetKeys();
+  char GetLastChar();
+
   uintptr_t GetAttribute(enum EAttribute attr);
 
 #ifdef __cplusplus

@@ -5,7 +5,8 @@
 #include <stm32f10x_gpio.h>
 #include <stm32f10x_usart.h>
 
-#include "../imports.h" // for FPGA commands
+extern "C" uint32_t FPGA32(uint8_t Cmd, uint16_t Cnt, uint32_t Data);
+extern "C" uint16_t FPGA16(uint8_t Cmd, uint16_t Cnt, uint16_t Data);
 
 enum GpioStatus {
   Ok = 0,

@@ -121,17 +121,6 @@ uint32_t GetKeys()
   return out;
 }
 
-// FPGA
-uint32_t FPGA32(uint8_t Cmd, uint16_t Cnt, uint32_t Data)
-{
-  return 0;
-}
-
-uint16_t FPGA16(uint8_t Cmd, uint16_t Cnt, uint16_t Data)
-{
-  return 0;
-}
-
 bool ExtFlashSecWr(uint8_t* pBuffer, uint32_t WriteAddr)
 {
   __ProgDiskPage(pBuffer, WriteAddr);
@@ -158,6 +147,8 @@ uintptr_t GetAttribute(enum EAttribute attribute)
     case LicenseValid: return (uintptr_t)0;
     case DisplayType: return (uintptr_t)0;
     case DiskType: return (uintptr_t)0;
+    case BatteryVoltage: return (uintptr_t)__Get(V_BATTERY, 0);
+    case Charging: return (uintptr_t)__Get(USB_POWER, 0);
     default: return 0;
   }
 }

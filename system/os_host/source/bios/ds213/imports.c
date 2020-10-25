@@ -149,17 +149,6 @@ uint32_t GetKeys()
   return keys;
 }
 
-// FPGA
-uint32_t FPGA32(uint8_t Cmd, uint16_t Cnt, uint32_t Data)
-{
-  return 0;
-}
-
-uint16_t FPGA16(uint8_t Cmd, uint16_t Cnt, uint16_t Data)
-{
-  return 0;
-}
-
 void USB_DevInit(void)
 {
   GPIO_InitTypeDef  GPIO_Struct;
