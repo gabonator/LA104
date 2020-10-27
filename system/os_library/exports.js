@@ -45,11 +45,7 @@ for (var i in lines)
   }
 }
 
-var _path = "/Users/gabrielvalky/Downloads/gcc-arm-none-eabi-7-2018-q2-update/bin/";
-if (!require("fs").existsSync(_path)) {
-  _path = "";
-}
-execute(_path + "arm-none-eabi-nm --demangle ./build/libbios.so", out =>
+execute("arm-none-eabi-nm --demangle ./build/libbios.so", out =>
 {
   var lines = out.split("\n");
   for (var i in lines)
@@ -59,7 +55,7 @@ execute(_path + "arm-none-eabi-nm --demangle ./build/libbios.so", out =>
       demangled.push(tokens[1]);
   }
 
-  execute(_path + "arm-none-eabi-nm ./build/libbios.so", out =>
+  execute("arm-none-eabi-nm ./build/libbios.so", out =>
   {
     var lines = out.split("\n");
     for (var i in lines)
