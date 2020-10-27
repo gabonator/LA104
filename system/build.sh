@@ -43,6 +43,7 @@ if [ "$DEVICE" == "all" ]; then
     echo "Building $build..."
     $0 $build || exit 1
   done
+  exit 0
 fi
 
 if [ ! -f "../tools/elfstrip/elfstrip" ]; then
