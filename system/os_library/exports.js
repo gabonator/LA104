@@ -46,6 +46,9 @@ for (var i in lines)
 }
 
 var _path = "/Users/gabrielvalky/Downloads/gcc-arm-none-eabi-7-2018-q2-update/bin/";
+if (!require("fs").existsSync(_path)) {
+  _path = "";
+}
 execute(_path + "arm-none-eabi-nm --demangle ./build/libbios.so", out =>
 {
   var lines = out.split("\n");
@@ -190,7 +193,7 @@ uint32_t GetProcAddress(char* symbol)
       out += 'return (uint32_t)static_cast<'+retvalue+'(*)(' + tokens[2] + ')>(' + tokens[1] + '); //' + mname;
 //    console.log(out + " // " + mname);
     console.log(out);
-  }           
+  }
 
   isGpio = isAdc = isUsb = isMemory = false;
   if (!isGpio && wasGpio)
@@ -207,7 +210,7 @@ uint32_t GetProcAddress(char* symbol)
 }
 `)
 //  console.log('  return 0;\n}\n');
-}              
+}
 
 
 function hash(str)
