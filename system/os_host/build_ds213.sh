@@ -53,6 +53,7 @@ arm-none-eabi-gcc -Wall -Os -Werror -fno-common -mcpu=cortex-m3 -mthumb -msoft-f
   ../library/COMMON/commonusb_pwr.c \
   ../library/COMMON/commonusb_istr.c \
   ../library/COMMON/commonusb_app.c \
+|| exit 1
 
 arm-none-eabi-g++ -Wall -Os -Werror -fno-common -mcpu=cortex-m3 -mthumb -msoft-float -MD -fno-exceptions -fno-rtti -fno-threadsafe-statics -Wno-psabi -c -Wall -Werror \
   -D __USER__=\"$USER\" \
@@ -79,6 +80,7 @@ arm-none-eabi-g++ -Wall -Os -Werror -fno-common -mcpu=cortex-m3 -mthumb -msoft-f
   ../source/main/Execute.cpp \
   ../source/gui/Gui.cpp \
   ../source/framework/Serialize.cpp \
+|| exit 1
 
 arm-none-eabi-gcc -mcpu=cortex-m3 -mthumb -o output.elf -nostartfiles -T ../app.ld \
   ./main.o \
@@ -127,6 +129,7 @@ arm-none-eabi-gcc -mcpu=cortex-m3 -mthumb -o output.elf -nostartfiles -T ../app.
   ./adc.o \
   ./dac.o \
   ./private.o \
+|| exit 1
 
 arm-none-eabi-objcopy -O binary ./output.elf ./output.bin
 arm-none-eabi-objcopy -O ihex ./output.elf ./system_ds213.hex

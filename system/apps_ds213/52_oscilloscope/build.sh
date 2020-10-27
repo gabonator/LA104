@@ -16,7 +16,8 @@ arm-none-eabi-g++ -Wall -Os -fpermissive -fno-common -mcpu=cortex-m3 -mthumb -ms
 ../pub/Func.c \
 -I../../../os_library/include/ \
 -I../pub/ \
--I../app/
+-I../app/ \
+|| exit 1
 
 arm-none-eabi-gcc -fPIC -mcpu=cortex-m3 -mthumb -o output.elf -nostartfiles -T ../app.lds \
 ./Main.o \
@@ -27,7 +28,8 @@ arm-none-eabi-gcc -fPIC -mcpu=cortex-m3 -mthumb -o output.elf -nostartfiles -T .
 ./Sys.o \
 ./File.o \
 ./Func.o \
--lbios_ds213 -L../../../os_library/build
+-lbios_ds213 -L../../../os_library/build \
+|| exit 1
 
 arm-none-eabi-objdump -d -S output.elf > output.asm
 

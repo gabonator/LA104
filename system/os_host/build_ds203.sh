@@ -19,7 +19,7 @@ INCLUDES="\
   -I ../library/CMSIS/Device/STM32F10x/Include \
   -I ../library"
 
-arm-none-eabi-gcc -mcpu=cortex-m3 -mthumb -c ../source/bios/ds203/BIOS.s -o BIOS.o
+arm-none-eabi-gcc -mcpu=cortex-m3 -mthumb -c ../source/bios/ds203/BIOS.S -o BIOS.o || exit 1
 
 arm-none-eabi-gcc -Wall -Os -Werror -fno-common -mcpu=cortex-m3 -mthumb -msoft-float -MD \
   -D USE_STDPERIPH_DRIVER \
@@ -30,7 +30,8 @@ arm-none-eabi-gcc -Wall -Os -Werror -fno-common -mcpu=cortex-m3 -mthumb -msoft-f
   ../source/interrupt.c \
   ../library/CMSIS/Device/STM32F10x/Source/system_stm32f10x.c \
   ../source/bios/imports.c \
-  ../library/STM32F10x_StdPeriph_Driver/src/misc.c
+  ../library/STM32F10x_StdPeriph_Driver/src/misc.c \
+  || exit 1
 
 arm-none-eabi-g++ -Wall -Os -Werror -fno-common -mcpu=cortex-m3 -mthumb -msoft-float -MD -fno-exceptions -fno-rtti -fno-threadsafe-statics -Wno-psabi -c -Wall -Werror \
   -D __USER__=\"$USER\" \
@@ -56,7 +57,8 @@ arm-none-eabi-g++ -Wall -Os -Werror -fno-common -mcpu=cortex-m3 -mthumb -msoft-f
   ../library/spf/spf.c \
   ../source/main/Execute.cpp \
   ../source/gui/Gui.cpp \
-  ../source/Framework/Serialize.cpp \
+  ../source/framework/Serialize.cpp \
+  || exit 1
 
 arm-none-eabi-gcc -mcpu=cortex-m3 -mthumb -o output.elf -nostartfiles -T ../app_ds203.ld \
   ./main.o \
@@ -79,6 +81,7 @@ arm-none-eabi-gcc -mcpu=cortex-m3 -mthumb -o output.elf -nostartfiles -T ../app_
   ./adc.o \
   ./dac.o \
   ./private.o \
+  || exit 1
 
 arm-none-eabi-objcopy -O binary ./output.elf ./output.bin
 arm-none-eabi-objcopy -O ihex ./output.elf ./system_ds203.hex
