@@ -27,7 +27,7 @@ void SetCookie(char* cookie)
 char* GetCookie()
 {
 #ifdef __APPLE__
-    return (char*) ""; //"experime/fractal";
+    return (char*) "";
 #endif
     if (mPersistentConfig[0] != 'G' || mPersistentConfig[1] != 'A' || mPersistentConfig[2] != 'B' || mPersistentConfig[3] != 's')
         return nullptr;
@@ -39,6 +39,44 @@ void _HandleAssertion(const char* file, int line, const char* cond)
     BIOS::DBG::Print("Assertion failed in %s [%d]: %s\n", file, line, cond);
     while (1);
 }
+
+class CTokenizer
+{
+  char* mString;
+
+public:
+  CTokenizer(char* str)
+  {
+    mString = str;
+  }
+
+    CTokenizer(const char* str)
+    {
+      mString = (char*)str;
+    }
+
+  bool GetToken(char* out, int maxLength)
+  {
+    for (int i=0; i<maxLength-1; i++)
+    {
+      out[i] = mString[i];
+      if (mString[i] == 0)
+      {
+        mString += i;
+        return i > 0;
+      }
+      if (mString[i] == ' ')
+      {
+        out[i] = 0;
+        mString += i;
+        mString++;
+        return true;
+      }
+    }
+    _ASSERT(0);
+    return false;
+  }
+};
 
 class CDirInfo
 {
@@ -143,36 +181,11 @@ public:
     {
         return mIconName;
     }
-    char* GetExecutable()
+    const char* GetExecutable() const
     {
-        /*
-        if (mExecName[0] == 0)
-        {
-#ifdef __APPLE__
-            char testExecName[512];
-#else
-            char testExecName[64];
-#endif
-            // TODO!
-            strcpy(testExecName, GetRoot());
-            strcat(testExecName, "/");
-            strcat(testExecName, GetFileName());
-            strcat(testExecName, "/");
-            strcat(testExecName, GetFileName());
-            strcat(testExecName, ".elf");
-
-            FAT::EResult result = FAT::Open(testExecName, FAT::IoRead);
-            if (result == FAT::EOk)
-            {
-                strcpy(mExecName, GetFileName());
-                strcat(mExecName, ".elf");
-                FAT::Close(result);
-            }
-        }
-         */
         return mExecName;
     }
-    int GetOrder()
+    int GetOrder() const
     {
         return mOrder;
     }
@@ -249,6 +262,8 @@ public:
             strcat(imgSrc, "/");
             strcat(imgSrc, info.GetIconName());
         }
+
+        FixPath(imgSrc);
     
         char* suffix = imgSrc + strlen(imgSrc) - 4; // .BMP
         _ASSERT(suffix[0] == '.');
@@ -334,16 +349,12 @@ public:
     {
         mItems.RemoveAll();
         
-        static char* rootPath = (char*)""; //(char*)"APPS";
-
-        strcpy(mCurrentDir, rootPath);
+        strcpy(mCurrentDir, "");
         for (int i=0; i<mFolderStack.GetSize(); i++)
         {
             strcat(mCurrentDir, "/");
             strcat(mCurrentDir, mFolderStack[i]);
         }
-
-        // TODO: collect files at first!!! CDirInfo ctor reads fs
 
         FAT::EResult eOpen = FAT::OpenDir(mCurrentDir);
         if (eOpen == FAT::EResult::EOk)
@@ -387,7 +398,7 @@ public:
             int order = a.GetOrder() - b.GetOrder();
             if (order != 0)
                 return order;
-            return strcmp(a.GetShortName(), b.GetShortName());
+            return strcmp(b.GetShortName(), a.GetShortName());
         });
     }
     
@@ -528,45 +539,47 @@ public:
         }
     }
 
+    void FixPath(char* fixedPath)
+    {
+        char *parent = nullptr;
+        while ((parent = strstr(fixedPath, "/../")) != nullptr)
+        {
+           char* end = parent+3;
+           parent--;
+           while (*parent != '/' && parent > fixedPath)
+               parent--;
+
+           // remove parent..end
+           int charsToRemove = end-parent;
+           int chars = strlen(end)+1;
+           for (int i=0; i<chars; i++)
+               parent[i] = parent[i+charsToRemove];
+        }
+    }
+
     void Execute(const char* root, const char* file)
     {
-        /*
-	char fixedPath[64];
-	strcpy(fixedPath, root);
-        strcat(fixedPath, "/");
-	strcat(fixedPath, folder);
-
-        auto cut = [&fixedPath]() -> bool
+        char fileToken[32];
+        char fixedPath[64] = "";
+        CTokenizer tokenizer(file);
+        while (tokenizer.GetToken(fileToken, 32))
         {
-            for (int i=strlen(fixedPath)-1; i>0; i--)
-                if (fixedPath[i] == '/')
-                {
-                    fixedPath[i] = 0;
-                    return true;
-                }
+          if (fixedPath[0])
+            strcat(fixedPath, " ");
 
-            return false;
-        };
-
-        while (file[0] == '.' && file[1] == '.' && file[2] == '/')
-        {
-            file += 3;
-            if (!cut())
-            {
-                fixedPath[0] = 0;
-                break;
-            }
+          // switch or file as attribute
+          if (fileToken[0] != '-')
+          {
+            strcat(fixedPath, root);
+            strcat(fixedPath, "/");
+            strcat(fixedPath, fileToken);
+          } else
+          {
+            strcat(fixedPath, fileToken);
+          }
         }
-        strcat(fixedPath, "/");
-        strcat(fixedPath, file);
-         */
-        
-        char fixedPath[64];
-        strcpy(fixedPath, root);
-        strcat(fixedPath, "/");
-        strcat(fixedPath, file);
-
-        //BIOS::DBG::Print("[%s]n\n", fixedPath);
+        FixPath(fixedPath);
+        //BIOS::DBG::Print("[%s]\n", fixedPath);
         BIOS::OS::SetArgument(fixedPath);
     }
 

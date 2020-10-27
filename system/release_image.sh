@@ -118,6 +118,21 @@ cp $ICON/serial.bmp $TO/tools/uartmon.bmp
 cp $ICON/motor.bmp $TO/tools/vfd_invt.bmp
 cp $ICON/ws2812.bmp $TO/tools/ws2812.bmp
 
+echo -n "{\"description\":{short:\"Help\",long:\"Help\"},\"icon\":\"../help.bmp\",\"execute\":\"../viewtxt.elf help.txt\",order:200}" >> $TO/tools/help.lnk
+
+cat > $TO/tools/help.txt <<- EOM
+Tools
+-------
+  - "Character map" - just shows the ascii table and font used by this operating system, 8x14 pixel font is from Genoa EGA BIOS
+  - "DCF77" - decodes the DCF77 pulses and shows date and time information. Attach DCF77 receiver to P1 input.
+  - "DS1820" - measures temperature from multiple DS1820 thermometer sensors and shows information in form of graph. Measurement is stored in HTML file. Attach DS1820 sensors to the P1 input.
+  - "GPIO" - digital pin manipulation application - you can configure P1..P4 pins as inputs or outputs, set their logic level and observe external signals in form of simple graph. This application can be used for generation of 4 different PWM signals with ability to set the modulation frequency. Nice feature for testing RGB LEDs
+  - "Sequencer" - simple sequencer with 4 outputs and 8 inputs. You will need two PCF8574 expanders at i2c addresses 0x38 and 0x39. Connect SCL to P1 and SDA to P2. First expander is used for output and second expander for input
+  - "UART monitor" - uart monitor with full configuration support - you can set baudrate, parity and data word length. Currently only for 8bit encoding.
+  - "VFD Invt" - application for visualizing the performance of Invt motor inverters over RS485 link with MAX485 transceiver. Attach DI=P1 (TXD), DE=P3, RE=P4, RO=P2 (RXD)
+  - "WS2812" - applcation for controlling WS2812 addressable leds with set of nice looking animations. Attach your led strip to P1
+EOM
+
 #devices
 mkdir $TO/devices
 cp $ICON/fchip.bmp $TO/devices/devices.bmp

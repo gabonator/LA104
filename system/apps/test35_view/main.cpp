@@ -2,6 +2,8 @@
 #include "../../os_host/source/framework/BufferedIo.h"
 #include "../../os_host/source/framework/Serialize.h"
 
+uint8_t mFileSystemBuffer[BIOS::FAT::SectorSize];
+
 bool isdigit(char c)
 {
     return c >= '0' && c <= '9';
@@ -138,6 +140,8 @@ int _main(void)
     
     BIOS::LCD::Print(4, 0, RGB565(ffffff), RGBTRANS, "File viewer");
 
+    BIOS::FAT::SetSharedBuffer(mFileSystemBuffer);
+
 #ifdef __APPLE__
     OS::SetArgument((char*)"/viewtxt.elf /Users/gabrielvalky/Documents/git/LA104/system/apps/test35_view/readme.txt");
     //const char* path = "/Users/gabrielvalky/Documents/git/LA104/system/apps/test35_view/test.txt";
@@ -166,8 +170,7 @@ int _main(void)
         BIOS::SYS::DelayMs(1000);
         return 1;
     }
-    
-    
+        
     char showName[26];
     
     if (strlen(fileName) < COUNT(showName)-1)
@@ -373,6 +376,8 @@ int _main(void)
             DrawProgress();
         }
     }
+
+    BIOS::FAT::SetSharedBuffer(nullptr);
     
     return 0;
 }

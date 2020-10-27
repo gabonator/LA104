@@ -1,11 +1,11 @@
 (
-  echo Building host...
-  cd os_host
+  echo Building library...
+  cd os_library
   rm -rf build
-#  rm build/manager.hex 2> /dev/null
+#  rm build/libbios.so 2> /dev/null
   ./build.sh
-  if [ ! -f build/system_la104.hex ]; then
-    echo Unable to build operating system firmware
+  if [ ! -f build/libbios_la104.so ]; then
+    echo Unable to build shared library prototype
   fi
 )
 
@@ -14,13 +14,13 @@ if [ $? -eq 1 ]; then
 fi
 
 (
-  echo Building library
-  cd os_library
+  echo Building host...
+  cd os_host
   rm -rf build
-#  rm build/libbios.so 2> /dev/null
+#  rm build/manager.hex 2> /dev/null
   ./build.sh
-  if [ ! -f build/libbios_la104.so ]; then
-    echo Unable to build shared library prototype
+  if [ ! -f build/system_la104.hex ]; then
+    echo Unable to build operating system firmware
   fi
 )
 

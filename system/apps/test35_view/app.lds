@@ -1,33 +1,38 @@
-/*
-Placed at end of RAM/ROM
-08008000..08030000 allrom
-20000000..2000a000 allram
-*/
-
 MEMORY
 {
-  rom (rx) :   ORIGIN = 0x08028000, LENGTH = 8K
-  ram (rwx) :  ORIGIN = 0x20009F00, LENGTH = 256
-  null (rwx) : ORIGIN = 0xf0000000, LENGTH = 4K
+/*  rom (rx)  : ORIGIN = 0x0801ed00, LENGTH = 60K*/
+/*  rom (rx) : ORIGIN = 0x08064280, LENGTH = 80K*/
+  rom (rx) : ORIGIN = 0x08040000, LENGTH = 256K
 
+
+  ram (rwx) : ORIGIN = 0x20004800, LENGTH = 16K
+  null (rwx): ORIGIN = 0x00001000, LENGTH = 4K
 }
 
+/* _estack = ORIGIN(ram)+LENGTH(ram)-0x100; */
+
 SECTIONS
-{
-  .text : {
-    *(.entry)
-    *(.text*)        /* Program code */
-    *(.rodata*)      /* Read only data */
-  } >rom
-  .data : {
-    *(.data*)        /* Data memory */
-  } >ram
+  {
+    .text : {
+      *(.entry)
+      *(.text*)        /* Program code */
+      *(.rodata*)      /* Read only data */
+    } >rom
+
+    .data : {
+      *(.data*)        /* Data memory */
+/*      *(.dynamic*) */
+    } >ram AT >rom
+
   .bss : {
     *(.bss*)         /* Zero-filled run time allocate data memory */
-  } >ram
+    } >ram
+
   .rel.plt : { *(.rel.plt)  } > rom
   .plt : { *(.plt) } > rom
   .got : { *(.got.plt) *(.got) } > ram /* relocation fixed by memory write! */
   .dynsym : { *(.dynsym) } > null
   .dynstr : { *(.dynstr) } > null
-}
+
+  }  
+
