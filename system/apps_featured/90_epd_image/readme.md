@@ -9,9 +9,9 @@ display:
 connections:
   - VDD - 3V
   - VSS - GND
-  - MOSI - P1
-  - SCK - P2
-  - CS - P3
-  - RESET - P4
+  - MOSI (SDA) - P1
+  - SCK (SCL) - P2
+  - /CS - P3
+  - /RST - P4
   - BUSY - CH4
-  - DC - (not used, 3 spi 9 bit mode, BS1=VDD, DC=VSS)
+  - D/C - (not used, 3 spi 9 bit mode, BS1=VDD, DC=VSS)
