@@ -101,6 +101,7 @@ namespace BIOS
       switch (mode)
       {
         case EMode::Square:
+          Hw.pDevInit(SGNLOUT);
           Hw.pDevInit(SO_DGTL);
           wave = nullptr;
           samples = 0;
@@ -108,6 +109,7 @@ namespace BIOS
         case EMode::Buffer:
           if (wave != buffer || length != samples)
           {
+            Hw.pDevInit(SGNLOUT);
             Hw.pDevInit(SO_ANLG);
             Hw.pFout_DMA(DISABLE);
             *Hw.pFout_DMA_CNT = length;

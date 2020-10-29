@@ -10,8 +10,7 @@ namespace Sampler
 //		BIOS::ADC::Restart(); //TODO: order?
 		for (int i=0; i<Samples; i++)
 		{
-			memory[i] &= 0xff000000;
-			memory[i] |= BIOS::ADC::Get();
+			memory[i] = BIOS::ADC::Get();
 		}
 	}
 	

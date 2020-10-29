@@ -74,7 +74,7 @@ CWndMenuInput::CWndMenuInput()
 		{
 #ifdef DS203
 			BIOS::ADC::Enable( true );
-			BIOS::ADC::Restart();
+			BIOS::ADC::Restart(0);
 #endif
 		}
 

@@ -55,12 +55,12 @@ bool BIOS::OS::HasArgument()
 
 ///// TODO: move to adc.cpp
 #if defined(DS203) || defined(DS213)
-void BIOS::ADC::Init() {}
-bool BIOS::ADC::Ready() { return true; }
-BIOS::ADC::ERunState BIOS::ADC::GetState() { return BIOS::ADC::ERunState::Full; }
+//void BIOS::ADC::Init() {}
+//bool BIOS::ADC::Ready() { return true; }
+BIOS::ADC::EState BIOS::ADC::GetState() { return BIOS::ADC::EState::Full; }
 
 int _adc_i = 0;
-void BIOS::ADC::Restart() { _adc_i = 0;}
+void BIOS::ADC::Restart(int) { _adc_i = 0;}
 BIOS::ADC::TSample::SampleType BIOS::ADC::Get()
 {
 	int i = _adc_i++;
@@ -75,7 +75,7 @@ BIOS::ADC::TSample::SampleType BIOS::ADC::Get()
 }
 
 int BIOS::ADC::GetPointer() { return 0; }
-void BIOS::ADC::Enable(bool bEnable) {}
+bool BIOS::ADC::Enable(bool bEnable) { return true; }
 bool BIOS::ADC::Enabled() { return true; }
 
 void BIOS::ADC::ConfigureInput(EInput input, ECouple couple, EResolution res, int offset) {}

@@ -1,0 +1,1 @@
+cp build/58gmin13.elf /Volumes/DS213/

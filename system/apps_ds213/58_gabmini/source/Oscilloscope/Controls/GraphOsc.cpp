@@ -172,7 +172,10 @@ void CWndOscGraph::OnPaintXY()
 	for (ui16 x=0; x<nColMax; x++, nIndex++)
 	{
 		ui32 ui32Sample = nIndex < nMaxIndex ?  Sampler::GetAt(nIndex) : 0;
-		
+
+		if (ui32Sample == BIOS::ADC::NoData)
+			break;
+
 		int nSampleY2 = 0, nSampleY1 = 0;
 
 		if ( bEnabled1 )
@@ -308,6 +311,11 @@ void CWndOscGraph::OnPaintTY()
 
 		BIOS::ADC::TSample Sample;
 		Sample.value = nIndex < nMaxIndex ? Sampler::GetAt(nIndex) : 0;
+
+		if (Sample.value == BIOS::ADC::NoData)
+		{
+			en1 = en2 = en3 = en4 = false;
+		}
 
 		if ( en1 )
 		{

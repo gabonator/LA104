@@ -28,11 +28,9 @@ uint32_t GetProcAddress(char* symbol)
     case 0x00009bd3: return (uint32_t)static_cast<void(*)(int, int, BIOS::ADC::ETriggerType, BIOS::ADC::EInput)>(BIOS::ADC::ConfigureTrigger); //_ZN4BIOS3ADC16ConfigureTriggerEiiNS0_12ETriggerTypeENS0_6EInputE
     case 0x0000e2eb: return (uint32_t)static_cast<void(*)(float)>(BIOS::ADC::ConfigureTimebase); //_ZN4BIOS3ADC17ConfigureTimebaseEf
     case 0x0000c656: return (uint32_t)BIOS::ADC::Get;
-    case 0x00009593: return (uint32_t)static_cast<void(*)()>(BIOS::ADC::Init); //_ZN4BIOS3ADC4InitEv
-    case 0x0000fafd: return (uint32_t)static_cast<bool(*)()>(BIOS::ADC::Ready); //_ZN4BIOS3ADC5ReadyEv
-    case 0x00004d2c: return (uint32_t)static_cast<void(*)(bool)>(BIOS::ADC::Enable); //_ZN4BIOS3ADC6EnableEb
+    case 0x00004d2c: return (uint32_t)static_cast<bool(*)(bool)>(BIOS::ADC::Enable); //_ZN4BIOS3ADC6EnableEb
     case 0x000083ed: return (uint32_t)static_cast<bool(*)()>(BIOS::ADC::Enabled); //_ZN4BIOS3ADC7EnabledEv
-    case 0x0000946f: return (uint32_t)static_cast<void(*)()>(BIOS::ADC::Restart); //_ZN4BIOS3ADC7RestartEv
+    case 0x00009462: return (uint32_t)static_cast<void(*)(int)>(BIOS::ADC::Restart); //_ZN4BIOS3ADC7RestartEi
     case 0x00006300: return (uint32_t)BIOS::ADC::GetState;
     case 0x00004740: return (uint32_t)static_cast<int(*)()>(BIOS::DAC::GetFrequency); //_ZN4BIOS3DAC12GetFrequencyEv
     case 0x0000fdaf: return (uint32_t)static_cast<void(*)(int)>(BIOS::DAC::SetFrequency); //_ZN4BIOS3DAC12SetFrequencyEi

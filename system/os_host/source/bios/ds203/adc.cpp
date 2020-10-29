@@ -92,45 +92,49 @@ namespace BIOS
   namespace ADC
   {
     bool gEnabled{false};
+    bool gInit{false};
+    int gBeginOffset{0};
     int32_t gStarted{0};
     float gTimePerDiv{1.0f};
 
-    void Init() 
+    BIOS::ADC::EState GetState() 
     {
-      if (__Get(FPGA_OK, 0) == 0)
-      {
-        BIOS::DBG::Print("FPGA configuration error\n");
-        _ASSERT(0);
-      }
-      __Set(STANDBY, DN);
+      if (!gEnabled)
+        return EState::Offline;
+
+      if (__Get(FIFO_FULL, 0) & 1)
+        return EState::Full;
+
+      if (__Get(FIFO_EMPTY, 0) & 1)
+        return EState::Busy;
+
+      return EState::Online;
     }
 
-    bool Ready() 
-    {
-	return __Get(FIFO_FULL, 0);
-    }
-
-    BIOS::ADC::ERunState GetState() 
-    {
-	int nAux = 0;
-	if ( __Get(FIFO_START, 0) & 1 )
-		nAux |= (int)BIOS::ADC::ERunState::Start;
-	if ( __Get(FIFO_EMPTY, 0) & 1 )
-		nAux |= (int)BIOS::ADC::ERunState::Empty;
-	if ( __Get(FIFO_FULL, 0) & 1 )
-		nAux |= (int)BIOS::ADC::ERunState::Full;
-
-	return (BIOS::ADC::ERunState)nAux;
-    }
-
-    void Restart() 
+    void Restart(int beginOffset) 
     {
 	__Set(FIFO_CLR, W_PTR);
 	gStarted = BIOS::SYS::GetTick();
+	gBeginOffset = beginOffset;
     }
 
     BIOS::ADC::TSample::SampleType Get() 
     {
+      while (gBeginOffset > 0)
+      {
+        gBeginOffset--;
+        // TODO: optimize!
+        __asm (
+          "LDR     R1,  = 0x40011000\n"  //     ; GPIO  PORT_C   
+          "MOVW    R2,  #0x20\n"         // ; H_L pin: GPIO_PORT_B_Bit5 
+          "LDR     R3,  =0x64000000\n"   //  ; FIFO Port address
+          "STR     R2,  [R1, #0x14]\n"   // ; 0 -> H_L
+          "LDRH    R0,  [R3, #0]\n"      // ; FIFO Data -> R0
+          "STR     R2,  [R1, #0x10]\n"   // ; 1 -> H_L
+          "LDRH    R1,  [R3, #0]\n"      // ; FIFO Data -> R1  
+        );
+      }
+
       __asm (
         "LDR     R1,  = 0x40011000\n"  //     ; GPIO  PORT_C   
         "MOVW    R2,  #0x20\n"         // ; H_L pin: GPIO_PORT_B_Bit5 
@@ -158,14 +162,27 @@ namespace BIOS
 	return nSamples;
     }
 
-    void Enable(bool bEnable) 
+    bool Enable(bool bEnable) 
     {
+      if (!gInit)
+      {
+        if (__Get(FPGA_OK, 0) == 0)
+        {
+          BIOS::DBG::Print("FPGA configuration error\n");
+          _ASSERT(0);
+          return false;
+        }
+        __Set(STANDBY, DN);
+        gInit = true;
+      }
+
       gEnabled = bEnable;
       __Set(ADC_CTRL, bEnable ? EN : DN );
       if (bEnable)
       {     
         __Set(ADC_MODE, SEPARATE);
       }
+      return true;
     }
 
     bool Enabled()
@@ -182,7 +199,7 @@ namespace BIOS
 
           __Set(CH_A_COUPLE, (int)couple);
           __Set(CH_A_RANGE,  (int)res);
-          __Set(CH_A_OFFSET, offset);
+          __Set(CH_A_OFFSET, offset/4);
           break;
 
         case BIOS::ADC::EInput::CH2:
@@ -190,7 +207,7 @@ namespace BIOS
 
           __Set(CH_B_COUPLE, (int)couple);
           __Set(CH_B_RANGE,  (int)res);
-          __Set(CH_B_OFFSET, offset);
+          __Set(CH_B_OFFSET, offset/4);
           break;
 
         default:
@@ -255,7 +272,7 @@ namespace BIOS
         return;
       }
       __Set(T_THRESHOLD, time);  
-      __Set(V_THRESHOLD, value);  
+      __Set(V_THRESHOLD, value/4);  
       __Set(TRIGG_MODE,  ((int)source << 3) | (int)type);
     }
 

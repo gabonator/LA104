@@ -21,7 +21,7 @@ arm-none-eabi-g++ -Os -Werror -fno-common -mcpu=cortex-m3 -mthumb -msoft-float -
   ../../../os_host/source/gui/Controls.cpp \
   ../source/Framework/Sampler.cpp \
   -I../../../os_library/include/ \
-  -I../source/
+  -I../source/ || exit 1
 
 arm-none-eabi-gcc -Os -fPIC -mcpu=cortex-m3 -mthumb -o output.elf -nostartfiles -T ../source/app_ds203.lds \
   ./main.o \
@@ -33,7 +33,7 @@ arm-none-eabi-gcc -Os -fPIC -mcpu=cortex-m3 -mthumb -o output.elf -nostartfiles 
   ./GraphOsc.o ./CoreOscilloscope.o ./MenuDisp.o ./MenuInput.o \
   ./MenuMarker.o \
   ./Sampler.o ./Settings.o ./Controls.o ./Serialize.o \
-  -lbios_ds203 -L../../../os_library/build -lm
+  -lbios_ds203 -L../../../os_library/build -lm || exit 1
 
 arm-none-eabi-objdump -d -S output.elf > output.asm
 arm-none-eabi-readelf -all output.elf > output.txt

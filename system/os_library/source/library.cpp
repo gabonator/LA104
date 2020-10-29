@@ -142,15 +142,13 @@ namespace BIOS
 #if defined(DS203) || defined(DS213)
   namespace ADC
   {
-    void Init() {}
-    bool Ready() { return true; }
-    BIOS::ADC::ERunState GetState() { return BIOS::ADC::ERunState::Full; }
+    BIOS::ADC::EState GetState() { return BIOS::ADC::EState::Full; }
 
-    void Restart() {}
+    void Restart(int sampleOffset) {}
     BIOS::ADC::TSample::SampleType Get() { return 0;}
 
     int GetPointer() { return 0; }
-    void Enable(bool bEnable) {}
+    bool Enable(bool bEnable) { return true; }
     bool Enabled() { return true; }
 
     void ConfigureInput(BIOS::ADC::EInput input, BIOS::ADC::ECouple couple, BIOS::ADC::EResolution res, int offset) {}

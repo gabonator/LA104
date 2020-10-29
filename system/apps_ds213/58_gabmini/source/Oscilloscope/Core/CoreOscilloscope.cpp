@@ -31,11 +31,11 @@
 #ifdef DS203
 	BIOS::ADC::Enable(true);
 #endif
-	BIOS::ADC::ConfigureInput( BIOS::ADC::EInput::CH1, (BIOS::ADC::ECouple)nACouple, (BIOS::ADC::EResolution)nARange, nAOffset);
-	BIOS::ADC::ConfigureInput( BIOS::ADC::EInput::CH2, (BIOS::ADC::ECouple)nBCouple, (BIOS::ADC::EResolution)nBRange, nBPosition);
+	BIOS::ADC::ConfigureInput( BIOS::ADC::EInput::CH1, (BIOS::ADC::ECouple)nACouple, (BIOS::ADC::EResolution)nARange, nAOffset*4);
+	BIOS::ADC::ConfigureInput( BIOS::ADC::EInput::CH2, (BIOS::ADC::ECouple)nBCouple, (BIOS::ADC::EResolution)nBRange, nBPosition*4);
 	BIOS::ADC::ConfigureTimebase(fTimePerDiv);
 //	BIOS::ADC::ConfigureBuffer( arrLen[ (NATIVEENUM)Settings.Time.Resolution ] );
-	BIOS::ADC::Restart();
+	BIOS::ADC::Restart(0);
 
 	UpdateConstants();
 }
@@ -47,7 +47,7 @@
 		BIOS::ADC::ConfigureTrigger(0, 0, BIOS::ADC::ETriggerType::None, BIOS::ADC::EInput::CH1 );
 	} else
 	{
-		BIOS::ADC::ConfigureTrigger(Settings.Trig.nTime, Settings.Trig.nLevel, 
+		BIOS::ADC::ConfigureTrigger(Settings.Trig.nTime, Settings.Trig.nLevel*4, 
 			(BIOS::ADC::ETriggerType)Settings.Trig.Type, (BIOS::ADC::EInput)Settings.Trig.Source);
 	}
 }
@@ -55,6 +55,8 @@
 /*static*/ void CCoreOscilloscope::UpdateConstants()
 {
 	Settings.Runtime.m_fTimeRes = CSettings::TimeBase::pfValueResolution[ Settings.Time.Resolution ];
+	Settings.Runtime.m_nScreenDuration = (int)(Settings.Runtime.m_fTimeRes*1000*10);
+
 	Settings.Runtime.m_fCH1Res  = 
 		CSettings::AnalogChannel::pfValueResolution[ Settings.CH1.Resolution ] *
 		CSettings::AnalogChannel::pfValueProbe[ Settings.CH1.Probe ];
