@@ -121,7 +121,13 @@ class Device
 
   getPixel(x, y) 
   { 
-    return 0;
+    y = 240-y;
+    var p = (y*320+x)*4;
+    var r = this.imageData.data[p++];// = (((rgb)&0x1f)<<3);
+    var g = this.imageData.data[p++];// = ((((rgb)>>5)&0x3f)<<2);
+    var b = this.imageData.data[p++];// = ((((rgb)>>11)&0x1f)<<3);
+
+    return ((r)>>3)|(((g)>>2)<<5)|(((b)>>3)<<11);
   }
 
   loop() 
@@ -255,8 +261,8 @@ class Shell
   {
     console.log("Load app " + file);
     var imports = {appFinish: null, appInit: null, appLoop: null, 
-      __ZN4BIOS2OS11SetArgumentEPc:null, __ZN4BIOS2OS11GetArgumentEv:null,
-      __ZN4BIOS2OS11HasArgumentEv:null//, _appVideoBuffer: null, _appVideoBufferChanged: null
+      _ZN4BIOS2OS11SetArgumentEPc:null, _ZN4BIOS2OS11GetArgumentEv:null,
+      _ZN4BIOS2OS11HasArgumentEv:null//, _appVideoBuffer: null, _appVideoBufferChanged: null
     };
 
     var tablesize = {
@@ -273,11 +279,11 @@ class Shell
       if (args)
       {
         console.log("Setting arguments: "+args);
-        var ptr = imports.__ZN4BIOS2OS11GetArgumentEv();
+        var ptr = imports._ZN4BIOS2OS11GetArgumentEv();
         device.setString(ptr, file + " " + args);
 
-        imports.__ZN4BIOS2OS11SetArgumentEPc(ptr);
-        imports.__ZN4BIOS2OS11HasArgumentEv(); // reset HasArgument flag
+        imports._ZN4BIOS2OS11SetArgumentEPc(ptr);
+        imports._ZN4BIOS2OS11HasArgumentEv(); // reset HasArgument flag
       }
 
 //      device.videoMemoryPtr = imports._appVideoBuffer();
@@ -303,14 +309,14 @@ class Shell
 
   onProcessExit()
   {
-    if (!Module.__ZN4BIOS2OS11HasArgumentEv())
+    if (!Module._ZN4BIOS2OS11HasArgumentEv())
     {
       // no execute command requested, return to shell
       this.LoadApp("apps/shell.wasm");
       return;
     }
 
-    var newCommand = device.getString(Module.__ZN4BIOS2OS11GetArgumentEv())
+    var newCommand = device.getString(Module._ZN4BIOS2OS11GetArgumentEv())
     console.log("Exit command: "+newCommand);
     if (newCommand.length != 0)
       this.biosExecute(newCommand);
@@ -341,7 +347,7 @@ class Shell
 }
 
 window.onload = () => { shell = new Shell() };
-
+Module = {noRun:1};
 </script>
 <script src="app.js"></script>
 

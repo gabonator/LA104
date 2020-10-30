@@ -107,7 +107,8 @@ namespace BIOS
         default:
           break;
       }
-      _ASSERT(0);
+      BIOS::DBG::Print("attr not defined (%d)", eAttribute);
+//      _ASSERT(0);
       return 0;
     }
   }
