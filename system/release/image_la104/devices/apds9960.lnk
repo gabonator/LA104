@@ -1,1 +1,0 @@
-{"description":{short:"APDS9960",long:"APDS9960 color gesture sensor"},"icon":"chip.bmp","execute":"apds9960.elf"}

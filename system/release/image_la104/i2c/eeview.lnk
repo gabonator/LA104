@@ -1,1 +1,0 @@
-{"description":{"short":"EEPROM viewer","long":"I2C EEPROM memory viewer"},"icon":"eeview.bmp",execute:"eeview.elf",order:5}

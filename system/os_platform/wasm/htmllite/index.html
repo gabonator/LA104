@@ -62,7 +62,7 @@ class MiniApp
 
   flashRead(ptr, ofs, size)
   {
-    console.log([ptr, ofs, size]);
+    console.log(["flashRead", ptr, ofs, size]);
   }
 }
 
@@ -72,16 +72,16 @@ Module['noRun'] = true;
 
 window.onload = () => {
   Module['imports'] = {
-    _js_getKey: () => { return window.miniApp.getKey(); },
-    _js_getPixel: (x, y) => { return window.miniApp.getPixel(); },
-    _js_init : () => { return window.miniApp.init(); },
-    _js_loop : () => { return window.miniApp.loop(); },
-    _js_running : () => { return window.miniApp.running(); },
-    _js_setPixel : (x, y, rgb) => { return window.miniApp.setPixel(x, y, rgb); },
-    _js_ticks : () => { return window.miniApp.ticks(); },
-    _js_flashRead : (ptr, ofs, size) => { return window.miniApp.flashRead(ptr, ofs, size); },
-    _js_flashWrite : (ptr, ofs, size) => { return window.miniApp.flashWrite(ptr, ofs, size); },
-    _js_log: (ptr) => {
+    js_getKey: () => { return window.miniApp.getKey(); },
+    js_getPixel: (x, y) => { return window.miniApp.getPixel(); },
+    js_init : () => { return window.miniApp.init(); },
+    js_loop : () => { return window.miniApp.loop(); },
+    js_running : () => { return window.miniApp.running(); },
+    js_setPixel : (x, y, rgb) => { return window.miniApp.setPixel(x, y, rgb); },
+    js_ticks : () => { return window.miniApp.ticks(); },
+    js_flashRead : (ptr, ofs, size) => { return window.miniApp.flashRead(ptr, ofs, size); },
+    js_flashWrite : (ptr, ofs, size) => { return window.miniApp.flashWrite(ptr, ofs, size); },
+    js_log: (ptr) => {
       var text = "";
       for (var i=0; i<100 && Module['memory'][ptr+i] != 0; i++)
         text += String.fromCharCode(Module['memory'][ptr+i]);
@@ -90,9 +90,9 @@ window.onload = () => {
   };
 
   Module['exports'] = {
-    _appFinish: null,
-    _appInit: null,
-    _appLoop: null
+    appFinish: null,
+    appInit: null,
+    appLoop: null
   };
 
   if (Module['run']) 
@@ -101,10 +101,10 @@ window.onload = () => {
 
 Module['onRuntimeInitialized'] = () =>
 {
-  Module._appInit();
+  Module.appInit();
   setInterval(() =>
   {
-    Module._appLoop();
+    Module.appLoop();
   }, 50);
 }
 </script>

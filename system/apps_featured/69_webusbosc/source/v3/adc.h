@@ -85,7 +85,7 @@ namespace BIOS
       if (isStreaming())
         return streamerBuffer.size() >= 2048;
 
-      return BIOS::ADC::Ready();
+      return BIOS::ADC::GetState() == BIOS::ADC::EState::Full || BIOS::ADC::GetState() == BIOS::ADC::EState::Triggered;
     }
 
     void ConfigureTrigger2(int time, int value, BIOS::ADC::ETriggerType type, BIOS::ADC::EInput source)

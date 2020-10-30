@@ -1,1 +1,0 @@
-{"description":{short:"BMP085",long:"BMP085 Barometric sensor"},"icon":"chip.bmp","execute":"bmp085.elf"}

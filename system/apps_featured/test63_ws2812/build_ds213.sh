@@ -13,8 +13,8 @@ arm-none-eabi-readelf -all output.elf > output.txt
 find . -type f -name '*.o' -delete
 find . -type f -name '*.d' -delete
 
-../../../../tools/elfstrip/elfstrip output.elf 63ws_ds.elf
-
+../../../../tools/elfstrip/elfstrip output.elf 63ws_213.elf
+                                                      
 nm --print-size --size-sort -gC output.elf | grep " B " > symbols_ram.txt
 nm --print-size --size-sort -gC output.elf | grep " T " > symbols_rom.txt
 nm --print-size --size-sort -gC output.elf > symbols_all.txt

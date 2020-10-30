@@ -1,1 +1,0 @@
-{"description":{short:"GPIO",long:"GPIO and PWM controller"},"icon":"gpio.bmp","execute":"gpio.elf",order:90}
