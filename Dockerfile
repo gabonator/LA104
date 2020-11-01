@@ -8,8 +8,8 @@ RUN ln -s `which nodejs` /usr/bin/node
 
 WORKDIR /home/dev
 
-RUN wget https://developer.arm.com/-/media/Files/downloads/gnu-rm/7-2018q2/gcc-arm-none-eabi-7-2018-q2-update-linux.tar.bz2 \
-    && tar xvf gcc-arm-none-eabi-7-2018-q2-update-linux.tar.bz2 \
+RUN wget -q https://developer.arm.com/-/media/Files/downloads/gnu-rm/7-2018q2/gcc-arm-none-eabi-7-2018-q2-update-linux.tar.bz2 \
+    && tar xf gcc-arm-none-eabi-7-2018-q2-update-linux.tar.bz2 \
     && rm gcc-arm-none-eabi-7-2018-q2-update-linux.tar.bz2
 
 
@@ -18,7 +18,7 @@ ENV PATH $PATH:/home/dev/gcc-arm-none-eabi-7-2018-q2-update/bin
 COPY . .
 
 RUN cd system/scripts \
-    ./build_minimal.sh
+    && ./build_minimal.sh
 
 CMD [bash]
 
