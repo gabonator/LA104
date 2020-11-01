@@ -116,6 +116,8 @@ done
 
 if [ $ERRORS -eq 1 ]; then
   echo [WARNING] Built with errors!
+else
+  echo Build ok!
 fi
 
 exit $ERRORS

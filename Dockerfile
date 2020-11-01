@@ -18,7 +18,7 @@ ENV PATH $PATH:/home/dev/gcc-arm-none-eabi-7-2018-q2-update/bin
 COPY . .
 
 RUN cd system/scripts \
-    && ./build_minimal.sh
+    && ./build_full.sh
 
 CMD [bash]
 
