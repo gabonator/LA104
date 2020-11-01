@@ -1,5 +1,7 @@
 #https://developer.arm.com/open-source/gnu-toolchain/gnu-rm/downloads
 
+set -e
+
 GITREVISION=`git log --pretty=format:'%h' -n 1`
 TARGET=LA104
 
@@ -62,7 +64,7 @@ arm-none-eabi-g++ -Wall -Os -Werror -fno-common -mcpu=cortex-m3 -mthumb -msoft-f
   ../library/spf/spf.c \
   ../source/main/Execute.cpp \
   ../source/gui/Gui.cpp \
-  ../source/Framework/Serialize.cpp \
+  ../source/framework/Serialize.cpp \
 
 arm-none-eabi-gcc -mcpu=cortex-m3 -mthumb -o output.elf -nostartfiles -T ../app.ld \
   ./main.o \

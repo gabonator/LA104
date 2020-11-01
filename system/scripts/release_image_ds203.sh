@@ -10,13 +10,14 @@ rm -rf $TO
 mkdir $TO
 
 (
-  cp $FROM/29fileman_ds203.elf $TO/shell.elf || exit 1
-  cp $FROM/21mplayd.elf $TO/midiplay.elf || exit 1
-  cp $FROM/61devin.elf $TO/devinfo.elf || exit 1
-  cp $FROM/63ws_203.elf $TO/leds.elf || exit 1
-  cp $FROM/69webos0.elf $TO/webosc.elf || exit 1
-  cp $FROM/58gmin03.elf $TO/miniosc.elf || exit 1
-  cp $FROM/60gagen0.elf $TO/minigen.elf || exit 1
+  set -e
+  cp $FROM/29fileman_ds203.elf $TO/shell.elf
+  cp $FROM/21mplayd.elf $TO/midiplay.elf
+  cp $FROM/61devin.elf $TO/devinfo.elf
+  cp $FROM/63ws_203.elf $TO/leds.elf
+  cp $FROM/69webos0.elf $TO/webosc.elf
+  cp $FROM/58gmin03.elf $TO/miniosc.elf
+  cp $FROM/60gagen0.elf $TO/minigen.elf
   # official fw not ported yet!        	
 )
 

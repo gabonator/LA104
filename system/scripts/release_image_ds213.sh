@@ -10,6 +10,7 @@ rm -rf $TO
 mkdir $TO
 
 (
+  set -e
   cp $FROM/29fileman_ds213.elf $TO/shell.elf
   cp $FROM/21mplay2.elf $TO/midiplay.elf
   cp $FROM/61devin.elf $TO/devinfo.elf

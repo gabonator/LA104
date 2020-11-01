@@ -1,5 +1,7 @@
 #https://developer.arm.com/open-source/gnu-toolchain/gnu-rm/downloads
 
+set -e
+
 GITREVISION=`git log --pretty=format:'%h' -n 1`
 TARGET=DS213
 
