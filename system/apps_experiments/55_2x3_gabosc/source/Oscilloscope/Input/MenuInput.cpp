@@ -73,7 +73,7 @@ CWndMenuInput::CWndMenuInput()
 		if ( pSender == &m_wndListTrigger.m_itmSync )
 		{
 			BIOS::ADC::Enable( true );
-			BIOS::ADC::Restart();
+			BIOS::ADC::Restart(0);
 		}
 
 		Settings.Trig.State = (Settings.Trig.Sync == CSettings::Trigger::_Single) ? 

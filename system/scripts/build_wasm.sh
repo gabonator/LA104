@@ -1,3 +1,17 @@
+#!/bin/bash
+
+#
+# To setup wasm building environment:
+#
+#   git clone https://github.com/emscripten-core/emsdk.git
+#   ./emsdk install latest
+#   ./emsdk activate latest
+#
+# check "which emcc" and remove references in /usr/local
+# call emsdk_env.sh to setup environment, or set path to utilities:
+# PATH=$PATH:~/Documents/git/ext/emsdk/upstream/emscripten
+# PATH=$PATH:~/Documents/git/ext/emsdk/upstream/bin
+#
 
 buildApp () {
   (
@@ -9,11 +23,16 @@ buildApp () {
     rm -rf build
     ./build_wasm.sh > /dev/null 2> /dev/null
 
+    if [ $? -eq 1 ]; then
+      echo "$1: Build failed"
+      exit 1
+    fi
+
     for f in build/*.wasm; do
       [ -e "$f" ] && exit 0
       break
     done
-    echo "$1: Build failed"
+    echo "$1: No executable found"
     exit 1
   )
 

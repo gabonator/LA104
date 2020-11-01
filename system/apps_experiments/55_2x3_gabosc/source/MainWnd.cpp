@@ -80,10 +80,13 @@ bool CMainWnd::IsRunning()
 	{
 		long now = BIOS::SYS::GetTick();
 
-		if ( (Settings.Trig.Sync != CSettings::Trigger::_None) && BIOS::ADC::Enabled() && BIOS::ADC::Ready() )
+		bool ready = BIOS::ADC::GetState() == BIOS::ADC::EState::Full ||
+                  BIOS::ADC::GetState() == BIOS::ADC::EState::Triggered;
+
+		if ( (Settings.Trig.Sync != CSettings::Trigger::_None) && BIOS::ADC::Enabled() && ready )
 		{
 			Sampler::Copy();
-			BIOS::ADC::Restart();
+			BIOS::ADC::Restart(0);
 			CWnd::WindowMessage( CWnd::WmBroadcast, ToWord('d', 'g') );
                         m_lLastAcquired = now;
 			return;
@@ -114,7 +117,7 @@ bool CMainWnd::IsRunning()
 			// force restart if the write pointer is behind current window
 			if ( BIOS::ADC::Enabled() && bScreenReady )
 			{
-				BIOS::ADC::Restart();
+				BIOS::ADC::Restart(0);
 			} 
 		}
 	}

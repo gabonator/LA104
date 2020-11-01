@@ -34,7 +34,7 @@
 	BIOS::ADC::ConfigureTimebase(fTimePerDiv);
 	BIOS::ADC::ConfigureTimebase(fTimePerDiv);
 //	BIOS::ADC::ConfigureBuffer( arrLen[ (NATIVEENUM)Settings.Time.Resolution ] );
-	BIOS::ADC::Restart();
+	BIOS::ADC::Restart(0);
 
 	UpdateConstants();
 }

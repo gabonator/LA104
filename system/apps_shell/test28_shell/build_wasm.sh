@@ -2,8 +2,8 @@
 mkdir build
 cd build 
 
-PATH=$PATH:/Users/gabrielvalky/Documents/git/ext/emsdk/upstream/emscripten
-PATH=$PATH:/Users/gabrielvalky/Documents/git/ext/emsdk/upstream/bin
+PATH=$PATH:~/Documents/git/ext/emsdk/upstream/emscripten
+PATH=$PATH:~/Documents/git/ext/emsdk/upstream/bin
 
 INCLUDES="\
   -I ../../../os_platform/common/include
@@ -21,12 +21,13 @@ SOURCE="\
   ../../../os_platform/common/source/bios/memory.cpp \
   ../../../os_platform/common/source/bios/sys.cpp"
 
-EXPORTED="['_appLoop', '_appInit', '_appFinish', '__ZN4BIOS2OS11SetArgumentEPc', '__ZN4BIOS2OS11GetArgumentEv', '__ZN4BIOS2OS11HasArgumentEv']"
+NAME=shell
+BASE=http://localhost:8080/apps/
 
-emcc ${INCLUDES} ${SOURCE} -g4 -O3 -s TOTAL_STACK=1024 -s TOTAL_MEMORY=65536 -s ENVIRONMENT="web" -s TEXTDECODER=2 -s MALLOC=emmalloc -s MINIMAL_RUNTIME=1 -s WASM=1 -s EXTRA_EXPORTED_RUNTIME_METHODS="['AsciiToString']" -s EXPORTED_FUNCTIONS="${EXPORTED}" -o shell.js -DEMULATED -DEMSCRIPTEN -DLA104 --std=c++11 -s ERROR_ON_UNDEFINED_SYMBOLS=0 --source-map-base http://localhost:8080/apps/ || exit 1
-node ../../../os_platform/wasm/htmllite/package.js shell
+EXPORTED="['_appLoop', '_appInit', '_appFinish']"
+CONFIGURATION="-s TOTAL_STACK=1024 -s TOTAL_MEMORY=65536 -s MINIMAL_RUNTIME=1 -s WASM=1 -s ERROR_ON_UNDEFINED_SYMBOLS=0 -s WARN_ON_UNDEFINED_SYMBOLS=0"
+DEFINES="-DEMULATED -DEMSCRIPTEN -DLA104"
+emcc $INCLUDES $SOURCE -g4 -O3 --std=c++11 $CONFIGURATION $DEFINES --source-map-base $BASE -s EXPORTED_FUNCTIONS="${EXPORTED}" -o $NAME.js || exit 1
+node ../../../os_platform/wasm/htmllite/package.js $NAME
 
-#emcc ${INCLUDES} ${SOURCE} -g4 -O3 -s TOTAL_STACK=16384 -s TOTAL_MEMORY=131072 -s MINIMAL_RUNTIME=1 -s WASM=1 -s EXPORTED_FUNCTIONS="${EXPORTED}" -o app.js -DEMSCRIPTEN -DLA104 --std=c++11 -s ERROR_ON_UNDEFINED_SYMBOLS=0
-#node ../../../os_platform/wasm/htmllite/package.js
 
-cp app.wasm /Users/gabrielvalky/Documents/git/LA104/system/release/wasm/apps/shell.wasm

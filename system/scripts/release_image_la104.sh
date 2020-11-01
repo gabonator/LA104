@@ -1,12 +1,18 @@
+#!/bin/bash
 # prepares filesystem for LA104, all files should be copied into the device root
 # contains latest and most useful applications to show capabilities of LA104
 
-# at first run buildall.sh
-FROM=release/bin
-TO=release/image_la104/
-ICON=../tools/shellicons
-mkdir release
+# at first run build_full.sh
+
+FROM=../build/apps
+TO=../build/image_ds213/
+ICON=../../tools/shellicons
+
+rm -rf $TO
 mkdir $TO
+
+(
+set -e
 
 # shell
 #cp $FROM/29fileman_la104.elf $TO/shell.elf
@@ -38,7 +44,7 @@ cp $ICON/midi.bmp $TO/midi/midi.bmp
 echo -n "{\"description\":{\"short\":\"MIDI\",\"long\":\"MIDI tools\"},\"icon\":\"midi.bmp\"}" > $TO/midi/index.lnk
 
 cp $FROM/21mplayl.elf $TO/midi/midiplay.elf
-cp apps_featured/test21_midiplay/midi/laisla.mid $TO/midi/laisla.mid
+cp ../apps_featured/test21_midiplay/midi/laisla.mid $TO/midi/laisla.mid
 cp $ICON/music.bmp $TO/midi/midiplay.bmp
 echo -n "{\"description\":{\"short\":\"MIDI\",\"long\":\"MIDI player\"},\"icon\":\"midiplay.bmp\",\"execute\":\"midiplay.elf\"}" > $TO/midi/midiplay.lnk
 
@@ -51,7 +57,7 @@ cp $FROM/37icscan.elf $TO/i2c/i2cscan.elf
 cp $ICON/magnifier.bmp $TO/i2c/i2cscan.bmp
 echo -n "{\"description\":{\"short\":\"I2C scanner\",\"long\":\"I2C bus scanner\"},\"icon\":\"i2cscan.bmp\",execute:\"i2cscan.elf\",order:10}" > $TO/i2c/i2cscan.lnk
 
-cp apps_featured/test37_i2cscan/devices.txt $TO/i2c/devices.txt
+cp ../apps_featured/test37_i2cscan/devices.txt $TO/i2c/devices.txt
 cp $FROM/85eetest.elf $TO/i2c/eeview.elf
 cp $ICON/eeprom.bmp $TO/i2c/eeview.bmp
 echo -n "{\"description\":{\"short\":\"EEPROM viewer\",\"long\":\"I2C EEPROM memory viewer\"},\"icon\":\"eeview.bmp\",execute:\"eeview.elf\",order:5}" > $TO/i2c/eeview.lnk
@@ -72,7 +78,7 @@ echo -n "{\"description\":{\"short\":\"USB analyser\",\"long\":\"WebUSB rf analy
 cp $FROM/82sanal.elf $TO/rftools/spectrum.elf
 cp $ICON/spectrum.bmp $TO/rftools/spectrum.bmp
 echo -n "{\"description\":{\"short\":\"spectrum analyser\",\"long\":\"spectrum analyser\"},\"icon\":\"spectrum.bmp\",\"execute\":\"spectrum.elf\",order:5}" > $TO/rftools/spectrum.lnk
-cp apps_featured/80_rftool/logs/*.* $TO/rftools/
+cp ../apps_featured/80_rftool/logs/*.* $TO/rftools/
 
 # eink
 mkdir $TO/eink
@@ -83,7 +89,7 @@ cp $FROM/90eink.elf $TO/eink/displimg.elf
 cp $ICON/picture.bmp $TO/eink/displimg.bmp
 echo -n "{\"description\":{short:\"eInk\",long:\"eInk display image loader\"},\"icon\":\"displimg.bmp\",\"execute\":\"displimg.elf\"}" > $TO/eink/displimg.lnk
 
-cp apps_featured/90_epd_image/res/*.bmp $TO/eink/
+cp ../apps_featured/90_epd_image/res/*.bmp $TO/eink/
 
 #tools 
 mkdir $TO/tools
@@ -218,7 +224,20 @@ Version information
 ---------------------
 oct/2020 release
 EOM
+)
 
-cd release/image_la104
-rm ../la104apps.zip
+if [ $? -eq 1 ]; then
+  echo [ERROR] File not found
+  exit 1
+fi
+
+cd $TO
+rm la104apps.zip > /dev/null 2> /dev/null
 zip -r ../la104apps.zip *
+
+if [ $? -eq 1 ]; then
+  echo [ERROR] Compression failure
+  exit 1
+fi
+
+echo [DONE] Packaging finished

@@ -15,10 +15,10 @@ RUN wget https://developer.arm.com/-/media/Files/downloads/gnu-rm/7-2018q2/gcc-a
 
 ENV PATH $PATH:/home/dev/gcc-arm-none-eabi-7-2018-q2-update/bin
 
-
 COPY . .
 
-RUN ./build.sh
+RUN cd system/scripts \
+    ./build_minimal.sh
 
 CMD [bash]
 
