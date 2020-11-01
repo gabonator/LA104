@@ -23,7 +23,7 @@ buildApp () {
     fi
 
     rm -rf build
-    ./build.sh > /dev/null 2> /dev/null
+    ./build.sh
 
     if [ $? -eq 1 ]; then
       echo "$1: Build failed"
