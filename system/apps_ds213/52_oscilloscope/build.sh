@@ -40,6 +40,6 @@ nm --print-size --size-sort -gC output.elf | grep " B " > symbols_ram.txt
 nm --print-size --size-sort -gC output.elf | grep " T " > symbols_rom.txt
 nm --print-size --size-sort -gC output.elf > symbols_all.txt
 
-../../../../tools/elfstrip/elfstrip output.elf 52osc.elf
+../../../../tools/elfstrip/elfstrip output.elf 52osc213.elf
 #../../../elfdump/elfdump snake.elf
 rm output.elf

@@ -1,1 +1,0 @@
-{"description":{short:"DHT22",long:"DHT11/DHT22 temperature humidity"},"icon":"chip.bmp","execute":"dht22.elf"}

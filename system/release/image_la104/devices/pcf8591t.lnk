@@ -1,1 +1,0 @@
-{"description":{short:"PCF8591t",long:"PCF8591t I2C ADC"},"icon":"chip.bmp","execute":"pcf8591t.elf"}

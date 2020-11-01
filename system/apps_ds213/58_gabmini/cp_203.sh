@@ -1,0 +1,1 @@
+cp build/58gmin03.elf /Volumes/DS203/

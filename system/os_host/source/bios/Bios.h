@@ -258,10 +258,14 @@ namespace BIOS
       SampleType value;
     };
 
-    enum class ERunState {
-      Start = 1,
-      Empty = 2,
-      Full = 4
+    static const TSample::SampleType NoData = 0xffffffff;
+
+    enum class EState {
+      Offline = 0,
+      Online = 1,        // ready to transfer in auto mode
+      Triggered = 2,     // ready to transfer
+      Full = 3,          // ready to transfer, buffer full
+      Busy = 4           // cant transfer now
     };
 
     enum class EInput {
@@ -299,15 +303,13 @@ namespace BIOS
       None
     };
 
-    void Init();
-    bool Ready();
-    ERunState GetState();
+    EState GetState();
 
-    void Restart();
+    void Restart(int nSampleOffset);
     TSample::SampleType Get();
 
     int GetPointer();
-    void Enable(bool bEnable);
+    bool Enable(bool bEnable);
     bool Enabled();
 
     void ConfigureInput(EInput input, ECouple couple, EResolution res, int offset);

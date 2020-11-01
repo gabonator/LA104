@@ -127,7 +127,11 @@ void CSettings::Reset()
 	CH1.Resolution = AnalogChannel::_1V;
 	CH1.Probe = AnalogChannel::_1X;
 	CH1.u16Color = RGB565(ffff00);
+#ifdef DS213
 	CH1.u16Position = 172;
+#else
+	CH1.u16Position = 117;
+#endif
 	CH1.Enabled = AnalogChannel::_YES;
 	
 	CH2.pszName = "CH2";
@@ -136,7 +140,11 @@ void CSettings::Reset()
 	CH2.Resolution = AnalogChannel::_1V;
 	CH2.Probe = AnalogChannel::_1X;
 	CH2.u16Color = RGB565(00ffff);
-	CH2.u16Position = 122;
+#ifdef DS213
+	CH1.u16Position = 122;
+#else
+	CH2.u16Position = 22;
+#endif
 	CH2.Enabled = AnalogChannel::_YES;
 	
 	CH3.pszName = "CH3";
@@ -159,11 +167,11 @@ void CSettings::Reset()
 	// first samples are some noise, cut them out, length matching one div
 	Time.Shift = Time.InvalidFirst;
 	
-	Trig.Sync = Trigger::_Norm;
+	Trig.Sync = Trigger::_Auto; // _Norm
 	Trig.Type = Trigger::_EdgeLH;
 	Trig.Source = Trigger::_CH1;
 	Trig.State = Trigger::_Run;
-	Trig.nLevel = 80;
+	Trig.nLevel = 160;
 	Trig.nTime = 30*5;
 	Trig.nHoldOff = 0;
 	Trig.nPosition = 150;
@@ -299,10 +307,27 @@ void CSettings::ResetCalibration()
 //	DacCalib.m_arrCurveIn[0] = 0.5f;	DacCalib.m_arrCurveOut[0] = 725;
 //	DacCalib.m_arrCurveIn[1] = 1.5f;	DacCalib.m_arrCurveOut[1] = 2176;
 
+/*
+ 105 -> 0
+ 238 -> 255
+*/
+#if defined(DS213)
+	const static si16 defaultQin[] = {105, 238};
+#elif defined(DS203)
+	const static si16 defaultQin[] = {-24, 249};
+#else
 	const static si16 defaultQin[] = {0, 256};
+#error Unknown platform
+#endif
+
 	const static si32 defaultQout[] = {0, -(256<<11)};
 	const static si16 defaultKin[] = {0, 0, 0, 0, 0, 256};
 	const static si32 defaultKout[] = {1<<11, 1<<11, 1<<11, 1<<11, 1<<11, 1<<11};
+/*
+			fast.K = InterpolatorK::Get( pCurCurve.m_arrCurveKin, pCurCurve.m_arrCurveKout, nVert );
+			fast.Q = InterpolatorQ::Get( pCurCurve.m_arrCurveQin, pCurCurve.m_arrCurveQout, nVert );
+			fast.Zero = fast.Q / fast.K;
+*/
 
 	for ( int i = 0; i <= AnalogChannel::_ResolutionMax; i++ )
 	{

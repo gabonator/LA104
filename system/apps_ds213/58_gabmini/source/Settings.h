@@ -320,6 +320,7 @@ class AnalogChannel : public CSerialize
 		int m_nStandby;
 		
 		FLOAT m_fTimeRes;
+		int m_nScreenDuration;
 		FLOAT m_fCH1Res;
 		FLOAT m_fCH2Res;
 

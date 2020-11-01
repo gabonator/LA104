@@ -1,1 +1,0 @@
-{"description":{"short":"USB analyser","long":"WebUSB rf analyser"},"icon":"wusbosc.bmp","execute":"wusbosc.elf",order:2}

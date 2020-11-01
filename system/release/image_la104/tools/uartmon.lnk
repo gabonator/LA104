@@ -1,1 +1,0 @@
-{"description":{short:"UART monitor",long:"UART monitor"},"icon":"uartmon.bmp","execute":"uartmon.elf"}

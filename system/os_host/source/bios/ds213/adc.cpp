@@ -8,34 +8,43 @@ namespace BIOS
 {
   namespace ADC
   {
+    bool bInit = false;
     bool bEnabled = false;
     bool bRestart = true;
     bool bEmpty = false;
+    int nReadOffset = 0;
 
-    void Init() 
+    bool Enabled()
     {
-      pFunc1 __BiosInit = (pFunc1)0x08000101; // Point to DFU BiosInit
-      __BiosInit((uint32_t)&Hw);
+      return bEnabled;
     }
 
-    bool Ready() 
+    BIOS::ADC::EState GetState() 
     {
+      if (!bEnabled)
+        return BIOS::ADC::EState::Offline;
+
       constexpr int CH_A = 0;
       constexpr int CH_B = 1;
 
       u32 Status = FPGA_CtrlRW(CH_A, SMPL_ST) | FPGA_CtrlRW(CH_B, SMPL_ST);
-      // TRIGG - triggered, stable signal
-      // SCRNF - no trigger, but we can show the signal in "Auto mode", otherwise we cant read samples from fpga!
-      return (Status & TRIGG) | (Status & SCRNF); //  if(Status & SCRNF) ScrnF = 1;
+
+//      if ((Status & TRIGG) && (Status & SCRNF) )
+//        return BIOS::ADC::EState::TriggeredFull; // TODO: verify full?
+
+      if (Status & TRIGG)
+        return BIOS::ADC::EState::Triggered; // TODO: verify full?
+
+      if (Status & SCRNF) // Screen full?
+        return BIOS::ADC::EState::Online; // ready to transfer
+
+      return BIOS::ADC::EState::Busy;
     }
 
-    BIOS::ADC::ERunState GetState() 
+    void Restart(int offset) 
     {
-      return BIOS::ADC::ERunState::Start;
-    }
+      nReadOffset = offset;
 
-    void Restart() 
-    {
       FPGA_DataWr(A_C_CH, SMPL_MODE, SEPARATE); 
       FPGA_DataWr(B_D_CH, SMPL_MODE, SEPARATE);
       FPGA_DataWr(A_C_CH, SMPL_PSMP, 150);
@@ -50,20 +59,17 @@ namespace BIOS
       {
         bRestart = false;
         bEmpty = false;
-        int begin = 0;
-        FPGA_DataWr(A_C_CH, SMPL_RPTR, begin);
-        FPGA_DataWr(B_D_CH, SMPL_RPTR, begin);
-      }
-
-      if (bEmpty)
-      {
-        return 0x00008080;
+        FPGA_DataWr(A_C_CH, SMPL_RPTR, nReadOffset);
+        FPGA_DataWr(B_D_CH, SMPL_RPTR, nReadOffset);
       }
 
       int sampleAC = FPGA_SmplRd(A_C_CH);
       int sampleBD = FPGA_SmplRd(B_D_CH);
       if ((sampleAC | sampleBD) & EMPTY)
         bEmpty = true;                              
+
+      if (bEmpty)
+        return ADC::NoData;
 
       uint32_t result = (sampleAC >> 8) | (sampleBD & 0xff00);
 
@@ -80,8 +86,37 @@ namespace BIOS
       return 0;
     }
 
-    void Enable(bool bEnable) 
+    void _Copy()
     {
+      FPGA_DataWr(A_C_CH, SMPL_MODE, SEPARATE); 
+      FPGA_DataWr(B_D_CH, SMPL_MODE, SEPARATE);
+      FPGA_DataWr(A_C_CH, SMPL_PSMP, 150);
+      FPGA_DataWr(B_D_CH, SMPL_PSMP, 150);
+      *Hw.pOut_Clr = 1, *Hw.pOut_Clr = 0;        // FPGA 
+
+
+      FPGA_DataWr(A_C_CH, SMPL_RPTR, 0);
+      FPGA_DataWr(B_D_CH, SMPL_RPTR, 0);
+
+      FPGA_SmplRd(A_C_CH);
+      FPGA_SmplRd(B_D_CH);
+
+      FPGA_DataWr(A_C_CH, SMPL_MODE, SEPARATE); 
+      FPGA_DataWr(B_D_CH, SMPL_MODE, SEPARATE);
+      FPGA_DataWr(A_C_CH, SMPL_PSMP, 150);
+      FPGA_DataWr(B_D_CH, SMPL_PSMP, 150);
+      *Hw.pOut_Clr = 1, *Hw.pOut_Clr = 0;        // FPGA 
+    }
+
+    bool Enable(bool bEnable) 
+    {
+      if (!bInit)
+      {
+        pFunc1 __BiosInit = (pFunc1)0x08000101; // Point to DFU BiosInit
+        __BiosInit((uint32_t)&Hw);
+        bInit = true;
+      }
+
       bEnabled = bEnable;
       _ASSERT(bEnable);
 
@@ -98,11 +133,24 @@ namespace BIOS
       FPGA_DataWr(B_D_CH, SMPL_MODE, SEPARATE);
       FPGA_DataWr(A_C_CH, SMPL_PSMP, 150);
       FPGA_DataWr(B_D_CH, SMPL_PSMP, 150);
-    }
 
-    bool Enabled()
-    { 
-      return bEnabled; 
+      // TODO: Strange startup sequence
+      FPGA_ByteWr(A_C_CH, TRIG_VOLT, 128);
+      FPGA_ByteWr(B_D_CH, TRIG_VOLT, 128);
+
+      FPGA_ByteWr(A_C_CH, TRIG_KIND, TRIG_NONE);
+      FPGA_ByteWr(B_D_CH, TRIG_KIND, TRIG_NONE);
+
+      *Hw.pOut_Clr = 1, *Hw.pOut_Clr = 0;
+      for (int i=0; i<400; i++) { FPGA_SmplRd(A_C_CH); FPGA_SmplRd(B_D_CH); }
+
+      *Hw.pOut_Clr = 1, *Hw.pOut_Clr = 0;
+      for (int i=0; i<400; i++) { FPGA_SmplRd(A_C_CH); FPGA_SmplRd(B_D_CH); }
+
+      *Hw.pOut_Clr = 1, *Hw.pOut_Clr = 0;
+      for (int i=0; i<400; i++) { FPGA_SmplRd(A_C_CH); FPGA_SmplRd(B_D_CH); }
+
+      return true;
     }
 
     void ConfigureInput(BIOS::ADC::EInput input, BIOS::ADC::ECouple couple, BIOS::ADC::EResolution res, int offset) 
@@ -118,7 +166,7 @@ namespace BIOS
       if (input == BIOS::ADC::EInput::CH1)
       {
         int Range = (int)res+2;
-        *Hw.pCh_A_Posn = offset*4; // 0..1024
+        *Hw.pCh_A_Posn = offset; // 0..1024
         *Hw.pOut_A_Coupl = couple == BIOS::ADC::ECouple::DC;
         *Hw.pOut_A_Level  = RANGE_SW[0][Range];
         *Hw.pOut_A_Slct0  = RANGE_SW[1][Range];
@@ -129,7 +177,7 @@ namespace BIOS
       if (input == BIOS::ADC::EInput::CH2)
       {
         int Range = (int)res+2;
-        *Hw.pCh_B_Posn = offset*4;
+        *Hw.pCh_B_Posn = offset;
         *Hw.pOut_B_Coupl = couple == BIOS::ADC::ECouple::DC;
         *Hw.pOut_B_Level  = RANGE_SW[0][Range];
         *Hw.pOut_B_Slct0  = RANGE_SW[1][Range];
@@ -187,19 +235,19 @@ namespace BIOS
         case BIOS::ADC::ETriggerType::GreaterDTHigh: trigType = (int)TRIG_ApGT; break;
         case BIOS::ADC::ETriggerType::None: trigType = (int)TRIG_ANY; break;
       }
-
+ 
       if (source == BIOS::ADC::EInput::CH1)
       {
         FPGA_ByteWr(A_C_CH, TRIG_KIND, trigType);
         FPGA_ByteWr(B_D_CH, TRIG_KIND, TRIG_NONE);
-        FPGA_ByteWr(A_C_CH, TRIG_VOLT, value);
+        FPGA_ByteWr(A_C_CH, TRIG_VOLT, value/4);
         FPGA_ByteWr(A_C_CH, TRIG_WDTH, time);
       }
       if (source == BIOS::ADC::EInput::CH2)
       {
         FPGA_ByteWr(A_C_CH, TRIG_KIND, TRIG_NONE);
         FPGA_ByteWr(B_D_CH, TRIG_KIND, trigType);
-        FPGA_ByteWr(B_D_CH, TRIG_VOLT, value);
+        FPGA_ByteWr(B_D_CH, TRIG_VOLT, value/4);
         FPGA_ByteWr(B_D_CH, TRIG_WDTH, time);
       }
     }

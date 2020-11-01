@@ -4,6 +4,7 @@ CMainWnd* CMainWnd::m_pInstance = nullptr;
 CSettings m_Settings; // TODO:!
 
 long m_lLastAcquired = 0;
+long m_lLastRequested = 0;
 
 void CMainWnd::Create()
 {	
@@ -25,18 +26,17 @@ void CMainWnd::Create()
 	SendMessage( &mWndToolBar, ToWord('g', 'i'), nMenuItem);
 	m_wndMenuInput.SetFocus();
 
+        // just for testing
+        BIOS::DAC::SetMode(BIOS::DAC::EMode::Square, nullptr, 0);
+        BIOS::DAC::SetFrequency(1000);
+
 #if defined(DS203)
 	// Start in scan mode
-	Settings.Trig.Sync = CSettings::Trigger::_Scan;
 	CCoreOscilloscope::ConfigureTrigger();
 	CCoreOscilloscope::ConfigureAdc();
-	BIOS::ADC::Restart();
+	BIOS::ADC::Restart(0);
 #elif defined(DS213)
-	// Strange DS213 startup procedure
         BIOS::ADC::Enable( true );
-	BIOS::ADC::Restart();
-	while (!BIOS::ADC::Ready()); Sampler::Copy(); BIOS::ADC::Restart();
-	while (!BIOS::ADC::Ready()); Sampler::Copy(); BIOS::ADC::Restart();
 	CCoreOscilloscope::ConfigureAdc();
 	CCoreOscilloscope::ConfigureTrigger();
 #else
@@ -88,32 +88,54 @@ bool CMainWnd::IsRunning()
 {
 	if ( nMsg == WmTick )
 	{
-		if ( (Settings.Trig.Sync != CSettings::Trigger::_None) && BIOS::ADC::Enabled() && BIOS::ADC::Ready() )
+		BIOS::ADC::EState state = BIOS::ADC::GetState();
+
+		bool ready = state != BIOS::ADC::EState::Offline && state != BIOS::ADC::EState::Busy;
+#ifdef DS203
+		bool triggered = state == BIOS::ADC::EState::Full;
+#else
+		bool triggered = state == BIOS::ADC::EState::Triggered;
+#endif
+
+		if ( (Settings.Trig.Sync != CSettings::Trigger::_None) && triggered )
 		{
+			m_lLastAcquired = BIOS::SYS::GetTick();
 			Sampler::Copy();
-			BIOS::ADC::Restart();
+			BIOS::ADC::Restart(0);
+         		m_lLastRequested = BIOS::SYS::GetTick();
+
 			CWnd::WindowMessage( CWnd::WmBroadcast, ToWord('d', 'g') );
 		}
 
-	if ( BIOS::ADC::Enabled() && Settings.Trig.Sync == CSettings::Trigger::_Auto )
+	if ( ready && Settings.Trig.Sync == CSettings::Trigger::_Auto )
 	{
-		if ( m_lLastAcquired != -1 && BIOS::SYS::GetTick() - m_lLastAcquired > 150 )
+		int screenDuration = Settings.Runtime.m_nScreenDuration*3/2+20;
+		if ( BIOS::SYS::GetTick() - m_lLastAcquired > 500 && BIOS::SYS::GetTick() - m_lLastRequested > screenDuration)
 		{
 #ifdef DS203
 			bool bScreenReady = BIOS::ADC::GetPointer() > (300 + Settings.Time.InvalidFirst);
+//			bool canProcess = true;
 #else
-			bool bScreenReady = false; // not implemented on DS213!!
+			bool bScreenReady = true;
+//			int nScreenDuration = Settings.Runtime.m_nScreenDuration*2;
+//			bool bScreenReady = BIOS::SYS::GetTick() - m_lLastRequested > nScreenDuration;
+//                        bool canProcess = bScreenReady;
 #endif
-			Sampler::Copy();
-
-			// redraw the screen even when the sampler is not full
-			WindowMessage( CWnd::WmBroadcast, ToWord('d', 'g') );
-		
-			// force restart if the write pointer is behind current window
-			if ( bScreenReady )
+//			if (bScreenReady)
 			{
-				BIOS::ADC::Restart();
-			} 
+         			Sampler::Copy();
+
+         			// redraw the screen even when the sampler is not full
+         			WindowMessage( CWnd::WmBroadcast, ToWord('d', 'g') );
+         		
+         			// force restart if the write pointer is behind current window
+         			// restart only when the write ptr is behind screen - slow signals
+         			if ( bScreenReady )
+         			{
+         				BIOS::ADC::Restart(0);
+         				m_lLastRequested = BIOS::SYS::GetTick();
+         			} 
+			}
 		}
 	}
 

@@ -11,11 +11,11 @@ function Main()
   var env =
      { "abort": abort, 
        "_abort": abort,
-       "___assert_fail": abort, 
-       "___setErrNo": abort, 
-       "_emscripten_get_heap_size": abort, 
-       "_emscripten_memcpy_big": abort, 
-       "_emscripten_resize_heap": abort,
+       "__assert_fail": abort, 
+       "__setErrNo": abort, 
+       "emscripten_get_heap_size": abort, 
+       "emscripten_memcpy_big": abort, 
+       "emscripten_resize_heap": abort,
        "abortOnCannotGrowMemory": abort, 
        "DYNAMICTOP_PTR": DYNAMICTOP_PTR,
        memory:new WebAssembly.Memory({ 'initial': TOTAL_MEMORY / WASM_PAGE_SIZE, 'maximum': TOTAL_MEMORY / WASM_PAGE_SIZE }),
@@ -28,12 +28,12 @@ function Main()
   for (var i in imports)
     env[i] = imports[i];
 
-  WebAssembly.instantiate(new Uint8Array(Module['wasmBinary']), {env:env})
+  return WebAssembly.instantiate(new Uint8Array(Module['wasmBinary']), {env:env})
   .then( output => 
    {
     var exports = output.instance.exports;
     Module['asm'] = exports;
-    Module["asm"]["globalCtors"]();
+    if (Module["asm"]["__wasm_call_ctors"]) Module["asm"]["__wasm_call_ctors"]();
     Module["memory"] = new Uint8Array(env.memory.buffer);
 
     var _exports = Module['exports'];

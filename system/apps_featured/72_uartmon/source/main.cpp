@@ -111,6 +111,13 @@ public:
             uint8_t data = GPIO::UART::Read();
             Recv(data);
         }
+        EVERY(1000)
+        {
+            static int counter = 1000;
+            char message[64];
+            sprintf(message, "Ahoj, toto je riadok %d.\n", counter++);
+            Send(message);
+        }
     }
     void Recv(char data)
     {
@@ -264,7 +271,7 @@ public:
                 case 3: mTxMode = Ascii; break; // tx ascii
                 case 4: mTxMode = Hex; break; // tx hex
                 case 5: mTxMode = Dec; break; // tx dec
-                case 6: Send((char*)"Ahoj!"); break; // send
+                case 6: Send((char*)"Ahoj!\n"); break; // send
                 case 7: mRxMode = Ascii; break; // rx ascii
                 case 8: mRxMode = Hex; break; // rx hex
                 case 9: mRxMode = Dec; break; // rx dec
