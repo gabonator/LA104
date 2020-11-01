@@ -16,7 +16,7 @@
  * CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include <Library.h>
+#include <library.h>
 
 extern "C" 
 {
