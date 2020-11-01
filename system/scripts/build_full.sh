@@ -6,6 +6,12 @@ mkdir $OUTPUT
 mkdir $OUTPUT/firmware
 mkdir $OUTPUT/apps
 
+ERRORS=0
+VERBOSE=0
+if [ "$1" == "verbose" ]; then
+  VERBOSE=1
+fi
+
 ./build_check.sh
 if [ $? -eq 1 ]; then
   echo [ERROR] Building environment not configured properly
@@ -18,8 +24,6 @@ if [ $? -eq 1 ]; then
   exit 1
 fi
 
-ERRORS=0
-
 buildApp () {
   (
     cd $1
@@ -29,7 +33,11 @@ buildApp () {
     fi
 
     rm -rf build
-    ./build.sh > /dev/null 2> /dev/null
+    if [ $VERBOSE -eq 1 ]; then
+      ./build.sh
+    else
+      ./build.sh > /dev/null 2> /dev/null
+    fi
 
     if [ $? -eq 1 ]; then
       echo "[WARNING] $1: Build failed"
