@@ -197,13 +197,26 @@ int main(int argc, const char * argv[])
     {
       printf("Usage:\n");
       printf("\n");
-      printf("  sudo ./dfuload /dev/disk2 cp input.hex\n");
+      printf("  sudo ./dfuload /dev/disk2 cp firmware.hex\n");
       return 1;
     }
 
-    int fd = open(argv[1], O_RDWR);
+    // DS203 disconnects and reconnects in regular intervals on OSX
+    printf("Opening: '%s' ...", argv[1]);
+    int fd = 0;
+    for (int i=0; i<50; i++)
+    {
+      fd = open(argv[1], O_RDWR);
+      if (fd>0)
+        break;
+      printf(".");
+      fflush(stdout);
+      usleep(50*1000);
+    }
 
-    if (fd<0)
+    printf("\n");
+
+    if (fd<=0)
     {
       fprintf(stderr, "Failed to open disk '%s', errno:%d\n", argv[1], errno);
       return 1;

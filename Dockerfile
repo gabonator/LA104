@@ -18,7 +18,10 @@ ENV PATH $PATH:/home/dev/gcc-arm-none-eabi-7-2018-q2-update/bin
 COPY . .
 
 RUN cd system/scripts \
-    && ./build_full.sh verbose
+    && ./build.sh verbose \
+    && mkdir output
+    && cp system/build/firmware/*.* output/
+    && cp system/build/*.* output/
 
 CMD [bash]
 

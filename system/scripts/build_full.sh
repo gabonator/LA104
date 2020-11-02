@@ -1,16 +1,17 @@
 #!/bin/bash
 
+ERRORS=0
+VERBOSE=0
+if [ "$1" == "verbose" ]; then
+  set -x
+  VERBOSE=1
+fi
+
 OUTPUT=../build
 rm -rf $OUTPUT
 mkdir $OUTPUT
 mkdir $OUTPUT/firmware
 mkdir $OUTPUT/apps
-
-ERRORS=0
-VERBOSE=0
-if [ "$1" == "verbose" ]; then
-  VERBOSE=1
-fi
 
 ./build_check.sh
 if [ $? -eq 1 ]; then
