@@ -1,3 +1,7 @@
+[![Docker Cloud Build Status](https://img.shields.io/docker/cloud/build/gabonator/la104)](https://hub.docker.com/r/gabonator/la104/builds)
+
+
+
 # LA104 pocket logic analyser operating system
 
 LA104 is another nice piece of handheld hardware coming from [e-design / miniware company](http://www.miniware.com.cn/) similar to their previous product - pocket digital storage oscillosope DS203. 
