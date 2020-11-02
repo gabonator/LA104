@@ -7,7 +7,7 @@
  * @brief   Endpoint routines
  ******************************************************************************
  */
-#include <USB_lib.h>
+#include <usb_lib.h>
 #include <usb_core.h>
 #include <usb_mem.h>
 #include "cdcusb_desc.h"

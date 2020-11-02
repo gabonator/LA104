@@ -7,7 +7,7 @@
  * @brief	Connection/disconnection & power management
  ******************************************************************************
  */
-#include <USB_lib.h>
+#include <usb_lib.h>
 #include "commonusb_conf.h"
 #include "commonusb_pwr.h"
 //#include "commonusb_app.h"

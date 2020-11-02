@@ -7,7 +7,7 @@
  * @brief	All processing related to Virtual Com Port Demo
  ******************************************************************************
  */
-#include <USB_lib.h>
+#include <usb_lib.h>
 #include "cdcusb_conf.h"
 #include "cdcusb_prop.h"
 #include "cdcusb_desc.h"

@@ -63,7 +63,7 @@ SECTIONS
     .  = 0x0;          /* From 0x00000000 */
 
     .bios 0x08000100 (NOLOAD) : {
-      BIOS.o
+      bios.o
     }
 
     /* the program code is stored in the .text section, which goes to Flash */

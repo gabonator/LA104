@@ -1,7 +1,7 @@
 #ifndef __HW_CONFIG_H
 #define __HW_CONFIG_H
 
-#include <USB_lib.h>
+#include <usb_lib.h>
 #include <usb_type.h>
 #include <stdint.h>
 #include <stdbool.h>

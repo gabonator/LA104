@@ -7,7 +7,7 @@
  * @brief	ISTR events interrupt service routines
  ******************************************************************************
  */
-#include <USB_lib.h>
+#include <usb_lib.h>
 #include "commonusb_pwr.h"
 #include "commonusb_istr.h"
 #include "commonusb_app.h"
