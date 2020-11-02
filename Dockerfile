@@ -19,8 +19,8 @@ COPY . .
 
 RUN cd system/scripts \
     && ./build.sh verbose \
-    && mkdir output
-    && cp system/build/firmware/*.* output/
+    && mkdir output \
+    && cp system/build/firmware/*.* output/ \
     && cp system/build/*.* output/
 
 CMD [bash]
