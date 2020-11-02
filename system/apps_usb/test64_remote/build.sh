@@ -38,4 +38,4 @@ find . -type f -name '*.d' -delete
 
 ../../../../tools/elfstrip/elfstrip output.elf 64remote.elf
 nm --print-size --size-sort -gC output.elf > symbols_all.txt
-cat symbols_all.txt | grep _address
+#cat symbols_all.txt | grep _address

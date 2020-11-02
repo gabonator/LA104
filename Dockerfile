@@ -2,7 +2,7 @@ FROM gcc:7.3
 
 
 RUN apt-get update \
-    && apt-get -y install git  bzr lib32z1 lib32ncurses5 nodejs vim
+    && apt-get -y install git bzr lib32z1 lib32ncurses5 nodejs vim zip
 
 RUN ln -s `which nodejs` /usr/bin/node
 

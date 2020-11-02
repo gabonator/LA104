@@ -47,5 +47,5 @@ find . -type f -name '*.d' -delete
 nm --print-size --size-sort -gC output.elf | grep " B " > symbols_ram.txt
 nm --print-size --size-sort -gC output.elf | grep " T " > symbols_rom.txt
 nm --print-size --size-sort -gC output.elf > symbols_all.txt
-cat symbols_all.txt | grep _address
+#cat symbols_all.txt | grep _address
 #objdump -s -j .dynamic output.elf
