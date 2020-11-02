@@ -1,3 +1,5 @@
+magick=""
+
 magick convert fileelf.png -resize 64x64 -background transparent -gravity Center -extent 64x64 -alpha on fileelf.bmp
 magick convert i2c.png -resize 64x64 -background transparent -gravity Center -extent 64x64 -alpha on i2c.bmp
 magick convert eeprom.png -resize 64x64 -background transparent -gravity Center -extent 64x64 -alpha on eeprom.bmp

@@ -1,3 +1,5 @@
+magick=""
+
 magick convert fractal.png -resize 64x64 -background transparent -gravity Center -extent 64x64 -alpha on fractal.bmp
 magick convert mouse.png -resize 64x64 -background transparent -gravity Center -extent 64x64 -alpha on mouse.bmp
 magick convert midi.png -resize 64x64 -background transparent -gravity Center -extent 64x64 -alpha on midi.bmp

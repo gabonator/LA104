@@ -1,3 +1,5 @@
+magick=""
+
 #magick convert folder.png -resize 64x64 -alpha off -background "#ff00ff" -flatten -colors 256 -compress none folder_min.bmp
 magick convert folder.png -resize 64x64 -background transparent -gravity Center -extent 64x64 compo1.png
 magick convert games.png -resize 32x32 -background transparent -gravity SouthEast -extent 64x64 compo2.png
