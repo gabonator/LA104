@@ -1,3 +1,4 @@
+#!/bin/bash
 magick=""
 
 magick convert fractal.png -resize 64x64 -background transparent -gravity Center -extent 64x64 -alpha on fractal.bmp

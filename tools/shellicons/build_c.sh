@@ -1,3 +1,5 @@
+#!/bin/bash
+set -x
 magick=""
 
 #magick convert folder.png -resize 64x64 -alpha off -background "#ff00ff" -flatten -colors 256 -compress none folder_min.bmp
