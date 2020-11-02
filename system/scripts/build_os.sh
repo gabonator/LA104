@@ -27,6 +27,7 @@ fi
   echo Building host...
   cd ../os_host
   rm -rf build
+  #TODO: docker - cant see any output from this script??
   ./build.sh
   if [ ! -f build/system_la104.hex ]; then
     echo Unable to build operating system firmware for LA104

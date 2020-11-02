@@ -12,6 +12,16 @@ rm -rf $TO
 mkdir $TO
 
 (
+  cd $ICON
+  ./build.sh
+)
+
+if [ $? -eq 1 ]; then
+  echo [ERROR] Cannot prepare icons
+  exit 1
+fi
+
+(
 set -e
 
 # shell
