@@ -5,7 +5,7 @@
 # at first run build_full.sh
 
 FROM=../build/apps
-TO=../build/image_ds213/
+TO=../build/image_la104/
 ICON=../../tools/shellicons
 
 rm -rf $TO
@@ -234,10 +234,26 @@ Version information
 ---------------------
 oct/2020 release
 EOM
+
+mkdir $TO/fun
+cp $ICON/fgames.bmp $TO/fun/fun.bmp
+echo -n "{\"description\":{\"short\":\"Fun\",\"long\":\"Just for fun\"},\"icon\":\"fun.bmp\",order:-200}" > $TO/fun/index.lnk
+
+cp $FROM/99cube4.elf $TO/fun/cube.elf
+cp $FROM/2import.elf $TO/fun/triangle.elf
+cp $FROM/4snake.elf $TO/fun/snake.elf
+cp $FROM/39lcd.elf $TO/fun/scroll.elf
+
+echo -n "{\"description\":{short:\"Cube\",long:\"Rotating cube\"},\"icon\":\"app.bmp\",\"execute\":\"cube.elf\"}" > $TO/fun/cube.lnk
+echo -n "{\"description\":{short:\"Triangle\",long:\"Sierpinski triangle\"},\"icon\":\"app.bmp\",\"execute\":\"triangle.elf\"}" > $TO/fun/triangle.lnk
+echo -n "{\"description\":{short:\"Snake\",long:\"Snake game\"},\"icon\":\"app.bmp\",\"execute\":\"snake.elf\"}" > $TO/fun/snake.lnk
+echo -n "{\"description\":{short:\"Scroll\",long:\"Scroll test\"},\"icon\":\"app.bmp\",\"execute\":\"scroll.elf\"}" > $TO/fun/scroll.lnk
+
+cp $ICON/games.bmp $TO/fun/app.bmp
 )
 
 if [ $? -eq 1 ]; then
-  echo [ERROR] File not found
+  echo [ERROR] Failed to prepare disk image
   exit 1
 fi
 

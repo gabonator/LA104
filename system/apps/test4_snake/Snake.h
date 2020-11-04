@@ -340,7 +340,7 @@ public:
 			}
 	}
 
-	/*virtual*/ void OnKey(ui16 nKey)
+	virtual void OnKey(int nKey)
 	{
 		if ( nKey == BIOS::KEY::Left )
 		{
