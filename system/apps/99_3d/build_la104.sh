@@ -12,4 +12,4 @@ arm-none-eabi-objdump -d -S output.elf > output.asm
 find . -type f -name '*.o' -delete
 find . -type f -name '*.d' -delete
 
-../../../../tools/elfstrip/elfstrip output.elf 99cube4.elf
+../../../../tools/elfstrip/elfstrip output.elf 99cube04.elf

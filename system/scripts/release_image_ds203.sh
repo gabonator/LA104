@@ -13,11 +13,13 @@ mkdir $TO
   set -e
   cp $FROM/29fileman_ds203.elf $TO/shell.elf
   cp $FROM/21mplayd.elf $TO/midiplay.elf
+  cp ../apps_featured/test21_midiplay/midi/laisla.mid $TO/laisla.mid
   cp $FROM/61devin.elf $TO/devinfo.elf
   cp $FROM/63ws_203.elf $TO/leds.elf
   cp $FROM/69webos0.elf $TO/webosc.elf
   cp $FROM/58gmin03.elf $TO/miniosc.elf
   cp $FROM/60gagen0.elf $TO/minigen.elf
+  cp $FROM/99cube03.elf $TO/demo3d.elf
   # official fw not ported yet!        	
 )
 

@@ -13,12 +13,14 @@ mkdir $TO
   set -e
   cp $FROM/29fileman_ds213.elf $TO/shell.elf
   cp $FROM/21mplay2.elf $TO/midiplay.elf
+  cp ../apps_featured/test21_midiplay/midi/laisla.mid $TO/laisla.mid
   cp $FROM/61devin.elf $TO/devinfo.elf
   cp $FROM/63ws_213.elf $TO/leds.elf
   cp $FROM/69webos1.elf $TO/webosc.elf
   cp $FROM/58gmin13.elf $TO/miniosc.elf
   cp $FROM/60gagen1.elf $TO/minigen.elf
   cp $FROM/52osc213.elf $TO/oscillo.elf
+  cp $FROM/99cube13.elf $TO/demo3d.elf
 )
 
 if [ $? -eq 1 ]; then

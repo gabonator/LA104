@@ -239,7 +239,7 @@ mkdir $TO/fun
 cp $ICON/fgames.bmp $TO/fun/fun.bmp
 echo -n "{\"description\":{\"short\":\"Fun\",\"long\":\"Just for fun\"},\"icon\":\"fun.bmp\",order:-200}" > $TO/fun/index.lnk
 
-cp $FROM/99cube4.elf $TO/fun/cube.elf
+cp $FROM/99cube04.elf $TO/fun/cube.elf
 cp $FROM/2import.elf $TO/fun/triangle.elf
 cp $FROM/4snake.elf $TO/fun/snake.elf
 cp $FROM/39lcd.elf $TO/fun/scroll.elf
