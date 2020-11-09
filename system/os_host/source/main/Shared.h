@@ -22,7 +22,7 @@ uint32_t GetProcAddress(char* symbol)
     case 0x00008cd4: return (uint32_t)static_cast<uint32_t(*)()>(BIOS::OS::DisableInterrupts); //_ZN4BIOS2OS17DisableInterruptsEv
     case 0x000007cc: return (uint32_t)BIOS::OS::GetInterruptVector;
     case 0x00003cbf: return (uint32_t)static_cast<void(*)(BIOS::OS::EInterruptVector, void (*)())>(BIOS::OS::SetInterruptVector); //_ZN4BIOS2OS18SetInterruptVectorENS0_16EInterruptVectorEPFvvE
-#if defined(DS203) || defined(DS213)
+#if defined(DS203) || defined(DS203HD) || defined(DS213)
     case 0x00005afd: return (uint32_t)static_cast<int(*)()>(BIOS::ADC::GetPointer); //_ZN4BIOS3ADC10GetPointerEv
     case 0x00006f3a: return (uint32_t)static_cast<void(*)(BIOS::ADC::EInput, BIOS::ADC::ECouple, BIOS::ADC::EResolution, int)>(BIOS::ADC::ConfigureInput); //_ZN4BIOS3ADC14ConfigureInputENS0_6EInputENS0_7ECoupleENS0_11EResolutionEi
     case 0x00009bd3: return (uint32_t)static_cast<void(*)(int, int, BIOS::ADC::ETriggerType, BIOS::ADC::EInput)>(BIOS::ADC::ConfigureTrigger); //_ZN4BIOS3ADC16ConfigureTriggerEiiNS0_12ETriggerTypeENS0_6EInputE

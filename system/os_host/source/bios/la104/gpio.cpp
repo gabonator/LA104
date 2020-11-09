@@ -11,7 +11,7 @@ extern "C" uint16_t FPGA16(uint8_t Cmd, uint16_t Cnt, uint16_t Data);
 enum GpioStatus {
   Ok = 0,
   I2cErrorBegin,
-  I2cBusy,
+  I2cBusy, // SDA, SCL tied low, check pull-ups, or the i2c transceiver is stuck (try pulling low both lines)
   I2cErrorStart,
   I2cErrorStop,
   I2cErrorAddressAck,
@@ -610,6 +610,9 @@ namespace BIOS
       P2: PB14, PB11  remap   TIM2_CH4
       P3: PB13, PB8   default TIM4_CH3
       P4: PB12, PB9   default TIM4_CH4
+
+      B10 - SCL
+      B11 - SDA
     */
     static const uint8_t arrPinAdrAPort[4] = {PIN::PortB, PIN::PortB, PIN::PortB, PIN::PortB};
     static const uint8_t arrPinAdrAPin[4] = {15, 14, 13, 12};
@@ -680,6 +683,8 @@ namespace BIOS
             ::I2C::i2c_deinit(); 
             PIN::SetState(arrPinAdrAPort[P1], arrPinAdrAPin[P1], PIN::StateSimpleInput);
             PIN::SetState(arrPinAdrAPort[P2], arrPinAdrAPin[P2], PIN::StateSimpleInput);
+            PIN::SetState(arrPinAdrBPort[P1], arrPinAdrBPin[P1], PIN::StateSimpleInput);
+            PIN::SetState(arrPinAdrBPort[P2], arrPinAdrBPin[P2], PIN::StateSimpleInput);
           break;
           case Uart:
             ::UART::uart_deinit(); 
@@ -727,9 +732,11 @@ namespace BIOS
           break;
         case Input | PullUp:
           PIN::SetState(arrPinAdrBPort[pin], arrPinAdrBPin[pin], PIN::StateInput | PIN::StateInputPull);
+          PIN::SetPin(arrPinAdrBPort[pin], arrPinAdrBPin[pin], 1);
           break;
         case Input | PullDown:
-          _ASSERT(0);
+          PIN::SetState(arrPinAdrBPort[pin], arrPinAdrBPin[pin], PIN::StateInput | PIN::StateInputPull);
+          PIN::SetPin(arrPinAdrBPort[pin], arrPinAdrBPin[pin], 0);
           break;
         case Output:
           PIN::SetState(arrPinAdrBPort[pin], arrPinAdrBPin[pin], PIN::StateSimpleOutput);
@@ -753,7 +760,10 @@ namespace BIOS
       bool BeginTransmission(uint8_t address)
       {
           if (!::I2C::i2c_start())
+          {
+              ::I2C::i2c_stop(true);
               return false;
+          }
           if (!::I2C::i2c_address_direction(address << 1, I2C_Direction_Transmitter))
           {
               ::I2C::i2c_stop(true);
@@ -797,7 +807,7 @@ namespace BIOS
 
     namespace UART
     {
-      RingBuffer<uint8_t, 64> mUartBuffer;
+      RingBuffer<uint8_t, 300> mUartBuffer;
 
       void Setup(int baudrate, EConfig config)
       {

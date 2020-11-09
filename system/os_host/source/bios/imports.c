@@ -11,3 +11,7 @@
 #ifdef DS203
 #include "ds203/imports.c"
 #endif
+
+#ifdef DS203HD
+#include "ds203/imports.c"
+#endif

@@ -29,9 +29,9 @@ namespace APP
 void Init(const char* title)
     {
 #ifdef CONSOLE_MODE_B
-        CONSOLE::window(8, 16, BIOS::LCD::Width-8, BIOS::LCD::Height-14);
+        CONSOLE::window = CRect(8, 16, BIOS::LCD::Width-8, BIOS::LCD::Height-14);
         CONSOLE::cursor = CONSOLE::window.TopLeft();
-        LCD::Bar(client, CONSOLE::colorBack);
+        BIOS::LCD::Bar(client, CONSOLE::colorBack);
 #else
         BIOS::LCD::Bar(client, backgroundColor);
 #endif

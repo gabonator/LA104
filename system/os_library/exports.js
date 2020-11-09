@@ -174,7 +174,7 @@ uint32_t GetProcAddress(char* symbol)
     if (isGpio && !wasGpio)
       console.log("#if defined(LA104)")
     if (isAdc && !wasAdc)
-      console.log("#if defined(DS203) || defined(DS213)")
+      console.log("#if defined(DS203) || defined(DS203HD) || defined(DS213)")
     if (isUsb && !wasUsb)
       console.log("#if !defined(DISABLE_USB)")
 

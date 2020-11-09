@@ -32,7 +32,7 @@ namespace BIOS
 #elif defined(DS213)
     const int Width = 400;
     const int Height = 240;
-#elif defined(DS203)
+#elif defined(DS203) || defined(DS203HD)
     const int Width = 400;
     const int Height = 240;
 #endif
@@ -130,6 +130,9 @@ namespace BIOS
 #if defined(DS203)
     const int SectorSize = 512;
     const int SectorCount = 4096;
+#elif defined(DS203HD)
+    const int SectorSize = 4096;
+    const int SectorCount = 2048;
 #elif defined(DS213)
     const int SectorSize = 4096;
     const int SectorCount = 2047;
@@ -238,7 +241,7 @@ namespace BIOS
   }
 #endif
 	
-#if defined(DS203) || defined(DS213)
+#if defined(DS203) || defined(DS203HD) || defined(DS213)
   namespace ADC
   {
     const int NumSamples = 4096;

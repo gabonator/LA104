@@ -62,7 +62,7 @@ void SysTickHandler(void)
   }
 }
 
-#ifdef DS203
+#if defined(DS203) || defined(DS203HD)
 #define KEY_IF_RST 19
 //extern void __Set(uint8_t Object, uint32_t Value);
 extern void __Set(int x, int y);
@@ -94,7 +94,7 @@ void USART3_IRQHandler(void)
 }
 
 // TODO: move to platform dependent code
-#if defined(DISABLE_USB) || defined(DS203)
+#if defined(DISABLE_USB) || defined(DS203) || defined(DS203HD)
 
 extern void __USB_Istr(void);
 extern void __CTR_HP(void);

@@ -1,5 +1,5 @@
 #https://developer.arm.com/open-source/gnu-toolchain/gnu-rm/downloads
-
+set -e
 
 mkdir -p build
 cd build

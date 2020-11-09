@@ -139,7 +139,7 @@ namespace BIOS
   }
 #endif
                    
-#if defined(DS203) || defined(DS213)
+#if defined(DS203) || defined(DS203HD) || defined(DS213) 
   namespace ADC
   {
     BIOS::ADC::EState GetState() { return BIOS::ADC::EState::Full; }

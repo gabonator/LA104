@@ -1,5 +1,7 @@
 #include <library.h>
 #include "../../os_host/source/framework/BufferedIo.h"
+#include "i2c.h"
+
 using namespace BIOS;
 
 void Draw(int i, int colorBack, int colorText)
@@ -19,8 +21,6 @@ void DrawAll()
 
 void InitIo()
 {
-    BIOS::GPIO::PinMode(BIOS::GPIO::P1, BIOS::GPIO::I2c);
-    BIOS::GPIO::PinMode(BIOS::GPIO::P2, BIOS::GPIO::I2c);
 }
 
 void DeinitIo()
@@ -31,17 +31,8 @@ void DeinitIo()
 
 bool Test(int address)
 {
-#ifdef __APPLE__
-    SYS::DelayMs(30);
-    if (address == 0x19 || address == 0x1e || address == 0x69) // 9 DOF module
-        return true;
-    return false;
-#endif
-
-      bool ok = BIOS::GPIO::I2C::BeginTransmission(address);
-      ok &= BIOS::GPIO::I2C::EndTransmission();
-
-      return ok;
+  BIOS::SYS::DelayMs(20);
+  return i2c::testPresence(address);
 }
 
 class CTokenizer
