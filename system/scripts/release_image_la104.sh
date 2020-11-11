@@ -49,14 +49,14 @@ cp $ICON/info.bmp $TO/devinfo.bmp
 echo -n "{\"description\":{\"short\":\"Dev info\",\"long\":\"Device info\"},\"icon\":\"devinfo.bmp\",\"execute\":\"devinfo.elf\",order:-10}" > $TO/devinfo.lnk
 
 # midi
-mkdir $TO/midi
-cp $ICON/midi.bmp $TO/midi/midi.bmp
-echo -n "{\"description\":{\"short\":\"MIDI\",\"long\":\"MIDI tools\"},\"icon\":\"midi.bmp\"}" > $TO/midi/index.lnk
-
-cp $FROM/21mplayl.elf $TO/midi/midiplay.elf
-cp ../apps_featured/test21_midiplay/midi/laisla.mid $TO/midi/laisla.mid
-cp $ICON/music.bmp $TO/midi/midiplay.bmp
-echo -n "{\"description\":{\"short\":\"MIDI\",\"long\":\"MIDI player\"},\"icon\":\"midiplay.bmp\",\"execute\":\"midiplay.elf\"}" > $TO/midi/midiplay.lnk
+#mkdir $TO/midi
+#cp $ICON/fmidi.bmp $TO/midi/midi.bmp
+#echo -n "{\"description\":{\"short\":\"MIDI\",\"long\":\"MIDI tools\"},\"icon\":\"midi.bmp\"}" > $TO/midi/index.lnk
+#
+#cp $FROM/21mplayl.elf $TO/midi/midiplay.elf
+#cp ../apps_featured/test21_midiplay/midi/laisla.mid $TO/midi/laisla.mid
+#cp $ICON/music.bmp $TO/midi/midiplay.bmp
+#echo -n "{\"description\":{\"short\":\"MIDI\",\"long\":\"MIDI player\"},\"icon\":\"midiplay.bmp\",\"execute\":\"midiplay.elf\"}" > $TO/midi/midiplay.lnk
 
 # i2c
 mkdir $TO/i2c
@@ -71,6 +71,18 @@ cp ../apps_featured/test37_i2cscan/devices.txt $TO/i2c/devices.txt
 cp $FROM/85eetest.elf $TO/i2c/eeview.elf
 cp $ICON/eeprom.bmp $TO/i2c/eeview.bmp
 echo -n "{\"description\":{\"short\":\"EEPROM viewer\",\"long\":\"I2C EEPROM memory viewer\"},\"icon\":\"eeview.bmp\",execute:\"eeview.elf\",order:5}" > $TO/i2c/eeview.lnk
+
+
+echo -n "{\"description\":{short:\"Help\",long:\"Help\"},\"icon\":\"../help.bmp\",\"execute\":\"../viewtxt.elf help.txt\",order:200}" >> $TO/i2c/help.lnk
+
+cat > $TO/i2c/help.txt <<- EOM
+I2C bus tools
+-------
+
+  - "I2C bus scanner" - Connect your device to LA104 (SCL to P1, SDA to P2) and run the scanner. It should show you wich addressess are in use. Contains database od 250 i2c devices and automatically shows corresponding device name and description. Most I2C devices can be powered directly by LA104 power pins (GND, 3V)
+  - "EEPROM viewer" - Memory viewer and editor compatible with 24LC256 and similar I2C eeprom memories
+
+EOM
 
 # rftools
 mkdir $TO/rftools
@@ -87,19 +99,86 @@ echo -n "{\"description\":{\"short\":\"USB analyser\",\"long\":\"WebUSB rf analy
 
 cp $FROM/82sanal.elf $TO/rftools/spectrum.elf
 cp $ICON/spectrum.bmp $TO/rftools/spectrum.bmp
-echo -n "{\"description\":{\"short\":\"spectrum analyser\",\"long\":\"spectrum analyser\"},\"icon\":\"spectrum.bmp\",\"execute\":\"spectrum.elf\",order:5}" > $TO/rftools/spectrum.lnk
+echo -n "{\"description\":{\"short\":\"spectrum analyser\",\"long\":\"Spectrum analyser\"},\"icon\":\"spectrum.bmp\",\"execute\":\"spectrum.elf\",order:5}" > $TO/rftools/spectrum.lnk
 cp ../apps_featured/80_rftool/logs/*.* $TO/rftools/
 
+echo -n "{\"description\":{short:\"Help\",long:\"Help\"},\"icon\":\"../help.bmp\",\"execute\":\"../viewtxt.elf help.txt\",order:200}" >> $TO/rftools/help.lnk
+
+cat > $TO/rftools/help.txt <<- EOM
+RF toolkit
+-------
+
+  - "RF analyser & synthesizer" - main application which automatically decodes few of most used weather stations and wireless keys
+  - "WebUSB rf analyser" - Webusb analyser which uses your computer for signal analysis. Runs in your web browser and integrates RTL433 library for signal decoding
+  - "Spectrum analyser" - Simple spectrum analyser which uses RSSI for estimating radiated signal power
+
+All of those applications require CC1101 transceiver attached to LA104. 
+
+CC1101 Wiring:
+         VDD   [1] 2    VDD  -> +3V
+P1 <-     SI    3  4    SCK  -> P2
+CH4 <-    SO    5  6    GDO2
+P3 <-    /CS    7  8    GDO0 -> P4
+         GND    9 10    GND  -> GND
+
+Wiring using LA104 cable:
+
+| Color  | LA104 | CC1101   |
+|--------|-------|----------|
+| brown  | CH1   |          |
+| red    | CH2   |          |
+| orange | CH3   |          |
+| yellow | CH4   | 5 - SO   |
+| green  | GND   | 10 - GND |
+| blue   | P1    | 3 - SI   |
+| purple | P2    | 4 - SCK  |
+| gray   | P3    | 7 - /CS  |
+| white  | P4    | 8 - GDO0 |
+| black  | 3V+   | 2 - VDD  |
+
+EOM
+
 # eink
-mkdir $TO/eink
-echo -n "{\"description\":{short:\"eInk\",long:\"eInk display tools\"},\"icon\":\"eink.bmp\"}" > $TO/eink/index.lnk
-cp $ICON/eink.bmp $TO/eink/eink.bmp
+mkdir $TO/display
+echo -n "{\"description\":{short:\"Display\",long:\"Display tools\"},\"icon\":\"display.bmp\"}" > $TO/display/index.lnk
+cp $ICON/fpicture.bmp $TO/display/display.bmp
 
-cp $FROM/90eink.elf $TO/eink/displimg.elf
-cp $ICON/picture.bmp $TO/eink/displimg.bmp
-echo -n "{\"description\":{short:\"eInk\",long:\"eInk display image loader\"},\"icon\":\"displimg.bmp\",\"execute\":\"displimg.elf\"}" > $TO/eink/displimg.lnk
+cp $FROM/90eink.elf $TO/display/eink.elf
+cp $ICON/eink.bmp $TO/display/eink.bmp
+cp ../apps_featured/90_epd_image/res/*.bmp $TO/display/
+echo -n "{\"description\":{short:\"eInk\",long:\"eInk display image loader\"},\"icon\":\"eink.bmp\",\"execute\":\"eink.elf\"}" > $TO/display/eink.lnk
 
-cp ../apps_featured/90_epd_image/res/*.bmp $TO/eink/
+cp $FROM/81image.elf $TO/display/imgview.elf
+cp $ICON/picture.bmp $TO/display/imgview.bmp
+cp ../apps/81_image/res/*.bmp $TO/display/
+echo -n "{\"description\":{short:\"Image view\",long:\"Image viewer\"},\"icon\":\"imgview.bmp\",\"execute\":\"imgview.elf\"}" > $TO/display/imgview.lnk
+
+cp $FROM/102oled.elf $TO/display/oledssd.elf
+cp $ICON/picture.bmp $TO/display/oledssd.bmp
+echo -n "{\"description\":{short:\"Oled test\",long:\"SSD1306 oled test\"},\"icon\":\"oledssd.bmp\",\"execute\":\"oledssd.elf\"}" > $TO/display/oledssd.lnk
+
+
+echo -n "{\"description\":{short:\"Help\",long:\"Help\"},\"icon\":\"../help.bmp\",\"execute\":\"../viewtxt.elf help.txt\",order:200}" >> $TO/display/help.lnk
+
+cat > $TO/display/help.txt <<- EOM
+Display tools
+-------
+
+  - "Image view" - shows 24 bpp or 32 bpp bitmaps on this screen
+  - "eInk display image loader" - compatible with EPD eInk displays with SSD1675 controller. Configured for 2" / 9" display with resolution of 296x128 black/white/red pixels. Wiring:
+    - VDD - 3V
+    - VSS - GND
+    - MOSI (SDA) - P1
+    - SCK (SCL) - P2
+    - /CS - P3
+    - /RST - P4
+    - BUSY - CH4
+    - D/C - (not used, 3 spi 9 bit mode, BS1=VDD, DC=VSS)
+  - "Oled test" - shows test image on SSD1306 128x64 monochromatic oled display through I2C connection. Wiring:
+    - SCL - P1
+    - SDA - P2
+
+EOM
 
 #tools 
 mkdir $TO/tools
@@ -114,6 +193,7 @@ cp $FROM/33temper.elf $TO/tools/dstemper.elf
 cp $FROM/15charla.elf $TO/tools/charmap.elf
 cp $FROM/63ws_104.elf $TO/tools/ws2812.elf
 cp $FROM/49gpio.elf $TO/tools/gpio.elf
+cp $FROM/21mplayl.elf $TO/tools/midiplay.elf
 
 echo -n "{\"description\":{short:\"Character map\",long:\"Character map\"},\"icon\":\"charmap.bmp\",\"execute\":\"charmap.elf\",order:50}" > $TO/tools/charmap.lnk
 echo -n "{\"description\":{short:\"DCF77\",long:\"DCF77 decoder\"},\"icon\":\"dcf77.bmp\",\"execute\":\"dcf77.elf\",order:40}" > $TO/tools/dcf77.lnk
@@ -123,6 +203,7 @@ echo -n "{\"description\":{short:\"Sequencer\",long:\"Sequencer and analyser\"},
 echo -n "{\"description\":{short:\"UART monitor\",long:\"UART monitor\"},\"icon\":\"uartmon.bmp\",\"execute\":\"uartmon.elf\"}" > $TO/tools/uartmon.lnk
 echo -n "{\"description\":{short:\"VFD Invt\",long:\"Invt VFD RS485 visualizer\"},\"icon\":\"vfd_invt.bmp\",\"execute\":\"vfd_invt.elf\"}" > $TO/tools/vfd_invt.lnk
 echo -n "{\"description\":{short:\"WS2812\",long:\"WS2812 addressable led tester\"},\"icon\":\"ws2812.bmp\",\"execute\":\"ws2812.elf\",order:100}" > $TO/tools/ws2812.lnk
+echo -n "{\"description\":{\"short\":\"MIDI\",\"long\":\"MIDI player\"},\"icon\":\"midiplay.bmp\",\"execute\":\"midiplay.elf\"}" > $TO/tools/midiplay.lnk
 
 cp $ICON/charmap.bmp $TO/tools/charmap.bmp
 cp $ICON/dcf77.bmp $TO/tools/dcf77.bmp
@@ -132,6 +213,8 @@ cp $ICON/sequence.bmp $TO/tools/sequence.bmp
 cp $ICON/serial.bmp $TO/tools/uartmon.bmp
 cp $ICON/motor.bmp $TO/tools/vfd_invt.bmp
 cp $ICON/ws2812.bmp $TO/tools/ws2812.bmp
+cp $ICON/music.bmp $TO/tools/midiplay.bmp
+cp ../apps_featured/test21_midiplay/midi/laisla.mid $TO/tools/laisla.mid
 
 echo -n "{\"description\":{short:\"Help\",long:\"Help\"},\"icon\":\"../help.bmp\",\"execute\":\"../viewtxt.elf help.txt\",order:200}" >> $TO/tools/help.lnk
 
@@ -146,6 +229,7 @@ Tools
   - "UART monitor" - uart monitor with full configuration support - you can set baudrate, parity and data word length. Currently only for 8bit encoding.
   - "VFD Invt" - application for visualizing the performance of Invt motor inverters over RS485 link with MAX485 transceiver. Attach DI=P1 (TXD), DE=P3, RE=P4, RO=P2 (RXD)
   - "WS2812" - applcation for controlling WS2812 addressable leds with set of nice looking animations. Attach your led strip to P1
+  - "MIDI player" - plays a midi file on synthesizer. Directly attach P1 and VCC to the Midi Input port using current limiting resistor
 EOM
 
 #devices
@@ -195,6 +279,19 @@ cp $ICON/chip.bmp $TO/devices/chip.bmp
 #cp $ICON/chip.bmp $TO/tools/simcom.bmp
 #cp $ICON/chip.bmp $TO/tools/yx5300.bmp
 
+echo -n "{\"description\":{short:\"Help\",long:\"Help\"},\"icon\":\"../help.bmp\",\"execute\":\"../viewtxt.elf help.txt\",order:200}" >> $TO/devices/help.lnk
+
+cat > $TO/devices/help.txt <<- EOM
+Device drivers
+-------
+
+For I2C devices connect SCL to P1 and SDA to P2. For single wire devices use P1, for uart devices P1 is TX (LA104 transmitting to device) and P2 is RX (LA104 receives on this pin), 
+for other devices wiring instructions see the application folder or source code on github:
+
+https://github.com/gabonator/LA104/tree/master/system/apps_experiments
+
+EOM
+
 # usb
 mkdir $TO/usb
 cp $ICON/fusb.bmp $TO/usb/usb.bmp
@@ -212,23 +309,39 @@ cp $ICON/serial.bmp $TO/usb/cdc.bmp
 cp $ICON/mouse.bmp $TO/usb/hid.bmp
 cp $ICON/midi.bmp $TO/usb/midi.bmp
 
+echo -n "{\"description\":{short:\"Help\",long:\"Help\"},\"icon\":\"../help.bmp\",\"execute\":\"../viewtxt.elf help.txt\",order:200}" >> $TO/usb/help.lnk
+
+cat > $TO/usb/help.txt <<- EOM
+USB Applications
+-------
+
+After running any of these applications, disconnect usb cable and reconnect. In case you are using USB-C to USB micro cable, disconnect the cable on both ends, attach on the computer side and then on the LA104 side. The charging led should light up
+
+  - "Serial link" - USB CDC profile
+  - "Human interface device" - HID profile, you can move the mouse pointer with encoders
+  - "MIDI" - Midi usb bridge which transfers the usb traffic to internal uart (P1: TXD, P2: RXD)
+EOM
+
 cat > $TO/help.txt <<- EOM
 LA104 
 -------
 Hello, this is readme file for logic analyser "LA104" produced by Chinese company e-Design. This firmware was programmed by Gabriel Valky with help of github community and it tries to show full potential of this versatile device. Whole project is open sourced here: https://github.com/gabonator/LA104
 
 Use encoders move around icons to choose the application you would like to run. Press first button "SMPL" to open folder or execute program. When you want to exit running application, press second button "MENU".
-
+                                                                               
 Application groups
 --------------------
   - "File manager" - easy access to the file system, use this shell to run your own programs. To make it default, copy "fileman.elf" to "shell.elf". To revert it to this visual shell rename "gui.elf" to "shell.elf"
+  - "Logic analyser" - original logic analyser software provided by manufacturer
   - "Help" - short manual should be present in all application groups for short description of all available programs
-  - "Tools" - set of very handy applications for hardware testing and logging (e.g. temperature logger, addressable led tester...) 
+  - "Tools" - set of very handy applications for hardware testing and logging (e.g. uart monitor, pwm generator) 
   - "I2C bus tools" - contains I2C bus scanner and eeprom viewer
   - "Device drivers" - various applications for testing of specific components
   - "RF toolkit" - radio frequency analyser and synthesizer with CC1101 transceiver, including spectrum analyser and WebUsb analyser
-  - "eInk display tools" - this application allows you to test your eInk display
-  - "MIDI tools" - midi player over uart
+  - "USB Applications" - mouse simulator, usb to uart converter
+  - "Display tools" - Image viewer for LA104 and led/oled/eink displays
+  - "Device info" - shows information about this device
+  - "Just for fun" - non technical applications
 
 Version information
 ---------------------

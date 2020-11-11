@@ -116,18 +116,25 @@ public:
 		return *this;
 	}
 
-	void Seek(ui32 lOffset)
+	bool Seek(ui32 lOffset)
 	{
 	        m_nOffset = lOffset % BufferSectorSize;
 		lOffset -= m_nOffset;
 
+		if ((int)lOffset == m_nSectorOffset + BufferSectorSize)
+		{
+                    m_nSectorOffset += BufferSectorSize;
+	            BIOS::FAT::EResult eResult = BIOS::FAT::Read( m_pData );
+	            return ( eResult == BIOS::FAT::EOk );			
+		} 
 	        if ((int)lOffset != m_nSectorOffset)
 	        {
 	            m_nSectorOffset = lOffset;
 		    BIOS::FAT::Seek( lOffset );
 	            BIOS::FAT::EResult eResult = BIOS::FAT::Read( m_pData );
-	            _ASSERT( eResult == BIOS::FAT::EOk );
+	            return ( eResult == BIOS::FAT::EOk );
 	        }
+                return true;
 	}
 
     int GetFileOffset()

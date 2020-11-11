@@ -19,7 +19,8 @@ namespace BIOS
       DiskSectorSize, DiskSectorCount,
       GpioStatus, KeyMask, 
       FlashReadRange, FlashWriteRange, FlashAlertRange,
-      BatteryVoltage, Charging};
+      BatteryVoltage, Charging,
+      GpioI2cSpeed};
 
     uintptr_t GetAttribute(EAttribute eInternal);
   }

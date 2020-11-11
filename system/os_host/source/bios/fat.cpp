@@ -129,8 +129,10 @@ namespace BIOS
     EResult Init()
     {
       FRESULT r = f_mount(0, &g_fatfs);  
+#ifdef _VERBOSE
       if (r != 0)
         BIOS::DBG::Print("FAT:INIT RESULT=%d\n", r);
+#endif
       return Result(r);
     }
 
@@ -160,9 +162,10 @@ namespace BIOS
 
       ui32 rcount;
       FRESULT r = f_read(&g_file, pSectorData, BIOS::FAT::SectorSize, &rcount);
+#ifdef _VERBOSE
       if (r != 0)
         BIOS::DBG::Print("FAT:READ RESULT=%d\n", r);
-
+#endif
       return Result(r);
     }
 

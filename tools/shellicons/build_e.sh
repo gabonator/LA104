@@ -26,6 +26,14 @@ convert folder.png -resize 64x64 -background transparent -gravity Center -extent
 convert antenna.png -resize 32x32 -background transparent -gravity SouthEast -extent 64x64 compo2.png
 convert -composite compo1.png compo2.png fant.bmp
 
+convert folder.png -resize 64x64 -background transparent -gravity Center -extent 64x64 compo1.png
+convert picture.png -resize 32x32 -background transparent -gravity SouthEast -extent 64x64 compo2.png
+convert -composite compo1.png compo2.png fpicture.bmp
+
+convert folder.png -resize 64x64 -background transparent -gravity Center -extent 64x64 compo1.png
+convert midi.png -resize 32x32 -background transparent -gravity SouthEast -extent 64x64 compo2.png
+convert -composite compo1.png compo2.png fmidi.bmp
+
 convert games.png -resize 64x64 -background transparent -gravity Center -extent 64x64 -alpha on games.bmp
 
 rm compo1.png compo2.png

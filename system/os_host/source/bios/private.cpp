@@ -7,14 +7,6 @@ static_assert((int)BIOS::SYS::EAttribute::DiskSectorCount == (int)EAttribute::Di
 //extern const unsigned char font[256*14];
 //extern const unsigned char* font;
 extern const void* ptrFont;
-#if defined(LA104)
-extern uint32_t gGpioStatusCode;
-#endif
-#if defined(LA104) || defined(DS213)
-extern uint32_t gFlashReadRange[2];
-extern uint32_t gFlashWriteRange[2];
-extern uint32_t gFlashAlertRange[2];
-#endif
 extern "C" uint32_t gKeyMask;
 extern "C" volatile char lastChar;
 
@@ -26,7 +18,7 @@ namespace BIOS
     {
       switch (attribute)
       {
-        case EAttribute::BiosVersion: return 0x0103;
+        case EAttribute::BiosVersion: return 0x0104;
 
         case EAttribute::CharRom: return (uintptr_t)ptrFont;
         case EAttribute::LastChar: return (uintptr_t)&lastChar;
@@ -51,22 +43,15 @@ namespace BIOS
         case EAttribute::DisplayType:
         case EAttribute::DiskType:
         case EAttribute::BatteryVoltage:
+        case EAttribute::GpioStatus:
+        case EAttribute::GpioI2cSpeed:
+        case EAttribute::FlashReadRange:
+        case EAttribute::FlashWriteRange:
+        case EAttribute::FlashAlertRange:
           return (uintptr_t)::GetAttribute((::EAttribute)attribute);
 
         case EAttribute::DiskSectorSize: return BIOS::FAT::SectorSize;
         case EAttribute::DiskSectorCount: return BIOS::FAT::SectorCount;
-#if defined(LA104)
-        case EAttribute::GpioStatus: return (uintptr_t)&gGpioStatusCode;
-#endif
-#if defined(LA104) || defined(DS213)
-        case EAttribute::FlashReadRange: return (uintptr_t)gFlashReadRange;
-        case EAttribute::FlashWriteRange: return (uintptr_t)gFlashWriteRange;
-        case EAttribute::FlashAlertRange: return (uintptr_t)gFlashAlertRange;
-#else
-        case EAttribute::FlashReadRange: return (uintptr_t)nullptr;
-        case EAttribute::FlashWriteRange: return (uintptr_t)nullptr;
-        case EAttribute::FlashAlertRange: return (uintptr_t)nullptr;
-#endif
         case EAttribute::KeyMask: return (uintptr_t)&gKeyMask;
 
         default:

@@ -40,7 +40,7 @@ namespace RPC
     if (strcmp(command, "OSC::Ready")==0) 
       return (uint32_t)BIOS::ADC::Ready2;     // vracia false?
     if (strcmp(command, "OSC::ConfigureInput")==0)
-      return (uint32_t)BIOS::ADC::ConfigureInput;
+      return (uint32_t)BIOS::ADC::ConfigureInput2;
     if (strcmp(command, "OSC::ConfigureTrigger")==0)
       return (uint32_t)BIOS::ADC::ConfigureTrigger2;
     if (strcmp(command, "OSC::GetPointer")==0)

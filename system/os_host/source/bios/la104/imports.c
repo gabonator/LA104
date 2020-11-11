@@ -10,6 +10,8 @@ void __CTR_HP(void) {}
 #endif
 
 extern void (* g_pfnVectors[76])(void);
+extern uint32_t gGpioStatusCode;
+extern uint32_t gGpioI2cSpeed;
 
 __attribute__ ((section(".biosfunc"), optimize("O0")))
 uint32_t __Bios(uint8_t Item, uint32_t Var) { return 0; }
@@ -287,6 +289,11 @@ uintptr_t GetAttribute(enum EAttribute attribute)
     // 2954 - empty, device unable to start, 3956 - fully charged
     // 4000..4680 - charging
     case Charging: return (uintptr_t)__Bios(PWRCTRL, VIN_ST); 
+    case GpioStatus: return (uintptr_t)&gGpioStatusCode;
+    case GpioI2cSpeed: return (uintptr_t)&gGpioI2cSpeed;
+    case FlashReadRange: return (uintptr_t)gFlashReadRange;
+    case FlashWriteRange: return (uintptr_t)gFlashWriteRange;
+    case FlashAlertRange: return (uintptr_t)gFlashAlertRange;
     default: return 0;
   }
 }

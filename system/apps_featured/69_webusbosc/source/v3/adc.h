@@ -112,7 +112,7 @@ namespace BIOS
 //          streamerDeinit();
 //          adcReset();
         }
-        ConfigureTrigger(time, value, type, source);
+        ConfigureTrigger(time, value*4, type, source);
       }
     }
 
@@ -140,6 +140,11 @@ namespace BIOS
       }
       _ASSERT(0);
       return 0;
+    }
+
+    void ConfigureInput2(EInput input, ECouple couple, EResolution res, int offset)
+    {
+      BIOS::ADC::ConfigureInput(input, couple, res, offset*4);
     }
 
     uint32_t SetParam(int attribute, int value)

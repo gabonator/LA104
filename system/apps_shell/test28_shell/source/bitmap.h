@@ -47,7 +47,10 @@ void DrawImage(char* path, int bx, int by)
     
     BmpHdr header;
     reader >> CStream(&header, sizeof(header));
-    reader.Seek(header.dwBfOffset);
+    if (!reader.Seek(header.dwBfOffset))
+{
+  BIOS::DBG::Print("Seek to %d in %s failed!\n", header.dwBfOffset, path);
+}
     
     for (int y=0; y<(int)header.dwBiHeight; y++)
         for (int x=0; x<(int)header.dwBiWidth; x++)
@@ -70,13 +73,27 @@ void DrawImage(char* path, int bx, int by)
 
 void SaveImage(char* path, CRect rc)
 {
+    constexpr uint32_t checkHeader = 'G' | ('A' << 8) | ('B' << 16) | (200 << 24);
+
     CBufferedWriter writer;
     LCD::BufferBegin(rc);
     
     writer.Open(path);
+
+    writer << (ui32)checkHeader;
+    int ofs = 4;
+
     for (int x=rc.left; x<rc.right; x++)
         for (int y=rc.bottom-1; y>=rc.top; y--)
+        {
             writer << (uint16_t)LCD::BufferRead();
+            ofs += 2;
+            if (ofs == BIOS::FAT::SectorSize)
+            {
+                writer << (ui32)checkHeader;
+                ofs = 4;
+            }
+        }
 
     LCD::BufferEnd();
 
@@ -85,25 +102,34 @@ void SaveImage(char* path, CRect rc)
 
 bool LoadImage(char* path, CRect rc)
 {
+    constexpr uint32_t checkHeader = 'G' | ('A' << 8) | ('B' << 16) | (200 << 24);
+
     CBufferedReader reader;
     if (!reader.Open(path))
         return false;
     
     int fileOffset = 0;
-    int pixelCount = BIOS::FAT::SectorSize/2;
+    int pixelCount = BIOS::FAT::SectorSize/2-2;
     uint16_t* pixelData = (uint16_t*)BIOS::FAT::GetSharedBuffer();
-
+    if (*((uint32_t*)BIOS::FAT::GetSharedBuffer()) != checkHeader)
+        return false;
+ 
     LCD::BufferBegin(rc);
     int remaining = rc.Width()*rc.Height();
     while (remaining > 0)
     {
         int process = min(remaining, pixelCount);
-        LCD::BufferWrite(pixelData, process);
+        LCD::BufferWrite(pixelData+2, process);
         remaining -= process;
         if (process > 0)
         {
             fileOffset += BIOS::FAT::SectorSize;
-            reader.Seek(fileOffset);
+            if (!reader.Seek(fileOffset) ||
+              *((uint32_t*)BIOS::FAT::GetSharedBuffer()) != checkHeader)
+            {
+                LCD::BufferEnd();
+                return false;
+            }
         }
     }
     LCD::BufferEnd();

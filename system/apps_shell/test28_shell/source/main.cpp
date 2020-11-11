@@ -208,6 +208,7 @@ class CBrowser : public CWnd, public CSmallFont, public CMenuEnumerator
 #else
     char mCurrentDir[64];
 #endif
+    bool mRunning{true};
 
 public:
     void Create(const char *pszId, ui16 dwFlags, const CRect &rc, CWnd *pParent)
@@ -435,7 +436,26 @@ public:
     
     void OnKey(int nKey) override
     {
+        static int lastKey = BIOS::KEY::None;
+
         int newCursor = mCursor;
+        if (nKey == BIOS::KEY::Escape)
+        {
+            if (mFolderStack.GetSize() == 0)
+            {
+                if (lastKey == nKey)
+                    mRunning = false;
+                lastKey = nKey;
+            }
+            else
+            {
+                PopTo(mFolderStack.GetSize()-1);
+                lastKey = BIOS::KEY::None;
+            }
+            return;
+        }
+        lastKey = nKey;
+
         if (nKey == BIOS::KEY::Left)
             newCursor--;
         if (nKey == BIOS::KEY::Right)
@@ -645,13 +665,17 @@ public:
         }
         return false;
     }
+    bool IsRunning()
+    {
+        return mRunning;
+    }
 };
 
 class CApplication : public CWnd
 {
     CMenuMain mMenu;
     CBrowser mBrowser;
-	uint8_t mFileSystemBuffer[BIOS::FAT::SectorSize];
+    uint8_t mFileSystemBuffer[BIOS::FAT::SectorSize];
     
 public:
     void Create()
@@ -683,6 +707,11 @@ public:
     {
 		BIOS::FAT::SetSharedBuffer(nullptr);
     }
+
+    bool IsRunning()
+    {
+        return mBrowser.IsRunning();
+    }
 };
 
 CApplication app;
@@ -704,8 +733,9 @@ int _main(void)
     app.WindowMessage( CWnd::WmPaint );
 
     BIOS::KEY::EKey key;
-    while ((key = BIOS::KEY::GetKey()) != BIOS::KEY::Escape)
+    while (app.IsRunning())
     {
+        key = BIOS::KEY::GetKey();
         if (key != BIOS::KEY::None)
             app.WindowMessage(CWnd::WmKey, key);
         app.WindowMessage(CWnd::WmTick);

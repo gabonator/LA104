@@ -30,6 +30,7 @@ enum GpioStatus {
 };
 
 uint32_t gGpioStatusCode = GpioStatus::Ok;
+uint32_t gGpioI2cSpeed = 100000;
 
 namespace PIN
 {
@@ -117,7 +118,7 @@ namespace PIN
     uint32_t dwAddr = arrGpioBase[nPort];
     uint32_t dwIDR = ((uint32_t*)dwAddr)[2];
     return (dwIDR & (1<<nPin)) ? 1 : 0;
-  }
+  }                   
 }
 
 // TIM8 CH4
@@ -262,7 +263,7 @@ namespace I2C
    
       // Step 1: Initialize I2C
       RCC_APB1PeriphClockCmd(I2Cx_RCC, ENABLE);
-      I2C_InitStruct.I2C_ClockSpeed = 100000;
+      I2C_InitStruct.I2C_ClockSpeed = gGpioI2cSpeed;
       I2C_InitStruct.I2C_Mode = I2C_Mode_I2C;
       I2C_InitStruct.I2C_DutyCycle = I2C_DutyCycle_2;
       I2C_InitStruct.I2C_OwnAddress1 = 0x00;
@@ -309,6 +310,11 @@ namespace I2C
         }      
       }
 */
+      if (I2C_GetFlagStatus(I2Cx, I2C_FLAG_BUSY))
+      {
+        gGpioStatusCode = GpioStatus::I2cBusy;
+      }
+
       SetTimeout(50);
 
       // Generate start condition
@@ -342,7 +348,11 @@ namespace I2C
           return false; 
         }
       }
-
+      if (I2C_GetFlagStatus(I2Cx, I2C_FLAG_BUSY))
+      {
+        gGpioStatusCode = GpioStatus::I2cBusy;
+      }
+/*
       while (I2C_GetFlagStatus(I2Cx, I2C_FLAG_BUSY))
       {
         if (Timeout()) 
@@ -351,6 +361,7 @@ namespace I2C
           return false;
         }      
       }
+*/
       return true;
   }
    

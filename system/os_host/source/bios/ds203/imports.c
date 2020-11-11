@@ -149,6 +149,9 @@ uintptr_t GetAttribute(enum EAttribute attribute)
     case DiskType: return (uintptr_t)0;
     case BatteryVoltage: return (uintptr_t)__Get(V_BATTERY, 0);
     case Charging: return (uintptr_t)__Get(USB_POWER, 0);
+    case FlashReadRange: return (uintptr_t)0; // Uses native usb interface
+    case FlashWriteRange: return (uintptr_t)0;
+    case FlashAlertRange: return (uintptr_t)0;
     default: return 0;
   }
 }

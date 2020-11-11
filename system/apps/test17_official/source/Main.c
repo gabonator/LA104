@@ -98,7 +98,14 @@ int main(void)
                 }
                 else if(Item.flag)
                 {
-                    if(Menu.index == IN_TYPE)
+                    if(Menu.index == FILE_CTRL)
+                    {
+                        if(gItemIndexNum[FILE_CTRL] == EXIT)
+                        {
+                            ExitApplication();
+                        }
+                    }
+                    else if(Menu.index == IN_TYPE)
                     {
                         if(gItemParam[INTYPE]!=IN_USER)
                         {

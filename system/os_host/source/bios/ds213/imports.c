@@ -221,6 +221,9 @@ uintptr_t GetAttribute(enum EAttribute attribute)
     case DiskType: return (uintptr_t)(uint32_t)Hw.pDiskTypStr;
     case BatteryVoltage: return (uintptr_t)*Hw.pAdc_Vbty*375/256*8; // unverified 
     case Charging: return (uintptr_t)*Hw.pSt_Vin; // pSt_Chg
+    case FlashReadRange: return (uintptr_t)gFlashReadRange;
+    case FlashWriteRange: return (uintptr_t)gFlashWriteRange;
+    case FlashAlertRange: return (uintptr_t)gFlashAlertRange;
     default: return 0;
   }
 }
