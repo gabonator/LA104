@@ -117,6 +117,8 @@ private:
       int pulseLong = PulseDuration(2);
       int pulseShort = PulseDuration(1);
 
+//      pulse.Add(pulseShort);
+//      pulse.Add(pulseShort*9);
       pulse.Add(pulseLong);
 
       for (int i=0; i<length; i++)
@@ -126,6 +128,7 @@ private:
           
           pulse.Add(bit ? pulseLong : pulseShort);
       }
+pulse.Add(pulseLong); // trailing zeroes
     return true;
   }
 

@@ -51,7 +51,7 @@ bool sendPacket(uint8_t* buffer, int length, int dataRate)
 	long lBase0 = BIOS::SYS::GetTick();
     
     gModem.SetDataRate(dataRate);
-    gModem.SetOutputPower(0xb0); // configure low/high levels
+    gModem.SetOutputPower(0xc6);
     
 	gModem.PrepareTxState();          // 8 ms
 	gModem.FlushRxFifo();

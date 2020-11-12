@@ -129,7 +129,7 @@ public:
   uint8_t *getBuffer(void);
   uint8_t setBuffer(uint8_t*);
 
-private:
+public:
   inline void SPIwrite(uint8_t d) __attribute__((always_inline));
   void drawFastHLineInternal(int16_t x, int16_t y, int16_t w, uint16_t color);
   void drawFastVLineInternal(int16_t x, int16_t y, int16_t h, uint16_t color);

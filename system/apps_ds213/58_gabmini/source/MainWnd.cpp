@@ -109,10 +109,16 @@ bool CMainWnd::IsRunning()
 
 	if ( ready && Settings.Trig.Sync == CSettings::Trigger::_Auto )
 	{
+                // we dont need to wait for the screen to be fully reloaded - on slow sampling modes
 		int screenDuration = Settings.Runtime.m_nScreenDuration*3/2+20;
 		if ( BIOS::SYS::GetTick() - m_lLastAcquired > 500 && BIOS::SYS::GetTick() - m_lLastRequested > screenDuration)
 		{
+// If we enter this point, we will lost buffer-full synchronization - because we immediatelly 
+// request new transfer after the wptr reaches end of screen. So the "FULL" flag will be never
+// set
+// only if we will wait for full buffer, but that would reduce redraw time
 #ifdef DS203
+// + invalid first + scroll offset
 			bool bScreenReady = BIOS::ADC::GetPointer() > (300 + Settings.Time.InvalidFirst);
 //			bool canProcess = true;
 #else

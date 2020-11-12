@@ -129,7 +129,9 @@ uint16_t Adafruit_MLX90614::read16(uint8_t a) {
   uint16_t ret;
   // <start><addr><ack><command><ack><start><addr><ack><data><nack><stop>
 
-  Wire.beginTransmission(_addr); // start transmission to device
+  if (!Wire.beginTransmission(_addr)) // start transmission to device
+    return 0;
+
   Wire.write(a);                 // sends register address to read from
 
   //Wire.endTransmission(false);   // end transmission

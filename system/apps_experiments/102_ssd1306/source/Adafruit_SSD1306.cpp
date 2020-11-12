@@ -120,18 +120,8 @@ void Adafruit_SSD1306::ssd1306_command1(uint8_t c) {
 void Adafruit_SSD1306::ssd1306_commandList(const uint8_t *c, uint8_t n) {
     wire->beginTransmission(i2caddr);
     WIRE_WRITE((uint8_t)0x00); // Co = 0, D/C = 0
-    uint8_t bytesOut = 1;
     while (n--) {
-/*
-      if (bytesOut >= WIRE_MAX) {
-        wire->endTransmission();
-        wire->beginTransmission(i2caddr);
-        WIRE_WRITE((uint8_t)0x00); // Co = 0, D/C = 0
-        bytesOut = 1;
-      }
-*/
       wire->write(*(c++));
-//      bytesOut++;
     }
     wire->endTransmission();
 }
@@ -217,6 +207,13 @@ bool Adafruit_SSD1306::begin(uint8_t vcs, uint8_t addr, bool reset,
     if (periphBegin)
       wire->begin();
   }
+
+  // check presence
+  if (!wire->beginTransmission(i2caddr))
+    return false;
+  if (!wire->endTransmission())
+    return false;
+
 
   TRANSACTION_START
 
@@ -639,18 +636,8 @@ void Adafruit_SSD1306::display(void) {
   uint8_t *ptr = buffer;
   wire->beginTransmission(i2caddr);
   wire->write((uint8_t)0x40);
-  uint8_t bytesOut = 1;
   while (count--) {
-/*
-    if (bytesOut >= WIRE_MAX) {
-      wire->endTransmission();
-      wire->beginTransmission(i2caddr);
-      WIRE_WRITE((uint8_t)0x40);
-      bytesOut = 1;
-    }
-*/
     WIRE_WRITE(*ptr++);
-//      bytesOut++;
   }
   wire->endTransmission();
   TRANSACTION_END

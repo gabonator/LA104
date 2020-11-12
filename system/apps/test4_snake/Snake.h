@@ -161,10 +161,10 @@ static const ui8 levels[] = {
 	"#     #        #    #####"
 	"#     #        #    #####"
 	"#     #        #    #####"
-	"#     #        #    #####"
-	"#                   #####"
-	"#                   #####"
-	"#                   #####"
+	"#     #    #   #    #####"
+	"#          #        #####"
+	"#          #        #####"
+	"#          #        #####"
 	"#########################"};
 
 
@@ -296,8 +296,10 @@ public:
 			PrepareSprite( blk, pSprite, m_nTailDir );
 		else
 			PrepareSprite( blk, pSprite, eDirRight );
-
-		BIOS::LCD::Pattern( x<<4, (y+1)<<4, (x+1)<<4, (y+2)<<4, pSprite, 16*16 );
+		BIOS::LCD::BufferBegin(CRect(x<<4, (y+1)<<4, (x+1)<<4, (y+2)<<4));
+                BIOS::LCD::BufferWrite(pSprite, 16*16);
+                BIOS::LCD::BufferEnd();
+//		BIOS::LCD::Pattern( x<<4, (y+1)<<4, (x+1)<<4, (y+2)<<4, pSprite, 16*16 );
 	}
 
 	ui8 GetBlock(int x, int y)
@@ -323,9 +325,9 @@ public:
 				int x=0, y=0;
 				switch (nTransform)
 				{
-					case eDirRight: x=15-_y; y=_x; break;
+					case eDirRight: x=_y; y=_x; break;
 					case eDirDown: x=15-_x; y=_y; break;
-					case eDirLeft: x=_y; y=15-_x; break;
+					case eDirLeft: x=15-_y; y=15-_x; break;
 					case eDirUp: x=_x; y=_y; break;
 				}
 
@@ -342,6 +344,7 @@ public:
 
 	virtual void OnKey(int nKey)
 	{
+/*
 		if ( nKey == BIOS::KEY::Left )
 		{
 			if ( ++m_nDir > eDirUp )
@@ -353,7 +356,23 @@ public:
 				m_nDir--;
 			else
 				m_nDir = eDirUp;
+		} else  */
+		if ( nKey == BIOS::KEY::Up )
+		{
+			m_nDir = eDirUp;
 		} else
+		if ( nKey == BIOS::KEY::Down )
+		{
+			m_nDir = eDirDown;
+		} else
+		if ( nKey == BIOS::KEY::Right )
+		{
+			m_nDir = eDirRight;
+		} else 
+		if ( nKey == BIOS::KEY::Left )
+		{
+			m_nDir = eDirLeft;
+		} else 
 		{
 			CWnd::OnKey( nKey );
 			return;

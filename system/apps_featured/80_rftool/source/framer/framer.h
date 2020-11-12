@@ -8,46 +8,12 @@ namespace PULSE
 {
     uint16_t arrSignalData[400];
     CArray<uint16_t> arrSignal(arrSignalData, COUNT(arrSignalData));
-/*
-    void uniqueName(char* name)
-    {
-        static int counter = 0;
-        sprintf(name, "dump%03d.sig", counter++);
-    }
- */
-/*
-    void dump(char* fname, CArray<uint16_t>& data)
-    {
-        _ASSERT(sizeof(gFatSharedBuffer) >= BIOS::SYS::GetAttribute(BIOS::SYS::EAttribute::DiskSectorSize));
-        BIOS::FAT::SetSharedBuffer(gFatSharedBuffer);
-        mWriter.Open(fname);
-
-        auto Print = [&](const char* format, ...)
-        {
-          char buf[32];
-          
-          va_list args;
-          va_start( args, format );
-          vsprintf( buf, format, args );
-          va_end(args);
-
-          mWriter << buf;
-        };
-
-        Print("%d: ", data.GetSize());
-        for (int i=0; i<data.GetSize(); i++)
-            Print("%d, ", data[i]);
-        Print("\r\n");
-        
-        mWriter.Close();
-        BIOS::FAT::SetSharedBuffer(nullptr);
-    }*/
 
     void push(int v)
     {
         if (v==-1)
         {
-            if (arrSignal.GetSize() > 100 && arrSignal.GetSize() < 500)
+            if (arrSignal.GetSize() > 60 && arrSignal.GetSize() < 500)
             {
                 analyse(arrSignal);
             }
