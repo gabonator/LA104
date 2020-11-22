@@ -222,7 +222,7 @@ public:
 	void InsertAt( int i, const TYPE& element )
 	{
 		int nSize = GetSize();
-		_ASSERT( i < nSize );
+		_ASSERT( i <= nSize );
 		Resize(+1);
 
 		for ( int j = nSize-1; j >= i; j-- )
