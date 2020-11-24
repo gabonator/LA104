@@ -2,8 +2,8 @@
 #include "platform.h"
 #include "ringbuf.h"
 
-RingBufCPP<uint8_t, 2048> serialRead;
-RingBufCPP<uint8_t, 2048> serialWrite;
+RingBufCPP<uint8_t, 512> serialRead;
+RingBufCPP<uint8_t, 512> serialWrite;
 
 Serial SERIAL;
 

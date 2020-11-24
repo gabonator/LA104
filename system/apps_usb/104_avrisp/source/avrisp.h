@@ -36,6 +36,9 @@
 // 7: Programming - In communication with the slave
 //
 
+//#include <library.h>
+void debugprint(const char * format, ...);
+
 #include "platform.h"
 
 #define HWVER 2
@@ -55,7 +58,7 @@ uint8_t write_eeprom_chunk(unsigned int start, unsigned int length);
 uint8_t write_flash_pages(int length);
 void avrisp();
 
-#define PROG_FLICKER false
+#define PROG_FLICKER true
 #define SPI_MODE0 0x00
 #define SPI_CLOCK 1000000/6
 
@@ -368,8 +371,12 @@ void write_flash(int length) {
 }
 
 uint8_t write_flash_pages(int length) {
+
   int x = 0;
   unsigned int page = current_page();
+
+  debugprint("write_flash_pages(%d,page=%d);\n", length, page);
+
   while (x < length) {
     if (page != current_page()) {
       commit(page);
@@ -449,6 +456,7 @@ uint8_t flash_read(uint8_t hilo, unsigned int addr) {
 }
 
 char flash_read_page(int length) {
+  debugprint("flash_read_page(%d,here=%d);\n", length, here);
   for (int x = 0; x < length; x += 2) {
     uint8_t low = flash_read(LOW, here);
     SERIAL.print((char) low);

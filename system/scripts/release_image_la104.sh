@@ -194,6 +194,7 @@ cp $FROM/15charla.elf $TO/tools/charmap.elf
 cp $FROM/63ws_104.elf $TO/tools/ws2812.elf
 cp $FROM/49gpio.elf $TO/tools/gpio.elf
 cp $FROM/21mplayl.elf $TO/tools/midiplay.elf
+cp $FROM/105avrfl.elf $TO/tools/avrflash.elf
 
 echo -n "{\"description\":{short:\"Character map\",long:\"Character map\"},\"icon\":\"charmap.bmp\",\"execute\":\"charmap.elf\",order:50}" > $TO/tools/charmap.lnk
 echo -n "{\"description\":{short:\"DCF77\",long:\"DCF77 decoder\"},\"icon\":\"dcf77.bmp\",\"execute\":\"dcf77.elf\",order:40}" > $TO/tools/dcf77.lnk
@@ -204,6 +205,7 @@ echo -n "{\"description\":{short:\"UART monitor\",long:\"UART monitor\"},\"icon\
 echo -n "{\"description\":{short:\"VFD Invt\",long:\"Invt VFD RS485 visualizer\"},\"icon\":\"vfd_invt.bmp\",\"execute\":\"vfd_invt.elf\"}" > $TO/tools/vfd_invt.lnk
 echo -n "{\"description\":{short:\"WS2812\",long:\"WS2812 addressable led tester\"},\"icon\":\"ws2812.bmp\",\"execute\":\"ws2812.elf\",order:100}" > $TO/tools/ws2812.lnk
 echo -n "{\"description\":{\"short\":\"MIDI\",\"long\":\"MIDI player\"},\"icon\":\"midiplay.bmp\",\"execute\":\"midiplay.elf\"}" > $TO/tools/midiplay.lnk
+echo -n "{\"description\":{short:\"AvrFlash\",long:\"Atmel firmware flasher\"},\"icon\":\"avrflash.bmp\",\"execute\":\"avrflash.elf\",order:20}" > $TO/tools/avrflash.lnk
 
 cp $ICON/charmap.bmp $TO/tools/charmap.bmp
 cp $ICON/dcf77.bmp $TO/tools/dcf77.bmp
@@ -214,7 +216,11 @@ cp $ICON/serial.bmp $TO/tools/uartmon.bmp
 cp $ICON/motor.bmp $TO/tools/vfd_invt.bmp
 cp $ICON/ws2812.bmp $TO/tools/ws2812.bmp
 cp $ICON/music.bmp $TO/tools/midiplay.bmp
+cp $ICON/arduino.bmp $TO/tools/avrflash.bmp
 cp ../apps_featured/test21_midiplay/midi/laisla.mid $TO/tools/laisla.mid
+cp ../apps/105_avrprogrammer/arduino/blink.hex $TO/tools/blink.hex
+cp ../apps/105_avrprogrammer/arduino/wheel.hex $TO/tools/wheel.hex
+cp ../apps/105_avrprogrammer/arduino/toggle.hex $TO/tools/toggle.hex
 
 echo -n "{\"description\":{short:\"Help\",long:\"Help\"},\"icon\":\"../help.bmp\",\"execute\":\"../viewtxt.elf help.txt\",order:200}" >> $TO/tools/help.lnk
 
@@ -300,14 +306,17 @@ echo -n "{\"description\":{\"short\":\"USB Applications\",\"long\":\"USB Applica
 cp $FROM/24ncdc.elf $TO/usb/cdc.elf
 cp $FROM/25hid.elf $TO/usb/hid.elf
 cp $FROM/26midi.elf $TO/usb/midi.elf
+cp $FROM/104avris.elf $TO/usb/avrisp.elf
 
 echo -n "{\"description\":{short:\"Serial link\",long:\"Serial link\"},\"icon\":\"cdc.bmp\",\"execute\":\"cdc.elf\"}" > $TO/usb/cdc.lnk
 echo -n "{\"description\":{short:\"HID\",long:\"Human interface device\"},\"icon\":\"hid.bmp\",\"execute\":\"hid.elf\"}" > $TO/usb/hid.lnk
 echo -n "{\"description\":{short:\"MIDI\",long:\"Midi to uart\"},\"icon\":\"midi.bmp\",\"execute\":\"midi.elf\"}" > $TO/usb/midi.lnk
+echo -n "{\"description\":{short:\"AVRISP\",long:\"Atmel ISP programmer\"},\"icon\":\"avrisp.bmp\",\"execute\":\"avrisp.elf\"}" > $TO/usb/avrisp.lnk
 
 cp $ICON/serial.bmp $TO/usb/cdc.bmp
 cp $ICON/mouse.bmp $TO/usb/hid.bmp
 cp $ICON/midi.bmp $TO/usb/midi.bmp
+cp $ICON/farduino.bmp $TO/usb/avrisp.bmp
 
 echo -n "{\"description\":{short:\"Help\",long:\"Help\"},\"icon\":\"../help.bmp\",\"execute\":\"../viewtxt.elf help.txt\",order:200}" >> $TO/usb/help.lnk
 
@@ -320,6 +329,12 @@ After running any of these applications, disconnect usb cable and reconnect. In 
   - "Serial link" - USB CDC profile
   - "Human interface device" - HID profile, you can move the mouse pointer with encoders
   - "MIDI" - Midi usb bridge which transfers the usb traffic to internal uart (P1: TXD, P2: RXD)
+  - "Atmel ISP programmer" - Flash atmel chips from arduino environment using ICSP header:
+    P1   P4  P3
+     .   .   .  
+     .   .   .
+     GND P2  VCC
+
 EOM
 
 cat > $TO/help.txt <<- EOM

@@ -796,7 +796,7 @@ cdcacm_data_rx_cb(
   uint8_t ep __attribute__((unused))
 ) {
 	uint16_t len = usbd_ep_read_packet(usbd_dev, DATA_OUT, cdcbuf, MAX_USB_PACKET_SIZE);
-    if (len == 0) { return; }
+//    if (len == 0) { return; }
     uint16_t pos = (len < MAX_USB_PACKET_SIZE) ? len : MAX_USB_PACKET_SIZE;
     cdcbuf[pos] = 0;
 
