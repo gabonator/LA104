@@ -111,7 +111,7 @@ bool DoFlashing(char* name)
     if (signature[0] != signature84[0] || signature[1] != signature84[1] || signature[2] != signature84[2])
     {
         CONSOLE::Color(RGB565(ff0000));
-        CONSOLE::Print("Chip signature %02x%02x%02 does not match with %02x%02x%20x\n",
+        CONSOLE::Print("Wrong chip signature %02x%02x%02x, should be %02x%02x%02x\n",
                        signature[0], signature[1], signature[2],
                        signature84[0], signature84[1], signature84[2]);
         return false;
@@ -197,7 +197,6 @@ int _main(void)
     _ASSERT(sizeof(gFatSharedBuffer) >= BIOS::SYS::GetAttribute(BIOS::SYS::EAttribute::DiskSectorSize));
     BIOS::FAT::SetSharedBuffer(gFatSharedBuffer);
     //mReader.Open((char*)"avr/tinystar.hex");
-    //mRader.
 
     APP::Init("AVRISP");
     APP::Status("ATTiny84, 1MHz internal oscillator");
@@ -220,7 +219,7 @@ int _main(void)
             } else
             {
                 CONSOLE::Color(RGB565(ffffff));
-                CONSOLE::Print("Flashed failed!\n");
+                CONSOLE::Print("Flashing failed!\n");
             }
 
             // Wait for key press

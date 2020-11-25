@@ -21,6 +21,12 @@ Go to release section on top of this page, download *system.hex*. Power on the L
 
 #### News
 
+##### Avrisp programmer
+
+Can be used for flashing Atmel MCUs - either for flashing HEX files directly over ICSP connector [105_avrprogrammer](system/apps/105_avrprogrammer/), or use LA104 as AVRISP USB programmer compatible with Arduino IDE [104_avrisp](system/apps_usb/104_avrisp/)
+
+[![AVRISP programmer](https://img.youtube.com/vi/yC3a1zbonJ0/0.jpg)](https://www.youtube.com/watch?v=yC3a1zbonJ0 "AVRISP programmer")
+
 ##### EInk display image loader
 
 - Application [90_epd_image](system/apps_featured/90_epd_image/) loads BMP images and transfers them into the eink display
