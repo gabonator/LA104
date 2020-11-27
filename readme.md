@@ -148,7 +148,7 @@ This app uses RS485 adapter to talk to Invt Good drive inverters. Read more [her
 
 ##### WASM experimental evironment
 
-You the experience of using LA104 analyser in [your browser](https://rawgit.valky.eu/gabonator/LA104/master/resources/wasmbuild/index.html)
+LA104 OS running in [your browser](https://rawgit.valky.eu/gabonator/LA104/master/resources/wasmbuild/index.html) using WASM technology
 
 ![WASM build](resources/imgWasm.png)
 
