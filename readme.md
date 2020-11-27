@@ -10,11 +10,11 @@ This time they designed wholly digital device without analog circuitry featuring
 
 ![Product brief](resources/productBrief.png)
 
-When I was developing alternative firmware for DS203, I was trying to design some simple operating system that would allow me to upload easily new programs to the devie with ability to switch between them without flashing it again. Something similar that [jpa did before](https://jpa.kapsi.fi/dsoquad/) with his PAWN interpreter on DS203 with a little difference that the application will be native C/C++ compiled code offering full computational power of the device. Unfortunately the GCC toolchain I was using had some bug which produced ARM32 instructions in PLT section which are not supported by STM32F103 and I was not able to force the compiler to use Thumb instruction set. So the dynamic relocation of imported symbols was an impossible task to implement. Now after few years, this problem was fixed and finally I could continue developing this operating system I have started before.
+When I was developing [alternative firmware](....) for DS203, I was trying to design some simple operating system that would allow me to upload easily new programs to the devie with ability to switch between them without flashing it again. Something similar that [jpa did before](https://jpa.kapsi.fi/dsoquad/) with his PAWN interpreter on DS203 with a little difference that the application will be native C/C++ compiled code offering full computational power of the device. Unfortunately the GCC toolchain I was using had some bug which produced ARM32 instructions in PLT section which are not supported by STM32F103 and I was not able to force the compiler to use Thumb instruction set. So the dynamic relocation of imported symbols was an impossible task to implement. Now after few years, this problem was fixed and finally I could continue developing this operating system I have started before.
 
 #### Installation
 
-Go to release section of this page, find latest version for your device (there are releases for LA104, DS203 and DS213) and download *system.hex*. Power on the LA104 while holding first button. Connect the device using USB cable with your computer. New disk drive should appear, copy the *system.hex* file there. The disk should disconnect and reconnect shortly after the upload was finished. If you are lucky, you will see *system.rdy* on the disk. Turn the unit off and on and copy remaining files from zip archive *la104apps.zip* to your device. After power cycle a gui should appear. For Linux/OSX systems use [tools/dfuload](tools/dfuload) script to copy the firmware, if the file system does not appear stable, you can format it using [tools/dfuload](tools/dfuload/format.sh) script.
+Go to release section of this page, find latest version for your device (there are releases for LA104, DS203 and DS213) and download *system.hex*. Power on the LA104 while holding first button. Connect the device using USB cable with your computer. New disk drive should appear, copy the *system.hex* file there. The disk should disconnect and reconnect shortly after the upload was finished. If you are lucky, you will see *system.rdy* on the disk. Turn the unit off and on and copy remaining files from zip archive *la104apps.zip* to your device. After power cycle a gui should appear. For Linux/OSX systems use [tools/dfuload](tools/dfuload) script to copy the firmware, if the file system does not appear stable, you can format it using [tools/dfuload/format.sh](tools/dfuload/format.sh) script.
 
 #### Building
 
@@ -35,22 +35,14 @@ Refer to this [tutorial](resources/tutorial_building)
   - system
     - apps - working applications mainly for LA104
     - apps_ds213 - applications for DS213/DS203
-    - apps_experiments - experimental applications, arduino sample code interfacing some sensors and experimental applications. Use this as reference code for your projects
+    - apps_experiments - arduino sample code interfacing some sensors and experimental applications. Use this as reference code for your projects. Mostly just simple console applications
     - apps_featured - advanced applications with full visual interface
     - apps_shell - file lister and graphical application switcher
     - apps_usb - apps simulating various USB peripherals
     - os_host - system source code, actually an application which loads ELF files from filesystem, matches the imported symbols and loads them
     - os_library - dummy library exposing all functions of the system. Necessary for building all applications
-    - os_platform - support files for building for Win32/OSX or WASM
-    - scripts - building scripts
-      - build.sh - main building scripts which builds the OS, all applications and prepares disk image for all devices, this file is referenced in Docker file
-      - build_check.sh - verifies if all necessary components are already installed
-      - build_full.sh - builds OS and all APPS
-      - build_minimal.sh - builds OS and featured apps and shell - just to quick verification if the C++ toolchain is working well
-      - build_os.sh - builds OS
-      - build_wasm.sh - builds some apps for web browser
-      - release_image_XXX.sh - prepares the release image for specific device
-      - imagefile_XXXX_XXXXX.sh - prepares the filesystem image (as single file) which can be easily copied to the eeprom without copying all files individually, reducing the FAT fragmentation
+    - os_platform - support files for building for other platforms than Arm (Win32, OSX XCode or WASM)
+    - scripts - [building scripts](resources/tutorial_building)
 
 #### Applications in LA104 package
 

@@ -31,7 +31,7 @@ void setPixel(int x, int y, int c)
 	if (0 && nc++ > 200)
 	{
 		nc = 0;
-		sdl_blit();
+		//sdl_blit();
 
 	}
 }
@@ -94,6 +94,7 @@ bool sdl_running()
 
 int sdl_lastKey()
 {
+    sdl_blit();
     int temp = lastKey;
     lastKey = 0;
     return temp;

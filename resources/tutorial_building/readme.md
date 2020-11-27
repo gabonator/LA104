@@ -12,6 +12,27 @@
 https://developer.arm.com/open-source/gnu-toolchain/gnu-rm/downloads
 - In my case, I am using lightly outdated version (gcc-arm-none-eabi-7-2018-q2-update), but I suggest downloading lastest available version
 
+## Building scripts
+[/system/scripts](/system/scripts) contains all scripts necessary for building whole project:
+  - build.sh - main building scripts which builds the OS, all applications and prepares disk image for all devices, this file is referenced in Docker file. It calls build_full.sh, release_image_la104.sh, release_image_ds203.sh, release_image_ds213.sh in sequence.
+  - build_check.sh - verifies if all necessary components are already installed
+  - build_full.sh - builds OS and all APPS
+  - build_minimal.sh - builds OS and featured apps and shell - just to quick verification if the C++ toolchain is working well
+  - build_os.sh - builds OS
+  - release_image_XXX.sh - prepares the release image for specific device
+
+Extra stuff:
+  - build_wasm.sh - builds some apps for web browser, you will need to install emsdk with emcc compiler before using this script
+  - generate_applist.js - generates list of all applications in release image in form of github markup language including all icons
+
+Experimental stuff:
+  - imagefile_make_XXXXX.sh - prepares the formatted filesystem image (as a single file) which can be easily copied to the eeprom without copying all files individually, reducing the FAT fragmentation and eeprom write cycles
+  - imagefile_copy_XXXXX.sh - copies the fs image to the device
+  - imagefile_test_XXXXX.sh - mounts the fs as local folder for verification
+
+## Docker builds
+- Whole repository is being automatically built on every commit by docker builds. See [dockerfile](....), this script just calls system/scripts/build.sh which does job. It builts the OS, all applications and creates a filesystem image for LA104/DS203/DS213 as zip archive in *system/build* folder. For manual building all components separately, continue reading
+
 ## Mac OSX / Linux
 - Clone whole repository (git clone https://github.com/gabonator/LA104.git)
 - Building the OS: 
@@ -112,11 +133,7 @@ https://developer.arm.com/open-source/gnu-toolchain/gnu-rm/downloads
     ../../../../tools/elfstrip/elfstrip output.elf 2import.elf
     ```
     - If everything went well, it should produce **build/2import.elf** file
-    
-    ## Linux
-    - Follow the OSX tutorial, provided scripts should work well
-    - Linux is more strict with the mismatched filename cases, during the compilation with provided scripts, you will need to fix few typos by renaming the file names or changing the include paths in code
-    
+        
     ## Windows
     - Follow the OSX tutorial, but rewrite provided scripts into batch files, it should be pretty easy, since there are just 4-10 commands
     
