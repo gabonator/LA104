@@ -150,6 +150,9 @@ This app uses RS485 adapter to talk to Invt Good drive inverters. Read more [her
 
 You the experience of using LA104 analyser in [your browser](https://rawgit.valky.eu/gabonator/LA104/master/resources/wasmbuild/index.html)
 
+![WASM build](resources/imgWasm.png)
+
+
 ##### (DS203) Web USB Oscilloscope
 
 Proud to announce the first oscilloscope in the world using the WebUsb technology (correct me if I am wrong)! [Read more here](system/apps_featured/69_webusbosc/readme.md)
