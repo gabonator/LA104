@@ -138,7 +138,7 @@ class Shell
   constructor()
   {
     Promise.resolve()
-    .then(() => this.readAsync("la104.fat"))
+    .then(() => this.readCompressedAsync("la104fat.zip"))
     .then((data) => Module['disk'] = new Uint8Array(data))
     .then(() => this.main());
   }
@@ -160,6 +160,24 @@ class Shell
       xhr.onerror = onerror;
       xhr.send(null);
     });
+  }
+
+  readCompressedAsync(url)
+  {
+    return this.readAsync(url).then(data => new Promise((resolve, reject) => 
+    {
+      zip.createReader(new zip.BufferReader(data), zipReader => {
+        zipReader.getEntries((entries) =>
+        {
+          var entry = entries[0];
+          var writer = new zip.BlobWriter();
+          entry.getData(writer, (blob) => {
+            resolve(blob.arrayBuffer());
+          }); 
+//          console.log(entries);
+        });
+      }, reject);
+    }));
   }
 
   execute(wasmBinary, imports, exports, tablesize) 
@@ -271,4 +289,5 @@ window.onload = () => { shell = new Shell() };
 Module = {noRun:1};
 </script>
 <script src="app.js"></script>
+<script src="zip.js"></script>
 
