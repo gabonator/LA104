@@ -15,5 +15,6 @@ Credits:
 
 
 More tools:
+  - cp.sh - copies the LA104 system to the disk /dev/disk2
   - format.sh - formats the internal storage of LA104, results in clean disk
   - snapshot.sh - downloads whole filesystem from LA104 (DSxxx) into single file for use in emulated environment (running LA104 apps from mac/pc, look for la104.fat file in repository)

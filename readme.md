@@ -10,15 +10,96 @@ This time they designed wholly digital device without analog circuitry featuring
 
 ![Product brief](resources/productBrief.png)
 
-Flashing is done by holding first function button during powering up and by copying firmware HEX file onto the virtual flash USB drive formatted as FAT12. This could be tricky, since this approach does not work on Mac OSX. For some reason the default copying procedure after mounting this USB drive on OSX is different than the programmers at e-design expected, it works reliably only on Windows machines. During extensive research and testing I found a method how to upload firmware on any unix/linux operating system. Just build [tools/dfuload](tools/dfuload) by running build.sh script and you are ready to flash new firmwares. 
-
 When I was developing alternative firmware for DS203, I was trying to design some simple operating system that would allow me to upload easily new programs to the devie with ability to switch between them without flashing it again. Something similar that [jpa did before](https://jpa.kapsi.fi/dsoquad/) with his PAWN interpreter on DS203 with a little difference that the application will be native C/C++ compiled code offering full computational power of the device. Unfortunately the GCC toolchain I was using had some bug which produced ARM32 instructions in PLT section which are not supported by STM32F103 and I was not able to force the compiler to use Thumb instruction set. So the dynamic relocation of imported symbols was an impossible task to implement. Now after few years, this problem was fixed and finally I could continue developing this operating system I have started before.
 
 #### Installation
 
-Go to release section on top of this page, download *system.hex*. Power on the LA104 while holding first button. Connect the device using USB cable with your computer. New disk drive should appear, copy the *system.hex* file there. The disk should disconnect and reconnect shortly after the upload was finished. If you are lucky, you will see *manager.rdy* on the disk. Turn the unit off and on and copy remaining files from zip archive *approot.zip* to your device. After power cycle a gui should appear. If the file system does not appear stable, you can format it using [tools/dfuload](tools/dfuload/format.sh) script.
+Go to release section of this page, find latest version for your device (there are releases for LA104, DS203 and DS213) and download *system.hex*. Power on the LA104 while holding first button. Connect the device using USB cable with your computer. New disk drive should appear, copy the *system.hex* file there. The disk should disconnect and reconnect shortly after the upload was finished. If you are lucky, you will see *system.rdy* on the disk. Turn the unit off and on and copy remaining files from zip archive *la104apps.zip* to your device. After power cycle a gui should appear. For Linux/OSX systems use [tools/dfuload](tools/dfuload) script to copy the firmware, if the file system does not appear stable, you can format it using [tools/dfuload](tools/dfuload/format.sh) script.
 
+#### Building
 
+Refer to this [tutorial](resources/tutorial_building)
+
+#### Repository structure
+
+  - resources - old projects, screenshots used in this document and tutorials
+  - tools
+    - dfuload - copies the firmware to the device, works for DS203, DS213 and LA104 on linux/osx
+    - elfstrip - reduces the size of ELF images, used by all application building scripts
+    - fpga - FPGA images and scripts for downloading images using openocd
+    - midiconv - converts multichannel midi files into single channel (single data stream), so it can be played without seeking
+    - openocd - notes on how to flash DS213 over SWD interface and how to debug the apps in Microsoft Visual Code
+    - rtl433 - rtl433 clone modified to be used as WASM binary in web browser/javascript
+    - shellicons - icons used in LA104 visual shell
+    - stm32flash - recovery tool for DS203
+  - system
+    - apps - working applications mainly for LA104
+    - apps_ds213 - applications for DS213/DS203
+    - apps_experiments - experimental applications, arduino sample code interfacing some sensors and experimental applications. Use this as reference code for your projects
+    - apps_featured - advanced applications with full visual interface
+    - apps_shell - file lister and graphical application switcher
+    - apps_usb - apps simulating various USB peripherals
+    - os_host - system source code, actually an application which loads ELF files from filesystem, matches the imported symbols and loads them
+    - os_library - dummy library exposing all functions of the system. Necessary for building all applications
+    - os_platform - support files for building for Win32/OSX or WASM
+    - scripts - building scripts
+      - build.sh - main building scripts which builds the OS, all applications and prepares disk image for all devices, this file is referenced in Docker file
+      - build_check.sh - verifies if all necessary components are already installed
+      - build_full.sh - builds OS and all APPS
+      - build_minimal.sh - builds OS and featured apps and shell - just to quick verification if the C++ toolchain is working well
+      - build_os.sh - builds OS
+      - build_wasm.sh - builds some apps for web browser
+      - release_image_XXX.sh - prepares the release image for specific device
+      - imagefile_XXXX_XXXXX.sh - prepares the filesystem image (as single file) which can be easily copied to the eeprom without copying all files individually, reducing the FAT fragmentation
+
+#### Applications in LA104 package
+
+| Icon | Group | App name | App project |
+|------|-------|----------|-------------|
+| ![17analys.elf](resources/appicons/analyser.png) |  | Logic analyser | [apps/test17_official](system/apps/test17_official/) |
+| ![61devin.elf](resources/appicons/devinfo.png) |  | Device info | [apps_featured/61_devinfo](system/apps_featured/61_devinfo/) |
+| ![29fileman_la104.elf](resources/appicons/fileman.png) |  | File manager | [apps_shell/test29_fileman](system/apps_shell/test29_fileman/) |
+| ![14apds1.elf](resources/appicons/chip.png) | devices | APDS9960 color gesture sensor | [apps_experiments/test14_apds9960](system/apps_experiments/test14_apds9960/) |
+| ![11i2c.elf](resources/appicons/chip.png) | devices | BMP085 Barometric sensor | [apps_experiments/test11_i2c_api](system/apps_experiments/test11_i2c_api/) |
+| ![92bmp180.elf](resources/appicons/chip.png) | devices | BMP180/BMP085 barometer | [apps_experiments/92_bmp180](system/apps_experiments/92_bmp180/) |
+| ![9dht.elf](resources/appicons/chip.png) | devices | DHT11/DHT22 temperature humidity | [apps_experiments/test9_dht_app](system/apps_experiments/test9_dht_app/) |
+| ![56ds1307.elf](resources/appicons/chip.png) | devices | DS1307 real time clock | [apps_experiments/test56_ds1307](system/apps_experiments/test56_ds1307/) |
+| ![57ds3231.elf](resources/appicons/chip.png) | devices | DS3231 real time clock | [apps_experiments/test57_ds3231](system/apps_experiments/test57_ds3231/) |
+| ![36espwww.elf](resources/appicons/chip.png) | devices | ESP8266 uart wifi server | [apps/test36_esp_server](system/apps/test36_esp_server/) |
+| ![84maxdis.elf](resources/appicons/chip.png) | devices | MAX7219 display driver | [apps_experiments/84_max7219](system/apps_experiments/84_max7219/) |
+| ![87mlx906.elf](resources/appicons/chip.png) | devices | MLX90614 non cotact thermo | [apps_unfinished/87_mlx90614](system/apps_unfinished/87_mlx90614/) |
+| ![34scope.elf](resources/appicons/chip.png) | devices | PCF8591t I2C ADC | [apps/test34_scope](system/apps/test34_scope/) |
+| ![95sht20.elf](resources/appicons/chip.png) | devices | SHT20 temperature humidity | [apps_experiments/95_sht20](system/apps_experiments/95_sht20/) |
+| ![45simcom.elf](resources/appicons/chip.png) | devices | SIMCOM gprs modem | [apps/test45_simcom](system/apps/test45_simcom/) |
+| ![96tm1637.elf](resources/appicons/chip.png) | devices | TM1637 7-segment display | [apps_experiments/96_tm1637](system/apps_experiments/96_tm1637/) |
+| ![13mp3.elf](resources/appicons/chip.png) | devices | YX5300 MP3 player | [apps/test13_mp3](system/apps/test13_mp3/) |
+| ![90eink.elf](resources/appicons/eink.png) | display | eInk display image loader | [apps_featured/90_epd_image](system/apps_featured/90_epd_image/) |
+| ![81image.elf](resources/appicons/imgview.png) | display | Image viewer | [apps/81_image](system/apps/81_image/) |
+| ![102oled.elf](resources/appicons/oledssd.png) | display | SSD1306 oled test | [apps_experiments/102_ssd1306](system/apps_experiments/102_ssd1306/) |
+| ![99cube04.elf](resources/appicons/app.png) | fun | Rotating cube | [apps/99_3d](system/apps/99_3d/) |
+| ![39lcd.elf](resources/appicons/app.png) | fun | Scroll test | [apps_experiments/test39_lcd](system/apps_experiments/test39_lcd/) |
+| ![4snake.elf](resources/appicons/app.png) | fun | Snake game | [apps/test4_snake](system/apps/test4_snake/) |
+| ![2import.elf](resources/appicons/app.png) | fun | Sierpinski triangle | [apps_experiments/test2_import](system/apps_experiments/test2_import/) |
+| ![85eetest.elf](resources/appicons/eeview.png) | i2c | I2C EEPROM memory viewer | [apps_featured/85_i2ceeprom](system/apps_featured/85_i2ceeprom/) |
+| ![37icscan.elf](resources/appicons/i2cscan.png) | i2c | I2C bus scanner | [apps_featured/test37_i2cscan](system/apps_featured/test37_i2cscan/) |
+| ![80rftool.elf](resources/appicons/rftool.png) | rftools | RF analyser synthesizer | [apps_featured/80_rftool/test](system/apps_featured/80_rftool/test/) |
+| ![82sanal.elf](resources/appicons/spectrum.png) | rftools | Spectrum analyser | [apps/82_specan](system/apps/82_specan/) |
+| ![79ccosc.elf](resources/appicons/wusbosc.png) | rftools | WebUSB rf analyser | [apps/79_cc1101osc](system/apps/79_cc1101osc/) |
+| ![105avrfl.elf](resources/appicons/avrflash.png) | tools | Atmel firmware flasher | [apps/105_avrprogrammer](system/apps/105_avrprogrammer/) |
+| ![15charla.elf](resources/appicons/charmap.png) | tools | Character map | [apps/test15_charmap](system/apps/test15_charmap/) |
+| ![30dcf77.elf](resources/appicons/dcf77.png) | tools | DCF77 decoder | [apps/test30_dcf77](system/apps/test30_dcf77/) |
+| ![33temper.elf](resources/appicons/dstemper.png) | tools | DS1820 temperature grapher | [apps_featured/test33_temper](system/apps_featured/test33_temper/) |
+| ![49gpio.elf](resources/appicons/gpio.png) | tools | GPIO and PWM controller | [apps_featured/test49_gpio](system/apps_featured/test49_gpio/) |
+| ![21mplayl.elf](resources/appicons/midiplay.png) | tools | MIDI player | [apps_featured/test21_midiplay](system/apps_featured/test21_midiplay/) |
+| ![22seqen.elf](resources/appicons/sequence.png) | tools | Sequencer and analyser | [apps/test22_sequencer](system/apps/test22_sequencer/) |
+| ![72uartm.elf](resources/appicons/uartmon.png) | tools | UART monitor | [apps_featured/72_uartmon](system/apps_featured/72_uartmon/) |
+| ![74invt.elf](resources/appicons/vfd_invt.png) | tools | Invt VFD RS485 visualizer | [apps_featured/74_invtvisual](system/apps_featured/74_invtvisual/) |
+| ![63ws_104.elf](resources/appicons/ws2812.png) | tools | WS2812 addressable led tester | [apps_featured/test63_ws2812](system/apps_featured/test63_ws2812/) |
+| ![104avris.elf](resources/appicons/avrisp.png) | usb | Atmel ISP programmer | [apps_usb/104_avrisp](system/apps_usb/104_avrisp/) |
+| ![24ncdc.elf](resources/appicons/cdc.png) | usb | Serial link | [apps_usb/test24_usbcdc](system/apps_usb/test24_usbcdc/) |
+| ![25hid.elf](resources/appicons/hid.png) | usb | Human interface device | [apps_usb/test25_hid](system/apps_usb/test25_hid/) |
+| ![26midi.elf](resources/appicons/midi.png) | usb | Midi to uart | [apps_usb/test26_midi](system/apps_usb/test26_midi/) |
+    
 #### News
 
 ##### Avrisp programmer
@@ -26,6 +107,21 @@ Go to release section on top of this page, download *system.hex*. Power on the L
 Can be used for flashing Atmel MCUs - either for flashing HEX files directly over ICSP connector [105_avrprogrammer](system/apps/105_avrprogrammer/), or use LA104 as AVRISP USB programmer compatible with Arduino IDE [104_avrisp](system/apps_usb/104_avrisp/)
 
 [![AVRISP programmer](https://img.youtube.com/vi/yC3a1zbonJ0/0.jpg)](https://www.youtube.com/watch?v=yC3a1zbonJ0 "AVRISP programmer")
+
+##### Docker
+The la104 images can be build using docker
+
+The Dockerfile builds a container which runs build.sh.
+build.sh executes the steps in the tutorial in the order presented.
+build image using the dockerfile with the following commands.
+
+```bash
+docker build . -t la104
+id=$(docker run -d --rm la104 sleep 300)
+docker cp $id:/home/dev/output - > ./output.tar
+tar -xvf output.tar
+docker rm -v $id
+```
 
 ##### EInk display image loader
 
@@ -41,10 +137,6 @@ Ultimate toolkit for hacking OOK/ASK wireless devices (weather stations, wireles
 - Spectrum analyser: [82_specan](system/apps/82_specan/)
 - Web usb signal analyser: [79_cc1101osc](system/apps/79_cc1101osc/)
 
-##### Building tutorial
-
-Read more [here](resources/tutorial_building)
-
 ##### (LA104) Variable frequency drive visualizer
 
 This app uses RS485 adapter to talk to Invt Good drive inverters. Read more [here](system/apps_featured/74_invtvisual), besides the visualization tool, there is also [application](system/apps_experiments/75_invtemu) which emulates GD100 VFD (as seen on the picture)... Watch video:
@@ -56,8 +148,7 @@ This app uses RS485 adapter to talk to Invt Good drive inverters. Read more [her
 
 ##### WASM experimental evironment
 
-You the experience of using LA104 analyser in [your browser](https://rawgit.valky.eu/gabonator/LA104/master/system/release/wasm/index.html)
-
+You the experience of using LA104 analyser in [your browser](https://rawgit.valky.eu/gabonator/LA104/master/resources/wasmbuild/index.html)
 
 ##### (DS203) Web USB Oscilloscope
 
@@ -158,47 +249,9 @@ Connect your midi keyboard with two wires (3V and P1 through 100-330 ohm resisto
 
 ![Logic sequencer 2](resources/imgMidi2.png)
 
-
-#### In this repository you will find
-
-  - [resources](resources) - official resources from manufacturer, shematics and memory layout information
-  - [experiments](resources/experiments) - the first simple applications to verify if we have proper toolchain, libraries, linker script and startup code
-      - blink - When getting familiar with new hardware platform, this is the most common application - just blink a LED attached to P1 port. It is worth noting that the P1..P4 pins are connected always to two different IO pins of the MCU. This allows you to use each pin as general purpose IO pin, or as UART or I2C bus signal. For example pin P1 is connected to MOSI_PB15 and T23_TX3_SCL2_PB10. And P2 is connected to MISO_PB14 and T24_RX3_SDA2_PB11. So be very careful when configuring the IO pins so you won't create a short circuit 
-    - triangle_oldlib - code taken from DS203 project. Draws simple sierpinski fractal to test LCD in C language
-    - triangle_newlib - the same code, but with new library (2012 instead of 2008), this library is taken from official LA104 firmware project  
-    - triangle_cpp - the same code, but in C++ with linker script that supports C++ features
-    - worm - project taken from DS203, simple worm game but the controls are not very intuitive. Just a demonstration of simple event based window system
-    - dynamic_simple - first step towards building own operating system, main application ELF just calls few imported functions (Test1, Test2, Test3, Test4). Imported library (shared object) has only empty implementation of those functions Test1..Test4 functions so the linker won't shout at us during compilation. Then by using [tools/elfdump](tools/elfdump) utility, a C code [dump.c](experiments/dynamic_simple/dump/dump.c) is generated which shows what will be loaded in which memory regions during ELF load process. [Secondary application](experiments/dynamic_simple/secondary/main.c) then calls this generated code and matches all imports into real functions
-    - dynamic_advanced - the same, but this time the code is organized in three folders - library, host and client application. Instead of dummy functions, this time imported functions are putpixel and random.
-  - [official_fw_gcc](resources/official_fw_gcc) - official LA104 firmware ported to use GCC compiler. No need to use IAR workbench. Only slight changes were done in the code - e.g. replacing sprintf function with malloc independent version of this function. 
-  - tools - various commandline tools
-    - [dfuload](tools/dfuload) - DFU load utility mentioned before
-    - [elfstrip](tools/elfstrip) - utlity to remove unnecessary parts from ELF file
-    - [elfdump](tools/elfdump) - shows some information about ELF file structure and dumps used memory regions as C code
-  - [system](system) - LA104 custom firmware / operating system 
-    - [bin](system/bin) - here you will find main firmware HEX file (manager.hex) and few interesting applications. At first flash the manager.hex in DFU mode and after reboot, copy these ELF files to the device using USB cable
-    - os_host - operating system implementation with file manager and ELF loader
-    - os_library - dummy library used by client applications during linking
-      - test1_noimport - simple application without importing any symbols. Just uses LA104 bios to draw some image. For testing whether the ELF file was properly generated and stripped and if it loads succesfully
-      - test2_import - the same application, but it imports BIOS::KEY::GetKey to properly exit the application when pressing second button and BIOS::LCD::PutPixel instead of using LA104 bios function
-      - test3_gui - some simple GUI rendering, with text drawing and windows
-      - test5_blink_hex - instead of ELF, this is just bare HEX file which is loaded into RAM to prevent FLASH rewrites. Just blinks the LED attached to P1 pin
-      - test6_pwm_hex - first experiments with configuring 4 channel PWM, as well as previous program it loads the code into RAM. After finetuning and transferring the PWM code into host app, test7_pwm_app was made
-      - test8_ds_app - reads the scratchpad of DS1820 / DS18B20 thermometer and shows temperature reading using GPIO api calls developed in test5_blink_hex
-      - test9_dht - the same but with DHT22 temperature / humidity sensor
-      - test10_i2c_direct - again with core library files to configure I2C transceiver to interface with BMP180 (BMP085) barometric pressure sensor. After merging this support code into host app, test11_i2c_api was made
-      - test12_uart_api - after adding support code to host, this is the api test for UART on pins P1 & P2 (no other pins support HW uart on LA104)
-      - test16_cc1101 - CC1101 transceiver sniffing Oregon scientific weather station sensors
-      - test11_i2c_api - interfacing BMP180 (BMP085) arduino library with I2C api calls
-      - test14_apds9960 - again I2C communication with APDS9960 color sensor / gesture recognizer. This time with original sparkfun arduino library and sample code without almost any changes. Showing how to run your arduino code directly on LA104
-      - test4_snake - just snake game, not easy to control with the rotating encoders
-      - test7_pwm_app - gui application for controlling PWM outputs, great tool for playing with RGB leds
-      - test13_mp3 - mp3 player gui application, works with MD_YX5300 module
-      - test15_charmap - shows ASCII character table used by OS
+#### Screenshots
 
 ![Hybrid app on mac OSX](resources/hybridmp3.png)
-
-#### Screenshots
 
 ![File manager](resources/imgManager.png)
 
@@ -215,71 +268,3 @@ Connect your midi keyboard with two wires (3V and P1 through 100-330 ohm resisto
 ![I2C barometric sensor](resources/imgBmp180.png)
 
 ![MP3 player](resources/imgMp3.png)
-
-
-#### Finished Features
-  - add snapshotting to host app - DONE (95% done, 23screen.elf)
-  - C++ global variables memory placement, currently all variables on stack - DONE (100%, fixed linker script)
-  - DS1820 network scanner app (50% done, 18onew.elf)
-  - API signals: file added / fat changed, usb connection/disconnection (50% done, GetIntVect/SetIntVect)
-  - PCF8574 sequencer + BCD to 7 segment test application (95%, 22sequen.elf)
-  - midi player app (95%, 21mplay.elf)
-  - USB toolkit - serial port, midi device, HID keyboard and mouse emulator, joystick (95%)
-  - hybrid app using cmake (hybrid = app is running on desktop in synthetic environment)
-  - Graphical shell with icons (90%)
-  - separate file manager from host app (100%)
-  - fix execution failures due to corrupted reads (100% caused by conflicting eeprom reads from usb&fat)
-  - Fast USB streamer through CDC into web based PC app & some simple analysis (pulseview compatible protocol)
-  - use external logical analyser app (sigrok / pulseview) emulating SUMP protocol (50%, for now just fixed sampling speed, consider attaching to stock logic analyser application)
-  - USB CDC - USB to TTL interface (80%, only baudrate is supported, no flow control, no parity check)
-  - automated generation of app root & including icons (50%, icons tbd)
-  - universal IR remote control app (80% done, samsung compatible)
-  - One wire temperature sensor grapher (90% done, drawing temperature chart of up to 8 sensors)
-  - Analog oscilloscope using PCF8591 (90% done)
-  - Test signal generator running in background for testing of logic analyser app (80% done)
-  - swiss army knife for hardware engineers - package of applications that can talk to popular electronic devices (some samples are already there) and monitor any digital buses (logic analyser)
-  - DCF77 decoding application with visualization (100%)
-  - manual & text reader app (100%)
-  - solve problem how to pass file as argument to app run through gui shell (100% only using file manager)
-  - ESP8266 AP webserver using AT commands (100% simple webserver with file system listing, using promises)
-  - GPIO tool (simple 8 channel visualizer/controller) with 4 channel PWM generator (100%)
-
-#### TODO list
-  - sometimes flashing new image fails, entry point address change usually helps
-  - soft USB disconnection, so we do not need to disconnect cable to switch USB profiles
-  - finish conversion of original firmware into ELF (80%)
-  - optimize memory usage, switch to 500 byte clusters instead of 4k (2 buffers required => 8kb wasted), or share disk IO buffer from bios
-  - obtain FPGA code from manufacturer 
-  - setup FPGA build environment
-
-#### Ideas
-  - floppy disk drive over USB 
-  - connect old graphic card with ISA interface through USB
-  - CNC g code decoder and player
-
-#### Abandoned ideas
-  - remote control using ESP or BLE - possible to attach to UART0? (not possible, use USB CDC instead)
-  - finish GIF loading, or consider other image formats (PCX, LBM, BMP?) - BMP won
-  - working directory & relative paths (not important now)
-
-#### Hardware improvement suggestions
-  - add test pads for UART0 on PCB, this would allow various hardware mods
-  - direction control pins of buffer 1DIR, 2DIR connected to FPGA, so we can synthesize fast signals - e.g. modify packets on the fly, mitm attacks, canbus slave device, etc///
-  - larger eeprom
-  - open sourced FPGA code
-
-# Docker
-The la104 images can be build using docker
-
-The Dockerfile builds a container which runs build.sh.
-build.sh executes the steps in the tutorial in the order presented.
-build image using the dockerfile with the following commands.
-
-```bash
-docker build . -t la104
-id=$(docker run -d --rm la104 sleep 300)
-docker cp $id:/home/dev/output - > ./output.tar
-tar -xvf output.tar
-docker rm -v $id
-```
-

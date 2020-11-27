@@ -21,7 +21,8 @@ buildApp () {
     fi
 
     rm -rf build
-    ./build_wasm.sh > /dev/null 2> /dev/null
+    ./build_wasm.sh 
+#> /dev/null 2> /dev/null
 
     if [ $? -eq 1 ]; then
       echo "$1: Build failed"
@@ -48,61 +49,65 @@ cleanApp () {
   )
 }
 
-for d in apps_featured/*/ ; do
+for d in ../apps_featured/*/ ; do
     buildApp "$d"
 done
-for d in apps_shell/*/ ; do
+for d in ../apps_shell/*/ ; do
     buildApp "$d"
 done
-for d in apps_experiments/*/ ; do
+for d in ../apps_experiments/*/ ; do
     buildApp "$d"
 done
-for d in apps/*/ ; do
+for d in ../apps/*/ ; do
     buildApp "$d"
 done
-for d in apps_usb/*/ ; do
+for d in ../apps_usb/*/ ; do
     buildApp "$d"
 done
 
-for d in apps_ds213/*/ ; do
+for d in ../apps_ds213/*/ ; do
     buildApp "$d"
 done
 
 # copy fresh builds
-mkdir release
-mkdir release/wasm
-mkdir release/wasm/apps
-for d in apps*/*/ ; do
-    cp $d/build/*.wasm release/wasm/apps > /dev/null 2> /dev/null
-    cp $d/build/*.map release/wasm/apps > /dev/null 2> /dev/null
+mkdir ../build
+mkdir ../build/wasm
+mkdir ../build/wasm/apps
+for d in ../apps*/*/ ; do
+    cp $d/build/*.wasm ../build/wasm/apps > /dev/null 2> /dev/null
+    cp $d/build/*.map ../build/wasm/apps > /dev/null 2> /dev/null
 done
 
 # cleanup
-for d in apps_featured/*/ ; do
+for d in ../apps_featured/*/ ; do
     cleanApp "$d"
 done
-for d in apps_shell/*/ ; do
+for d in ../apps_shell/*/ ; do
     cleanApp "$d"
 done
-for d in apps_experiments/*/ ; do
+for d in ../apps_experiments/*/ ; do
     cleanApp "$d"
 done
-for d in apps/*/ ; do
+for d in ../apps/*/ ; do
     cleanApp "$d"
 done
-for d in apps_usb/*/ ; do
+for d in ../apps_usb/*/ ; do
     cleanApp "$d"
 done
-for d in apps_ds213/*/ ; do
+for d in ../apps_ds213/*/ ; do
     cleanApp "$d"
 done
 
 
-cp os_platform/mac_sdl/data/la104.fat release/wasm/la104.fat
-cp os_platform/wasm/htmllite/app.js release/wasm/app.js
-cat > release/wasm/index.html <<- EOM
+cp ../os_platform/mac_sdl/data/la104.fat ../build/wasm/la104.fat
+cp ../os_platform/wasm/htmllite/app.js ../build/wasm/app.js
+cat > ../build/wasm/index.html <<- EOM
 
+<div style="width:640px; height:480px;">
 <canvas id="canvas" width="320" height="240" style="border: 1px solid #d0d0d0; transform:translate(160px, 120px) scale(2);"></canvas>
+</div>
+<br>
+Use arrow keys, enter and backspace. Only help and few applications work (file manager, tools/ws2812, fun/trinagle)
 <script>
 
 class Device
@@ -323,12 +328,13 @@ class Shell
 //        if (imports._appVideoBufferChanged())
         device.blit();
       }, 50);
-    });
+    })
+    .catch((e)=>alert("App not found, " + file));
   }
 
   onProcessExit()
   {
-    if (!Module._ZN4BIOS2OS11HasArgumentEv())
+    if (!Module._ZN4BIOS2OS11HasArgumentEv || !Module._ZN4BIOS2OS11HasArgumentEv())
     {
       // no execute command requested, return to shell
       this.LoadApp("apps/shell.wasm");
@@ -359,7 +365,7 @@ class Shell
     if (command.substr(0, 5) == "apps/")
       command = command.substr(5);
     command = command.replace(".elf", ".wasm");
-    var path = "apps/" + command.split("/").join("_");
+    var path = "apps/" + command.split("/").slice(-1)[0];
 
     this.LoadApp(path, args);
   }
@@ -372,6 +378,6 @@ Module = {noRun:1};
 
 EOM
 
-cd release/wasm
+cd ../build/wasm
 rm ../wasm.zip
 zip -r ../wasm.zip *
