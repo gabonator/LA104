@@ -31,7 +31,7 @@ Experimental stuff:
   - imagefile_test_XXXXX.sh - mounts the fs as local folder for verification
 
 ## Docker builds
-- Whole repository is being automatically built on every commit by docker builds. See [dockerfile](....), this script just calls system/scripts/build.sh which does job. It builts the OS, all applications and creates a filesystem image for LA104/DS203/DS213 as zip archive in *system/build* folder. For manual building all components separately, continue reading
+- Whole repository is being automatically built on every commit by docker builds. See [dockerfile](/Dockerfile), this script just calls system/scripts/build.sh which does job. It builts the OS, all applications and creates a filesystem image for LA104/DS203/DS213 as zip archive in *system/build* folder. For manual building all components separately, continue reading
 
 ## Mac OSX / Linux
 - Clone whole repository (git clone https://github.com/gabonator/LA104.git)

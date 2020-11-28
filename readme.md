@@ -42,7 +42,7 @@ Refer to this [tutorial](resources/tutorial_building)
     - os_host - system source code, actually an application which loads ELF files from filesystem, matches the imported symbols and loads them
     - os_library - dummy library exposing all functions of the system. Necessary for building all applications
     - os_platform - support files for building for other platforms than Arm (Win32, OSX XCode or WASM)
-    - scripts - [building scripts](resources/tutorial_building)
+    - scripts - [building scripts](resources/tutorial_building#building-scripts)
 
 #### Applications in LA104 package
 
