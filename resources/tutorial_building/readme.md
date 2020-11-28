@@ -32,6 +32,15 @@ Experimental stuff:
 
 ## Docker builds
 - Whole repository is being automatically built on every commit by docker builds. See [dockerfile](/Dockerfile), this script just calls system/scripts/build.sh which does job. It builts the OS, all applications and creates a filesystem image for LA104/DS203/DS213 as zip archive in *system/build* folder. For manual building all components separately, continue reading
+- Build image using the dockerfile with the following commands:
+
+```bash
+docker build . -t la104
+id=$(docker run -d --rm la104 sleep 300)
+docker cp $id:/home/dev/output - > ./output.tar
+tar -xvf output.tar
+docker rm -v $id
+```
 
 ## Mac OSX / Linux
 - Clone whole repository (git clone https://github.com/gabonator/LA104.git)

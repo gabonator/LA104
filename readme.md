@@ -96,24 +96,13 @@ Refer to this [tutorial](resources/tutorial_building)
 
 ##### Avrisp programmer
 
-Can be used for flashing Atmel MCUs - either for flashing HEX files directly over ICSP connector [105_avrprogrammer](system/apps/105_avrprogrammer/), or use LA104 as AVRISP USB programmer compatible with Arduino IDE [104_avrisp](system/apps_usb/104_avrisp/)
+- Can be used for flashing Atmel MCUs - either for flashing HEX files directly over ICSP connector [105_avrprogrammer](system/apps/105_avrprogrammer/), or use LA104 as AVRISP USB programmer compatible with Arduino IDE [104_avrisp](system/apps_usb/104_avrisp/)
 
 [![AVRISP programmer](https://img.youtube.com/vi/yC3a1zbonJ0/0.jpg)](https://www.youtube.com/watch?v=yC3a1zbonJ0 "AVRISP programmer")
 
-##### Docker
-The la104 images can be build using docker
+##### Docker integration
 
-The Dockerfile builds a container which runs build.sh.
-build.sh executes the steps in the tutorial in the order presented.
-build image using the dockerfile with the following commands.
-
-```bash
-docker build . -t la104
-id=$(docker run -d --rm la104 sleep 300)
-docker cp $id:/home/dev/output - > ./output.tar
-tar -xvf output.tar
-docker rm -v $id
-```
+- The la104 images can be build using docker, [integration details](resources/tutorial_building#docker-builds)
 
 ##### EInk display image loader
 
