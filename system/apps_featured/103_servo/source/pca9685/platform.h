@@ -11,7 +11,7 @@ public:
   bool beginTransmission(int addr);
   int read();
   void write(int d);
-  bool endTransmission(bool stop = false);
+  bool endTransmission(bool stop = true);
   void requestFrom(int addr, int count);
 };
 

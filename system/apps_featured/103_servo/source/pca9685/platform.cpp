@@ -8,10 +8,13 @@ void check(const char* m)
 {
   if (!gpioStatus)
   {
+    uint32_t *gpioI2cSpeed = (uint32_t*)BIOS::SYS::GetAttribute(BIOS::SYS::EAttribute::GpioI2cSpeed);
+    if (gpioI2cSpeed)
+      *gpioI2cSpeed = 400000;
+
     gpioStatus = (uint32_t*)BIOS::SYS::GetAttribute(BIOS::SYS::EAttribute::GpioStatus);
   }
 
-return;
   if (*gpioStatus != 0)
   {
     BIOS::DBG::Print(" i2c error:%d %s", *gpioStatus, m);
@@ -42,7 +45,7 @@ bool TwoWire::beginTransmission(int addr)
   check("B{");
   bool wireOk = GPIO::I2C::BeginTransmission(addr);
   checkx(wireOk);
-  check("}");
+  check("}r");
   return wireOk;
 }
 
@@ -50,7 +53,7 @@ int TwoWire::read()
 {
   check("R{");
   int a = GPIO::I2C::Read();
-  check("}");
+  check("}r");
   return a;
 }
 
@@ -58,16 +61,14 @@ void TwoWire::write(int d)
 {
   check("W{");
   GPIO::I2C::Write(d);
-  check("}");
+  check("}w");
 }
 
 bool TwoWire::endTransmission(bool stop) 
 {
-stop = true;
-//  check("E{");
+  check("E{");
   GPIO::I2C::EndTransmission(stop);    
-    *gpioStatus = 0;
-//  check("}");
+  check("}e");
   return true;
 }
 
@@ -75,7 +76,7 @@ void TwoWire::requestFrom(int addr, int count)
 {
   check("X{");
   GPIO::I2C::RequestFrom(addr, count);    
-  check("}");
+  check("}x");
 }
 
 void delay(int d)

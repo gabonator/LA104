@@ -20,7 +20,11 @@ public:
     bool begin()
     {
         if (!mPwmDriver.begin())
+        {
+            BIOS::DBG::Print("Failed to initialize driver!\n");
+            BIOS::SYS::DelayMs(15000);
             return false;
+        }
 
         mPwmDriver.setOscillatorFrequency(27000000);
         mPwmDriver.setPWMFreq(50);  // Analog servos run at ~50 Hz updates
@@ -454,7 +458,7 @@ public:
         if (focus)
             BIOS::LCD::Printf(rect.left+16, rect.top+1, RGB565(000000), RGB565(ffffff), "%.1f s", mDataPoint->mDuration/1000);
         else
-            BIOS::LCD::Printf(rect.left+16, rect.top+1, RGB565(ffffff), RGB565(202020), "%.1f s", mDataPoint->mDuration/1000);
+            BIOS::LCD::Printf(rect.left+16, rect.top+1, RGB565(606060), RGB565(202020), "%.1f s", mDataPoint->mDuration/1000);
         DrawCurve(rect.right-16-24, rect.top);
     }
 
@@ -620,16 +624,18 @@ public:
             forceRedraw = true;
         }
         
-        if (forceRedraw)
-        {
-            char message[32];
-            sprintf(message, "%d, %d, %d, %d, %d, %d", p->mData[0], p->mData[1], p->mData[2], p->mData[3], p->mData[4], p->mData[5]);
-            APP::Status(message);
-        }
-        
+        uint32_t l0 = BIOS::SYS::GetTick();
         for (int i=0; i</*COUNT(p->mData)*/8; i++)
         {
             mPwm.write(i, p->mData[i]);
+        }
+        uint32_t l1 = BIOS::SYS::GetTick();
+
+        if (forceRedraw)
+        {
+            char message[32];
+            sprintf(message, "%d ms: %d, %d, %d, %d, %d, %d", (int)(l1-l0), p->mData[0], p->mData[1], p->mData[2], p->mData[3], p->mData[4], p->mData[5]);
+            APP::Status(message);
         }
     }
     

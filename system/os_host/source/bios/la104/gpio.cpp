@@ -348,11 +348,14 @@ namespace I2C
           return false; 
         }
       }
+/*
       if (I2C_GetFlagStatus(I2Cx, I2C_FLAG_BUSY))
       {
         gGpioStatusCode = GpioStatus::I2cBusy;
       }
-/*
+*/
+      // Some devices really need time to release the bus (pca9685)
+      SetTimeout(3);
       while (I2C_GetFlagStatus(I2Cx, I2C_FLAG_BUSY))
       {
         if (Timeout()) 
@@ -361,7 +364,6 @@ namespace I2C
           return false;
         }      
       }
-*/
       return true;
   }
    
