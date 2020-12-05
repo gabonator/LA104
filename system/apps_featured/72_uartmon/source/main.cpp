@@ -8,7 +8,7 @@ using namespace BIOS;
 class CApplication : public CWnd
 {
     int mBaudrate{9600};
-    GPIO::UART::EConfig mFlags{GPIO::UART::EConfig(GPIO::UART::length8 | GPIO::UART::parityEven | GPIO::UART::stopBits1)};
+    GPIO::UART::EConfig mFlags{GPIO::UART::EConfig(GPIO::UART::length8 | GPIO::UART::parityNone | GPIO::UART::stopBits1)};
     uint32_t* mGpioStatus{nullptr};
     int mRxBytes{0};
     int mTxBytes{0};
@@ -16,8 +16,8 @@ class CApplication : public CWnd
     EFormatMode mRxMode{Ascii};
     EFormatMode mTxMode{Ascii};
     int mFocus{0};
-    bool mNewLineRx{false};
-    bool mNewLineTx{false};
+    bool mNewLineRx{true};
+    bool mNewLineTx{true};
 
 public:
     void Create(const char* pszId, ui16 dwFlags, const CRect& rc, CWnd* pParent)
@@ -111,6 +111,7 @@ public:
             uint8_t data = GPIO::UART::Read();
             Recv(data);
         }
+/*
         EVERY(1000)
         {
             static int counter = 1000;
@@ -118,6 +119,7 @@ public:
             sprintf(message, "Ahoj, toto je riadok %d.\n", counter++);
             Send(message);
         }
+*/
     }
     void Recv(char data)
     {
@@ -125,6 +127,8 @@ public:
         switch (mRxMode)
         {
             case Ascii:
+                if (data == '\r')
+                  break;
                 CONSOLE::Print("%c", data);
                 break;
             case Hex:

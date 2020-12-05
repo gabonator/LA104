@@ -1,6 +1,7 @@
 #include <library.h>
 #include "../../os_host/source/framework/BufferedIo.h"
-#include "i2c.h"
+
+#define BITBANG
 
 using namespace BIOS;
 
@@ -10,7 +11,9 @@ void Draw(int i, int colorBack, int colorText)
     int y = i/16;
     CRect rc(x*18+18, 20+16*y+16-4, x*18+16+19, 20+16*y+16+14-4);
     LCD::Bar(rc, colorBack);
-    LCD::Printf(rc.left, rc.top, colorText, colorBack, "%02X", i);
+    if (i>=4 && i<=7)
+      colorText = RGB565(808080);
+    LCD::Printf(rc.left+1, rc.top, colorText, colorBack, "%02X", i);
 }
 
 void DrawAll()
@@ -19,20 +22,48 @@ void DrawAll()
         Draw(i, RGB565(b0b0b0), RGB565(404040));
 }
 
+#ifdef BITBANG
+#include "i2c.h"
+
 void InitIo()
 {
 }
+
+bool Test(int address)
+{
+    // some devices refuse to communicate when Hs-mode Master was issued on i2c bus (LSM303)
+    // probably range 00..07 and 78..7f should not be tested at all, but for debugging 
+    // custom implementation of i2c slave devices it could be helpful
+
+    if (address >= 4 && address <= 7)
+        return false;
+
+    BIOS::SYS::DelayMs(20);
+    return i2c::testPresence(address);
+}
+#else
+void InitIo()
+{
+    BIOS::GPIO::PinMode(BIOS::GPIO::P1, BIOS::GPIO::I2c);
+    BIOS::GPIO::PinMode(BIOS::GPIO::P2, BIOS::GPIO::I2c);
+}
+
+bool Test(int address)
+{
+    if (!BIOS::GPIO::I2C::BeginTransmission(address))
+        return false;
+
+    if (!BIOS::GPIO::I2C::EndTransmission())
+        return false;
+
+    return true;
+}
+#endif
 
 void DeinitIo()
 {
     BIOS::GPIO::PinMode(BIOS::GPIO::P1, BIOS::GPIO::Input);
     BIOS::GPIO::PinMode(BIOS::GPIO::P2, BIOS::GPIO::Input);
-}
-
-bool Test(int address)
-{
-  BIOS::SYS::DelayMs(20);
-  return i2c::testPresence(address);
 }
 
 class CTokenizer
@@ -132,11 +163,6 @@ int strncmp( const char * s1, const char * s2, size_t n )
 
 void GetDescription(int address)
 {
-#ifdef __APPLE__
-    char databasePath[512];
-    strcpy(databasePath, "/Users/gabrielvalky/Documents/git/LA104/system/apps/test37_i2cscan/devices.txt");
-    
-#else
     char databasePath[64];
     
     // Get current process path
@@ -148,7 +174,6 @@ void GetDescription(int address)
         strcpy(databasePath, "");
 
     strcat(databasePath, "/devices.txt");
-#endif
     
     CBufferedReader f;
     char strLine[128];

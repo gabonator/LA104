@@ -73,7 +73,7 @@ public:
     }
 #endif
     
-    bool GetData(CArray<int>& meas)
+    bool GetData(CArray<int>& meas, CArray<int>& readings)
     {
 #ifdef __APPLE__
         return Demo(meas);
@@ -82,10 +82,12 @@ public:
         long now = BIOS::SYS::GetTick();
 
         // waiting 2000 ms to finish measurement
-        if (mLastConversion != 0 && now - mLastConversion >= 2000)
+        if (mLastConversion != 0 && now - mLastConversion >= 1000)
         {
             for (int i=0; i<meas.GetSize(); i++)
+            {
                 meas[i] = CSeriesBase::Invalid;
+            }
             
             CDS1820::TAddress addr;
             CDS1820::TScratchpad data;
@@ -99,13 +101,33 @@ public:
                 int temperature = 0;
                 if (mSensor.GetTemperature(addr, data, temperature))
                 {
+
                     mWorking = true;
-                    int slot = GetTemperatureSlot(addr);
-                    if (slot != -1)
-                        meas[slot] = temperature;
+
+                        int slot = GetTemperatureSlot(addr);
+                        if (slot != -1)
+                        {     
+                            // TODO: check sudden temperature change
+                            meas[slot] = temperature;
+                        }
                 }
             }
             
+
+            for (int i=0; i<meas.GetSize(); i++)
+            {
+                if (meas[i] != CSeriesBase::Invalid)
+                {
+                    if (readings[i] < 1000)
+                        readings[i]++;
+                    if (readings[i] < 3)
+                        meas[i] = CSeriesBase::Invalid; 
+                } else
+                {
+                    readings[i] = 0;
+                }
+            }
+
             mLastConversion = 0;
             return mWorking;
         }
@@ -306,7 +328,9 @@ public:
         if (value == CSeriesBase::Invalid)
             BIOS::LCD::Printf(10+16+index*64, 16+20+2-8, color, MyGui::TitleColor, "        ");
         else
-        {
+        if (value == -9999)
+            BIOS::LCD::Printf(10+16+index*64, 16+20+2-8, color, MyGui::TitleColor, "...." "\xf8" "C  ");
+        else{
             char buf[16];
             if (value > 0)
                 sprintf(buf, "%d.%d", value/16, (value%16)*10/16);
@@ -323,14 +347,24 @@ public:
         data.Init(dataPlacement, COUNT(dataPlacement));
         data.SetSize(COUNT(dataPlacement));
 
-        if (mDevice.GetData(data))
+        static int readingsPlacement[gConfigMaxSensors];
+        CArray<int> readings;
+        readings.Init(readingsPlacement, COUNT(readingsPlacement));
+        readings.SetSize(COUNT(readingsPlacement));
+
+        if (mDevice.GetData(data, readings))
         {
             _ASSERT(data.GetSize() == mSeries.GetSize());
             for (int i=0; i<data.GetSize(); i++)
                 mSeries[i] << data[i];
             
             for (int i=0; i<data.GetSize(); i++)
-                ShowMeasurement(i, data[i]);
+            {
+                if (data[i] == CSeriesBase::Invalid && readings[i] > 0)
+                    ShowMeasurement(i, -9999);
+                else
+                    ShowMeasurement(i, data[i]);
+            }
 			
 			if (mLog.IsOpened())
 				mLog.Append(data);
@@ -341,7 +375,7 @@ public:
     {
         static int counter = 0;
         
-        EVERY(200)
+        EVERY(100)
         {
             PushData();
             counter++;
@@ -349,7 +383,7 @@ public:
 
         bool needRedraw = mWndGraph.Redraw();
 
-        if (needRedraw || (counter > 5 && mSeries[0].GetLength() > 5))
+        if (needRedraw || (counter > 2 && mSeries[0].GetLength() > 5))
         {
             mYAxis.Update(mWndGraph.GetRange());
             

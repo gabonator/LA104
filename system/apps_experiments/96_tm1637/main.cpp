@@ -7,11 +7,11 @@ using namespace BIOS;
 
 
 // Module connection pins (Digital Pins)
-#define CLK BIOS::GPIO::EPin::P1
-#define DIO BIOS::GPIO::EPin::P2
+#define CLK BIOS::GPIO::EPin::P2
+#define DIO BIOS::GPIO::EPin::P1
 
 // The amount of time (in milliseconds) between tests
-#define TEST_DELAY   2000
+#define TEST_DELAY   1000
 
 const uint8_t SEG_DONE[] = {
 	SEG_B | SEG_C | SEG_D | SEG_E | SEG_G,           // d
@@ -22,8 +22,21 @@ const uint8_t SEG_DONE[] = {
 
 TM1637Display display(CLK, DIO);
 
-void loop()
+bool _Delay(int ms)
 {
+  for (int i=0; i<ms; i += 10)
+  {
+    BIOS::SYS::DelayMs(10);
+    if (BIOS::KEY::GetKey() != BIOS::KEY::None)
+      return false;
+  }
+  return true;
+}
+
+bool loop()
+{
+  #define Delay(ms) if (!_Delay(ms)) return false;
+
   int k;
   uint8_t data[] = { 0xff, 0xff, 0xff, 0xff };
   uint8_t blank[] = { 0x00, 0x00, 0x00, 0x00 };
@@ -39,70 +52,70 @@ void loop()
   data[2] = display.encodeDigit(2);
   data[3] = display.encodeDigit(3);
   display.setSegments(data);
-  BIOS::SYS::DelayMs(TEST_DELAY);
+  Delay(TEST_DELAY);
 
   /*
   for(k = 3; k >= 0; k--) {
 	display.setSegments(data, 1, k);
-	BIOS::SYS::DelayMs(TEST_DELAY);
+	Delay(TEST_DELAY);
 	}
   */
 
   display.clear();
   display.setSegments(data+2, 2, 2);
-  BIOS::SYS::DelayMs(TEST_DELAY);
+  Delay(TEST_DELAY);
 
   display.clear();
   display.setSegments(data+2, 2, 1);
-  BIOS::SYS::DelayMs(TEST_DELAY);
+  Delay(TEST_DELAY);
 
   display.clear();
   display.setSegments(data+1, 3, 1);
-  BIOS::SYS::DelayMs(TEST_DELAY);
+  Delay(TEST_DELAY);
 
 
   // Show decimal numbers with/without leading zeros
   display.showNumberDec(0, false); // Expect: ___0
-  BIOS::SYS::DelayMs(TEST_DELAY);
+  Delay(TEST_DELAY);
   display.showNumberDec(0, true);  // Expect: 0000
-  BIOS::SYS::DelayMs(TEST_DELAY);
+  Delay(TEST_DELAY);
 	display.showNumberDec(1, false); // Expect: ___1
-	BIOS::SYS::DelayMs(TEST_DELAY);
+	Delay(TEST_DELAY);
   display.showNumberDec(1, true);  // Expect: 0001
-  BIOS::SYS::DelayMs(TEST_DELAY);
+  Delay(TEST_DELAY);
   display.showNumberDec(301, false); // Expect: _301
-  BIOS::SYS::DelayMs(TEST_DELAY);
+  Delay(TEST_DELAY);
   display.showNumberDec(301, true); // Expect: 0301
-  BIOS::SYS::DelayMs(TEST_DELAY);
+  Delay(TEST_DELAY);
   display.clear();
   display.showNumberDec(14, false, 2, 1); // Expect: _14_
-  BIOS::SYS::DelayMs(TEST_DELAY);
+  Delay(TEST_DELAY);
   display.clear();
   display.showNumberDec(4, true, 2, 2);  // Expect: __04
-  BIOS::SYS::DelayMs(TEST_DELAY);
+  Delay(TEST_DELAY);
   display.showNumberDec(-1, false);  // Expect: __-1
-  BIOS::SYS::DelayMs(TEST_DELAY);
+  Delay(TEST_DELAY);
   display.showNumberDec(-12);        // Expect: _-12
-  BIOS::SYS::DelayMs(TEST_DELAY);
+  Delay(TEST_DELAY);
   display.showNumberDec(-999);       // Expect: -999
-  BIOS::SYS::DelayMs(TEST_DELAY);
+  Delay(TEST_DELAY);
   display.clear();
   display.showNumberDec(-5, false, 3, 0); // Expect: _-5_
-  BIOS::SYS::DelayMs(TEST_DELAY);
+  Delay(TEST_DELAY);
   display.showNumberHexEx(0xf1af);        // Expect: f1Af
-  BIOS::SYS::DelayMs(TEST_DELAY);
+  Delay(TEST_DELAY);
   display.showNumberHexEx(0x2c);          // Expect: __2C
-  BIOS::SYS::DelayMs(TEST_DELAY);
+  Delay(TEST_DELAY);
   display.showNumberHexEx(0xd1, 0, true); // Expect: 00d1
-  BIOS::SYS::DelayMs(TEST_DELAY);
+  Delay(TEST_DELAY);
   display.clear();
   display.showNumberHexEx(0xd1, 0, true, 2); // Expect: d1__
-  BIOS::SYS::DelayMs(TEST_DELAY);
+  Delay(TEST_DELAY);
   
 	// Run through all the dots
 	for(k=0; k <= 4; k++) {
 		display.showNumberDecEx(0, (0x80 >> k), true);
-		BIOS::SYS::DelayMs(TEST_DELAY);
+		Delay(TEST_DELAY);
 	}
 
   // Brightness Test
@@ -111,22 +124,23 @@ void loop()
   for(k = 0; k < 7; k++) {
     display.setBrightness(k);
     display.setSegments(data);
-    BIOS::SYS::DelayMs(TEST_DELAY);
+    Delay(TEST_DELAY);
   }
   
   // On/Off test
   for(k = 0; k < 4; k++) {
     display.setBrightness(7, false);  // Turn off
     display.setSegments(data);
-    BIOS::SYS::DelayMs(TEST_DELAY);
+    Delay(TEST_DELAY);
     display.setBrightness(7, true); // Turn on
     display.setSegments(data);
-    BIOS::SYS::DelayMs(TEST_DELAY);  
+    Delay(TEST_DELAY);  
   }
 
  
   // Done!
   display.setSegments(SEG_DONE);
+  return true;
 }
 
 #ifdef _ARM
@@ -148,12 +162,13 @@ int _main(void)
     CRect rc2(rcClient);
     rc2.top = rc2.bottom-14;
     GUI::Background(rc2, RGB565(404040), RGB565(202020));
-    LCD::Print(8, rc2.top, RGB565(808080), RGBTRANS, "P1: CLK, P2: DIO");
+    LCD::Print(8, rc2.top, RGB565(808080), RGBTRANS, "P1: DIO, P2: CLK");
 
     KEY::EKey key;
     while ((key = KEY::GetKey()) != KEY::EKey::Escape)
     {
-      loop();
+      if (!loop())
+        return 0;
       BIOS::SYS::DelayMs(1000);
     }
     

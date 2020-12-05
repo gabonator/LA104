@@ -71,13 +71,14 @@ bool start()
 
 int write( int c )
 {
+    bool ok = true;
     for ( uint8_t i=0;i<8;i++) {
         if (!writebit( c & 128 ))
-            return false;
+            ok = false;
         c<<=1;
     }
 
-    return readbit();
+    return ok && readbit();
 }
 
 void stop()
@@ -91,9 +92,15 @@ void stop()
 bool testPresence(int address)
 {
   if (!start())
+  {
+    stop();
     return false;
+  }
   if (!write(address<<1))
+  {
+    stop();
     return false;
+  }
   stop();
   return true;
 }
