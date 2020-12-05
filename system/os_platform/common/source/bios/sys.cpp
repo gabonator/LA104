@@ -96,6 +96,7 @@ namespace BIOS
     uintptr_t GetAttribute(BIOS::SYS::EAttribute eAttribute)
     {
       static uint32_t dummy = 0;
+      static uint32_t dummy2 = 0;
       switch (eAttribute)
       {
         case EAttribute::CharRom: return (uintptr_t)font;
@@ -103,6 +104,7 @@ namespace BIOS
         case EAttribute::ScreenHeight: return 240;
         case EAttribute::DiskSectorSize: return BIOS::FAT::SectorSize;
         case EAttribute::GpioStatus: return (uintptr_t)&dummy;
+        case EAttribute::GpioI2cSpeed: return (uintptr_t)&dummy2;
 //        case EInternal::LastChar: return (uintptr_t)&lastChar;
         default:
           break;

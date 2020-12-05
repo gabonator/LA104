@@ -38,8 +38,10 @@ convert games.png -resize 64x64 -background transparent -gravity Center -extent 
 
 convert arduino.png -resize 64x64 -background transparent -gravity Center -extent 64x64 -alpha on arduino.bmp
 
-convert folder.png -resize 64x64 -background transparent -gravity Center -extent 64x64 compo1.png
+convert usb2.png -resize 64x64 -background transparent -gravity Center -extent 64x64 compo1.png
 convert arduino.png -resize 32x32 -background transparent -gravity SouthEast -extent 64x64 compo2.png
 convert -composite compo1.png compo2.png farduino.bmp
+
+convert servo.png -resize 64x64 -background transparent -gravity Center -extent 64x64 -alpha on servo.bmp
 
 rm compo1.png compo2.png

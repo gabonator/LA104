@@ -14,29 +14,44 @@ CRect InvalidRect(0, 0, 0, 0);
 
 class CPwm
 {
+    bool mOnline{false};
     Adafruit_PWMServoDriver mPwmDriver;
     
 public:
     bool begin()
     {
+        mOnline = false;
         if (!mPwmDriver.begin())
         {
-            BIOS::DBG::Print("Failed to initialize driver!\n");
-            BIOS::SYS::DelayMs(15000);
+            //BIOS::DBG::Print("Failed to initialize driver!\n");
+            //BIOS::SYS::DelayMs(15000);
             return false;
         }
 
         mPwmDriver.setOscillatorFrequency(27000000);
         mPwmDriver.setPWMFreq(50);  // Analog servos run at ~50 Hz updates
+        mOnline = true;
         return true;
+    }
+    
+    int rawValue(int level)
+    {
+        // 150..600
+        // 110..500
+        #define SERVOMIN  480 // This is the 'minimum' pulse length count (out of 4096)
+        #define SERVOMAX  95 // This is the 'maximum' pulse length count (out of 4096)
+
+        return SERVOMIN + (SERVOMAX-SERVOMIN)*level/180;
     }
     
     void write(int n, int level)
     {
-        #define SERVOMIN  150 // This is the 'minimum' pulse length count (out of 4096)
-        #define SERVOMAX  600 // This is the 'maximum' pulse length count (out of 4096)
-
-        mPwmDriver.setPWM(n, 0, SERVOMIN + (SERVOMAX-SERVOMIN)*level/360);
+        mPwmDriver.setPWM(n, 0, rawValue(level));
+    }
+    
+    bool isOnline()
+    {
+        return mOnline;
     }
 };
 
@@ -61,6 +76,12 @@ namespace Utils
     }
 }
 
+enum EEasing {
+    Linear,
+    CubicInOut,
+    Last = CubicInOut
+};
+
 class CDataPoint
 {
 public:
@@ -73,9 +94,9 @@ public:
     }
     
     int mUid{0};
-    int mData[8] {0, 20, 40, 60, 80, 100, 120, 140};
-    int mDuration{1500};
-    int mEasing{0};
+    int mData[8] {0, 0, 0, 0, 0, 0, 0, 0};
+    int mDuration{1000};
+    EEasing mEasing{CubicInOut};
     
     /*
     void operator = (const CDataPoint& p)
@@ -94,6 +115,14 @@ public:
     bool operator != (const CDataPoint& p)
     {
         return !operator ==(p);
+    }
+    const char* GetEasingName()
+    {
+        switch (mEasing)
+        {
+            case Linear: return "Linear";
+            case CubicInOut: return "CubicInOut";
+        }
     }
 };
 
@@ -147,13 +176,15 @@ public:
 
     virtual CRect GetSubitemRect(int i) = 0;
     virtual void PaintSubitem(const CRect& rect, int index, bool focus) = 0;
+    
+    virtual void OnKey(int subfocus, BIOS::KEY::EKey key) { _ASSERT(0); }
 };
 
 class CDialConfig : public CListItem
 {
     enum {
         Max = 6,
-        Width = Max*24 + (6-1)*8+2*0
+        Width = Max*24 + (6-1)*8+2*0-24
     };
     
     CDataPoint* mDataPoint{nullptr};
@@ -176,30 +207,31 @@ public:
     
     virtual void PaintSubitem(const CRect& rect, int index, bool focus) override
     {
-        BIOS::LCD::Bar(rect, RGB565(404040));
         if (index < Max)
         {
+            BIOS::LCD::Bar(rect, focus ? RGB565(ffffff) : RGB565(202020));
+
             CRect rcSlider(rect.left, rect.top+1, rect.right-60, rect.top+14-1);
             int sliderWidth = rcSlider.Width();
-            DrawSlider(rcSlider, mDataPoint->mData[index]*sliderWidth/360, focus);
+            DrawSlider(rcSlider, mDataPoint->mData[index]*sliderWidth/180, focus);
             if (focus)
-                BIOS::LCD::Printf(rcSlider.right+8, rcSlider.top, RGB565(000000), RGB565(ffffff), "%d\xf8", mDataPoint->mData[index]);
+                BIOS::LCD::Printf(rcSlider.right+8, rect.top, RGB565(000000), RGB565(ffffff), "%d\xf8", mDataPoint->mData[index]);
             else
-                BIOS::LCD::Printf(rcSlider.right+8, rcSlider.top, RGB565(d0d0d0), RGB565(404040), "%d\xf8", mDataPoint->mData[index]);
+                BIOS::LCD::Printf(rcSlider.right+8, rect.top, RGB565(d0d0d0), RGB565(202020 ), "%d\xf8", mDataPoint->mData[index]);
         } else
         if (index == Max)
         {
             if (focus)
                 BIOS::LCD::Print(rect.left, rect.top, RGB565(000000), RGB565(ffffff), "<Insert>");
             else
-                BIOS::LCD::Print(rect.left, rect.top, RGB565(ffffff), RGB565(404040), "<Insert>");
+                BIOS::LCD::Print(rect.left, rect.top, RGB565(ffffff), RGB565(202020), "<Insert>");
         }
         else if (index == Max+1)
         {
             if (focus)
                 BIOS::LCD::Print(rect.left, rect.top, RGB565(000000), RGB565(ffffff), "<Delete>");
             else
-                BIOS::LCD::Print(rect.left, rect.top, RGB565(ffffff), RGB565(404040), "<Delete>");
+                BIOS::LCD::Print(rect.left, rect.top, RGB565(ffffff), RGB565(202020), "<Delete>");
         }
     }
 
@@ -213,16 +245,27 @@ public:
         return mDataPoint;
     }
 
+    virtual void OnKey(int subfocus, BIOS::KEY::EKey key) override
+    {
+        if (subfocus < Max)
+        {
+            if (key == BIOS::KEY::Right)
+                mDataPoint->mData[subfocus] = min(mDataPoint->mData[subfocus] + 3, 180);
+            if (key == BIOS::KEY::Left)
+                mDataPoint->mData[subfocus] = max(mDataPoint->mData[subfocus] - 3, 0);
+        }
+    }
+
 private:
     void DrawSlider(const CRect& rc, int pos, bool focus)
     {
-        BIOS::LCD::Bar(rc, RGB565(404040));
+        //BIOS::LCD::Bar(rc, RGB565(404040));
         
         int mid = (rc.top + rc.bottom)/2;
         CRect rcBar(rc.left+2, mid-2, rc.right-2, mid+2);
-        if (focus)
-            BIOS::LCD::Bar(rcBar, RGB565(ffffff));
-        else
+        //if (focus)
+        //    BIOS::LCD::Bar(rcBar, RGB565(ffffff));
+        //else
             BIOS::LCD::Rectangle(rcBar, RGB565(b0b0b0));
         
         int x = rc.left + pos;
@@ -232,7 +275,7 @@ private:
             x = rc.right-2;
         
         CRect rcTick(x-2, rc.top, x+2, rc.bottom);
-        BIOS::LCD::Bar(rcTick, focus ? RGB565(ffffff) : RGB565(b0b0b0));
+        BIOS::LCD::Bar(rcTick, /*focus ? RGB565(ffffff) :*/ RGB565(b0b0b0));
     }
 };
 
@@ -352,10 +395,10 @@ private:
     void DrawRange(int mn, int mx, int color, bool dot = false)
     {
         constexpr int guard = 10;
-        mn = max(0, min(mn, 360));
-        mx = max(mn, min(mx, 360));
-        int left = guard + (80-2*guard)*mn/360;
-        int right = guard + (80-2*guard)*mx/360;
+        mn = max(0, min(mn, 180));
+        mx = max(mn, min(mx, 180));
+        int left = guard + (80-2*guard)*mn/180;
+        int right = guard + (80-2*guard)*mx/180;
         int i;
         for (i=left; i<right; i++)
         {
@@ -386,7 +429,7 @@ private:
     {
         memcpy(drawBuffer, !focus ? knob_data : knob_data2, sizeof(knob_data));
         
-        DrawRange(0, 360, RGB565(000000));
+        DrawRange(0, 180, RGB565(000000));
         DrawRange(0, a, RGB565(00ff00), true);
         
         BIOS::LCD::BufferBegin(CRect(x, y, x+knob_width, y+knob_height));
@@ -412,23 +455,35 @@ public:
     
     virtual void PaintSubitem(const CRect& rect, int index, bool focus) override
     {
-        BIOS::LCD::Bar(rect, RGB565(404040));
+        BIOS::LCD::Bar(rect, RGB565(202020));
         if (index == 0)
         {
             if (focus)
-                BIOS::LCD::Print(rect.left, rect.top, RGB565(000000), RGB565(ffffff), "Duration: 1.5 s");
+                BIOS::LCD::Printf(rect.left, rect.top, RGB565(000000), RGB565(ffffff), "Duration: %.1f s", mDataPoint->mDuration*0.001f);
             else
-                BIOS::LCD::Print(rect.left, rect.top, RGB565(ffffff), RGB565(404040), "Duration: 1.5 s");
+                BIOS::LCD::Printf(rect.left, rect.top, RGB565(ffffff), RGB565(202020), "Duration: %.1f s", mDataPoint->mDuration*0.001f);
         } else
         if (index == 1)
         {
             if (focus)
-                BIOS::LCD::Print(rect.left, rect.top, RGB565(000000), RGB565(ffffff), "Easing: < Linear >");
+                BIOS::LCD::Printf(rect.left, rect.top, RGB565(000000), RGB565(ffffff), "Easing: <%s>", mDataPoint->GetEasingName());
             else
-                BIOS::LCD::Print(rect.left, rect.top, RGB565(ffffff), RGB565(404040), "Easing: < Linear >");
+                BIOS::LCD::Printf(rect.left, rect.top, RGB565(ffffff), RGB565(202020), "Easing: <%s>", mDataPoint->GetEasingName());
         }
     }
-        
+    
+    virtual void OnKey(int subfocus, BIOS::KEY::EKey key) override
+    {
+        if (subfocus == 0 && key == BIOS::KEY::Right)
+            mDataPoint->mDuration += 100;
+        if (subfocus == 0 && key == BIOS::KEY::Left && mDataPoint->mDuration >= 200)
+            mDataPoint->mDuration -= 100;
+        if (subfocus == 1 && key == BIOS::KEY::Right && mDataPoint->mEasing < EEasing::Last)
+            mDataPoint->mEasing = (EEasing)(mDataPoint->mEasing + 1);
+        if (subfocus == 1 && key == BIOS::KEY::Left && mDataPoint->mEasing > 0)
+            mDataPoint->mEasing = (EEasing)(mDataPoint->mEasing - 1);
+    }
+
     virtual int GetSubitemCount() override
     {
         return 2;
@@ -455,10 +510,11 @@ public:
     virtual void PaintSubitem(const CRect& rect, int index, bool focus) override
     {
         BIOS::LCD::Bar(rect, focus ? RGB565(ffffff) : RGB565(202020));
+        _ASSERT(mDataPoint->mDuration >= 10 && mDataPoint->mDuration <= 5000);
         if (focus)
-            BIOS::LCD::Printf(rect.left+16, rect.top+1, RGB565(000000), RGB565(ffffff), "%.1f s", mDataPoint->mDuration/1000);
+            BIOS::LCD::Printf(rect.left+16, rect.top+1, RGB565(000000), RGB565(ffffff), "%.1f s", mDataPoint->mDuration*0.001f);
         else
-            BIOS::LCD::Printf(rect.left+16, rect.top+1, RGB565(606060), RGB565(202020), "%.1f s", mDataPoint->mDuration/1000);
+            BIOS::LCD::Printf(rect.left+16, rect.top+1, RGB565(606060), RGB565(202020), "%.1f s", mDataPoint->mDuration*0.001f);
         DrawCurve(rect.right-16-24, rect.top);
     }
 
@@ -486,7 +542,15 @@ private:
     int EasingFunction(int x)
     {
         // 0..1024
-        return CubicEaseInOut(x/1024.0f)*1024.0f;
+        switch (mDataPoint->mEasing)
+        {
+            case Linear:
+                return x;
+            case CubicInOut:
+                return CubicEaseInOut(x/1024.0f)*1024.0f;
+            default:
+                _ASSERT(0);
+        }
     }
     
     void DrawCurve(int _x, int _y)
@@ -623,18 +687,44 @@ public:
         {
             forceRedraw = true;
         }
-        
+
         uint32_t l0 = BIOS::SYS::GetTick();
-        for (int i=0; i</*COUNT(p->mData)*/8; i++)
+        if (mPwm.isOnline())
         {
-            mPwm.write(i, p->mData[i]);
+            for (int i=0; i<COUNT(p->mData); i++)
+            {
+                mPwm.write(i, p->mData[i]);
+            }
         }
         uint32_t l1 = BIOS::SYS::GetTick();
 
         if (forceRedraw)
         {
+            int value[COUNT(CDataPoint::mData)];
+            for (int i=0; i<COUNT(value); i++)
+                value[i] = mPwm.rawValue(p->mData[i]);
+            
             char message[32];
-            sprintf(message, "%d ms: %d, %d, %d, %d, %d, %d", (int)(l1-l0), p->mData[0], p->mData[1], p->mData[2], p->mData[3], p->mData[4], p->mData[5]);
+            if (mPwm.isOnline())
+            {
+                sprintf(message, "%d ms: %d, %d, %d, %d, %d, %d", (int)(l1-l0),
+                        value[0], value[1], value[2], value[3], value[4], value[5]);
+            } else {
+                sprintf(message, "Offline: %d, %d, %d, %d, %d, %d",
+                        value[0], value[1], value[2], value[3], value[4], value[5]);
+                
+                
+                if (!mPwm.isOnline())
+                {
+                    EVERY(10000)
+                    {
+                        sprintf(message, "Reconnect...");
+                        mPwm.begin();
+                    }
+                }
+
+            }
+            
             APP::Status(message);
         }
     }
@@ -653,6 +743,11 @@ public:
             factor = -1;
         }
     }
+    
+    bool AnimationRunning()
+    {
+        return mAnimationStart != 0;
+    }
 };
 
 class CList : public CWnd, CInterpolator
@@ -660,6 +755,7 @@ class CList : public CWnd, CInterpolator
     int mFocus{0};
     int mSubFocus{0};
     bool mChild{false};
+    bool mPlaying{false};
     
 public:
     CListItem* mItemsData[32];
@@ -672,7 +768,7 @@ public:
         for(int i=0; i<5; i++)
         {
             CDataPoint p(i);
-            p.mData[i] = 360;
+            p.mData[i] = 180;
             mDataPoints.Add(p);
             mBufferItemDials[i].SetNeedsRedraw(-1);
             mBufferFrameInfo[i].SetNeedsRedraw(-1);
@@ -737,14 +833,14 @@ public:
         }
 
         if (remain.Height() > 0)
-            BIOS::LCD::Bar(remain, RGB565(000000));
+            BIOS::LCD::Bar(remain, RGB565(202020));
         
         CDataPoint* pData = mItems[mFocus]->GetData();
         if (pData)
         {
             SetData(pData);
         }
-        /*
+        
         int y1 = -1, y2 = -1;
         if (positionA.IsValid())
         {
@@ -761,9 +857,24 @@ public:
         // interpolateA, positionB
         if (y1 != -1)
         {
+            /*
+            if (mAnimationShift != 0)
+            {
+                if (y1 >= mChildRect.top)
+                    y1 += mChildRect.Height();
+            }*/
             static int y0 = -1;
             if (y0 != y1)
             {
+                /*
+                CRect rcButton0(0, y0-10, 16, y0+8);
+                if (rcButton0.top > 16 && rcButton0.bottom < BIOS::LCD::Height-16)
+                    BIOS::LCD::RoundRect(rcButton0, RGB565(202020));
+                
+                CRect rcButton1(0, y1-10, 16, y1+8);
+                if (rcButton1.top > 16 && rcButton1.bottom < BIOS::LCD::Height-16)
+                    BIOS::LCD::RoundRect(rcButton1, RGB565(ffffff));
+*/
                 if (y0 != -1 && abs(y0-y1) > 3 && y0-8+16<BIOS::LCD::Height)
                     BIOS::LCD::Print(4, y0-8, RGB565(00ff00), RGB565(202020), " ");
                 y0 = y1;
@@ -771,9 +882,10 @@ public:
                     BIOS::LCD::Print(4, y1-8, RGB565(00ff00), RGB565(202020), "\x10");
             }
         }
-*/
     }
     
+    int mChildDrawIndex;
+    CRect mChildRect;
     CRect mAnimationRect;
     int mAnimationShift{0};
     
@@ -788,6 +900,9 @@ public:
                 int shift = min(8, mAnimationShift);
                 mAnimationShift -= shift;
                 mAnimationRect.Offset(0, shift);
+                mAnimationRect.top = min(mAnimationRect.top, BIOS::LCD::Height-16);
+                mAnimationRect.bottom = min(mAnimationRect.bottom, BIOS::LCD::Height-16);
+                mChildRect.bottom += shift;
                 
                 // move mAnimationRect 8 pixels down
                 for (int i=mAnimationRect.bottom+shift-1; i>=mAnimationRect.top; i--)
@@ -808,6 +923,8 @@ public:
                 // finish
                 if (mAnimationShift == 0)
                 {
+                    mChildRect.Invalidate();
+                    
                     CListItem* pChild = mItems[mFocus]->Execute();
                     _ASSERT(pChild);
 
@@ -819,13 +936,52 @@ public:
                     mChild = true;
 
                     mItems[mFocus]->SetNeedsRedraw(-1);
+                } else {
+                    CListItem* item = mItems[mFocus]->Execute();
+                    _ASSERT(item);
+                    int top = mChildRect.top;
+                    for (int j=0; j<item->GetSubitemCount(); j++)
+                    {
+                        CRect required = item->GetSubitemRect(j);
+                        required.Offset(mChildRect.left, top);
+                        if (required.bottom > BIOS::LCD::Height-16)
+                            break;
+                        if (required.bottom > mChildRect.bottom)
+                            break;
+                        if (j >= mChildDrawIndex)
+                        {
+                            item->PaintSubitem(required, j, false);
+                            mChildDrawIndex = j+1;
+                        }
+                    }
                 }
             }
+        }
+        
+        if (mPlaying)
+        {
+            if (!AnimationRunning())
+            {
+                // select next row;
+                mItems[mFocus]->SetNeedsRedraw(mSubFocus);
+                mFocus = (mFocus+1) % mItems.GetSize();
+                mSubFocus = 0;
+                mItems[mFocus]->SetNeedsRedraw(mSubFocus);
+            }
+            
         }
     }
     
     virtual void OnKey(int key) override
     {
+        if (key != BIOS::KEY::None)
+        {
+            if (mPlaying)
+            {
+                mPlaying = false;
+                return;
+            }
+        }
         if (mAnimationShift != 0)
             return;
         
@@ -837,6 +993,8 @@ public:
                 CListItem* pChild = mItems[mFocus]->Execute();
                 if (pChild)
                 {
+                    mChildDrawIndex = 0;
+                    mChildRect = CRect(24+16, mItems[mFocus]->mRect.bottom, BIOS::LCD::Width, mItems[mFocus]->mRect.bottom);
                     mAnimationRect = CRect(24, mItems[mFocus]->mRect.bottom, BIOS::LCD::Width, mItems[mItems.GetSize()-1]->mRect.bottom);
                     mAnimationShift = pChild->GetSubitemRect(pChild->GetSubitemCount()-1).bottom;
                 }
@@ -844,32 +1002,38 @@ public:
         }
         if (key==BIOS::KEY::Right && mItems[mFocus]->GetSubitemCount() > 1)
         {
+            mItems[mFocus]->OnKey(mSubFocus, (BIOS::KEY::EKey)key);
+
             CDataPoint* p = mItems[mFocus]->GetData();
             if (p)
             {
                 CInterpolator::Cancel();
-                p->mData[mSubFocus] = min(p->mData[mSubFocus] + 4, 360);
-                mItems[mFocus]->SetNeedsRedraw(-1);
                 SetData(p);
-
                 for (int i=0; i<mItems.GetSize(); i++)
-                    if (i != mFocus && mItems[i]->GetData() == p)
+                    if (mItems[i]->GetData() == p)
                         mItems[i]->SetNeedsRedraw(-1);
+            } else
+            {
+                mItems[mFocus-1]->SetNeedsRedraw(-1);
+                mItems[mFocus]->SetNeedsRedraw(mSubFocus);
             }
         }
         if (key==BIOS::KEY::Left && mItems[mFocus]->GetSubitemCount() > 1)
         {
+            mItems[mFocus]->OnKey(mSubFocus, (BIOS::KEY::EKey)key);
+
             CDataPoint* p = mItems[mFocus]->GetData();
             if (p)
             {
                 CInterpolator::Cancel();
-                p->mData[mSubFocus] = max(p->mData[mSubFocus] - 4, 0);
-                mItems[mFocus]->SetNeedsRedraw(-1);
                 SetData(p);
-
                 for (int i=0; i<mItems.GetSize(); i++)
-                    if (i != mFocus && mItems[i]->GetData() == p)
+                    if (mItems[i]->GetData() == p)
                         mItems[i]->SetNeedsRedraw(-1);
+            } else
+            {
+                mItems[mFocus-1]->SetNeedsRedraw(-1);
+                mItems[mFocus]->SetNeedsRedraw(mSubFocus);
             }
         }
         if (key==BIOS::KEY::Up)
@@ -907,16 +1071,6 @@ public:
             {
                 if (mChild)
                 {
-//                    delete mItems[mFocus];
-                    mItems.RemoveAt(mFocus);
-                    mChild = false;
-                    mSubFocus = 0;
-
-                    for (int i=mFocus; i<mItems.GetSize(); i++)
-                    {
-                        mItems[i]->SetNeedsRedraw(-1);
-                        //mItems[i]->SetData(mItems[i]->GetData());
-                    }
                     return;
                 }
 
@@ -934,13 +1088,20 @@ public:
                 mItems[mFocus]->SetNeedsRedraw(mSubFocus);
             }
         }
+        
+        if (key==BIOS::KEY::F3 && !mChild)
+        {
+            mPlaying = true;
+        }
+
     }
 };
 
 
 bool setup()
 {
-    return mPwm.begin();
+    mPwm.begin();
+    return true;
 }
 
 CList list;
