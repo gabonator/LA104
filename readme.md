@@ -46,8 +46,8 @@ Refer to this [tutorial](resources/tutorial_building)
 
 #### Applications in LA104 package
 
-| Icon | Group | App name | App project |
-|------|-------|----------|-------------|
+| Icon | Group | App name | App project / video |
+|------|-------|----------|---------------------|
 | ![17analys.elf](resources/appicons/analyser.png) |  | Logic analyser | [apps/test17_official](system/apps/test17_official/) |
 | ![61devin.elf](resources/appicons/devinfo.png) |  | Device info | [apps_featured/61_devinfo](system/apps_featured/61_devinfo/) |
 | ![29fileman_la104.elf](resources/appicons/fileman.png) |  | File manager | [apps_shell/test29_fileman](system/apps_shell/test29_fileman/) |
@@ -74,19 +74,20 @@ Refer to this [tutorial](resources/tutorial_building)
 | ![2import.elf](resources/appicons/app.png) | fun | Sierpinski triangle | [apps_experiments/test2_import](system/apps_experiments/test2_import/) |
 | ![85eetest.elf](resources/appicons/eeview.png) | i2c | I2C EEPROM memory viewer | [apps_featured/85_i2ceeprom](system/apps_featured/85_i2ceeprom/) |
 | ![37icscan.elf](resources/appicons/i2cscan.png) | i2c | I2C bus scanner | [apps_featured/test37_i2cscan](system/apps_featured/test37_i2cscan/) |
-| ![80rftool.elf](resources/appicons/rftool.png) | rftools | RF analyser synthesizer | [apps_featured/80_rftool/test](system/apps_featured/80_rftool/test/) |
-| ![82sanal.elf](resources/appicons/spectrum.png) | rftools | Spectrum analyser | [apps/82_specan](system/apps/82_specan/) |
-| ![79ccosc.elf](resources/appicons/wusbosc.png) | rftools | WebUSB rf analyser | [apps/79_cc1101osc](system/apps/79_cc1101osc/) |
-| ![105avrfl.elf](resources/appicons/avrflash.png) | tools | Atmel firmware flasher | [apps/105_avrprogrammer](system/apps/105_avrprogrammer/) |
+| ![80rftool.elf](resources/appicons/rftool.png) | rftools | RF analyser synthesizer | [apps_featured/80_rftool/test](system/apps_featured/80_rftool/test/)  [https://youtu.be/Gwyi00NKBNg](https://youtu.be/Gwyi00NKBNg) |
+| ![82sanal.elf](resources/appicons/spectrum.png) | rftools | Spectrum analyser | [apps/82_specan](system/apps/82_specan/)  [https://youtu.be/Gwyi00NKBNg](https://youtu.be/Gwyi00NKBNg) |
+| ![79ccosc.elf](resources/appicons/wusbosc.png) | rftools | WebUSB rf analyser | [apps/79_cc1101osc](system/apps/79_cc1101osc/)  [https://youtu.be/Gwyi00NKBNg](https://youtu.be/Gwyi00NKBNg) |
+| ![105avrfl.elf](resources/appicons/avrflash.png) | tools | Atmel firmware flasher | [apps/105_avrprogrammer](system/apps/105_avrprogrammer/)  [https://youtu.be/yC3a1zbonJ0](https://youtu.be/yC3a1zbonJ0) |
 | ![15charla.elf](resources/appicons/charmap.png) | tools | Character map | [apps/test15_charmap](system/apps/test15_charmap/) |
 | ![30dcf77.elf](resources/appicons/dcf77.png) | tools | DCF77 decoder | [apps/test30_dcf77](system/apps/test30_dcf77/) |
 | ![33temper.elf](resources/appicons/dstemper.png) | tools | DS1820 temperature grapher | [apps_featured/test33_temper](system/apps_featured/test33_temper/) |
 | ![49gpio.elf](resources/appicons/gpio.png) | tools | GPIO and PWM controller | [apps_featured/test49_gpio](system/apps_featured/test49_gpio/) |
-| ![21mplayl.elf](resources/appicons/midiplay.png) | tools | MIDI player | [apps_featured/test21_midiplay](system/apps_featured/test21_midiplay/) |
-| ![22seqen.elf](resources/appicons/sequence.png) | tools | Sequencer and analyser | [apps/test22_sequencer](system/apps/test22_sequencer/) |
+| ![21mplayl.elf](resources/appicons/midiplay.png) | tools | MIDI player | [apps_featured/test21_midiplay](system/apps_featured/test21_midiplay/)  [https://youtu.be/f3DCqy-3lNo](https://youtu.be/f3DCqy-3lNo) |
+| ![22seqen.elf](resources/appicons/sequence.png) | tools | Sequencer and analyser | [apps/test22_sequencer](system/apps/test22_sequencer/)  [https://youtu.be/D8OnXzE7OwU](https://youtu.be/D8OnXzE7OwU) |
+| ![103servo.elf](resources/appicons/servo.png) | tools | Servo controller PCA9685 | [apps_featured/103_servo](system/apps_featured/103_servo/)  [https://youtu.be/heYFrqVF1P4](https://youtu.be/heYFrqVF1P4) |
 | ![72uartm.elf](resources/appicons/uartmon.png) | tools | UART monitor | [apps_featured/72_uartmon](system/apps_featured/72_uartmon/) |
-| ![74invt.elf](resources/appicons/vfd_invt.png) | tools | Invt VFD RS485 visualizer | [apps_featured/74_invtvisual](system/apps_featured/74_invtvisual/) |
-| ![63ws_104.elf](resources/appicons/ws2812.png) | tools | WS2812 addressable led tester | [apps_featured/test63_ws2812](system/apps_featured/test63_ws2812/) |
+| ![74invt.elf](resources/appicons/vfd_invt.png) | tools | Invt VFD RS485 visualizer | [apps_featured/74_invtvisual](system/apps_featured/74_invtvisual/)  [https://youtu.be/0Ns7AHVvmX0](https://youtu.be/0Ns7AHVvmX0) |
+| ![63ws_104.elf](resources/appicons/ws2812.png) | tools | WS2812 addressable led tester | [apps_featured/test63_ws2812](system/apps_featured/test63_ws2812/)  [https://youtu.be/4fWqZBbjQPc](https://youtu.be/4fWqZBbjQPc) |
 | ![104avris.elf](resources/appicons/avrisp.png) | usb | Atmel ISP programmer | [apps_usb/104_avrisp](system/apps_usb/104_avrisp/) |
 | ![24ncdc.elf](resources/appicons/cdc.png) | usb | Serial link | [apps_usb/test24_usbcdc](system/apps_usb/test24_usbcdc/) |
 | ![25hid.elf](resources/appicons/hid.png) | usb | Human interface device | [apps_usb/test25_hid](system/apps_usb/test25_hid/) |

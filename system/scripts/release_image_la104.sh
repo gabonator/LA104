@@ -91,15 +91,15 @@ echo -n "{\"description\":{\"short\":\"RF toolkit\",\"long\":\"RF toolkit\"},\"i
 
 cp $FROM/80rftool.elf $TO/rftools/rftool.elf
 cp $ICON/antenna.bmp $TO/rftools/rftool.bmp
-echo -n "{\"description\":{\"short\":\"RF tool\",\"long\":\"RF analyser synthesizer\"},\"icon\":\"rftool.bmp\",\"execute\":\"rftool.elf\",order:10}" > $TO/rftools/rftool.lnk
+echo -n "{\"description\":{\"short\":\"RF tool\",\"long\":\"RF analyser synthesizer\"},\"icon\":\"rftool.bmp\",\"execute\":\"rftool.elf\",order:10,youtube:\"Gwyi00NKBNg\"}" > $TO/rftools/rftool.lnk
 
 cp $FROM/79ccosc.elf $TO/rftools/wusbosc.elf
 cp $ICON/usbant.bmp $TO/rftools/wusbosc.bmp
-echo -n "{\"description\":{\"short\":\"USB analyser\",\"long\":\"WebUSB rf analyser\"},\"icon\":\"wusbosc.bmp\",\"execute\":\"wusbosc.elf\",order:2}" > $TO/rftools/wusbosc.lnk
+echo -n "{\"description\":{\"short\":\"USB analyser\",\"long\":\"WebUSB rf analyser\"},\"icon\":\"wusbosc.bmp\",\"execute\":\"wusbosc.elf\",order:2,youtube:\"Gwyi00NKBNg\"}" > $TO/rftools/wusbosc.lnk
 
 cp $FROM/82sanal.elf $TO/rftools/spectrum.elf
 cp $ICON/spectrum.bmp $TO/rftools/spectrum.bmp
-echo -n "{\"description\":{\"short\":\"spectrum analyser\",\"long\":\"Spectrum analyser\"},\"icon\":\"spectrum.bmp\",\"execute\":\"spectrum.elf\",order:5}" > $TO/rftools/spectrum.lnk
+echo -n "{\"description\":{\"short\":\"spectrum analyser\",\"long\":\"Spectrum analyser\"},\"icon\":\"spectrum.bmp\",\"execute\":\"spectrum.elf\",order:5,youtube:\"Gwyi00NKBNg\"}" > $TO/rftools/spectrum.lnk
 cp ../apps_featured/80_rftool/logs/*.* $TO/rftools/
 
 echo -n "{\"description\":{short:\"Help\",long:\"Help\"},\"icon\":\"../help.bmp\",\"execute\":\"../viewtxt.elf help.txt\",order:200}" >> $TO/rftools/help.lnk
@@ -201,13 +201,13 @@ echo -n "{\"description\":{short:\"Character map\",long:\"Character map\"},\"ico
 echo -n "{\"description\":{short:\"DCF77\",long:\"DCF77 decoder\"},\"icon\":\"dcf77.bmp\",\"execute\":\"dcf77.elf\",order:40}" > $TO/tools/dcf77.lnk
 echo -n "{\"description\":{short:\"DS1820\",long:\"DS1820 temperature grapher\"},\"icon\":\"dstemper.bmp\",\"execute\":\"dstemper.elf\",order:70}" > $TO/tools/dstemper.lnk
 echo -n "{\"description\":{short:\"GPIO\",long:\"GPIO and PWM controller\"},\"icon\":\"gpio.bmp\",\"execute\":\"gpio.elf\",order:90}" > $TO/tools/gpio.lnk
-echo -n "{\"description\":{short:\"Sequencer\",long:\"Sequencer and analyser\"},\"icon\":\"sequence.bmp\",\"execute\":\"sequence.elf\",order:60}" > $TO/tools/sequence.lnk
+echo -n "{\"description\":{short:\"Sequencer\",long:\"Sequencer and analyser\"},\"icon\":\"sequence.bmp\",\"execute\":\"sequence.elf\",order:60,youtube:\"D8OnXzE7OwU\"}" > $TO/tools/sequence.lnk
 echo -n "{\"description\":{short:\"UART monitor\",long:\"UART monitor\"},\"icon\":\"uartmon.bmp\",\"execute\":\"uartmon.elf\"}" > $TO/tools/uartmon.lnk
-echo -n "{\"description\":{short:\"VFD Invt\",long:\"Invt VFD RS485 visualizer\"},\"icon\":\"vfd_invt.bmp\",\"execute\":\"vfd_invt.elf\"}" > $TO/tools/vfd_invt.lnk
-echo -n "{\"description\":{short:\"WS2812\",long:\"WS2812 addressable led tester\"},\"icon\":\"ws2812.bmp\",\"execute\":\"ws2812.elf\",order:100}" > $TO/tools/ws2812.lnk
-echo -n "{\"description\":{\"short\":\"MIDI\",\"long\":\"MIDI player\"},\"icon\":\"midiplay.bmp\",\"execute\":\"midiplay.elf\"}" > $TO/tools/midiplay.lnk
-echo -n "{\"description\":{short:\"AvrFlash\",long:\"Atmel firmware flasher\"},\"icon\":\"avrflash.bmp\",\"execute\":\"avrflash.elf\",order:20}" > $TO/tools/avrflash.lnk
-echo -n "{\"description\":{short:\"Servo\",long:\"Servo controller PCA9685\"},\"icon\":\"servo.bmp\",\"execute\":\"servo.elf\",order:65}" > $TO/tools/servo.lnk
+echo -n "{\"description\":{short:\"VFD Invt\",long:\"Invt VFD RS485 visualizer\"},\"icon\":\"vfd_invt.bmp\",\"execute\":\"vfd_invt.elf\",youtube:\"0Ns7AHVvmX0\"}" > $TO/tools/vfd_invt.lnk
+echo -n "{\"description\":{short:\"WS2812\",long:\"WS2812 addressable led tester\"},\"icon\":\"ws2812.bmp\",\"execute\":\"ws2812.elf\",order:100,youtube:\"4fWqZBbjQPc\"}" > $TO/tools/ws2812.lnk
+echo -n "{\"description\":{\"short\":\"MIDI\",\"long\":\"MIDI player\"},\"icon\":\"midiplay.bmp\",\"execute\":\"midiplay.elf\",youtube:\"f3DCqy-3lNo\"}" > $TO/tools/midiplay.lnk
+echo -n "{\"description\":{short:\"AvrFlash\",long:\"Atmel firmware flasher\"},\"icon\":\"avrflash.bmp\",\"execute\":\"avrflash.elf\",order:20, youtube:\"yC3a1zbonJ0\"}" > $TO/tools/avrflash.lnk
+echo -n "{\"description\":{short:\"Servo\",long:\"Servo controller PCA9685\"},\"icon\":\"servo.bmp\",\"execute\":\"servo.elf\",order:65,youtube:\"heYFrqVF1P4\"}" > $TO/tools/servo.lnk
 
 cp $ICON/charmap.bmp $TO/tools/charmap.bmp
 cp $ICON/dcf77.bmp $TO/tools/dcf77.bmp

@@ -48,7 +48,10 @@ public:
       case SDL_SCANCODE_DOWN: return '>'; break;
       case SDL_SCANCODE_RETURN: return '1'; break;
       case SDL_SCANCODE_BACKSPACE: return '2'; break;
-	  //case SDL_SCANCODE_BACKSPACE: return '3'; break;
+      case SDL_SCANCODE_1: return '1'; break;
+      case SDL_SCANCODE_2: return '2'; break;
+	  case SDL_SCANCODE_3: return '3'; break;
+      case SDL_SCANCODE_4: return '4'; break;
     }
     return 0;
   }

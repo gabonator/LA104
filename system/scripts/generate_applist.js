@@ -84,7 +84,7 @@ getFiles("../", "build.sh").then(l => l.filter(app => app.path.substr(0,4) == "a
   {
     var lnk = fs2.readFileSync(flist[f].base + flist[f].path + flist[f].name).toString();
     json = eval("_="+lnk);
-    final.push({desc:json.description.long, path:flist[f].path, icon:json.icon, execute:json.execute});
+    final.push({desc:json.description.long, path:flist[f].path, icon:json.icon, execute:json.execute, youtube:json.youtube});
   }
   appList = final;
   return final;
@@ -140,8 +140,8 @@ getFiles("../", "build.sh").then(l => l.filter(app => app.path.substr(0,4) == "a
   return Promise.all(promises);
 })
 .then(() => {
-  console.log("| Icon | Group | App name | App project |");
-  console.log("|------|-------|----------|-------------|");
+  console.log("| Icon | Group | App name | App project / video |");
+  console.log("|------|-------|----------|---------------------|");
 
   for (var i=0; i<appList.length; i++)
   {
@@ -149,7 +149,8 @@ getFiles("../", "build.sh").then(l => l.filter(app => app.path.substr(0,4) == "a
     var ref = appHashes[app.hash];
     var icon = "!["+ref.internal.split("/").slice(-1)[0]+"](resources/appicons/"+app.newIcon+")";
     var folder = "["+ref.folder.slice(0,-1)+"](system/"+ref.folder+")";
-    
+    if (app.youtube)
+      folder += "  [https://youtu.be/"+app.youtube+"](https://youtu.be/"+app.youtube+")";
     console.log("| " + icon + " | " + app.group + " | " + app.desc + " | " + folder + " |");
   }
 });
