@@ -133,6 +133,8 @@ public:
 	
 	void Destroy()
 	{
+        GPIO::PinMode(GPIO::EPin::P1, GPIO::EMode::Pwm);
+        GPIO::PinMode(GPIO::EPin::P1, GPIO::EMode::Input);
 	}
 	
 	virtual void OnMessage(CWnd* pSender, int code, uintptr_t data) override

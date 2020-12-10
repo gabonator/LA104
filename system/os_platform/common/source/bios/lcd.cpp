@@ -18,6 +18,7 @@ void BIOS::LCD::Clear(unsigned short clr)
 
 void BIOS::LCD::Bar(int x1, int y1, int x2, int y2, unsigned short clr)
 {
+  _ASSERT(x2-x1 >= 1 && y2-y1 >= 1);
   int t = FLIP(y1)+1;
   y1 = FLIP(y2)+1;
   y2 = t;

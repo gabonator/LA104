@@ -23,8 +23,9 @@ bool CWire::error() {
         CONSOLE::Print("<error %d>", err);
         CONSOLE::Color(RGB565(ffffff));        
         *gpioStatus = 0;
+        return true;
       }
-      return 0;
+      return false;
 }
 
 using namespace BIOS;

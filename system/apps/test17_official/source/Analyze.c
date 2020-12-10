@@ -323,7 +323,7 @@ u16 I2C_AnalyzeStartCnt(u64 StartTime)
     u16 DataCnt = 0;
     u32 TransTime = 0;
     u64 TempTime = 0;
-    memset(AnalyzeTime, 0, RECORD_DEPTH / 2 * sizeof(AnalyzeTime[0]));
+    memset(AnalyzeTime, 0, sizeof(AnalyzeTime));
     for(i = TRI_START_NUM; i < RECORD_DEPTH; i++)
     {
         Status = TransStatusData(i);                        // 
@@ -688,7 +688,7 @@ u16 SPI_AnalyzeDataStartCnt(u64 StartTime)
 
     CS_Polarity = gInputSubParam[IN_SPI][SPI_CS_POLAR];
     SCK_Last = CS_Polarity;
-    memset(AnalyzeTime, 0, RECORD_DEPTH / 2 * sizeof(AnalyzeTime[0]));
+    memset(AnalyzeTime, 0, sizeof(AnalyzeTime));
     for(i = TRI_START_NUM; i < RECORD_DEPTH; i++)
     {
         Status = TransStatusData(i);             // 

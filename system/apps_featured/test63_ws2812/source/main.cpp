@@ -949,6 +949,7 @@ public:
 	
 	void Destroy()
 	{
+        SPI.end();
 	}
 	
 	virtual void OnTimer() override
@@ -1005,6 +1006,7 @@ bool mainLoop()
 
 void mainFinish()
 {
+    app.Destroy();
 }
 
 #ifdef _ARM

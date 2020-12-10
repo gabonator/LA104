@@ -1,6 +1,6 @@
 CDeviceCC1101Interface gModem;
 
-bool analyse(CArray<uint16_t>&);
+void analyse(CArray<uint16_t>&);
 
 
 // 500 420 480 460 940 940

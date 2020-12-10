@@ -1,29 +1,27 @@
 # Building LA104/DS203/DS213 operating system
 
-## LA/DS application switching
-- LA104 or DS203 normally allows switching between multiple applications by holding one of the four buttons during startup. This method is not flexible enough and does not allow to use more than three different applications without flashing the device.  
-- All the LA/DS devices are equipped with eeprom (2MB or 8MB) which is used as small FAT12 disk drive. This drive is also accessible with USB connection as Mass Storage Device. Main idea for the operating system was to allow easy switching between any number of applications which are dynamically loaded and flashed from the eeprom on demand without restarting the device. 
-- This operating system does not provide any advanced features as one should expect (no multitasking, no dynamic allocations). It just loads linux .ELF files into RAM and FLASH, resolves imported methods and jumps to the application entry point. During startup the OS tries to load file **shell.elf** which can be simple file manager or graphical application switcher, or an application that should be executed right after startup.
-- There are at least two applications that need to be compiled and loaded into the device to use it - operating system and shell
-- Building of the operating system will produce .hex file which needs to be flashed to the device using interal DFU flasher. It you are lucky, you will be able to copy the .hex file into the DFU's virtual mass storage device after connecting the device with your computer and turning it on while holding first button. If you will be having problems with this initial flashing, look for dfuload tool in [/tools](/tools) folder. All other applications compile into .elf file which can be copied to the mass storage disk when the device is in normal operation (not DFU)
-- Regular .elf files contain lengthy parts, which are useless for the LA104. After compilation process, this file is stripped to reduce it's size by [/tools/elfstrip](/tools/elfstrip) tool
-- Source code of the operating system is placed in [/system/os_host](/system/os_host) folder and simple file manager is in [/system/apps_shell/test29_fileman](/system/apps_shell/test29_fileman). For testing purpose one should compile also some simple application e.g. [/system/apps/test15_charmap](/system/apps/test15_charmap) or [/system/apps_experiments/test2_import](/system/apps_experiments/test2_import)
-- Whole codebase is written in C/C++ with small bits of assembly. LA104 is based on STM32F103 arm processor and to be able to build this code, you will need **arm eabi toolchain** which can be downloaded here for any common platform:
-https://developer.arm.com/open-source/gnu-toolchain/gnu-rm/downloads
-- In my case, I am using lightly outdated version (gcc-arm-none-eabi-7-2018-q2-update), but I suggest downloading lastest available version
+## Quick and easy way
+
+- Install latest [arm eabi toolchain](https://developer.arm.com/tools-and-software/open-source-software/developer-tools/gnu-toolchain/gnu-rm/downloads)
+- Install [nodejs](https://nodejs.org/en/download/)
+- Clone repository ```git clone https://github.com/gabonator/LA104.git```
+- Go to system/scripts folder
+- run ```build.sh```
 
 ## Building scripts
-[/system/scripts](/system/scripts) contains all scripts necessary for building whole project:
+[/system/scripts](/system/scripts) contains all scripts necessary for building whole project. Currently only scripts for unix/linux/osx are provided:
   - build.sh - main building scripts which builds the OS, all applications and prepares disk image for all devices, this file is referenced in Docker file. It calls build_full.sh, release_image_la104.sh, release_image_ds203.sh, release_image_ds213.sh in sequence.
   - build_check.sh - verifies if all necessary components are already installed
   - build_full.sh - builds OS and all APPS
   - build_minimal.sh - builds OS and featured apps and shell - just to quick verification if the C++ toolchain is working well
   - build_os.sh - builds OS
-  - release_image_XXX.sh - prepares the release image for specific device
+  - build_apps.sh - builds all applications
+  - release_image_XXX.sh - prepares the release image for specific device as zipped archive
 
 Extra stuff:
   - build_wasm.sh - builds some apps for web browser, you will need to install emsdk with emcc compiler before using this script
   - generate_applist.js - generates list of all applications in release image in form of github markup language including all icons
+  - build_applist.sh - script calling the above and storing the MD file in build folder
 
 Experimental stuff:
   - imagefile_make_XXXXX.sh - prepares the formatted filesystem image (as a single file) which can be easily copied to the eeprom without copying all files individually, reducing the FAT fragmentation and eeprom write cycles
@@ -41,6 +39,17 @@ docker cp $id:/home/dev/output - > ./output.tar
 tar -xvf output.tar
 docker rm -v $id
 ```
+
+## LA/DS application switching
+- LA104 or DS203 normally allows switching between multiple applications by holding one of the four buttons during startup. This method is not flexible enough and does not allow to use more than three different applications without flashing the device.  
+- All the LA/DS devices are equipped with eeprom (2MB or 8MB) which is used as small FAT12 disk drive. This drive is also accessible with USB connection as Mass Storage Device. Main idea for the operating system was to allow easy switching between any number of applications which are dynamically loaded and flashed from the eeprom on demand without restarting the device. 
+- This operating system does not provide any advanced features as one should expect (no multitasking, no dynamic allocations). It just loads linux .ELF files into RAM and FLASH, resolves imported methods and jumps to the application entry point. During startup the OS tries to load file **shell.elf** which can be simple file manager or graphical application switcher, or an application that should be executed right after startup.
+- There are at least two applications that need to be compiled and loaded into the device to use it - operating system and shell
+- Building of the operating system will produce .hex file which needs to be flashed to the device using interal DFU flasher. It you are lucky, you will be able to copy the .hex file into the DFU's virtual mass storage device after connecting the device with your computer and turning it on while holding first button. If you will be having problems with this initial flashing, look for dfuload tool in [/tools](/tools) folder. All other applications compile into .elf file which can be copied to the mass storage disk when the device is in normal operation (not DFU)
+- Regular .elf files contain lengthy parts, which are useless for the LA104. After compilation process, this file is stripped to reduce it's size by [/tools/elfstrip](/tools/elfstrip) tool
+- Source code of the operating system is placed in [/system/os_host](/system/os_host) folder and simple file manager is in [/system/apps_shell/test29_fileman](/system/apps_shell/test29_fileman). For testing purpose one should compile also some simple application e.g. [/system/apps/test15_charmap](/system/apps/test15_charmap) or [/system/apps_experiments/test2_import](/system/apps_experiments/test2_import)
+- Whole codebase is written in C/C++ with small bits of assembly. LA104 is based on STM32F103 arm processor and to be able to build this code, you will need **arm eabi toolchain** which can be downloaded here for any common platform: https://developer.arm.com/open-source/gnu-toolchain/gnu-rm/downloads
+- Everything should be compiled without errors, tested with *gcc-arm-none-eabi-7-2018-q2-update* and more recent *gcc-arm-none-eabi-9-2020-q2-update*
 
 ## Mac OSX / Linux
 - Clone whole repository (git clone https://github.com/gabonator/LA104.git)
@@ -143,14 +152,14 @@ docker rm -v $id
     ```
     - If everything went well, it should produce **build/2import.elf** file
         
-    ## Windows
-    - Follow the OSX tutorial, but rewrite provided scripts into batch files, it should be pretty easy, since there are just 4-10 commands
-    
-    ## Flashing and first run
-    - After finishing this tutorial you should have three files: **system_la104.hex**, **shell.elf** and **2import.elf**
-    - Flash it with DFU loader by holding first button when powering the device. Use the **cp_la104.sh** script if you are having troubles copying the file to DFU drive (you will need to build the dfuload tool from [/tools/dfuload](/tools/dfuload) folder)
-    - Turn the device off and on, and the OS should ask for **shell.elf**
-    - After reconnecting the device using USB cable, you should be able to copy new files to the internal eeprom (different from the virtual DFU drive)
-    - copy **shell.elf** and **2import.elf**, press first button to reload the shell or power cycle the device
-    - you should see file manager with filesystem listing
-    
+## Windows
+- Follow the OSX tutorial, but rewrite provided scripts into batch files, it should be pretty easy, since there are just 4-10 commands
+
+## Flashing and first run
+- After finishing this tutorial you should have three files: **system_la104.hex**, **shell.elf** and **2import.elf**
+- Flash it with DFU loader by holding first button when powering the device. Use the **cp_la104.sh** script if you are having troubles copying the file to DFU drive (you will need to build the dfuload tool from [/tools/dfuload](/tools/dfuload) folder)
+- Turn the device off and on, and the OS should ask for **shell.elf**
+- After reconnecting the device using USB cable, you should be able to copy new files to the internal eeprom (different from the virtual DFU drive)
+- copy **shell.elf** and **2import.elf**, press first button to reload the shell or power cycle the device
+- you should see file manager with filesystem listing
+

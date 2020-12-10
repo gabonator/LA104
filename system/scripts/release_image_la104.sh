@@ -267,6 +267,7 @@ cp $FROM/92bmp180.elf $TO/devices/bmp180.elf
 cp $FROM/95sht20.elf $TO/devices/sht20.elf
 cp $FROM/96tm1637.elf $TO/devices/tm1637.elf
 cp $FROM/87mlx906.elf $TO/devices/mlx90614.elf
+cp $FROM/106mpr12.elf $TO/devices/mpr121.elf
 
 echo -n "{\"description\":{short:\"APDS9960\",long:\"APDS9960 color gesture sensor\"},\"icon\":\"chip.bmp\",\"execute\":\"apds9960.elf\"}" > $TO/devices/apds9960.lnk
 echo -n "{\"description\":{short:\"BMP085\",long:\"BMP085 Barometric sensor\"},\"icon\":\"chip.bmp\",\"execute\":\"bmp085.elf\"}" > $TO/devices/bmp085.lnk
@@ -282,18 +283,9 @@ echo -n "{\"description\":{short:\"BMP180\",long:\"BMP180/BMP085 barometer\"},\"
 echo -n "{\"description\":{short:\"SHT20\",long:\"SHT20 temperature humidity\"},\"icon\":\"chip.bmp\",\"execute\":\"sht20.elf\"}" > $TO/devices/sht20.lnk
 echo -n "{\"description\":{short:\"TM1637\",long:\"TM1637 7-segment display\"},\"icon\":\"chip.bmp\",\"execute\":\"tm1637.elf\"}" > $TO/devices/tm1637.lnk
 echo -n "{\"description\":{short:\"MLX90614\",long:\"MLX90614 non cotact thermo\"},\"icon\":\"chip.bmp\",\"execute\":\"mlx90614.elf\"}" > $TO/devices/mlx90614.lnk
+echo -n "{\"description\":{short:\"MPR121\",long:\"MPR121 12 channel toch sensor\"},\"icon\":\"chip.bmp\",\"execute\":\"mpr121.elf\"}" > $TO/devices/mpr121.lnk
 
 cp $ICON/chip.bmp $TO/devices/chip.bmp
-
-#cp $ICON/chip.bmp $TO/tools/bmp085.bmp
-#cp $ICON/chip.bmp $TO/tools/dht22.bmp
-#cp $ICON/chip.bmp $TO/tools/ds1307.bmp
-#cp $ICON/chip.bmp $TO/tools/ds3231.bmp
-#cp $ICON/chip.bmp $TO/tools/esp8266.bmp
-#cp $ICON/chip.bmp $TO/tools/max7219.bmp
-#cp $ICON/chip.bmp $TO/tools/pcf8591t.bmp
-#cp $ICON/chip.bmp $TO/tools/simcom.bmp
-#cp $ICON/chip.bmp $TO/tools/yx5300.bmp
 
 echo -n "{\"description\":{short:\"Help\",long:\"Help\"},\"icon\":\"../help.bmp\",\"execute\":\"../viewtxt.elf help.txt\",order:200}" >> $TO/devices/help.lnk
 

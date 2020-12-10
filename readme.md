@@ -20,6 +20,10 @@ Go to release section of this page, find latest version for your device (there a
 
 Refer to this [tutorial](resources/tutorial_building)
 
+#### Online demo
+
+[![WASM build](resources/imgWasm.png)](https://rawgit.valky.eu/gabonator/LA104/master/resources/wasmbuild/index.html)
+
 #### Repository structure
 
   - resources - old projects, screenshots used in this document and tutorials
@@ -60,6 +64,7 @@ Refer to this [tutorial](resources/tutorial_building)
 | ![36espwww.elf](resources/appicons/chip.png) | devices | ESP8266 uart wifi server | [apps/test36_esp_server](system/apps/test36_esp_server/) |
 | ![84maxdis.elf](resources/appicons/chip.png) | devices | MAX7219 display driver | [apps_experiments/84_max7219](system/apps_experiments/84_max7219/) |
 | ![87mlx906.elf](resources/appicons/chip.png) | devices | MLX90614 non cotact thermo | [apps_unfinished/87_mlx90614](system/apps_unfinished/87_mlx90614/) |
+| ![106mpr12.elf](resources/appicons/chip.png) | devices | MPR121 12 channel toch sensor | [apps_experiments/106_mpr121](system/apps_experiments/106_mpr121/) |
 | ![34scope.elf](resources/appicons/chip.png) | devices | PCF8591t I2C ADC | [apps/test34_scope](system/apps/test34_scope/) |
 | ![95sht20.elf](resources/appicons/chip.png) | devices | SHT20 temperature humidity | [apps_experiments/95_sht20](system/apps_experiments/95_sht20/) |
 | ![45simcom.elf](resources/appicons/chip.png) | devices | SIMCOM gprs modem | [apps/test45_simcom](system/apps/test45_simcom/) |
@@ -74,20 +79,20 @@ Refer to this [tutorial](resources/tutorial_building)
 | ![2import.elf](resources/appicons/app.png) | fun | Sierpinski triangle | [apps_experiments/test2_import](system/apps_experiments/test2_import/) |
 | ![85eetest.elf](resources/appicons/eeview.png) | i2c | I2C EEPROM memory viewer | [apps_featured/85_i2ceeprom](system/apps_featured/85_i2ceeprom/) |
 | ![37icscan.elf](resources/appicons/i2cscan.png) | i2c | I2C bus scanner | [apps_featured/test37_i2cscan](system/apps_featured/test37_i2cscan/) |
-| ![80rftool.elf](resources/appicons/rftool.png) | rftools | RF analyser synthesizer | [apps_featured/80_rftool/test](system/apps_featured/80_rftool/test/)  [https://youtu.be/Gwyi00NKBNg](https://youtu.be/Gwyi00NKBNg) |
-| ![82sanal.elf](resources/appicons/spectrum.png) | rftools | Spectrum analyser | [apps/82_specan](system/apps/82_specan/)  [https://youtu.be/Gwyi00NKBNg](https://youtu.be/Gwyi00NKBNg) |
-| ![79ccosc.elf](resources/appicons/wusbosc.png) | rftools | WebUSB rf analyser | [apps/79_cc1101osc](system/apps/79_cc1101osc/)  [https://youtu.be/Gwyi00NKBNg](https://youtu.be/Gwyi00NKBNg) |
-| ![105avrfl.elf](resources/appicons/avrflash.png) | tools | Atmel firmware flasher | [apps/105_avrprogrammer](system/apps/105_avrprogrammer/)  [https://youtu.be/yC3a1zbonJ0](https://youtu.be/yC3a1zbonJ0) |
+| ![80rftool.elf](resources/appicons/rftool.png) | rftools | RF analyser synthesizer | [apps_featured/80_rftool/test](system/apps_featured/80_rftool/test/)<br>[https://youtu.be/Gwyi00NKBNg](https://youtu.be/Gwyi00NKBNg) |
+| ![82sanal.elf](resources/appicons/spectrum.png) | rftools | Spectrum analyser | [apps/82_specan](system/apps/82_specan/)<br>[https://youtu.be/Gwyi00NKBNg](https://youtu.be/Gwyi00NKBNg) |
+| ![79ccosc.elf](resources/appicons/wusbosc.png) | rftools | WebUSB rf analyser | [apps/79_cc1101osc](system/apps/79_cc1101osc/)<br>[https://youtu.be/Gwyi00NKBNg](https://youtu.be/Gwyi00NKBNg) |
+| ![105avrfl.elf](resources/appicons/avrflash.png) | tools | Atmel firmware flasher | [apps/105_avrprogrammer](system/apps/105_avrprogrammer/)<br>[https://youtu.be/yC3a1zbonJ0](https://youtu.be/yC3a1zbonJ0) |
 | ![15charla.elf](resources/appicons/charmap.png) | tools | Character map | [apps/test15_charmap](system/apps/test15_charmap/) |
 | ![30dcf77.elf](resources/appicons/dcf77.png) | tools | DCF77 decoder | [apps/test30_dcf77](system/apps/test30_dcf77/) |
 | ![33temper.elf](resources/appicons/dstemper.png) | tools | DS1820 temperature grapher | [apps_featured/test33_temper](system/apps_featured/test33_temper/) |
 | ![49gpio.elf](resources/appicons/gpio.png) | tools | GPIO and PWM controller | [apps_featured/test49_gpio](system/apps_featured/test49_gpio/) |
-| ![21mplayl.elf](resources/appicons/midiplay.png) | tools | MIDI player | [apps_featured/test21_midiplay](system/apps_featured/test21_midiplay/)  [https://youtu.be/f3DCqy-3lNo](https://youtu.be/f3DCqy-3lNo) |
-| ![22seqen.elf](resources/appicons/sequence.png) | tools | Sequencer and analyser | [apps/test22_sequencer](system/apps/test22_sequencer/)  [https://youtu.be/D8OnXzE7OwU](https://youtu.be/D8OnXzE7OwU) |
-| ![103servo.elf](resources/appicons/servo.png) | tools | Servo controller PCA9685 | [apps_featured/103_servo](system/apps_featured/103_servo/)  [https://youtu.be/heYFrqVF1P4](https://youtu.be/heYFrqVF1P4) |
+| ![21mplayl.elf](resources/appicons/midiplay.png) | tools | MIDI player | [apps_featured/test21_midiplay](system/apps_featured/test21_midiplay/)<br>[https://youtu.be/f3DCqy-3lNo](https://youtu.be/f3DCqy-3lNo) |
+| ![22seqen.elf](resources/appicons/sequence.png) | tools | Sequencer and analyser | [apps/test22_sequencer](system/apps/test22_sequencer/)<br>[https://youtu.be/D8OnXzE7OwU](https://youtu.be/D8OnXzE7OwU) |
+| ![103servo.elf](resources/appicons/servo.png) | tools | Servo controller PCA9685 | [apps_featured/103_servo](system/apps_featured/103_servo/)<br>[https://youtu.be/heYFrqVF1P4](https://youtu.be/heYFrqVF1P4) |
 | ![72uartm.elf](resources/appicons/uartmon.png) | tools | UART monitor | [apps_featured/72_uartmon](system/apps_featured/72_uartmon/) |
-| ![74invt.elf](resources/appicons/vfd_invt.png) | tools | Invt VFD RS485 visualizer | [apps_featured/74_invtvisual](system/apps_featured/74_invtvisual/)  [https://youtu.be/0Ns7AHVvmX0](https://youtu.be/0Ns7AHVvmX0) |
-| ![63ws_104.elf](resources/appicons/ws2812.png) | tools | WS2812 addressable led tester | [apps_featured/test63_ws2812](system/apps_featured/test63_ws2812/)  [https://youtu.be/4fWqZBbjQPc](https://youtu.be/4fWqZBbjQPc) |
+| ![74invt.elf](resources/appicons/vfd_invt.png) | tools | Invt VFD RS485 visualizer | [apps_featured/74_invtvisual](system/apps_featured/74_invtvisual/)<br>[https://youtu.be/0Ns7AHVvmX0](https://youtu.be/0Ns7AHVvmX0) |
+| ![63ws_104.elf](resources/appicons/ws2812.png) | tools | WS2812 addressable led tester | [apps_featured/test63_ws2812](system/apps_featured/test63_ws2812/)<br>[https://youtu.be/4fWqZBbjQPc](https://youtu.be/4fWqZBbjQPc) |
 | ![104avris.elf](resources/appicons/avrisp.png) | usb | Atmel ISP programmer | [apps_usb/104_avrisp](system/apps_usb/104_avrisp/) |
 | ![24ncdc.elf](resources/appicons/cdc.png) | usb | Serial link | [apps_usb/test24_usbcdc](system/apps_usb/test24_usbcdc/) |
 | ![25hid.elf](resources/appicons/hid.png) | usb | Human interface device | [apps_usb/test25_hid](system/apps_usb/test25_hid/) |
@@ -234,22 +239,3 @@ Connect your midi keyboard with two wires (3V and P1 through 100-330 ohm resisto
 
 ![Logic sequencer 2](resources/imgMidi2.png)
 
-#### Screenshots
-
-![Hybrid app on mac OSX](resources/hybridmp3.png)
-
-![File manager](resources/imgManager.png)
-
-![PWM controller](resources/imgPwm.png)
-
-![Charset viewer](resources/imgCharset.png)
-
-![DS1820 temperature sensor](resources/imgDs1820.png)
-
-![DHT22 sensor](resources/imgDht.png)
-
-![I2C rgb sensor](resources/imgApds1.png)
-
-![I2C barometric sensor](resources/imgBmp180.png)
-
-![MP3 player](resources/imgMp3.png)

@@ -5,9 +5,9 @@
 class CSampler
 {
 public:
-  virtual bool Init() { return 0; }
-  virtual void Deinit() {}
-  virtual bool Read() { return 0; }
+  virtual bool Init() {_ASSERT(0); return false;}
+  virtual void Deinit() {_ASSERT(0);}
+  virtual bool Read() {_ASSERT(0); return false;}
 
     void delayMicroseconds(int us)
     {

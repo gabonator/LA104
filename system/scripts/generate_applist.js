@@ -84,7 +84,7 @@ getFiles("../", "build.sh").then(l => l.filter(app => app.path.substr(0,4) == "a
   {
     var lnk = fs2.readFileSync(flist[f].base + flist[f].path + flist[f].name).toString();
     json = eval("_="+lnk);
-    final.push({desc:json.description.long, path:flist[f].path, icon:json.icon, execute:json.execute, youtube:json.youtube});
+    final.push({desc:json.description.long, path:flist[f].path, icon:json.icon, execute:json.execute, youtube:json.youtube ? json.youtube : null});
   }
   appList = final;
   return final;
@@ -135,7 +135,7 @@ getFiles("../", "build.sh").then(l => l.filter(app => app.path.substr(0,4) == "a
       }).catch(e => {
       });
     };
-    promises.push(conv(imgsrc, "temp/"+target));
+    promises.push(conv(imgsrc, "../build/appicons/"+target));
   }
   return Promise.all(promises);
 })
@@ -147,6 +147,10 @@ getFiles("../", "build.sh").then(l => l.filter(app => app.path.substr(0,4) == "a
   {
     var app = appList[i];
     var ref = appHashes[app.hash];
+    if (!ref)
+    {
+      throw "Cannot match app: " + JSON.stringify(app);
+    }
     var icon = "!["+ref.internal.split("/").slice(-1)[0]+"](resources/appicons/"+app.newIcon+")";
     var folder = "["+ref.folder.slice(0,-1)+"](system/"+ref.folder+")";
     if (app.youtube)

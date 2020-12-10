@@ -459,7 +459,7 @@ public:
 
 CApplication app;
 
-bool analyse(CArray<uint16_t>& pulse)
+void analyse(CArray<uint16_t>& pulse)
 {
     app.AnalyseBuffer(pulse);
     return 0;

@@ -26,7 +26,7 @@ void BIOS::DBG::Print(const char * format, ...)
   js_log(bbuf);
 #else
 #ifdef __APPLE__
-    fprintf(stderr, buf);
+    fprintf(stderr, "%s", buf);
 #endif
 	for ( bbuf = buf; *bbuf; bbuf++ )
 	{

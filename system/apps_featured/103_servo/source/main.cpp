@@ -123,7 +123,7 @@ public:
             case Linear: return "Linear";
             case CubicInOut: return "CubicInOut";
             default:
-                _ASSERT(0);
+                return "Unknown";
         }
        return 0;
     }
@@ -206,6 +206,8 @@ public:
             return CRect(0, Max*14, 80, Max*14+16);
         else
             return CRect(80, Max*14, Width-16, Max*14+16);
+        _ASSERT(0);
+        return CRect();
     }
     
     virtual void PaintSubitem(const CRect& rect, int index, bool focus) override
@@ -553,6 +555,7 @@ private:
                 return CubicEaseInOut(x/1024.0f)*1024.0f;
             default:
                 _ASSERT(0);
+                return x;
         }
         return 0;
     }
