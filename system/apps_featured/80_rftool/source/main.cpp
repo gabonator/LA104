@@ -462,7 +462,6 @@ CApplication app;
 void analyse(CArray<uint16_t>& pulse)
 {
     app.AnalyseBuffer(pulse);
-    return 0;
 }
 
 void updateWave(int i)
