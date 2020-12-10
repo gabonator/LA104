@@ -57,23 +57,23 @@ uint32_t GetProcAddress(char* symbol)
     case 0x00000430: return (uint32_t)static_cast<void(*)(CRect const&)>(BIOS::LCD::BufferBegin); //_ZN4BIOS3LCD11BufferBeginERK5CRect
     case 0x0000d8f4: return (uint32_t)static_cast<void(*)(unsigned short*, int)>(BIOS::LCD::BufferWrite); //_ZN4BIOS3LCD11BufferWriteEPti
     case 0x0000f243: return (uint32_t)static_cast<void(*)(unsigned short)>(BIOS::LCD::BufferWrite); //_ZN4BIOS3LCD11BufferWriteEt
-    case 0x0000ff2f: return (uint32_t)static_cast<void(*)(CRect const&, unsigned short)>(BIOS::LCD::Bar); //_ZN4BIOS3LCD3BarERK5CRectt
     case 0x0000e34c: return (uint32_t)static_cast<void(*)(int, int, int, int, unsigned short)>(BIOS::LCD::Bar); //_ZN4BIOS3LCD3BarEiiiit
+    case 0x0000ff2f: return (uint32_t)static_cast<void(*)(CRect const&, unsigned short)>(BIOS::LCD::Bar); //_ZN4BIOS3LCD3BarERK5CRectt
     case 0x00003e5e: return (uint32_t)static_cast<int(*)(int, int, unsigned short, unsigned short, char const*)>(BIOS::LCD::Draw); //_ZN4BIOS3LCD4DrawEiittPKc
     case 0x00005994: return (uint32_t)static_cast<void(*)(unsigned short)>(BIOS::LCD::Clear); //_ZN4BIOS3LCD5ClearEt
-    case 0x0000b8c2: return (uint32_t)static_cast<int(*)(int, int, unsigned short, unsigned short, char const*)>(BIOS::LCD::Print); //_ZN4BIOS3LCD5PrintEiittPKc
-    case 0x00009d4b: return (uint32_t)static_cast<int(*)(int, int, unsigned short, unsigned short, char*)>(BIOS::LCD::Print); //_ZN4BIOS3LCD5PrintEiittPc
     case 0x000080db: return (uint32_t)static_cast<int(*)(int, int, unsigned short, unsigned short, char)>(BIOS::LCD::Print); //_ZN4BIOS3LCD5PrintEiittc
+    case 0x00009d4b: return (uint32_t)static_cast<int(*)(int, int, unsigned short, unsigned short, char*)>(BIOS::LCD::Print); //_ZN4BIOS3LCD5PrintEiittPc
+    case 0x0000b8c2: return (uint32_t)static_cast<int(*)(int, int, unsigned short, unsigned short, char const*)>(BIOS::LCD::Print); //_ZN4BIOS3LCD5PrintEiittPKc
     case 0x00008063: return (uint32_t)static_cast<int(*)(int, int, unsigned short, unsigned short, char const*, ...)>(BIOS::LCD::Printf); //_ZN4BIOS3LCD6PrintfEiittPKcz
     case 0x00002206: return (uint32_t)static_cast<void(*)(int, int, int, int, unsigned int)>(BIOS::LCD::Shadow); //_ZN4BIOS3LCD6ShadowEiiiij
     case 0x00000509: return (uint32_t)static_cast<void(*)(int, int, int, int, unsigned short const*, int)>(BIOS::LCD::Pattern); //_ZN4BIOS3LCD7PatternEiiiiPKti
     case 0x000085ac: return (uint32_t)static_cast<uint16_t(*)(int, int)>(BIOS::LCD::GetPixel); //_ZN4BIOS3LCD8GetPixelEii
-    case 0x0000698f: return (uint32_t)static_cast<void(*)(CPoint const&, unsigned short)>(BIOS::LCD::PutPixel); //_ZN4BIOS3LCD8PutPixelERK6CPointt
     case 0x0000a105: return (uint32_t)static_cast<void(*)(int, int, unsigned short)>(BIOS::LCD::PutPixel); //_ZN4BIOS3LCD8PutPixelEiit
+    case 0x0000698f: return (uint32_t)static_cast<void(*)(CPoint const&, unsigned short)>(BIOS::LCD::PutPixel); //_ZN4BIOS3LCD8PutPixelERK6CPointt
     case 0x00007604: return (uint32_t)static_cast<void(*)()>(BIOS::LCD::BufferEnd); //_ZN4BIOS3LCD9BufferEndEv
     case 0x0000850d: return (uint32_t)static_cast<void(*)(CRect const&, unsigned short)>(BIOS::LCD::Rectangle); //_ZN4BIOS3LCD9RectangleERK5CRectt
-    case 0x0000f4c2: return (uint32_t)static_cast<void(*)(CRect const&, unsigned short)>(BIOS::LCD::RoundRect); //_ZN4BIOS3LCD9RoundRectERK5CRectt
     case 0x0000ba0f: return (uint32_t)static_cast<void(*)(int, int, int, int, unsigned short)>(BIOS::LCD::RoundRect); //_ZN4BIOS3LCD9RoundRectEiiiit
+    case 0x0000f4c2: return (uint32_t)static_cast<void(*)(CRect const&, unsigned short)>(BIOS::LCD::RoundRect); //_ZN4BIOS3LCD9RoundRectERK5CRectt
     case 0x000044d6: return (uint32_t)static_cast<uintptr_t(*)(BIOS::SYS::EAttribute)>(BIOS::SYS::GetAttribute); //_ZN4BIOS3SYS12GetAttributeENS0_10EAttributeE
     case 0x0000c701: return (uint32_t)static_cast<void(*)(int)>(BIOS::SYS::Beep); //_ZN4BIOS3SYS4BeepEi
     case 0x00005757: return (uint32_t)static_cast<void(*)(int)>(BIOS::SYS::DelayMs); //_ZN4BIOS3SYS7DelayMsEi

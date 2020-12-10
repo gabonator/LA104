@@ -60,5 +60,6 @@ public:
       case 16: return "Overheat";
       case 36: return "Underload fault LL";
     }
+    return nullptr;
   }
 };

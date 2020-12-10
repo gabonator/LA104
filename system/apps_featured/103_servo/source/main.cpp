@@ -122,7 +122,10 @@ public:
         {
             case Linear: return "Linear";
             case CubicInOut: return "CubicInOut";
+            default:
+                _ASSERT(0);
         }
+       return 0;
     }
 };
 
@@ -201,7 +204,7 @@ public:
             return CRect(0, i*14, Width-16, i*14+14);
         else if (i==Max)
             return CRect(0, Max*14, 80, Max*14+16);
-        else if (i==Max+1)
+        else
             return CRect(80, Max*14, Width-16, Max*14+16);
     }
     
@@ -551,6 +554,7 @@ private:
             default:
                 _ASSERT(0);
         }
+        return 0;
     }
     
     void DrawCurve(int _x, int _y)

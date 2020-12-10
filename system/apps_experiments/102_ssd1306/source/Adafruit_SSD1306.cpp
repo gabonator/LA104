@@ -602,7 +602,7 @@ bool Adafruit_SSD1306::getPixel(int16_t x, int16_t y) {
 */
 uint8_t *Adafruit_SSD1306::getBuffer(void) { return buffer; }
 
-uint8_t Adafruit_SSD1306::setBuffer(uint8_t* buf) {buffer = buf;}
+uint8_t Adafruit_SSD1306::setBuffer(uint8_t* buf) {buffer = buf; return 0; }
 
 // REFRESH DISPLAY ---------------------------------------------------------
 

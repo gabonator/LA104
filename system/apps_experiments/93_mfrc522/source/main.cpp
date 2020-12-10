@@ -24,6 +24,7 @@ bool CWire::error() {
         CONSOLE::Color(RGB565(ffffff));        
         *gpioStatus = 0;
       }
+      return 0;
 }
 
 using namespace BIOS;
