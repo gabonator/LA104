@@ -20,6 +20,9 @@ Go to release section of this page, find latest version for your device (there a
 
 Refer to this [tutorial](resources/tutorial_building)
 
+#### Review video
+[![LA104 OS Review video](https://img.youtube.com/vi/8FxnDp6G_iQ/0.jpg)](https://www.youtube.com/watch?v=8FxnDp6G_iQ "LA104 OS Review video")
+
 #### Online demo
 
 [![WASM build](resources/imgWasm.png)](https://rawgit.valky.eu/gabonator/LA104/master/resources/wasmbuild/index.html)
