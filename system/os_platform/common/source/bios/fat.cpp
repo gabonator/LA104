@@ -209,7 +209,12 @@ namespace BIOS
 		EResult FindNext(TFindFile* pFile)
 		{
 			FILINFO* pFileInfo = (FILINFO*)pFile;
-			
+            static_assert(std::is_same<decltype(pFile->nAtrib), decltype(pFileInfo->fattrib)>::value, "wrong types");
+            static_assert(std::is_same<decltype(pFile->nFileLength), decltype(pFileInfo->fsize)>::value, "wrong types");
+            static_assert(std::is_same<decltype(pFile->nDate), decltype(pFileInfo->fdate)>::value, "wrong types");
+            static_assert(std::is_same<decltype(pFile->nTime), decltype(pFileInfo->ftime)>::value, "wrong types");
+            static_assert(std::is_same<decltype(pFile->strName[0]), decltype(pFileInfo->fname[0])>::value, "wrong types");
+
 			FRESULT r = f_readdir(&g_directory, pFileInfo);
 			if ( pFileInfo->fname[0] == 0)
 				return BIOS::FAT::ENoFile;
@@ -217,12 +222,12 @@ namespace BIOS
 			return Result(r);
 		}
 		
-		ui32 GetFileSize()
+		uint32_t GetFileSize()
 		{
 			return g_file.fsize;
 		}
 		
-		EResult Seek(ui32 lOffset)
+		EResult Seek(uint32_t lOffset)
 		{
 			FRESULT r = f_lseek(&g_file, lOffset);
 			return Result(r);

@@ -10,7 +10,7 @@
 
 uint32_t _strtol(char*str, char**p, int nBase)
 {
-	ui32 nVal = 0;
+	uint32_t nVal = 0;
 	char ch;
 	while ( (ch = *str++) != 0 )
 	{

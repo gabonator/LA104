@@ -8,9 +8,9 @@ CWndOscGraph::CWndOscGraph()
 	m_bNeedRedraw = true;
 }
 
-void CWndOscGraph::_PrepareColumn( ui16 *column, ui16 n, ui16 clr )
+void CWndOscGraph::_PrepareColumn( uint16_t *column, uint16_t n, uint16_t clr )
 {
-	for (ui16 y=0; y<DivsY*BlkY; y++)
+	for (uint16_t y=0; y<DivsY*BlkY; y++)
 		column[y] = clr;
 //		memset( column, clr, DivsY*BlkY*2 );
 	if ( n == 0 )
@@ -21,12 +21,12 @@ void CWndOscGraph::_PrepareColumn( ui16 *column, ui16 n, ui16 clr )
 		if ( (n % BlkX) == 0)
 		{	// Display vertical line or dots
 			ui8 inc = (Settings.Disp.Grid == CSettings::Display::_GridLines) ? 1 : 5;
-			for (ui16 y=0; y<DivsY*BlkY; y += inc)
+			for (uint16_t y=0; y<DivsY*BlkY; y += inc)
 				column[y] = RGB565(808080);
 		} else
 		if ((Settings.Disp.Grid == CSettings::Display::_GridLines) || ((n%6) == 0 ))
 		{	// Display horizontal line or dots
-			for (ui16 y=BlkY; y<DivsY*BlkY-1; y += BlkY)
+			for (uint16_t y=BlkY; y<DivsY*BlkY-1; y += BlkY)
 				column[y] = RGB565(808080);
 		}
 	}
@@ -35,17 +35,17 @@ void CWndOscGraph::_PrepareColumn( ui16 *column, ui16 n, ui16 clr )
 	{
 		if (n == CenterX)
 		{	// Display center X axis
-			for (ui16 y=0; y<DivsY*BlkY; y += 1)
+			for (uint16_t y=0; y<DivsY*BlkY; y += 1)
 				column[y] = RGB565(808080);
 		}
 		else if( (n==1) || (n == (MaxX-1)) || (n == CenterX-1) || (n == CenterX+1))
 		{	// Display X axis sub divisions
-			for (ui16 y=5; y<DivsY*BlkY; y += 5)
+			for (uint16_t y=5; y<DivsY*BlkY; y += 5)
 				column[y] = RGB565(808080);
 		}
 		else if( (n==2) || (n == (MaxX-2)) || (n == CenterX-2) || (n == CenterX+2))
 		{	// Display X axis main divisions
-			for (ui16 y=BlkY; y<DivsY*BlkY; y += BlkY)
+			for (uint16_t y=BlkY; y<DivsY*BlkY; y += BlkY)
 				column[y] = RGB565(808080);
 		}
 		// Display horizontal main axis
@@ -86,7 +86,7 @@ void CWndOscGraph::_PrepareColumn( ui16 *column, ui16 n, ui16 clr )
 	}
 }
 
-ui16 CWndOscGraph::_Interpolate( ui16 clrA, ui16 clrB )
+uint16_t CWndOscGraph::_Interpolate( uint16_t clrA, uint16_t clrB )
 {
 	int ar = Get565R(clrA);
 	int ag = Get565G(clrA);
@@ -137,7 +137,7 @@ void CWndOscGraph::OnPaintXY()
 	// input channels
 	ui8 bEnabled1 = Settings.CH1.Enabled == CSettings::AnalogChannel::_YES;
 	ui8 bEnabled2 = Settings.CH2.Enabled == CSettings::AnalogChannel::_YES;
-	ui16 clrPoint = _Interpolate( Settings.CH1.u16Color, Settings.CH2.u16Color );
+	uint16_t clrPoint = _Interpolate( Settings.CH1.u16Color, Settings.CH2.u16Color );
 
 	// calibration
 	CSettings::Calibrator::FastCalc calCh1, calCh2;
@@ -169,15 +169,15 @@ void CWndOscGraph::OnPaintXY()
 	}
 
 	
-	for (ui16 x=0; x<nColMax; x++, nIndex++)
+	for (uint16_t x=0; x<nColMax; x++, nIndex++)
 	{
-		ui32 ui32Sample = nIndex < nMaxIndex ?  Sampler::GetAt(nIndex) : 0;
+		uint32_t uint32_tSample = nIndex < nMaxIndex ?  Sampler::GetAt(nIndex) : 0;
 		
 		int nSampleY2 = 0, nSampleY1 = 0;
 
 		if ( bEnabled1 )
 		{
-			si16 ch1 = (ui8)((ui32Sample) & 0xff);
+			int16_t ch1 = (ui8)((uint32_tSample) & 0xff);
 			ch1 = Settings.CH1Calib.Correct( calCh1, ch1 );
 			if ( ch1 < 0 ) 
 				ch1 = 0;
@@ -187,7 +187,7 @@ void CWndOscGraph::OnPaintXY()
 		}
 		if ( bEnabled2 )
 		{
-			si16 ch2 = (ui8)((ui32Sample>>8) & 0xff);
+			int16_t ch2 = (ui8)((uint32_tSample>>8) & 0xff);
 			ch2 = Settings.CH2Calib.Correct( calCh2, ch2 );
 			if ( ch2 < 0 ) 
 				ch2 = 0;
@@ -204,7 +204,7 @@ void CWndOscGraph::OnPaintXY()
 
 void CWndOscGraph::OnPaintTY()
 {
-	ui16 column[CWndGraph::DivsY*CWndGraph::BlkY];
+	uint16_t column[CWndGraph::DivsY*CWndGraph::BlkY];
 	if ( !CWnd::GetOverlay().IsValid() /*&& m_bNeedRedraw*/ )
 	{
 		CRect rc = m_rcClient;
@@ -213,19 +213,19 @@ void CWndOscGraph::OnPaintTY()
 		m_bNeedRedraw = false;
 	}
 
-	ui16 clr1 = Settings.CH1.u16Color;
-	ui16 clr2 = Settings.CH2.u16Color;
-	ui16 clr3 = Settings.CH3.u16Color;
-	ui16 clr4 = Settings.CH4.u16Color;
+	uint16_t clr1 = Settings.CH1.u16Color;
+	uint16_t clr2 = Settings.CH2.u16Color;
+	uint16_t clr3 = Settings.CH3.u16Color;
+	uint16_t clr4 = Settings.CH4.u16Color;
 	ui8 en1 = Settings.CH1.Enabled == CSettings::AnalogChannel::_YES;
 	ui8 en2 = Settings.CH2.Enabled == CSettings::AnalogChannel::_YES;
 	ui8 en3 = Settings.CH3.Enabled == CSettings::DigitalChannel::_YES;
 	ui8 en4 = Settings.CH4.Enabled == CSettings::DigitalChannel::_YES;
 
-	ui16 clrShade1 = 0, clrShade2 = 0, clrShade12 = 0;
+	uint16_t clrShade1 = 0, clrShade2 = 0, clrShade12 = 0;
 
 	ui8 bTrigger = (BIOS::SYS::GetTick() - Settings.Trig.nLastChange) < 5000;
-	ui16 nTriggerTime = (Settings.Trig.nTime - Settings.Time.Shift);
+	uint16_t nTriggerTime = (Settings.Trig.nTime - Settings.Time.Shift);
 	if (!bTrigger)
 		nTriggerTime = -1;
 
@@ -305,10 +305,10 @@ void CWndOscGraph::OnPaintTY()
 		MathSetup( &Ch1fast, &Ch2fast );
 	}
 
-	ui16 clrm = Settings.Math.uiColor;
+	uint16_t clrm = Settings.Math.uiColor;
 	int nIndex = Settings.Time.Shift;
 
-	for (ui16 x=0; x<nMax; x++, nIndex++)
+	for (uint16_t x=0; x<nMax; x++, nIndex++)
 	{
 		int clrCol = (nTriggerTime != x) ? 0x0101 : 0x00;
 
@@ -376,15 +376,15 @@ void CWndOscGraph::OnPaintTY()
 
 		if ( en1 )
 		{
-			si16 ch1 = Sample.CH1;
+			int16_t ch1 = Sample.CH1;
 			ch1 = Settings.CH1Calib.Correct( Ch1fast, ch1 );
-			CUtils::Clamp<si16>( ch1, 0, 255 );
+			CUtils::Clamp<int16_t>( ch1, 0, 255 );
 
 			if ( bAverage1 )
 			{
-				ui16& nMemory = m_arrAverageBuf[x];
+				uint16_t& nMemory = m_arrAverageBuf[x];
 				int nNew = (nMemory*7 + (ch1<<8)*1)/8;  // 7:1
-				nMemory = (ui16)nNew;
+				nMemory = (uint16_t)nNew;
 				ch1 = nMemory >> 8;
 			}
 
@@ -392,15 +392,15 @@ void CWndOscGraph::OnPaintTY()
 		}
 		if ( en2 )
 		{
-			si16 ch2 = Sample.CH2;
+			int16_t ch2 = Sample.CH2;
 			ch2 = Settings.CH2Calib.Correct( Ch2fast, ch2 );
-			CUtils::Clamp<si16>( ch2, 0, 255 );
+			CUtils::Clamp<int16_t>( ch2, 0, 255 );
 
 			if ( bAverage2 )
 			{
-				ui16& nMemory = m_arrAverageBuf[x];
+				uint16_t& nMemory = m_arrAverageBuf[x];
 				int nNew = (nMemory*7 + (ch2<<8)*1)/8;
-				nMemory = (ui16)nNew;
+				nMemory = (uint16_t)nNew;
 				ch2 = nMemory >> 8;
 			}
 
@@ -529,7 +529,7 @@ void CWndOscGraph::OnPaintTY()
 
 		if ( bTrigger && (x & 1) == 1 )
 		{
-			ui16 y = (Settings.Trig.nLevel*(DivsY*BlkY))>>8;
+			uint16_t y = (Settings.Trig.nLevel*(DivsY*BlkY))>>8;
 			column[y] = RGB565(404040);
 		}
 		if ( nMarkerY1 > 0 )

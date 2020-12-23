@@ -1,4 +1,5 @@
 #include <library.h>
+#include "../oldtypes.h"
 
 namespace Sampler
 {

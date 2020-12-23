@@ -43,7 +43,7 @@ GPIOD
 */
 void Set_Pixel(uint_fast16_t Color)
 {
-  GPIOE->ODR = (u16)Color;
+  GPIOE->ODR = (uint16_t)Color;
   GPIOD->BRR = GPIO_Pin_9;
   GPIOD->BSRR = GPIO_Pin_9;
 }
@@ -57,7 +57,7 @@ void Lcd_Control(int d)
 {
   GPIOD->BRR = GPIO_Pin_8;
   _delay();
-  GPIOE->ODR = (u16)d;
+  GPIOE->ODR = (uint16_t)d;
   GPIOD->BRR = GPIO_Pin_9;
   _delay();
   GPIOD->BSRR = GPIO_Pin_9;
@@ -68,7 +68,7 @@ void Lcd_Control(int d)
 void Lcd_Data(int d)
 {
   _delay();
-  GPIOE->ODR = (u16)d;
+  GPIOE->ODR = (uint16_t)d;
   GPIOD->BRR = GPIO_Pin_9;
   _delay();
   GPIOD->BSRR = GPIO_Pin_9;

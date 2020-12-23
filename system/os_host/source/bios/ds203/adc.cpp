@@ -63,7 +63,7 @@ extern u32 __Get(u8, u32);
 extern u32 __Read_FIFO();
 }
 
-int _binary_search(ui32* A, ui32 key, int imin, int imax)
+int _binary_search(uint32_t* A, uint32_t key, int imin, int imax)
 {
   // continue searching while [imin,imax] is not empty
   while (imax >= imin)
@@ -249,7 +249,7 @@ namespace BIOS
 	// positive floats can be treated as dwords when compared
 	void* pArray = (void*)arrTime; // prevent gcc error "strict alignment rules"
 	void* pValue = (void*)&timePerDiv;
-	int nI = _binary_search( (ui32*)pArray, *(ui32*)pValue, 0, (int)COUNT(arrTime)-1 );
+	int nI = _binary_search( (uint32_t*)pArray, *(uint32_t*)pValue, 0, (int)COUNT(arrTime)-1 );
 
 	_ASSERT( nI >= 0 || nI < (int)COUNT(arrPsc) );
 	if ( nI == -1 )

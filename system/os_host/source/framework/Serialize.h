@@ -38,12 +38,12 @@ public:
 	}
 	
 	CStream( NATIVEENUM* e ) : m_pBuffer( e ), m_nOffset( 0 ), m_nLength( sizeof(NATIVEENUM) ) {}
-	CStream( ui32& n ) : m_pBuffer( &n ), m_nOffset( 0 ), m_nLength( sizeof(ui32) ) {}
-	CStream( si32& n ) : m_pBuffer( &n ), m_nOffset( 0 ), m_nLength( sizeof(si32) ) {}
-	CStream( ui16& n ) : m_pBuffer( &n ), m_nOffset( 0 ), m_nLength( sizeof(ui16) ) {}
-	CStream( si16& n ) : m_pBuffer( &n ), m_nOffset( 0 ), m_nLength( sizeof(si16) ) {}
-	CStream( ui8& n ) : m_pBuffer( &n ), m_nOffset( 0 ), m_nLength( sizeof(ui8) ) {}
-	CStream( si8& n ) : m_pBuffer( &n ), m_nOffset( 0 ), m_nLength( sizeof(si8) ) {}
+	CStream( uint32_t& n ) : m_pBuffer( &n ), m_nOffset( 0 ), m_nLength( sizeof(uint32_t) ) {}
+	CStream( int32_t& n ) : m_pBuffer( &n ), m_nOffset( 0 ), m_nLength( sizeof(int32_t) ) {}
+	CStream( uint16_t& n ) : m_pBuffer( &n ), m_nOffset( 0 ), m_nLength( sizeof(uint16_t) ) {}
+	CStream( int16_t& n ) : m_pBuffer( &n ), m_nOffset( 0 ), m_nLength( sizeof(int16_t) ) {}
+	CStream( uint8_t& n ) : m_pBuffer( &n ), m_nOffset( 0 ), m_nLength( sizeof(uint8_t) ) {}
+	CStream( int8_t& n ) : m_pBuffer( &n ), m_nOffset( 0 ), m_nLength( sizeof(int8_t) ) {}
 	CStream( int& n ) : m_pBuffer( &n ), m_nOffset( 0 ), m_nLength( sizeof(int) ) {}
 	
 	CStream& operator <<( const CStream& data )
@@ -76,10 +76,10 @@ public:
 		return m_nLength;
 	}
 
-	ui32 GetChecksum()
+	uint32_t GetChecksum()
 	{
-		ui32 nAux = 0;
-		ui8* pBuffer = (ui8*)m_pBuffer;
+		uint32_t nAux = 0;
+		uint8_t* pBuffer = (uint8_t*)m_pBuffer;
 		for ( int i = 0; i < m_nLength; i++, pBuffer++ )
 			nAux ^= (*pBuffer) << ((i&3)<<3);
 		return nAux;

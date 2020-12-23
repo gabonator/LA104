@@ -63,9 +63,9 @@ int BlurFilter( int a, int b, int c )
 				BIOS::ADC::TSample Sample;
 				Sample.value = Sampler::GetAt( Settings.Time.Shift + i );
 
-				si16 ch1 = Sample.CH1;
+				int16_t ch1 = Sample.CH1;
 				ch1 = Settings.CH1Calib.Correct( Ch1fast, ch1 );
-				CUtils::Clamp<si16>( ch1, 0, 255 );
+				CUtils::Clamp<int16_t>( ch1, 0, 255 );
 			
 				*bLow = min(*bLow, (ui8)ch1);
 				*bHigh = max(*bHigh, (ui8)ch1);
@@ -86,9 +86,9 @@ int BlurFilter( int a, int b, int c )
 				BIOS::ADC::TSample Sample;
 				Sample.value = Sampler::GetAt( Settings.Time.Shift + i );
 
-				si16 ch1 = Sample.CH1;
+				int16_t ch1 = Sample.CH1;
 				ch1 = Settings.CH1Calib.Correct( Ch1fast, ch1 );
-				CUtils::Clamp<si16>( ch1, 0, 255 );
+				CUtils::Clamp<int16_t>( ch1, 0, 255 );
 
 				if ( ch1 < *bLow || ch1 > *bHigh )
 				{
@@ -169,9 +169,9 @@ int BlurFilter( int a, int b, int c )
 			BIOS::ADC::TSample Sample;
 			Sample.value = Sampler::GetAt( Settings.Time.Shift + i );
 
-			si16 ch1 = Sample.CH1;
+			int16_t ch1 = Sample.CH1;
 			ch1 = Settings.CH1Calib.Correct( Ch1fast, ch1 );
-			CUtils::Clamp<si16>( ch1, 0, 255 );
+			CUtils::Clamp<int16_t>( ch1, 0, 255 );
 			*bLow = (ui8)ch1;
 			*bHigh = (ui8)ch1;
 		}

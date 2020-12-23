@@ -1,5 +1,6 @@
 #pragma once
 #include <Framework.h>
+#include "oldtypes.h"
 
 #define Settings (*CSettings::m_pInstance)
 

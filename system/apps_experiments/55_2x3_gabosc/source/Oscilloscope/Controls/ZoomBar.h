@@ -1,7 +1,7 @@
 class CWndZoomBar : public CWnd
 {
 public:
-	virtual void Create(CWnd* pParent, ui16 nFlags, CWnd* pGraph) 
+	virtual void Create(CWnd* pParent, uint16_t nFlags, CWnd* pGraph) 
 	{
 		CRect rcClient( pGraph->m_rcClient );
 		rcClient.top = rcClient.bottom + 4;
@@ -11,7 +11,7 @@ public:
 
 	virtual void OnPaint()
 	{
-		ui16 clr = RGB565(808080);
+		uint16_t clr = RGB565(808080);
 		CRect rcBorder = m_rcClient;
 		rcBorder.Inflate(1, 0, 1, 0);
 		BIOS::LCD::Bar( rcBorder, clr );
@@ -19,16 +19,16 @@ public:
 		//BIOS::LCD::Bar( rcBorder, RGB565(000000));
 		
 		CRect rc = rcBorder;
-		ui16 nBegin = Settings.Time.Shift;
-		ui16 nView = CWndGraph::DivsX*CWndGraph::BlkX;
+		uint16_t nBegin = Settings.Time.Shift;
+		uint16_t nView = CWndGraph::DivsX*CWndGraph::BlkX;
 
 		ui32 nXBegin = (nBegin*m_rcClient.Width()) >> 12;
 		ui32 nXEnd = ((nBegin+nView)*m_rcClient.Width()) >> 12;
 
 		rc.top++;
 		rc.bottom--;
-		rc.left = m_rcClient.left + (si16)nXBegin;
-		rc.right = m_rcClient.left + (si16)nXEnd;
+		rc.left = m_rcClient.left + (int16_t)nXBegin;
+		rc.right = m_rcClient.left + (int16_t)nXEnd;
 
 		if ( rc.right > rcBorder.right )
 			rc.right = rcBorder.right;

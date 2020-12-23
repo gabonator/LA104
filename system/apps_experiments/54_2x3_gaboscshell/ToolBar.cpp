@@ -98,9 +98,9 @@
 
 	for ( int i = nMenu+nIgnoreFirst; pItems[i].m_eType == CBarItem::ISub; i++ )
 	{
-		ui8 bSelected = (i==nFocus);
-		u16 clr = bSelected ? clrSelected : clrNormal;
-		u16 bgr = bSelected ? 0 : RGBTRANS;
+		uint8_t bSelected = (i==nFocus);
+		uint16_t clr = bSelected ? clrSelected : clrNormal;
+		uint16_t bgr = bSelected ? 0 : RGBTRANS;
 
 		if ( HasFocus() && bSelected )
 		{
@@ -134,7 +134,7 @@
 /*virtual*/ void CWndToolBar::OnKey(int nKey)
 {
 	const CWndToolBar::CBarItem* pItems = GetMenuItems();
-	ui8 oldFocus = m_nFocus;
+	uint8_t oldFocus = m_nFocus;
 	if ( nKey == BIOS::KEY::Left)
 	{
 		if ( pItems[m_nFocus].m_eType == CBarItem::IMain ) 
@@ -190,7 +190,7 @@
 	CWnd::OnKey( nKey );
 }
 
-/*virtual*/ void CWndToolBar::ChangeFocus(ui8 oldFocus)
+/*virtual*/ void CWndToolBar::ChangeFocus(uint8_t oldFocus)
 {
 	const CWndToolBar::CBarItem* pItems = GetMenuItems();
 	SendMessage( GetParent(), ToWord('L', 'D'), (NATIVEPTR)pItems[oldFocus].m_pWndMenu );
@@ -205,7 +205,7 @@ Invalidate();
 	if ( code == ToWord('g', 'i') )
 	{
 		const CBarItem *pItems = GetMenuItems();
-		m_nFocus = (ui8)data;
+		m_nFocus = (uint8_t)data;
 		CWnd* pFocus = GetFocus();
 		SendMessage( GetParent(), ToWord('L', 'E'), (NATIVEPTR)pItems[m_nFocus].m_pWndMenu );
 		if ( GetFocus() == pFocus )

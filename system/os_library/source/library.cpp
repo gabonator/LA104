@@ -80,10 +80,10 @@ namespace BIOS
     EResult Open(const char* strName, ui8 nIoMode) { return EOk; }
     EResult Read(ui8* pSectorData) { return EOk; }
     EResult Write(ui8* pSectorData) { return EOk; }
-    EResult Seek(ui32 lOffset) { return EOk; }
+    EResult Seek(uint32_t lOffset) { return EOk; }
     EResult Close(int nSize) { return EOk; }
     EResult Close() { return EOk; }
-    ui32 GetFileSize() { return 0; }
+    uint32_t GetFileSize() { return 0; }
 	
     EResult OpenDir(char* strPath) { return EOk; }
     EResult FindNext(TFindFile* pFile) { return EOk; }

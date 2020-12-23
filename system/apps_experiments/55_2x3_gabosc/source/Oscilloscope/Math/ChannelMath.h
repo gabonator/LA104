@@ -11,7 +11,7 @@ class CMathChannel
 
 public:
 	void			MathSetup( CSettings::Calibrator::FastCalc* pFC1, CSettings::Calibrator::FastCalc* pFC2 );
-	int				MathCalc(ui32 nSample);
+	int				MathCalc(uint32_t nSample);
 
 private:
 	int				MathGet(CSettings::MathOperand& op, int nSample);

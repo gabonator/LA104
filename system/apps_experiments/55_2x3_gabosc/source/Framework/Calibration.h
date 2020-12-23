@@ -78,10 +78,10 @@
 			eKPoints = 6
 		};
 
-		si16 m_arrCurveQin[eQPoints];
-		si32 m_arrCurveQout[eQPoints];
-		si16 m_arrCurveKin[eKPoints];
-		si32 m_arrCurveKout[eKPoints];
+		int16_t m_arrCurveQin[eQPoints];
+		int32_t m_arrCurveQout[eQPoints];
+		int16_t m_arrCurveKin[eKPoints];
+		int32_t m_arrCurveKout[eKPoints];
 	};
 
 	class LinApprox
@@ -92,8 +92,8 @@
 		};
 
 		float m_arrCurveIn[ePoints];
-		si16 m_arrCurveOut[ePoints];
-		typedef CalibrationCurve<float, si16, float, int, float, ePoints> Interpolator;
+		int16_t m_arrCurveOut[ePoints];
+		typedef CalibrationCurve<float, int16_t, float, int, float, ePoints> Interpolator;
 
 		int Get( float fVoltage )
 		{
@@ -105,8 +105,8 @@
 	{
 	public:	
 		LinCalibCurve CalData[AnalogChannel::_ResolutionMax+1];	
-		typedef CalibrationCurve<si16, si32, int, int, int, LinCalibCurve::eKPoints> InterpolatorK;
-		typedef CalibrationCurve<si16, si32, int, int, int, LinCalibCurve::eQPoints> InterpolatorQ;
+		typedef CalibrationCurve<int16_t, int32_t, int, int, int, LinCalibCurve::eKPoints> InterpolatorK;
+		typedef CalibrationCurve<int16_t, int32_t, int, int, int, LinCalibCurve::eQPoints> InterpolatorQ;
 
 		struct FastCalc 
 		{
@@ -121,7 +121,7 @@
 				{50e-3f, 100e-3f, 200e-3f, 500e-3f, 1.0f, 2.0f, 5.0f, 10.0f};
 
 			LinCalibCurve& pCurCurve = CalData[ pSource->Resolution ];
-			si16& nVert = pSource->u16Position;
+			int16_t& nVert = pSource->u16Position;
 
 			fast.K = InterpolatorK::Get( pCurCurve.m_arrCurveKin, pCurCurve.m_arrCurveKout, nVert );
 			fast.Q = InterpolatorQ::Get( pCurCurve.m_arrCurveQin, pCurCurve.m_arrCurveQout, nVert );
@@ -183,7 +183,7 @@
 				{50e-3f, 100e-3f, 200e-3f, 500e-3f, 1.0f, 2.0f, 5.0f, 10.0f};
 
 			LinCalibCurve& pCurCurve = CalData[ pSource->Resolution ];
-			si16& nVert = pSource->u16Position;
+			int16_t& nVert = pSource->u16Position;
 
 			fast.K = InterpolatorK::Get( pCurCurve.m_arrCurveKin, pCurCurve.m_arrCurveKout, nVert );
 			fast.Q = InterpolatorQ::Get( pCurCurve.m_arrCurveQin, pCurCurve.m_arrCurveQout, nVert );

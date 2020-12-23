@@ -1,6 +1,9 @@
 #ifndef FLASHCONFIG_H_
 #define FLASHCONFIG_H_
 
+typedef uint16_t ui16;
+typedef uint32_t ui32;
+
 /**
  * @brief Page size of flash in kilobytes
  */

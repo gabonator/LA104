@@ -48,9 +48,7 @@ void DrawImage(char* path, int bx, int by)
     BmpHdr header;
     reader >> CStream(&header, sizeof(header));
     if (!reader.Seek(header.dwBfOffset))
-{
-  BIOS::DBG::Print("Seek to %d in %s failed!\n", header.dwBfOffset, path);
-}
+        return;
     
     for (int y=0; y<(int)header.dwBiHeight; y++)
         for (int x=0; x<(int)header.dwBiWidth; x++)
@@ -80,7 +78,7 @@ void SaveImage(char* path, CRect rc)
     
     writer.Open(path);
 
-    writer << (ui32)checkHeader;
+    writer << (uint32_t)checkHeader;
     int ofs = 4;
 
     for (int x=rc.left; x<rc.right; x++)
@@ -90,7 +88,7 @@ void SaveImage(char* path, CRect rc)
             ofs += 2;
             if (ofs == BIOS::FAT::SectorSize)
             {
-                writer << (ui32)checkHeader;
+                writer << (uint32_t)checkHeader;
                 ofs = 4;
             }
         }
@@ -107,13 +105,13 @@ bool LoadImage(char* path, CRect rc)
     CBufferedReader reader;
     if (!reader.Open(path))
         return false;
-    
+
     int fileOffset = 0;
     int pixelCount = BIOS::FAT::SectorSize/2-2;
     uint16_t* pixelData = (uint16_t*)BIOS::FAT::GetSharedBuffer();
     if (*((uint32_t*)BIOS::FAT::GetSharedBuffer()) != checkHeader)
         return false;
- 
+
     LCD::BufferBegin(rc);
     int remaining = rc.Width()*rc.Height();
     while (remaining > 0)

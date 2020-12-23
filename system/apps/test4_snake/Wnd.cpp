@@ -354,7 +354,7 @@ void CWnd::KillTimer()
 
 void CWnd::_UpdateTimers()
 {
-	ui32 nTick = BIOS::SYS::GetTick();
+	uint32_t nTick = BIOS::SYS::GetTick();
 
 	for ( int i = 0; i < m_arrTimers.GetSize(); i++ )
 	{

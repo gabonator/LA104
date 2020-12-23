@@ -136,7 +136,7 @@ namespace BIOS
       return Result(r);
     }
 
-    EResult Open(const char* strName, ui8 nIoMode)
+    EResult Open(const char* strName, uint8_t nIoMode)
     {
 	if (NeedInvalidateFat())
 		InvalidateFat();
@@ -154,13 +154,13 @@ namespace BIOS
         return BIOS::FAT::EIntError;
     }
 
-    EResult Read(ui8* pSectorData)
+    EResult Read(uint8_t* pSectorData)
     {
       // TODO: Buffered reader should invalidate its buffer as well?
       if (NeedInvalidateFat())
         InvalidateFat();
 
-      ui32 rcount;
+      uint32_t rcount;
       FRESULT r = f_read(&g_file, pSectorData, BIOS::FAT::SectorSize, &rcount);
 #ifdef _VERBOSE
       if (r != 0)
@@ -169,9 +169,9 @@ namespace BIOS
       return Result(r);
     }
 
-    EResult Write(ui8* pSectorData)
+    EResult Write(uint8_t* pSectorData)
     {
-      ui32 wcount;
+      uint32_t wcount;
       FRESULT r = f_write(&g_file, pSectorData, BIOS::FAT::SectorSize, &wcount);    
       if (wcount != BIOS::FAT::SectorSize)
         return EDiskFull; // Disk is full
@@ -222,12 +222,12 @@ namespace BIOS
     	return Result(r);	
     } 
 
-    ui32 GetFileSize()
+    uint32_t GetFileSize()
     {
     	return g_file.fsize;
     }
 
-    EResult Seek(ui32 lOffset)
+    EResult Seek(uint32_t lOffset)
     {
     	FRESULT r = f_lseek(&g_file, lOffset);
     	return Result(r);

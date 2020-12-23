@@ -98,7 +98,7 @@ public:
 	{
 		if ( nFamilyCode == DS18S20_FAMILY_CODE )
 		{
-			si16 stemp = (m_arrScratchpad[1] << 8) | m_arrScratchpad[0];
+			int16_t stemp = (m_arrScratchpad[1] << 8) | m_arrScratchpad[0];
 			int temp = stemp;
 			temp >>= 1; // cut LSB
 			temp <<= 4;
@@ -112,7 +112,7 @@ public:
 		}
 		if ( nFamilyCode == DS18B20_FAMILY_CODE )
 		{
-			si16 temp = (m_arrScratchpad[1] << 8) | m_arrScratchpad[0];
+			int16_t temp = (m_arrScratchpad[1] << 8) | m_arrScratchpad[0];
 			fTemp = temp / 16.0f;
 			return true;
 		}

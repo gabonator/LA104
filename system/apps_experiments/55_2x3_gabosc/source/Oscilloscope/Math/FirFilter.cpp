@@ -1,7 +1,7 @@
+#include <MainWnd.h>
 #include "FirFilter.h"
 
 #include <Framework.h>
-#include <MainWnd.h>
 
 
 CFirFilter::CFirFilter()

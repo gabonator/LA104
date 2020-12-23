@@ -16,7 +16,7 @@
 
 //class CSnakeResources
 
-static const ui32 sprites[] = {
+static const uint32_t sprites[] = {
   // wall
 	0x2ccccccc, 0xccccccc2,
 	0xcccccccc, 0xcccccccc,
@@ -423,8 +423,8 @@ public:
 
 	virtual void OnTimer()
 	{
-		static si8 dx[4] = {1,0,-1,0};
-		static si8 dy[4] = {0,1,0,-1};
+		static int dx[4] = {1,0,-1,0};
+		static int dy[4] = {0,1,0,-1};
 
 		if ( GetFocus() != this )
 			return;

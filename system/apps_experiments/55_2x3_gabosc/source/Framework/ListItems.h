@@ -14,7 +14,7 @@ public:
 		m_Max = max;
 	}
 
-	virtual VPNavigate operator +(si8 d)
+	virtual VPNavigate operator +(int d)
 	{
 		return ( *m_pVal + d >= 0 && *m_pVal + d <= m_Max ) ? Yes : No; 
 	}
@@ -42,34 +42,34 @@ public:
 		return (ui16)strlen(((const char**)m_ppszText)[ *m_pVal ]) << 3;
 	}
 
-	virtual void Set(ui32 val)
+	virtual void Set(uint32_t val)
 	{
 		*m_pVal = (NATIVEENUM)val;
 	}
 
-	virtual ui32 Get()
+	virtual uint32_t Get()
 	{
-		return (ui32)*m_pVal;
+		return (uint32_t)*m_pVal;
 	}
 };
 
 class CProviderNum : public CValueProvider
 {
-	si16 *m_pVal;
-	si16 m_nMin;
-	si16 m_nMax;
+	int16_t *m_pVal;
+	int16_t m_nMin;
+	int16_t m_nMax;
 
 public:
-	void Create(si16* val, si16 _min, si16 _max)
+	void Create(int16_t* val, int16_t _min, int16_t _max)
 	{
 		m_pVal = val;
 		m_nMin = _min;
 		m_nMax = _max;
 	}
 
-	virtual VPNavigate operator +(si8 d)
+	virtual VPNavigate operator +(int d)
 	{
-		si16 n = (*m_pVal) + d;
+		int16_t n = (*m_pVal) + d;
 		return ( n >= m_nMin && n <= m_nMax ) ? Yes : No; 
 	}
 
@@ -100,11 +100,11 @@ public:
 		return (ui16)strlen( CUtils::itoa( *m_pVal ) )<<3;
 	}
 	
-	void SetMin( si16 nMin )
+	void SetMin( int16_t nMin )
 	{
 		m_nMin = nMin;
 	}
-	void SetMax( si16 nMax )
+	void SetMax( int16_t nMax )
 	{
 		m_nMax = nMax;
 	}
@@ -125,7 +125,7 @@ public:
 		m_nMax = _max;
 	}
 
-	virtual VPNavigate operator +(si8 d)
+	virtual VPNavigate operator +(int d)
 	{
 		T n = (*m_pVal) + d;
 		return ( n >= m_nMin && n <= m_nMax ) ? Yes : No; 
@@ -169,7 +169,7 @@ public:
 		m_pVal = pColor;
 	}
 
-	virtual VPNavigate operator +(si8 d)
+	virtual VPNavigate operator +(int d)
 	{
 		return Disabled; 
 	}
@@ -202,7 +202,7 @@ public:
 		m_pName = pName;
 	}
 
-	virtual VPNavigate operator +(si8 d)
+	virtual VPNavigate operator +(int d)
 	{
 		return Disabled;
 	}
@@ -223,7 +223,7 @@ public:
 		return 0;
 	}
 
-	virtual ui32 Get() 
+	virtual uint32_t Get() 
 	{ 
 		return 0; 
 	}
@@ -280,7 +280,7 @@ public:
 		_ASSERT(0);
 	}
 
-	virtual VPNavigate operator +(si8 d)
+	virtual VPNavigate operator +(int d)
 	{
 		if (d > 0 && GetValue() < 15)
 			return Yes;

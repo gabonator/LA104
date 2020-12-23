@@ -8,7 +8,7 @@
 #define DIRECT_MODE_INPUT(base, pin)    {BIOS::GPIO::DigitalWrite(PIN, 1); BIOS::GPIO::PinMode(PIN, BIOS::GPIO::EMode(BIOS::GPIO::Input | BIOS::GPIO::PullUp));}
 #define DIRECT_MODE_OUTPUT(base, pin)   BIOS::GPIO::PinMode(PIN, BIOS::GPIO::Output)
 
-void delayMicroseconds(ui32 us)
+void delayMicroseconds(uint32_t us)
 {
     us = us*12;
     while (us--)

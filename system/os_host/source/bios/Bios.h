@@ -65,7 +65,7 @@ namespace BIOS
     void BufferEnd();
 
     // TODO: duplicity?
-    void Pattern(int x1, int y1, int x2, int y2, const ui16 *pat, int l);
+    void Pattern(int x1, int y1, int x2, int y2, const uint16_t *pat, int l);
     int Draw(int x, int y, unsigned short clrf, unsigned short clrb, const char *p);
   }
 
@@ -121,10 +121,10 @@ namespace BIOS
 
     struct TFindFile
     {
-      ui32 nFileLength;		
-      ui16 nDate;
-      ui16 nTime;
-      ui8 nAtrib;
+      uint32_t nFileLength;
+      uint16_t nDate;
+      uint16_t nTime;
+      uint8_t nAtrib;
       char strName[13];
     };
 
@@ -148,13 +148,13 @@ namespace BIOS
     void* GetSharedBuffer();
 
     EResult Init();
-    EResult Open(const char* strName, ui8 nIoMode);
-    EResult Read(ui8* pSectorData);
-    EResult Write(ui8* pSectorData);
-    EResult Seek(ui32 lOffset);
+    EResult Open(const char* strName, uint8_t nIoMode);
+    EResult Read(uint8_t* pSectorData);
+    EResult Write(uint8_t* pSectorData);
+    EResult Seek(uint32_t lOffset);
     EResult Close(int nSize);
     EResult Close();
-    ui32 GetFileSize();
+    uint32_t GetFileSize();
 	
     EResult OpenDir(char* strPath);
     EResult FindNext(TFindFile* pFile);

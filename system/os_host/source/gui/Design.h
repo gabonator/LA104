@@ -25,13 +25,13 @@ public:
 	};
 
 public:
-	static void MenuItemDisabled(const CRect& rcRect, ui16 clr)
+	static void MenuItemDisabled(const CRect& rcRect, uint16_t clr)
 	{
 		BIOS::LCD::RoundRect( rcRect.left, rcRect.top, rcRect.left+12, rcRect.bottom, clr);
         BIOS::LCD::Bar( rcRect.left+8, rcRect.top, rcRect.right, rcRect.bottom, CDesignPalette::gray);
 	}
 
-	static void MenuItemEnabled(const CRect& rcRect, ui16 clr)
+	static void MenuItemEnabled(const CRect& rcRect, uint16_t clr)
 	{
 		BIOS::LCD::RoundRect( rcRect.left-2, rcRect.top, rcRect.right, rcRect.bottom, clr);
 		BIOS::LCD::RoundRect( rcRect.left+8-2, rcRect.top+1, rcRect.right-1, rcRect.bottom-1, RGB565(ffffff));
@@ -50,7 +50,7 @@ public:
 		//BIOS::LCD::Bar(rcRect.right-4, rcRect.top, rcRect.right, rcRect.bottom, RGB565(000000));
 	}
 
-	static void MenuBlockDisabled(const CRect& rcRect, ui16 clr)
+	static void MenuBlockDisabled(const CRect& rcRect, uint16_t clr)
 	{
 		// shadow
 		BIOS::LCD::RoundRect( rcRect.right-4, rcRect.top+4, rcRect.right+4, rcRect.bottom+4, RGB565(000070));
@@ -62,7 +62,7 @@ public:
 		BIOS::LCD::RoundRect( rcRect.right-8, rcRect.top, rcRect.right, rcRect.bottom, CDesignPalette::gray);
 	}
 
-	static void MenuBlockEnabled(const CRect& rcRect, ui16 clr)
+	static void MenuBlockEnabled(const CRect& rcRect, uint16_t clr)
 	{
 		// shadow
 		BIOS::LCD::RoundRect( rcRect.right-4, rcRect.top+4, rcRect.right+4, rcRect.bottom+4, RGB565(000070));
@@ -74,11 +74,11 @@ public:
 
 	static void GradientTop(const CRect& rcRect)
 	{
-		ui16 pattern[16];
+		uint16_t pattern[16];
 		_ASSERT( rcRect.Height() == COUNT(pattern) );
 
-		ui16 clradd = RGB565(00000b);
-		ui16 clr = RGB565(00204f);
+		uint16_t clradd = RGB565(00000b);
+		uint16_t clr = RGB565(00204f);
 		for (int i=0; i<16; i++)
 		{
 			clr += clradd;
@@ -106,7 +106,7 @@ public:
 */
 	}
 
-	static void Window(const CRect& rcRect, ui16 clr)
+	static void Window(const CRect& rcRect, uint16_t clr)
 	{
 		CRect rcClient = rcRect;
 		BIOS::LCD::RoundRect(rcClient, RGB565(000000));
@@ -116,7 +116,7 @@ public:
 		BIOS::LCD::RoundRect(rcClient, RGB565(b0b0b0));
 	}
 
-	static void WindowSelector(const CRect& rcRect, ui16 clr)
+	static void WindowSelector(const CRect& rcRect, uint16_t clr)
 	{
 		CRect rcClient = rcRect;
 		BIOS::LCD::RoundRect(rcClient, RGB565(000000));
@@ -137,7 +137,7 @@ public:
 		ui8 c = 0xd0;
 		for (int y=0; y<rcRect.Height(); y++)
 		{
-			ui16 clr = RGB565RGB(c, c, c);
+			uint16_t clr = RGB565RGB(c, c, c);
 			for (int x=rcRect.Width(); x--; )
 				BIOS::LCD::BufferWrite(clr);
 			c -= 0x0d;
@@ -145,7 +145,7 @@ public:
 		BIOS::LCD::BufferEnd();
 	}
 
-	static void Shadow(const CRect& rcRect, ui32 clr)
+	static void Shadow(const CRect& rcRect, uint32_t clr)
 	{
 		BIOS::LCD::Shadow( rcRect.left, rcRect.top, rcRect.right, rcRect.bottom, clr);
 	}
@@ -155,13 +155,13 @@ public:
 class CDesignFast
 {
 public:
-	static void MenuItemDisabled(const CRect& rcRect, ui16 clr)
+	static void MenuItemDisabled(const CRect& rcRect, uint16_t clr)
 	{
 		BIOS::LCD::Bar( rcRect.left, rcRect.top, rcRect.left+8, rcRect.bottom, clr );
 		BIOS::LCD::Bar( rcRect.left+8, rcRect.top, rcRect.right, rcRect.bottom, RGB565(b0b0b0) );
 	}
 
-	static void MenuItemEnabled(const CRect& rcRect, ui16 clr)
+	static void MenuItemEnabled(const CRect& rcRect, uint16_t clr)
 	{
 		BIOS::LCD::Bar( rcRect.left-2, rcRect.top, rcRect.left+8-1, rcRect.bottom, clr );
 		BIOS::LCD::Bar( rcRect.left+8-2, rcRect.top, rcRect.right, rcRect.bottom, RGB565(ffffff) );
@@ -172,13 +172,13 @@ public:
 		BIOS::LCD::Bar( rcRect, RGB565(0000B0) );
 	}
 
-	static void Window(const CRect& rcRect, ui16 clr)
+	static void Window(const CRect& rcRect, uint16_t clr)
 	{
 		BIOS::LCD::Bar( rcRect.left, rcRect.top, rcRect.right, rcRect.top+16, clr );
 		BIOS::LCD::Bar( rcRect.left, rcRect.top+16, rcRect.right, rcRect.bottom, CDesignPalette::gray );
 	}
 
-	static void WindowSelector(const CRect& rcRect, ui16 clr)
+	static void WindowSelector(const CRect& rcRect, uint16_t clr)
 	{
 		BIOS::LCD::Bar( rcRect.left, rcRect.top, rcRect.right, rcRect.top+16, clr );
 		BIOS::LCD::Bar( rcRect.left, rcRect.top+16, rcRect.right, rcRect.bottom, CDesignPalette::gray );
@@ -194,7 +194,7 @@ public:
 		BIOS::LCD::Bar(rcRect, RGB565(404040));
 	}
 
-	static void Shadow(const CRect& rcRect, ui32 clr)
+	static void Shadow(const CRect& rcRect, uint32_t clr)
 	{
 		BIOS::LCD::Shadow( rcRect.left, rcRect.top, rcRect.right, rcRect.bottom, 0xffffff80);
 	}

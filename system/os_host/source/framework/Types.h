@@ -36,18 +36,13 @@ void _HandleAssertion(const char*, int, const char*);
 #else
 #define NATIVEENUM uint8_t
 #endif
-#define NATIVEPTR ui32
-//typedef const unsigned short uc16;
+#define NATIVEPTR uintptr_t
+
+// TODO: remove these types
 typedef unsigned char ui8;
-//typedef unsigned char ui8;
-typedef unsigned short u16;
-typedef signed short si16;
-typedef signed char si8;
 typedef unsigned short ui16;
-typedef unsigned long ui32;
-typedef signed long si32;
-typedef signed short si16;
 typedef void* PVOID;
+
 #ifdef WIN32
 typedef int BOOL;
 #else
@@ -59,7 +54,7 @@ typedef const char * PCSTR;
 typedef char * PSTR;
 //typedef char CHAR;
 #ifndef WIN32
-typedef ui32 UINT;
+typedef uint32_t UINT;
 #endif
 
 #define EVERY(ms) static long dwTick##__LINE__ = 0; bool bDo##__LINE__ = BIOS::SYS::GetTick() - dwTick##__LINE__ > ms; if (bDo##__LINE__) dwTick##__LINE__ = BIOS::SYS::GetTick(); if (bDo##__LINE__)

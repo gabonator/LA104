@@ -60,7 +60,7 @@ void CSPI::begin()
 	
 	__Bios(EXT_SPI, INIT);
 
-	#define SPI_BaudRatePrescaler_16           ((u16)0x0018)
+	#define SPI_BaudRatePrescaler_16           ((uint16_t)0x0018)
 
 /*
 250ns..350ns  -> freq = 3.333333 MHz

@@ -18,7 +18,7 @@ namespace BIOS {
     	return false;
     }
 
-    bool LinearProgram( ui32 nAddress, unsigned char* pData, int nLength )
+    bool LinearProgram( uint32_t nAddress, unsigned char* pData, int nLength )
     {
         assert(0);
     	return false;

@@ -47,7 +47,7 @@ public:
             str[i] = m_pData[m_nOffset++];
             if ( m_nOffset == BufferSectorSize )
             {
-		m_nSectorOffset += BufferSectorSize;
+                m_nSectorOffset += BufferSectorSize;
                 m_nOffset = 0; // TODO: nemame skutocny offset
                 BIOS::FAT::EResult eResult = BIOS::FAT::Read( m_pData );
                 _ASSERT( eResult == BIOS::FAT::EOk );
@@ -65,21 +65,21 @@ public:
         _ASSERT(i < maxLength);
         str[i] = 0;
     }
-    
-    CBufferedReader& operator >>( PSTR str )
+
+	CBufferedReader& operator >>( char* str )
 	{
-        // unsafe
-        ReadLine(str, 128);
-        return *this;
+		// unsafe
+		ReadLine(str, 256);
+		return *this;
 	}
 	
-	CBufferedReader& operator >>( ui32 &i )
+	CBufferedReader& operator >>( uint32_t &i )
 	{
 		CStream stream(i);
 		return *this >> stream;
 	}
 
-	CBufferedReader& operator >>( ui8 &i )
+	CBufferedReader& operator >>( uint8_t &i )
 	{
 		CStream stream(i);
 		return *this >> stream;
@@ -91,12 +91,12 @@ public:
 		return *this >> stream;
 	}
 
-	CBufferedReader& operator >>( const ui8 &i )
-	{
-		// ugly! but MSVC requires const...
-		CStream stream(*(ui8*)&i);
-		return *this >> stream;
-	}
+//	CBufferedReader& operator >>( const ui8 &i )
+//	{
+//		// ugly! but MSVC requires const...
+//		CStream stream(*(ui8*)&i);
+//		return *this >> stream;
+//	}
 
 	virtual CBufferedReader& operator >>( const CStream& stream_ )
 	{
@@ -116,7 +116,7 @@ public:
 		return *this;
 	}
 
-	bool Seek(ui32 lOffset)
+	bool Seek(uint32_t lOffset)
 	{
 	        m_nOffset = lOffset % BufferSectorSize;
 		lOffset -= m_nOffset;
@@ -192,25 +192,25 @@ public:
 		return *this;
 	}
 
-	virtual CBufferedWriter& operator <<( ui32 dwData )
+	virtual CBufferedWriter& operator <<( uint32_t dwData )
 	{
 		*this << CStream(dwData);
 		return *this;
 	}
 
-	virtual CBufferedWriter& operator <<( int dwData )
-	{
-		*this << CStream(dwData);
-		return *this;
-	}
+//	virtual CBufferedWriter& operator <<( int dwData )
+//	{
+//		*this << CStream(dwData);
+//		return *this;
+//	}
 
-	virtual CBufferedWriter& operator <<( ui16 wData )
+	virtual CBufferedWriter& operator <<( uint16_t wData )
 	{
 		*this << CStream(wData);
 		return *this;
 	}
 
-	virtual CBufferedWriter& operator <<( ui8 dwData )
+	virtual CBufferedWriter& operator <<( uint8_t dwData )
 	{
 		*this << CStream(dwData);
 		return *this;

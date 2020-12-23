@@ -47,17 +47,17 @@ public:
 		{
 			m_pInfo->u16Position--;
 			Invalidate();
-			SendMessage(m_pParent, ToWord('i', 'u'), (ui32)(NATIVEPTR)m_pInfo);
+			SendMessage(m_pParent, ToWord('i', 'u'), (uint32_t)(NATIVEPTR)m_pInfo);
 		}
 		if ( nKey == BIOS::KEY::Right && m_pInfo->u16Position < 100 )
 		{
 			m_pInfo->u16Position++;
 			Invalidate();
-			SendMessage(m_pParent, ToWord('i', 'u'), (ui32)(NATIVEPTR)m_pInfo);
+			SendMessage(m_pParent, ToWord('i', 'u'), (uint32_t)(NATIVEPTR)m_pInfo);
 		}
 		if ( nKey == BIOS::KEY::Enter )
 		{
-			SendMessage(m_pParent, ToWord('m', 'd'), (ui32)(NATIVEPTR)m_pInfo);			
+			SendMessage(m_pParent, ToWord('m', 'd'), (uint32_t)(NATIVEPTR)m_pInfo);			
 		}
 		CWnd::OnKey( nKey );
 	}

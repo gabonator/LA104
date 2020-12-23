@@ -60,18 +60,18 @@ public:
 			_ASSERT(sizeof(m_pInfo->Resolution) == sizeof(NATIVEENUM));
 			DecEnum(m_pInfo->Resolution);
 			Invalidate();
-			SendMessage(m_pParent, ToWord('i', 'u'), (ui32)(NATIVEPTR)m_pInfo);
+			SendMessage(m_pParent, ToWord('i', 'u'), (uint32_t)(NATIVEPTR)m_pInfo);
 		}
 		if ( nKey == BIOS::KEY::Right && m_pInfo->Resolution < CSettings::AnalogChannel::_ResolutionMax )
 		{
 			_ASSERT(sizeof(m_pInfo->Resolution) == sizeof(NATIVEENUM));
 			IncEnum(m_pInfo->Resolution);
 			Invalidate();
-			SendMessage(m_pParent, ToWord('i', 'u'), (ui32)(NATIVEPTR)m_pInfo);
+			SendMessage(m_pParent, ToWord('i', 'u'), (uint32_t)(NATIVEPTR)m_pInfo);
 		}
 		if ( nKey == BIOS::KEY::Enter )
 		{
-			SendMessage(m_pParent, ToWord('m', 'a'), (ui32)(NATIVEPTR)m_pInfo);		// PTR!
+			SendMessage(m_pParent, ToWord('m', 'a'), (uint32_t)(NATIVEPTR)m_pInfo);		// PTR!
 		}
 		CWnd::OnKey( nKey );
 	}

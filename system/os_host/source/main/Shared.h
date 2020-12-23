@@ -39,7 +39,7 @@ uint32_t GetProcAddress(char* symbol)
     case 0x00000706: return (uint32_t)static_cast<void(*)(BIOS::DAC::EMode, unsigned short*, int)>(BIOS::DAC::SetMode); //_ZN4BIOS3DAC7SetModeENS0_5EModeEPti
 #endif
     case 0x0000ffe4: return (uint32_t)static_cast<void(*)(char const*, ...)>(BIOS::DBG::Print); //_ZN4BIOS3DBG5PrintEPKcz
-    case 0x0000758f: return (uint32_t)static_cast<ui32(*)()>(BIOS::FAT::GetFileSize); //_ZN4BIOS3FAT11GetFileSizeEv
+    case 0x0000758f: return (uint32_t)static_cast<uint32_t(*)()>(BIOS::FAT::GetFileSize); //_ZN4BIOS3FAT11GetFileSizeEv
     case 0x000008ad: return (uint32_t)static_cast<void*(*)()>(BIOS::FAT::GetSharedBuffer); //_ZN4BIOS3FAT15GetSharedBufferEv
     case 0x0000a6b5: return (uint32_t)static_cast<void(*)(void*)>(BIOS::FAT::SetSharedBuffer); //_ZN4BIOS3FAT15SetSharedBufferEPv
     case 0x00004f66: return (uint32_t)static_cast<BIOS::FAT::EResult(*)()>(BIOS::FAT::Init); //_ZN4BIOS3FAT4InitEv

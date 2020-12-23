@@ -11,7 +11,7 @@ public:
 	{
 		//BIOS::LCD::Bar( m_rcClient, RGB565(000000) );
 		GUI::Background(m_rcClient, RGB565(101010), RGB565(404040));
-		si16 x = (Settings.Trig.nTime-Settings.Time.Shift) /*>> 2*/;
+		int16_t x = (Settings.Trig.nTime-Settings.Time.Shift) /*>> 2*/;
 		if ( x >= 0 && x < m_rcClient.Width() )
 			BIOS::LCD::Draw( m_rcClient.left + x-4, m_rcClient.top, 
 				RGB565(606060), RGBTRANS, CShapes::trig_time );

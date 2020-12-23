@@ -66,7 +66,7 @@ public:
 		_ASSERT( m_pMeas );
 		if ( nKey == BIOS::KEY::Enter )
 		{
-			SendMessage(m_pParent, ToWord('m', 'c'), (ui32)(NATIVEPTR)m_pMeas);
+			SendMessage(m_pParent, ToWord('m', 'c'), (uint32_t)(NATIVEPTR)m_pMeas);
 			return;
 		}
 		CWnd::OnKey( nKey );

@@ -59,7 +59,7 @@ public:
 		if ( nKey == BIOS::KEY::KeyEnter )
 		{
 			_ASSERT( GetFocus() );
-			SendMessage( GetParent(), ToWord('e', 'd'), (ui32)GetFocus()->m_pszId);
+			SendMessage( GetParent(), ToWord('e', 'd'), (uint32_t)GetFocus()->m_pszId);
 		}
 	}
 };

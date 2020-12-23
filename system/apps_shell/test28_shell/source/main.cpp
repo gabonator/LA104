@@ -152,14 +152,22 @@ public:
                 mOrder = json["order"].GetNumber();
             } else
             {
+                _ASSERT(0);
                 strcpy(mShortName, name);
             }
         } else
         {
+            _ASSERT(0);
             strcpy(mShortName, name);
         }
         if (strlen(mIconName) == 0)
         {
+            CJson json(buffer);
+            if (json.Verify())
+            {
+                json["icon"].ToString(mIconName, 16);
+            }
+            
             strcpy(mIconName, name);
             strcat(mIconName, ".bmp");
         }
@@ -235,14 +243,43 @@ public:
         return CTopMenu::TItem{nullptr, CTopMenu::TItem::EState::None};
     }
 
-    void PopTo(int i)
+    void PopTo(int i, bool selectParent = false)
     {
         if (i == mFolderStack.GetSize())
             return;
         
-        mFolderStack.SetSize(i);
-        SendMessage(GetParent(), 0, mFolderStack.GetSize());
+        if (!selectParent)
+        {
+            mFolderStack.SetSize(i);
+            SendMessage(GetParent(), 0, mFolderStack.GetSize());
+            LoadItems();
+            DrawIcons();
+            return;
+        }
+        
+        int nLast = mFolderStack.GetSize()-1;
+        TFolderName folderName;
+        strcpy(folderName, mFolderStack[nLast]);
+
+        mFolderStack.SetSize(nLast);
+        SendMessage(GetParent(), 0, nLast);
         LoadItems();
+        
+        mCursor = 0;
+        mScroll = 0;
+        for (int i=0; i<mItems.GetSize(); i++)
+        {
+            const CDirInfo& dirInfo = mItems[i];
+            if (strcmp(dirInfo.GetFileName(), folderName) == 0)
+            {
+                mCursor = i;
+                break;
+            }
+        }
+        
+        if (mCursor >= 6)
+            mScroll = mCursor - (mCursor%6);
+        
         DrawIcons();
     }
     
@@ -265,7 +302,7 @@ public:
         }
 
         FixPath(imgSrc);
-    
+
         char* suffix = imgSrc + strlen(imgSrc) - 4; // .BMP
         _ASSERT(suffix[0] == '.');
         strcpy(suffix, row == 0 ? (on ? ".TM1" : ".TM0") : (on ? ".TM3" : ".TM2"));
@@ -449,7 +486,7 @@ public:
             }
             else
             {
-                PopTo(mFolderStack.GetSize()-1);
+                PopTo(mFolderStack.GetSize()-1, true);
                 lastKey = BIOS::KEY::None;
             }
             return;

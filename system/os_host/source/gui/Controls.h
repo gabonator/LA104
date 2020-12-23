@@ -257,21 +257,21 @@ public:
 class CValueProvider
 {
 public:
-	static const ui32 Invalid;
+	static const uint32_t Invalid;
 	enum VPNavigate {
 		No,
 		Yes,
 		Disabled,
 	};
 
-	virtual VPNavigate operator +( si8 dir ) { _ASSERT(0); return Disabled; }
-	virtual VPNavigate operator -( si8 dir ) { return this->operator+(-dir); }
+	virtual VPNavigate operator +( int dir ) { _ASSERT(0); return Disabled; }
+	virtual VPNavigate operator -( int dir ) { return this->operator+(-dir); }
 	virtual void operator++(int) { _ASSERT(0); }
 	virtual void operator--(int) { _ASSERT(0); }
 	virtual void OnPaint(const CRect& rcRect, ui8 bFocus) { _ASSERT(0); }
-	virtual ui16 GetWidth() { _ASSERT(0); return 0; }
-	virtual void Set(ui32 value) { _ASSERT(0); }
-	virtual ui32 Get() { return Invalid; }
+	virtual uint16_t GetWidth() { _ASSERT(0); return 0; }
+	virtual void Set(uint32_t value) { _ASSERT(0); }
+	virtual uint32_t Get() { return Invalid; }
 };
 	
 class CLStaticItem : public CListItem
@@ -377,7 +377,7 @@ public:
 			// is that provider enumerator ?
 			if ( m_pProvider->Get() !=	CValueProvider::Invalid )
 			{
-				SendMessage(m_pParent, ToWord('l', 'e'), (ui32)(NATIVEPTR)(m_pProvider));
+				SendMessage(m_pParent, ToWord('l', 'e'), (uintptr_t)m_pProvider);
 			}
 		}
 		CListItem::OnKey( nKey );
@@ -392,7 +392,7 @@ class CComboSelector : public CWnd
 {
 	ui16	m_clrFrame;
 	CValueProvider*	m_pProvider;
-	ui32	m_nOldValue;
+	uint32_t	m_nOldValue;
 
 public:
 
@@ -433,7 +433,7 @@ public:
 		rcClient.Deflate(4, 2, 4, 0);
 		*/
 
-		ui32 old = m_pProvider->Get();
+        uint32_t old = m_pProvider->Get();
 
 		// vypocitaj s ktorym prvym itemom musime zacat aby bol focus viditelny
 		ui16 nFocusBase = 0;
@@ -682,7 +682,7 @@ public:
 		m_nStep = nStep;
 	}
 
-	virtual VPNavigate operator +(si8 d)
+	virtual VPNavigate operator +(int d)
 	{
 		return Yes;
 	}

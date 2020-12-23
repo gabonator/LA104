@@ -11,8 +11,8 @@ class CUtils
 {
 public:
 	static int atoi(char *str);
-	static ui32 htoi(char *str);
-	static char* itoa(si16 i);
+	static uint32_t htoi(char *str);
+	static char* itoa(int16_t i);
 	static char* itoa2(ui8 n);
 	static char* ftoa(float f);
 	static char tohex(ui8 n);

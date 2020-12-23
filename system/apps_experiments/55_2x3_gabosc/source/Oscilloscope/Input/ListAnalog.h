@@ -37,7 +37,7 @@ public:
 			(NATIVEENUM*)&pInfo->Resolution, CSettings::AnalogChannel::_ResolutionMax );
 		m_proProbe.Create( (const char**)CSettings::AnalogChannel::ppszTextProbe,
 			(NATIVEENUM*)&pInfo->Probe, CSettings::AnalogChannel::_ProbeMax );
-		m_proPosition.Create( (si16*)&pInfo->u16Position, -20, 300 );
+		m_proPosition.Create( (int16_t*)&pInfo->u16Position, -20, 300 );
 		m_proColour.Create( &pInfo->u16Color );
 		m_proRed.Create( &pInfo->u16Color, CProviderRgb::Red );
 		m_proGrn.Create( &pInfo->u16Color, CProviderRgb::Green );

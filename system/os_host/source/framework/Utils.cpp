@@ -42,9 +42,9 @@ bool ishex(char c)
 	return false;
 }*/
 
-/*static*/ ui32 htoi(char *str)
+/*static*/ uint32_t htoi(char *str)
 {
-	ui32 nValue = 0;
+    uint32_t nValue = 0;
 	int nDigit = 0;
 	while ( (nDigit = hexval(*str++)) != -1 )
 	{
@@ -54,7 +54,7 @@ bool ishex(char c)
 	return nValue;
 }
 
-/*static*/ char* itoa2(ui8 n)
+/*static*/ char* itoa2(uint8_t n)
 {
 	for (int i=0; i<8; i++)
 		if (n & (128>>i) )
@@ -65,7 +65,7 @@ bool ishex(char c)
 	return tmp;
 }
 
-/*static*/ char* itoa(si16 n)
+/*static*/ char* itoa(int16_t n)
 {
 	int i = 0;
 	ui8 bSignum = 0;
@@ -94,12 +94,12 @@ bool ishex(char c)
 	}
 	return tmp;
 }
-/*static*/ char tohex(ui8 n)
+/*static*/ char tohex(uint8_t n)
 {
 	_ASSERT( n >= 0 && n < 16 );
 	return hex[n];
 }
-/*static*/ char* clrhex(ui16 c)
+/*static*/ char* clrhex(uint16_t c)
 {
 	tmp[0] = tohex((c&0x1f)>>1);
 	tmp[1] = tohex(((c>>5)&0x3f)>>2);
@@ -211,7 +211,7 @@ bool ishex(char c)
 	return tmp;
 }
 #endif
-ui16 InterpolateColor( ui16 clrA, ui16 clrB, int nLevel )
+ui16 InterpolateColor( uint16_t clrA, uint16_t clrB, int nLevel )
 {
 	int br = Get565R(clrB)*nLevel;
 	int bg = Get565G(clrB)*nLevel;

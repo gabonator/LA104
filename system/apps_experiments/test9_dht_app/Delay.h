@@ -4,7 +4,7 @@
 class CDelay
 {
 public:
-	static void DelayUs(ui32 us)
+	static void DelayUs(uint32_t us)
 	{
 		us = us*12;
 		while (us--)
@@ -13,11 +13,11 @@ public:
 		}
 	}
 
-	static void DelayMs(ui32 ms)
+	static void DelayMs(uint32_t ms)
 	{
 		while (ms--)
 		{
-			ui32 us = 12000;
+			uint32_t us = 12000;
 			while (us--)
 			{
 				__asm__("");

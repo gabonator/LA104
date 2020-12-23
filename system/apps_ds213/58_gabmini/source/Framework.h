@@ -1,4 +1,5 @@
 #pragma once
+#include "oldtypes.h"
 #include "../../../os_host/source/framework/Wnd.h"
 #include "../../../os_host/source/framework/Utils.h"
 #include "../../../os_host/source/framework/Serialize.h"

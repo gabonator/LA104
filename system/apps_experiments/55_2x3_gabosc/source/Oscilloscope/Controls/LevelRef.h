@@ -13,18 +13,18 @@ public:
 		GUI::Background(m_rcClient, RGB565(101010), RGB565(404040));
 		//if ( Settings.Trig.Sync != CSettings::Trigger::_None )                                           
 		{
-			ui16 y = Settings.Trig.nLevel;
+			uint16_t y = Settings.Trig.nLevel;
 			y = (y * (CWndGraph::DivsY*CWndGraph::BlkY)) >> 8;
 			BIOS::LCD::Draw( m_rcClient.left, m_rcClient.bottom - y-5, 
 				RGB565(606060), RGBTRANS, CShapes::trig_base );
 		}
 		if ( Settings.CH2.Enabled )
 		{
-			//ui16 y = Settings.CH2.u16Position;
+			//uint16_t y = Settings.CH2.u16Position;
 			//y = CSettings::GetZero(y);
 			CSettings::Calibrator::FastCalc fastCalc;
 			Settings.CH2Calib.Prepare( &Settings.CH2, fastCalc );
-			ui16 y = Settings.CH2Calib.GetZero( fastCalc );
+			uint16_t y = Settings.CH2Calib.GetZero( fastCalc );
 			y = (y * (CWndGraph::DivsY*CWndGraph::BlkY)) >> 8;
 
 			BIOS::LCD::Draw( m_rcClient.left, m_rcClient.bottom - y-5, 
@@ -32,11 +32,11 @@ public:
 		}
 		if ( Settings.CH1.Enabled )
 		{
-			//si16 y = Settings.CH1.u16Position;
+			//int16_t y = Settings.CH1.u16Position;
 			//y = CSettings::GetZero(y);
 			CSettings::Calibrator::FastCalc fastCalc;
 			Settings.CH1Calib.Prepare( &Settings.CH1, fastCalc );
-			si16 y = Settings.CH1Calib.GetZero( fastCalc );
+			int16_t y = Settings.CH1Calib.GetZero( fastCalc );
 
 			y = (y * (CWndGraph::DivsY*CWndGraph::BlkY)) >> 8;
 			int nScrY =  m_rcClient.bottom - y-5;
@@ -62,7 +62,7 @@ public:
 	{
 		if ( Settings.Math.Type != CSettings::MathOperator::_Off )
 		{
-			si16 y = Settings.Math.Position;
+			int16_t y = Settings.Math.Position;
 
 			y = (y * (CWndGraph::DivsY*CWndGraph::BlkY)) >> 8;
 			int nScrY =  m_rcClient.bottom - y-5;

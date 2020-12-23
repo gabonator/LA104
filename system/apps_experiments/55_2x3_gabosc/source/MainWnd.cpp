@@ -1,4 +1,5 @@
 #include "MainWnd.h"
+#include "oldtypes.h"
 
 CMainWnd* CMainWnd::m_pInstance = nullptr;
 CSettings m_Settings; // TODO:!

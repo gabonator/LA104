@@ -6,11 +6,11 @@
 namespace CUtils
 {
 	int atoi(char *str);
-	ui32 htoi(char *str);
-	char* itoa(si16 i);
-	char* itoa2(ui8 n);
-	char tohex(ui8 n);
-	char* clrhex(ui16 c);
+	uint32_t htoi(char *str);
+	char* itoa(int16_t i);
+	char* itoa2(uint8_t n);
+	char tohex(uint8_t n);
+	char* clrhex(uint16_t c);
 
 	template <class T>
 	inline void Clamp(T& nVariable, T nMin, T nMax)
@@ -28,6 +28,6 @@ namespace CUtils
 	}
 
 	unsigned int Random();
-	ui16 InterpolateColor( ui16 clrA, ui16 clrB, int nLevel );
+	ui16 InterpolateColor( uint16_t clrA, uint16_t clrB, int nLevel );
 	int Sqrt(int a);
 }

@@ -11,7 +11,7 @@ public:
 	class CTimer 
 	{
 	public:
-		CTimer( CWnd* pWnd, ui32 nInterval ) :
+		CTimer( CWnd* pWnd, uint32_t nInterval ) :
 			m_pWnd( pWnd ), m_nInterval( nInterval )
 		{
 			m_nNext = BIOS::SYS::GetTick() + nInterval;
@@ -97,7 +97,7 @@ public:
 	virtual void OnTimer();
 
 	void SetFocus();
-	ui8 HasFocus();
+	uint8_t HasFocus();
 	bool IsWindow();
 	bool IsVisible();
 	CWnd* GetActiveWindow();

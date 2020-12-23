@@ -38,7 +38,7 @@ class CGraph : public CWnd
     int mPrevCount{0};
     
 public:
-    void Create( const char* pszId, ui16 dwFlags, const CRect& rc, CWnd* pParent )
+    void Create( const char* pszId, uint16_t dwFlags, const CRect& rc, CWnd* pParent )
     {
         CWnd::Create(pszId, dwFlags, rc, pParent);
         

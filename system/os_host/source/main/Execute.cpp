@@ -7,6 +7,7 @@
 // TODO: cleanup
 //enum {DISABLE=0, ENABLE=1};
 //extern "C" void USB_Connect(uint8_t Status);
+uint8_t gBuffer[256];
 
 void Show(char* msg)
 {
@@ -61,10 +62,10 @@ bool Verify( CBufferedReader& f, Elf32_Shdr& elfSection )
 {
 	f.Seek( elfSection.offset );
 
-	ui8* pMem = (ui8*)elfSection.addr;
+	uint8_t* pMem = (uint8_t*)elfSection.addr;
 	for (int i=0; i<(int)elfSection.size; i++, pMem++)
 	{
-		ui8 bData;
+		uint8_t bData;
 		f >> bData;
 		if ( bData != *pMem )
 			return false;
@@ -74,7 +75,7 @@ bool Verify( CBufferedReader& f, Elf32_Shdr& elfSection )
 
 bool VerifyZero( CBufferedReader& f, Elf32_Shdr& elfSection )
 {
-	ui8* pMem = (ui8*)elfSection.addr;
+	uint8_t* pMem = (uint8_t*)elfSection.addr;
 	for (int i=0; i<(int)elfSection.size; i++, pMem++)
 	{
 		if ( 0 != *pMem )
@@ -86,10 +87,10 @@ bool VerifyZero( CBufferedReader& f, Elf32_Shdr& elfSection )
 void FlashRam( CBufferedReader& f, Elf32_Shdr& elfSection )
 {
 	f.Seek( elfSection.offset );
-	ui8* pWriteTo = (ui8*)elfSection.addr;
+	uint8_t* pWriteTo = (uint8_t*)elfSection.addr;
 	for (int i=0; i<(int)elfSection.size; i++)
 	{
-		ui8 bData;
+		uint8_t bData;
 		f >> bData;
 		*pWriteTo++ = bData;
 	}
@@ -104,7 +105,7 @@ void FlashRam( CBufferedReader& f, Elf32_Shdr& elfSection )
 void ZeroRam( CBufferedReader& f, Elf32_Shdr& elfSection )
 {
 	// section length should be aligned to 32bits!?
-	ui8* pWriteTo = (ui8*)elfSection.addr;
+	uint8_t* pWriteTo = (uint8_t*)elfSection.addr;
 	for (int i=0; i<(int)elfSection.size; i++)
 		*pWriteTo++ = 0;
 }
@@ -112,13 +113,13 @@ void ZeroRam( CBufferedReader& f, Elf32_Shdr& elfSection )
 void FlashRom( CBufferedReader& f, Elf32_Shdr& elfSection )
 {
 	int nLength = (int)elfSection.size;
-	ui32 dwAddr = elfSection.addr;
+	uint32_t dwAddr = elfSection.addr;
 
 	f.Seek( elfSection.offset );
 	BIOS::MEMORY::LinearStart();
 	for ( int i=0; i<nLength; )
 	{
-		ui8 buffer[256];
+		uint8_t* buffer = gBuffer;
 		int nToLoad = nLength-i;
 		if ( nToLoad > 256 )
 			nToLoad = 256;
@@ -142,9 +143,9 @@ void FlashRom( CBufferedReader& f, Elf32_Shdr& elfSection )
 void ZeroRom( CBufferedReader& f, Elf32_Shdr& elfSection )
 {
 	int nLength = (int)elfSection.size;
-	ui32 dwAddr = elfSection.addr;
+	uint32_t dwAddr = elfSection.addr;
 
-	ui8 buffer[64] = {0};
+	uint8_t buffer[64] = {0};
 
 	BIOS::MEMORY::LinearStart();
 	for ( int i=0; i<nLength; )
@@ -422,7 +423,7 @@ uint32_t ElfExecute( char* strName )
 					char strSymbolName[128];
 					fw >> CStream(&strSymbolName, sizeof(strSymbolName)); 
 
-					ui32 dwProcAddr = GetProcAddress( strSymbolName );
+					uint32_t dwProcAddr = GetProcAddress( strSymbolName );
 					if (!dwProcAddr)
 					{
                                           BIOS::DBG::Print("Symbol '");
@@ -436,7 +437,7 @@ uint32_t ElfExecute( char* strName )
 					0x20000E84 (GOT[2]) -> 0x20000DAC (PLT[0])
 					0x20000E84 (GOT[2]) <- new address
 					*/
-					ui32* pRelocation = (ui32*)elfRelocation.r_offset;
+					uint32_t* pRelocation = (uint32_t*)elfRelocation.r_offset;
 					*pRelocation = dwProcAddr;
 				}
 				break;
@@ -445,11 +446,11 @@ uint32_t ElfExecute( char* strName )
 			{
 				Show("InitArray");
 				// last processed section before jumping to entry
-				int nCount = elfSection.size/sizeof(ui32);
+				int nCount = elfSection.size/sizeof(uint32_t);
 				fw.Seek( elfSection.offset );
 				for (int i=0; i<nCount; i++)
 				{
-					ui32 dwInitPtr;
+					uint32_t dwInitPtr;
 					fw >> dwInitPtr;
 ///					BIOS::DBG::Print("0x%08x", dwInitPtr);
 #ifndef _WIN32

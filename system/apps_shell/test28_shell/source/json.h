@@ -14,6 +14,13 @@ public:
         mnLength = (int)strlen(mpString);
     }
 
+    CSubstring(const char* pString, int nLength)
+    {
+        mpString = pString;
+        mnBegin = 0;
+        mnLength = nLength;
+    }
+
     CSubstring(const CSubstring& begin, const CSubstring& end)
     {
         mpString = begin.mpString;
@@ -95,7 +102,7 @@ public:
         return mpString;
     }
     
-    void ToString(char* str, int maxLen) const
+    char* ToString(char* str, int maxLen) const
     {
         if (!mpString || mnLength == 0)
         {
@@ -113,6 +120,76 @@ public:
             nLen = maxLen-1;
         memcpy(str, pBeginPtr, nLen);
         str[nLen] = 0;
+        
+        return str;
+    }
+    
+    bool operator == (const char* comp)
+    {
+        return strncmp(GetBuffer(), comp, strlen(comp)) == 0;
+    }
+};
+
+class CConversion
+{
+    const CSubstring& mString;
+    
+public:
+    CConversion(const CSubstring& str) : mString(str)
+    {
+    }
+
+    char* ToString(char* str, int maxLen)
+    {
+        mString.ToString(str, maxLen);
+        return str;
+    }
+
+    int ToInt()
+    {
+        char temp[32];
+        mString.ToString(temp, COUNT(temp));
+
+        if (temp[0] == '0' && temp[1] == 'x')
+        {
+            char* p = temp+2;
+            int aux = 0;
+            while (*p)
+            {
+                aux <<= 4;
+                if (*p >= '0' && *p <= '9')
+                    aux |= *p - '0';
+                if (*p >= 'A' && *p <= 'F')
+                    aux |= *p - 'A' + 10;
+                if (*p >= 'a' && *p <= 'f')
+                    aux |= *p - 'a' + 10;
+                p++;
+            }
+            return aux;
+        } else if (temp[0] == '-' || (temp[0] >= '0' && temp[0] <= '9'))
+        {
+            bool neg = false;
+            
+            char* p = temp;
+            if (*p == '-')
+            {
+                neg = true;
+                p++;
+            }
+            
+            int aux = 0;
+            while (*p)
+            {
+                aux *= 10;
+                if (*p >= '0' && *p <= '9')
+                    aux += *p - '0';
+                p++;
+            }
+            return neg ? -aux : aux;
+
+        }
+        _ASSERT(0);
+        return 0;
     }
 };
 
@@ -190,6 +267,7 @@ public:
             if (key == _pKey)
                 _aux = CJson(value);
         });
+        //_ASSERT(_aux);
         return _aux;
     }
 
@@ -218,6 +296,32 @@ public:
     {
         CSubstring copyString = mString;
         return TraverseAny(copyString);
+    }
+    
+    void ForEach(TKeyValueCallback callback)
+    {
+        if (mString && mString[0] == '{')
+        {
+            TraverseObject(mString, callback);
+        } else
+        {
+            _ASSERT(0);
+        }
+    }
+
+    void ForEach(TValueCallback callback)
+    {
+        CSubstring& s = mString;
+        while (s.Length() && (s[0] == ' ' || s[0] == ',' || s[0] == '\r' || s[0] == '\n'))
+            s++;
+
+        if (mString && mString[0] == '[')
+        {
+            TraverseArray(mString, callback);
+        } else
+        {
+            _ASSERT(0);
+        }
     }
     
 private:
@@ -256,6 +360,19 @@ private:
         if (!s)
             return false;
 
+        if (s[0] == '0' && s[1] == 'x')
+        {
+            int i;
+            for (i=2; i<s.Length(); i++)
+                if ((s[i] >= '0' && s[i] <= '9') || (s[i] >= 'a' && s[i] <= 'f') || (s[i] >= 'A' && s[i] <= 'F'))
+                    continue;
+                else
+                    break;
+            
+            callback(s.TakeFirst(i));
+            return true;
+        }
+        
         if (s[0] == '+' || s[0] == '-' || s[0] == '.' || (s[0] >= '0' && s[0] <= '9') )
         {
             int i;
@@ -310,6 +427,8 @@ private:
 
     bool TraverseAny(CSubstring& s)
     {
+        while (s.Length() && (s[0] == ' ' || s[0] == ',' || s[0] == '\r' || s[0] == '\n'))
+            s++;
         if (TraverseKeyword(s, [](const CSubstring&){}))
             return true;
         if (TraverseNumber(s, [](const CSubstring&){}))
@@ -325,13 +444,15 @@ private:
     
     bool TraverseObject(CSubstring& s, TKeyValueCallback fCallback)
     {
+        while (s.Length() && (s[0] == ' ' || s[0] == ',' || s[0] == '\r' || s[0] == '\n'))
+            s++;
         if (!s || s[0] != '{')
             return false;
 
         s++;
         while (s.Length() && s[0] != '}')
         {
-            if (s[0] == ' ' || s[0] == ',')
+            if (s[0] == ' ' || s[0] == ',' || s[0] == '\r' || s[0] == '\n')
             {
                 s++;
                 continue;
@@ -347,6 +468,12 @@ private:
                 return false;
             }
             s++;
+
+            while (s.Length() && (s[0] == ' ' || s[0] == ',' || s[0] == '\r' || s[0] == '\n'))
+            {
+                s++;
+                continue;
+            }
 
             CSubstring valueBegin(s);
             if (!TraverseAny(s))
@@ -365,13 +492,16 @@ private:
 
     bool TraverseArray(CSubstring& s, TValueCallback fCallback)
     {
+        while (s.Length() && (s[0] == ' ' || s[0] == ',' || s[0] == '\r' || s[0] == '\n'))
+            s++;
+
         if (!s || s[0] != '[')
             return false;
 
         s++;
         while (s.Length() && s[0] != ']')
         {
-            if (s[0] == ' ' || s[0] == ',')
+            if (s[0] == ' ' || s[0] == ',' || s[0] == '\r' || s[0] == '\n')
             {
                 s++;
                 continue;

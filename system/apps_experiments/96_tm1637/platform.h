@@ -7,7 +7,7 @@ typedef uint8_t byte;
 enum {LOW = 0, HIGH = 1, INPUT = BIOS::GPIO::EMode::Input, OUTPUT = BIOS::GPIO::EMode::Output};
 
 
-static void delayMicroseconds(ui32 us)
+static void delayMicroseconds(uint32_t us)
 {
 	us = us*12;
 	while (us--)

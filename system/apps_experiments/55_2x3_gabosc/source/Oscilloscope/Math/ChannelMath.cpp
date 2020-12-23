@@ -23,7 +23,7 @@ void CMathChannel::MathSetup(CSettings::Calibrator::FastCalc* pFC1, CSettings::C
 	m_nTemp = 0;
 }
 
-int CMathChannel::MathCalc(ui32 nSample)
+int CMathChannel::MathCalc(uint32_t nSample)
 {
 	int res = 0;
 	switch ( Settings.Math.Type )

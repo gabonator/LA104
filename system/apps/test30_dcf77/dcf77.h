@@ -14,13 +14,13 @@ class CWndDcf77 : public CWnd
 	int m_nBitIndex;
 	bool m_bRedraw;
 
-	ui32 m_DcfBits[2];
+	uint32_t m_DcfBits[2];
 
-	ui32 m_DcfValid[2];
+	uint32_t m_DcfValid[2];
 	int m_lDcfAcquired;
 
 public:
-	virtual void Create(CWnd *pParent, ui16 dwFlags)
+	virtual void Create(CWnd *pParent, uint16_t dwFlags)
 	{
 		CWnd::Create("CWndDcf77", dwFlags | CWnd::WsNoActivate | CWnd::WsListener, CRect(0, 16, 400, 240), pParent);
 	}
@@ -32,7 +32,7 @@ public:
 		m_lDcfAcquired = 0;
 	}
 
-	int GetBit(int nBitIndex, ui32 *pData = NULL)
+	int GetBit(int nBitIndex, uint32_t *pData = NULL)
 	{	
 		if ( pData == NULL ) 
 			pData = m_DcfBits;
@@ -45,7 +45,7 @@ public:
 		return 0;
 	}
 
-	int GetBits(int nIndex, int nLen, ui32 *pData = NULL)
+	int GetBits(int nIndex, int nLen, uint32_t *pData = NULL)
 	{
 		if ( pData == NULL ) 
 			pData = m_DcfBits;
@@ -58,7 +58,7 @@ public:
 		return nResult;
 	}
 
-	int GetParity(int nIndex, int nLen, ui32 *pData = NULL)
+	int GetParity(int nIndex, int nLen, uint32_t *pData = NULL)
 	{
 		if ( pData == NULL ) 
 			pData = m_DcfBits;
@@ -161,7 +161,7 @@ public:
 					nIndex++;
 
 				bool bCurrent = (m_nBitIndex-1) >= DcfItem.nStart && (m_nBitIndex-1) < DcfItem.nStart + DcfItem.nLength;
-				ui16 clrBack = bCurrent ? RGB565(0000b0) : RGB565(000000);	
+				uint16_t clrBack = bCurrent ? RGB565(0000b0) : RGB565(000000);	
 				
 				BIOS::LCD::Print( x, y, RGB565(ffffff), clrBack, DcfItem.strName); 
 
@@ -194,7 +194,7 @@ public:
 						for (int j=0; j<DcfItem.nLength; j++)
 						{
 							nCurBit = GetBit(DcfItem.nStart+j);
-							ui16 clrB2 = (DcfItem.nStart+j == m_nBitIndex-1) ? RGB565(b00000) : clrBack;
+							uint16_t clrB2 = (DcfItem.nStart+j == m_nBitIndex-1) ? RGB565(b00000) : clrBack;
 							BIOS::LCD::Print( x+j*8+8, y, RGB565(ffffff), clrB2, itoa(nCurBit) ); 								
 						}
 						break;
@@ -281,7 +281,7 @@ public:
 		}
 	}
 
-	void dbg(char ch, ui16 clr)
+	void dbg(char ch, uint16_t clr)
 	{
 /*
 		static int i=0;

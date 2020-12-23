@@ -2,24 +2,24 @@
 #pragma pack(2)
 	struct BmpHdr 
 	{
-		ui16 wBfType;
-		ui32 dwBfSize;
-		ui16 wBfReserved1;
-		ui16 wBfReserved2;
-		ui32 dwBfOffset;
+		uint16_t wBfType;
+		uint32_t dwBfSize;
+		uint16_t wBfReserved1;
+		uint16_t wBfReserved2;
+		uint32_t dwBfOffset;
 
-		ui32 dwBiSize;
-		ui32 dwBiWidth;
-		ui32 dwBiHeight;
-		ui16 wBiPlanes;
-		ui16 wBiBitDepth;
-		ui32 dwBiCompression;
-		ui32 dwBiSizeImage;
-		ui32 dwBiXPels;
-		ui32 dwBiYPels;
+		uint32_t dwBiSize;
+		uint32_t dwBiWidth;
+		uint32_t dwBiHeight;
+		uint16_t wBiPlanes;
+		uint16_t wBiBitDepth;
+		uint32_t dwBiCompression;
+		uint32_t dwBiSizeImage;
+		uint32_t dwBiXPels;
+		uint32_t dwBiYPels;
 
-		ui32 dwBiClrUsed;
-		ui32 dwBiClrImportant;
+		uint32_t dwBiClrUsed;
+		uint32_t dwBiClrImportant;
 	};
 #pragma pack(pop)
 
@@ -55,7 +55,7 @@ bool SaveScreenshot16(char* strName)
 	for ( int y = BIOS::LCD::Height-1; y >= 0; y-- )
 		for ( int x = 0; x < BIOS::LCD::Width; x++ )
 		{
-			ui16 wPixel = BIOS::LCD::GetPixel( x, y );
+			uint16_t wPixel = BIOS::LCD::GetPixel( x, y );
 
 			if (((x>>2)+(y>>2))&1)
 				BIOS::LCD::PutPixel( x, y, wPixel^0x18e3);
@@ -76,7 +76,7 @@ bool SaveScreenshot16(char* strName)
 		{
 			if (((x>>2)+(y>>2))&1)
 			{
-				ui16 wPixel = BIOS::LCD::GetPixel( x, y );
+				uint16_t wPixel = BIOS::LCD::GetPixel( x, y );
 				BIOS::LCD::PutPixel( x, y, wPixel^0x18e3);
 				// ..... ...... .....
 				// ...11 ...111 ...11

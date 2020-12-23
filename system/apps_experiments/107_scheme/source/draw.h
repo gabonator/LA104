@@ -42,7 +42,7 @@ void drawline_aa(fix16_t x1, fix16_t y1, fix16_t x2, fix16_t y2, int color)
         if (reverse_xy)
             swap(&x, &y);
         
-        u16 oldcolor = BIOS::LCD::GetPixel(x >> 8, y >> 8);
+        uint16_t oldcolor = BIOS::LCD::GetPixel(x >> 8, y >> 8);
         BIOS::LCD::PutPixel(x >> 8, y >> 8, blend(color, oldcolor, c));
     };
     
