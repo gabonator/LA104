@@ -7,6 +7,9 @@
 #include <vector>
 #include <string>
 #include <cassert>
+#include <algorithm>
+
+using namespace std;
 
 #define EXPPROG 0
 
@@ -243,6 +246,7 @@ public:
     void Load(CString strFileName);
     void Save(CString strFileName);
     void Dump();
+    void ShortDump();
     void Process();
     void BuildNames(CElfSection secOrig, CElfSection secDynSym);
     
@@ -754,61 +758,48 @@ void CElf::Dump()
         m_arrSection[i].Dump();
     }
 }
-#if 0
-void CElf::Process()
+
+void CElf::ShortDump()
 {
-    /*
-     for ( int i=0; i<m_arrProgram.GetCount(); i++ )
-     {
-     Elf32_Phdr& phdr = m_arrProgram[i];
-     int& nMin = m_arrProgramMin[i];
-     int& nMax = m_arrProgramMax[i];
-     
-     printf("ofs:%d fsz:%d min:%d len:%d", phdr.offset, phdr.filesz, nMin, nMax-nMin);
-     if ( phdr.offset == 0 )
-     {
-     printf(" **");
-     int nShift = nMin - phdr.offset;
-     phdr.offset += nShift;
-     phdr.filesz -= nShift;
-     m_arrProgramData[i] = m_pFileData + nMin;
-     // fix all section offsets
-     
-     for ( int j=0; j<m_arrSection.GetCount(); j++ )
-     if ( GetProgramBySection( j ) == i )
-     {
-     Elf32_Shdr& shdr = m_arrSection[j];
-     shdr.offset += nShift;
-     }
-     }
-     printf("\n");
-     }
-     
-     */
-    /*
-     CArray<Elf32_Phdr> m_arrProgram;
-     CArray<LPVOID> m_arrProgramData;
-     CArray<int> m_arrProgramMin;
-     CArray<int> m_arrProgramMax;
-     
-     CArray<Elf32_Shdr> m_arrSection;
-     CArray<CString> m_arrSectionNames;
-     
-     
-     */
-    /*
-     m_elfHeader.shtrndx = -1;
-     m_arrSection.RemoveAt(0);
-     m_arrSectionNames.RemoveAt(0);
-     m_arrSection.RemoveAt(m_arrSection.GetCount()-1);
-     m_arrSectionNames.RemoveAt(m_arrSectionNames.GetCount()-1);
-     m_arrProgram.RemoveAt(0);
-     m_arrProgramData.RemoveAt(0);
-     m_arrProgramMin.RemoveAt(0);
-     m_arrProgramMax.RemoveAt(0);
-     */
+    uint32_t ramBegin = -1, ramEnd = 0, romBegin = -1, romEnd = 0;
+    char* note = "";
+
+    for ( int i=0; i<m_arrSection.GetSize(); i++)
+    {
+      CElf::SectionHeader* sh = &m_arrSection[i].m_Header;
+      uint32_t blkBegin = sh->addr;
+      uint32_t blkEnd = sh->addr + sh->size;
+
+      if ((blkBegin >> 24) == 0x20)
+      {
+        // ram
+        ramBegin = min(ramBegin, blkBegin);
+        ramEnd = max(ramEnd, blkEnd);
+      } else
+      if ((blkBegin >> 24) == 0x08)
+      {
+        // rom
+        romBegin = min(romBegin, blkBegin);
+        romEnd = max(romEnd, blkEnd);
+      } else
+      if ((blkBegin >> 24) == 0x00)
+      {
+      } else
+      {
+        printf("Unable to identify this section!\n");
+      }
+    }
+
+    if (romBegin >= 0x0800C000 && romBegin <= 0x08012740)
+      note = "DS203HD-FPGA";
+
+    int ramSize = ramBegin != -1 ? (ramEnd - ramBegin + 1023) / 1024 : 0;
+    int romSize = ramBegin != -1 ? (romEnd - romBegin + 1023) / 1024 : 0;
+
+    printf("ram: %08x-%08x %3dK, rom: %08x-%08x %3dK, entry: %08x %s\n", 
+        ramBegin, ramEnd, ramSize, romBegin, romEnd, romSize, m_elfHeader.m_Header.entry, note);
 }
-#endif
+
 
 void DumpSym( CElf::CElfSection sec, CElf::CElfSection nam)
 {
@@ -872,8 +863,16 @@ int main(int argc, char* argv[])
         return 1;
     
     CElf elfIn;
-    elfIn.Load(src);
+    elfIn.Load(src);   
+    if (argc == 3 && strcmp(out, "-q") == 0)
+    {
+        elfIn.ShortDump();
+        return 0;
+    }
+
     elfIn.Dump();
+    if (argc < 3)
+        return 0;
     
     /*
      elfIn.GetSection(".rel.plt").Export("relplt.x");
