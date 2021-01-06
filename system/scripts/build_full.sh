@@ -30,3 +30,5 @@ if [ $? -eq 1 ]; then
   echo [ERROR] Building Apps failed!
   exit 1
 fi
+
+./generate_memlist.sh

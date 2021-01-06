@@ -114,12 +114,5 @@ else
   echo Build ok!
 fi
 
-# build memory area list
-cd ../build/apps
-PATH=/Users/gabrielvalky/Documents/git/LA104/tools/elfstrip/
-OUTPUTLIST=memrange.txt
-rm $OUTPUTLIST
-for f in *.elf; do printf "%-13s " "$f" >> memrange.txt; elfstrip $f -q >> memrange.txt; done
-
 exit $ERRORS
 

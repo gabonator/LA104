@@ -790,7 +790,7 @@ void CElf::ShortDump()
       }
     }
 
-    if (romBegin >= 0x0800C000 && romBegin <= 0x08012740)
+    if (romBegin >= 0x0805C800 && romBegin <= 0x0807D7FF)
       note = "DS203HD-FPGA";
 
     int ramSize = ramBegin != -1 ? (ramEnd - ramBegin + 1023) / 1024 : 0;

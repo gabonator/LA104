@@ -11,6 +11,11 @@ if [ "`which node`" == "" ]; then
   exit 1
 fi
 
+if [ "`which convert`" == "" ]; then
+  echo "[ERROR] Image magick convert not found!"
+  exit 1
+fi
+
 cd ../../tools/elfstrip/
 ./build.sh
 

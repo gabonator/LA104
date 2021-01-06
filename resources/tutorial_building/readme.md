@@ -4,6 +4,7 @@
 
 - Install latest [arm eabi toolchain](https://developer.arm.com/tools-and-software/open-source-software/developer-tools/gnu-toolchain/gnu-rm/downloads)
 - Install [nodejs](https://nodejs.org/en/download/)
+- Install [imagemagick](https://imagemagick.org/script/download.php)
 - Clone repository ```git clone https://github.com/gabonator/LA104.git```
 - Go to system/scripts folder
 - run ```build.sh```
