@@ -7,6 +7,7 @@ namespace CONSOLE
     CPoint cursor(0, 16);
     uint16_t colorFront(RGB565(ffffff));
     uint16_t colorBack(RGB565(0000b0));
+    bool lineFeed{true};
 
     void Color(uint16_t c)
     {
@@ -32,6 +33,19 @@ namespace CONSOLE
     }
 #endif
 
+    void LineFeed()
+    {
+        cursor.x = window.left;
+        cursor.y += 14;
+
+
+    #ifdef CONSOLE_MODE_A
+        if (cursor.y >= window.bottom)
+            cursor.y = 0;
+        BIOS::LCD::Bar(window.left, cursor.y, window.right, cursor.y + 14, colorBack);
+    #endif
+    }
+
     void Putch(char c)
     {
 #ifdef CONSOLE_MODE_B
@@ -49,24 +63,14 @@ namespace CONSOLE
             cursor.x = window.left;
           return;
         }
-        if (c != 0x0d && c != 0x0a)
+        if (!lineFeed || (c != 0x0d && c != 0x0a))
         {
             cursor.x += BIOS::LCD::Print(cursor.x, cursor.y, colorFront, colorBack, c);
             if (cursor.x+7 < window.right)
                 return;
         }
-
-        cursor.x = window.left;
-        cursor.y += 14;
-
-
-#ifdef CONSOLE_MODE_A
-        if (cursor.y >= window.bottom)
-            cursor.y = 0;
-        BIOS::LCD::Bar(window.left, cursor.y, window.right, cursor.y + 14, colorBack);
-#endif
+        LineFeed();
     }
-    
     
     void Print(const char * format, ...)
     {

@@ -1,31 +1,37 @@
 #include <library.h>
 #include "../../os_host/source/framework/Console.h"
-#include "shapes.h"
-#include "layout.h"
+#include "framework/shapes.h"
+#include "framework/layout.h"
 
 using namespace BIOS;
-    
-class CApplication : public CWnd
+
+#include "appdata.h"
+
+class CApplication : public CApplicationData, public CWnd
 {
-    int mBaudrate{9600};
-    GPIO::UART::EConfig mFlags{GPIO::UART::EConfig(GPIO::UART::length8 | GPIO::UART::parityNone | GPIO::UART::stopBits1)};
+    enum {
+        PauseInterval = 50
+    };
+    
+    friend class CPageView;
+    friend class CPagePort;
+    friend class CPageLog;
+    friend class CPageSend;
+    
     uint32_t* mGpioStatus{nullptr};
     int mRxBytes{0};
     int mTxBytes{0};
-    enum EFormatMode { Ascii, Hex, Dec };
-    EFormatMode mRxMode{Ascii};
-    EFormatMode mTxMode{Ascii};
-    int mFocus{0};
-    bool mNewLineRx{true};
-    bool mNewLineTx{true};
+    int32_t mLastReceive{0};
 
 public:
     void Create(const char* pszId, ui16 dwFlags, const CRect& rc, CWnd* pParent)
     {
         mGpioStatus = (uint32_t*)BIOS::SYS::GetAttribute(BIOS::SYS::EAttribute::GpioStatus);
         _ASSERT(mGpioStatus);
+        CONSOLE::colorBack = RGB565(0000AA);
         CONSOLE::window = CRect(0, 14, BIOS::LCD::Width, 14+14*10);
         CONSOLE::cursor = CONSOLE::window.TopLeft();
+        CONSOLE::lineFeed = false;
 
         GPIO::PinMode(GPIO::P1, GPIO::Uart);
         GPIO::PinMode(GPIO::P2, GPIO::Uart);
@@ -37,7 +43,7 @@ public:
     
     void OnPaint() override
     {
-        LCD::Bar(CONSOLE::window, RGB565(0000b0));
+        LCD::Bar(CONSOLE::window, RGB565(0000aa));
         
         CRect rc1(m_rcClient);
         rc1.bottom = 14;
@@ -85,51 +91,81 @@ public:
         "NotImplemented"};
 
         _ASSERT(e<COUNT(errors));
-        CONSOLE::Color(RGB565(ff0000));
-        CONSOLE::Print("<%s>", errors[e]);
+        MarkError(errors[e]);
+    }
+    
+    void MarkError(const char* msg)
+    {
+        CONSOLE::Color(RGB565(ff5555));
+        CONSOLE::Print("<%s>", msg);
         CONSOLE::Color(RGB565(ffffff));
     }
     
-    void OnTick()
+    void MarkInfo(const char* msg)
     {
+        CONSOLE::Color(RGB565(55ff55));
+        CONSOLE::Print("<%s>", msg);
+        CONSOLE::Color(RGB565(ffffff));
+    }
+
+    virtual void OnTick()
+    {
+        int32_t now = BIOS::SYS::GetTick();
+        
 #ifdef __APPLE__
         EVERY(500)
         {
-            Recv('a');
-            Recv('h');
-            Recv('o');
-            Recv('j');
+            OnRecv('a');
+            OnRecv('h');
+            OnRecv('o');
+            OnRecv('j');
+            mLastReceive = now;
         }
 #endif
+        
         if (*mGpioStatus)
         {
             HandleError(*mGpioStatus);
             *mGpioStatus = 0;
         }
+
+        if (GPIO::UART::Available())
+        {
+            mLastReceive = now;
+        } else {
+            if (mLastReceive != 0 && now - mLastReceive > PauseInterval)
+            {
+                OnPause();
+                mLastReceive = 0;
+            }
+        }
+        
         while (GPIO::UART::Available())
         {
             uint8_t data = GPIO::UART::Read();
-            Recv(data);
+            OnRecv(data);
         }
-/*
-        EVERY(1000)
-        {
-            static int counter = 1000;
-            char message[64];
-            sprintf(message, "Ahoj, toto je riadok %d.\n", counter++);
-            Send(message);
-        }
-*/
     }
-    void Recv(char data)
+    
+    virtual void OnPause()
+    {
+        if (mMarkPause)
+        {
+            MarkInfo("");
+        }
+    }
+    
+    virtual void OnRecv(char data)
     {
         mRxBytes++;
         switch (mRxMode)
         {
             case Ascii:
-                if (data == '\r')
-                  break;
+                if (data == 0)
+                    data = ' ';
                 CONSOLE::Print("%c", data);
+                if (mNewLineRx && data == '\n')
+                    CONSOLE::LineFeed();
                 break;
             case Hex:
                 CONSOLE::Print("%02x ", data);
@@ -147,6 +183,8 @@ public:
         {
             case Ascii:
                 CONSOLE::Print("%c", data);
+                if (mNewLineTx && data == '\n')
+                    CONSOLE::LineFeed();
                 break;
             case Hex:
                 CONSOLE::Print("%02x ", data);
@@ -157,9 +195,9 @@ public:
         }
     }
     
-    void Send(char* str)
+    void Send(const char* str)
     {
-        CONSOLE::Color(RGB565(00ff00));
+        CONSOLE::Color(RGB565(55ff55));
         char c;
         while ((c = *str++) != 0)
         {
@@ -168,147 +206,13 @@ public:
         }
         CONSOLE::Color(RGB565(ffffff));
     }
-
-    const char* Format(int n)
-    {
-        static char temp[16];
-        sprintf(temp, "%d", n);
-        return temp;
-    }
     
-    void DrawLayout()
+    void ClearLog()
     {
-        //DrawBaudrateLayout();
-        //return;
-        using namespace Layout;
-        Color def(RGB565(b0b0b0));
-        Color hig(RGB565(ffffff));
-        
-        #define S(i) Select(mFocus == i)
-
-        CRect rcControls(0, 14+14*10, BIOS::LCD::Width, BIOS::LCD::Height-14);
-        GUI::Background(rcControls, RGB565(404040), RGB565(404040));
-        rcControls.Deflate(4, 4, 4, 2);
-
-        Render r(rcControls);
-        // window prilis blika, iba vnutro
-        r //<< Window(heading, mRedraw)
-            << def  << S(0) << Button("Clear log")
-                    << S(1) << Radio(mNewLineRx, "new line on CR/LF") << "  "
-                    << S(2) << Button("Open") << NewLine()
-            << hig << "TX" << def << " (P1):"
-                    << S(3) << Radio(mTxMode == Ascii, "ascii") << ","
-                    << S(4) << Radio(mTxMode == Hex, "hex") << ","
-                    << S(5) << Radio(mTxMode == Dec, "dec") << "   "
-                    << S(6) << Button("Send") << NewLine()
-            << hig << "RX" << def << " (P2):"
-                    << S(7) << Radio(mRxMode == Ascii, "ascii") << ","
-                    << S(8) << Radio(mRxMode == Hex, "hex") << ","
-                    << S(9) << Radio(mRxMode == Dec, "dec") << NewLine()
-        
-                    << S(10) << Button(Format(mBaudrate)) << "bps"
-                    << S(11) << Button(Format(GetDataBits())) << "bits"
-                    << S(12) << Button(GetParityAsString()) << "parity"
-                    << S(13) << Button(GetStopBitsAsString()) << "stop";
-    }
-    
-    void DrawBaudrateLayout()
-    {
-        using namespace Layout;
-
-        CRect rcControls(0, 14+14*10, BIOS::LCD::Width, BIOS::LCD::Height-14);
-        GUI::Background(rcControls, RGB565(404040), RGB565(404040));
-        rcControls.Deflate(4, 4, 4, 2);
-
-        const static int baudrates[] = {110, 150, 300, 1200, 2400, 4800, 9600, 19200, 31250, 38400, 57600, 115200, 230400};
-        Render r(rcControls);
-        r << "Select baudrate: " << NewLine(); //<< Button("Clear log");
-        for (int i=0; i<COUNT(baudrates); i++)
-        {
-            if (i == 6 || i == 11)
-                r << NewLine();
-            r << Button(Format(baudrates[i]));
-        }
-    }
-    
-    virtual void OnKey(int key) override
-    {
-        if (key == BIOS::KEY::Right && mFocus < 13)
-        {
-            mFocus++;
-            DrawLayout();
-        }
-        if (key == BIOS::KEY::Left && mFocus > 0)
-        {
-            mFocus--;
-            DrawLayout();
-        }
-        if (key == BIOS::KEY::Down)
-        {
-            const static int map[] = {
-                3, 3, 6,
-                7, 8, 9, 9,
-                11, 12, 13,
-                11, 11, 12, 13
-            };
-            mFocus = map[mFocus];
-            DrawLayout();
-        }
-        if (key == BIOS::KEY::Up)
-        {
-            const static int map[] = {
-                0, 1, 2,
-                0, 1, 1, 2,
-                3, 4, 5,
-                7, 7, 8, 9
-            };
-            mFocus = map[mFocus];
-            DrawLayout();
-        }
-        if (key == BIOS::KEY::Enter)
-        {
-            switch (mFocus)
-            {
-                case 0: break; // clear log
-                case 1: mNewLineRx = !mNewLineRx; mNewLineTx = mNewLineRx; break; // clear log
-                case 2: break; // open
-                case 3: mTxMode = Ascii; break; // tx ascii
-                case 4: mTxMode = Hex; break; // tx hex
-                case 5: mTxMode = Dec; break; // tx dec
-                case 6: Send((char*)"Ahoj!\n"); break; // send
-                case 7: mRxMode = Ascii; break; // rx ascii
-                case 8: mRxMode = Hex; break; // rx hex
-                case 9: mRxMode = Dec; break; // rx dec
-                case 10:
-                    mBaudrate = CycleBaudRate(mBaudrate);
-                    ConfigureUart();
-                    break;
-                case 11:
-                    if (GetDataBits() == 8)
-                        SetDataBits(9);
-                    else
-                        SetDataBits(8);
-                    break;
-                case 12:
-                    if (strcmp(GetParityAsString(), "N") == 0)
-                        SetPartiy("E");
-                    else if (strcmp(GetParityAsString(), "E") == 0)
-                        SetPartiy("O");
-                    else
-                        SetPartiy("N");
-                    break;
-                case 13:
-                    if (strcmp(GetStopBitsAsString(), "1") == 0)
-                        SetStopBits("1.5");
-                    else if (strcmp(GetStopBitsAsString(), "1.5") == 0)
-                        SetStopBits("2");
-                    else
-                        SetStopBits("1");
-                    break;
-            }
-            DrawLayout();
-        }
-
+        LCD::Bar(CONSOLE::window, CONSOLE::colorBack);
+        CONSOLE::cursor = CONSOLE::window.TopLeft();
+        mRxBytes = 0;
+        mTxBytes = 0;
     }
     
     void Destroy()
@@ -317,8 +221,7 @@ public:
         GPIO::PinMode(GPIO::P2, GPIO::Input);
     }
     
-    
-    void ConfigureUart()
+    virtual void ConfigureUart() override
     {
         *mGpioStatus = 0;
         GPIO::UART::Setup(mBaudrate, mFlags);
@@ -333,99 +236,126 @@ public:
         CWnd::WindowMessage(nMsg, nParam);
     }
     
-    int CycleBaudRate(int b)
+    // gui
+    virtual void DrawLayout() = 0;
+    
+    // logger
+    virtual bool StartLogging() = 0;
+    virtual void StopLogging() = 0;
+    virtual char* GetLogName() = 0;
+};
+
+#include "page.h"
+#include "pageport.h"
+#include "pageview.h"
+#include "pagesend.h"
+#include "pagelog.h"
+#include "logger.h"
+
+class CApplicationGui : public CApplicationLogger
+{
+    int mFocus{0};
+    CPagePort mPagePort{*this};
+    CPageView mPageView{*this};
+    CPageSend mPageSend{*this};
+    CPageLog mPageLog{*this};
+    CPage* mPages[4] = {&mPagePort, &mPageView, &mPageSend, &mPageLog};
+    int mnPage{0};
+    
+public:
+    void DrawMenu()
     {
-        const static int baudrates[] = {110, 150, 300, 1200, 2400, 4800, 9600, 19200, 31250, 38400, 57600, 115200, 230400};
-        int newBaudrate = -1;
-        for (int i=0; i<COUNT(baudrates)-1; i++)
-            if (baudrates[i] == b)
-                return baudrates[i+1];
-        return baudrates[0];
+        CRect rcControls(0, 14+14*10, BIOS::LCD::Width, 14+14*10+14+4);
+        
+        LCD::Bar(rcControls, RGB565(0000AA));
+        rcControls.top += 4;
+        int x = 8;
+        for (int i=0; i<COUNT(mPages); i++)
+        {
+            if (mnPage != i)
+            {
+                x += BIOS::LCD::Draw(x, rcControls.top, RGB565(4040b0), RGBTRANS, CShapes_tab_left);
+                x += BIOS::LCD::Print(x, rcControls.top, RGB565(b0b0b0), RGB565(4040b0), mPages[i]->Name());
+                x += BIOS::LCD::Draw(x, rcControls.top, RGB565(4040b0), RGBTRANS, CShapes_tab_right);
+            } else if (mY != -1) {
+                x += BIOS::LCD::Draw(x, rcControls.top, RGB565(404040), RGBTRANS, CShapes_tab_left);
+                x += BIOS::LCD::Print(x, rcControls.top, RGB565(ffffff), RGB565(404040), mPages[i]->Name());
+                x += BIOS::LCD::Draw(x, rcControls.top, RGB565(404040), RGBTRANS, CShapes_tab_right);
+            } else {
+                x += BIOS::LCD::Draw(x, rcControls.top, RGB565(ffffff), RGBTRANS, CShapes_tab_left);
+                x += BIOS::LCD::Print(x, rcControls.top, RGB565(000000), RGB565(ffffff), mPages[i]->Name());
+                x += BIOS::LCD::Draw(x, rcControls.top, RGB565(ffffff), RGBTRANS, CShapes_tab_right);
+            }
+            x += 8;
+        }
     }
     
-    void SetPartiy(const char* p)
+    void DrawLayout() override
     {
-        mFlags = GPIO::UART::EConfig(mFlags & ~GPIO::UART::EConfigMask::parity);
-        if (strcmp(p, "E") == 0)
-            mFlags = GPIO::UART::EConfig(mFlags | GPIO::UART::EConfig::parityEven);
-        else if (strcmp(p, "O") == 0)
-            mFlags = GPIO::UART::EConfig(mFlags | GPIO::UART::EConfig::parityOdd);
-        else if (strcmp(p, "N") == 0)
-            mFlags = GPIO::UART::EConfig(mFlags | GPIO::UART::EConfig::parityNone);
-        else
-            _ASSERT(0);
-
-        ConfigureUart();
-    }
-
-    void SetStopBits(const char* p)
-    {
-        mFlags = GPIO::UART::EConfig(mFlags & ~GPIO::UART::EConfigMask::stopBits);
-        if (strcmp(p, "1") == 0)
-            mFlags = GPIO::UART::EConfig(mFlags | GPIO::UART::EConfig::stopBits1);
-        else if (strcmp(p, "1.5") == 0)
-            mFlags = GPIO::UART::EConfig(mFlags | GPIO::UART::EConfig::stopBits15);
-        else if (strcmp(p, "2") == 0)
-            mFlags = GPIO::UART::EConfig(mFlags | GPIO::UART::EConfig::stopBits2);
-        else
-            _ASSERT(0);
-
-        ConfigureUart();
-    }
-
-    void SetDataBits(int n)
-    {
-        mFlags = GPIO::UART::EConfig(mFlags & ~GPIO::UART::EConfigMask::length);
-        if (n == 8)
-            mFlags = GPIO::UART::EConfig(mFlags | GPIO::UART::EConfig::length8);
-        else
-        if (n == 9)
-            mFlags = GPIO::UART::EConfig(mFlags | GPIO::UART::EConfig::length9);
-        else
-            _ASSERT(0);
-
-        ConfigureUart();
+        DrawMenu();
+        DrawPage();
     }
     
-    int GetBaudRate()
+    void DrawPage()
     {
-        return mBaudrate;
+        CRect rcControls(0, 14+14*10+14+4, BIOS::LCD::Width, BIOS::LCD::Height-14);
+        Layout::Render r(rcControls);
+        mPages[mnPage]->Draw(r);
     }
     
-    int GetDataBits()
+    virtual void OnTick() override
     {
-        if (mFlags & GPIO::UART::length9)
-            return 9;
-        return 8;
+        CApplication::OnTick();
+        mPages[mnPage]->OnTick();        
     }
-    
-    const char* GetParityAsString()
+
+    virtual void OnKey(int key) override
     {
-        if (mFlags & GPIO::UART::parityEven)
-            return "E";
-        if (mFlags & GPIO::UART::parityOdd)
-            return "O";
-        return "N";
-    }
-    
-    const char* GetStopBitsAsString()
-    {
-        if (mFlags & GPIO::UART::stopBits15)
-            return "1.5";
-        if (mFlags & GPIO::UART::stopBits2)
-            return "2";
-        return "1";
+        if (mY == -1)
+        {
+            if (key == BIOS::KEY::Right && mnPage < COUNT(mPages)-1)
+            {
+                mnPage++;
+                DrawLayout();
+            }
+            if (key == BIOS::KEY::Left && mnPage > 0)
+            {
+                mnPage--;
+                DrawLayout();
+            }
+            if (key == BIOS::KEY::Down)
+            {
+                mY++;
+                mPages[mnPage]->OnKey(0);
+                DrawLayout();
+            }
+        } else {
+            if (key == BIOS::KEY::Up)
+                mY--;
+            if (key == BIOS::KEY::Down)
+                mY++;
+            if (key == BIOS::KEY::Left)
+                mX--;
+            if (key == BIOS::KEY::Right)
+                mX++;
+
+            mPages[mnPage]->OnKey(key);
+            if (mY == -1)
+                DrawLayout();
+            else
+                DrawPage();
+        }
     }
 };
 
-
-CApplication app;
+CApplicationGui app;
 
 #ifdef _ARM
 __attribute__((__section__(".entry")))
 #endif
 int _main(void)
-{    
+{
+    app.AttachFs();
     app.Create("Application", CWnd::WsVisible, CRect(0, 0, BIOS::LCD::Width, BIOS::LCD::Height), nullptr);
 	app.SetFocus();
     app.WindowMessage( CWnd::WmPaint );
@@ -433,7 +363,7 @@ int _main(void)
     BIOS::KEY::EKey key = BIOS::KEY::None;
     while (key != BIOS::KEY::Escape)
     {
-	key = BIOS::KEY::GetKey();
+        key = BIOS::KEY::GetKey();
 
         if (key != BIOS::KEY::None)
             app.WindowMessage(CWnd::WmKey, key);
@@ -442,7 +372,13 @@ int _main(void)
     }
     
     app.Destroy();
+    app.DetachFs();
     return 0;
+}
+
+extern "C" void __cxa_pure_virtual()
+{
+    _ASSERT(!"Pure virtual call");
 }
 
 void _HandleAssertion(const char* file, int line, const char* cond)

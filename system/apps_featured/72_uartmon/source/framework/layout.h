@@ -90,12 +90,14 @@ namespace Layout
         }
         Render& operator << (char* str)
         {
-            mX += BIOS::LCD::Print(mX, mRect.top, mF, mB, str);
+            while (*str)
+                mX += BIOS::LCD::Print(mX, mRect.top, mF, mB, *str++);
             return *this;
         }
         Render& operator << (const char* str)
         {
-            mX += BIOS::LCD::Print(mX, mRect.top, mF, mB, str);
+            while (*str)
+                mX += BIOS::LCD::Print(mX, mRect.top, mF, mB, *str++);
             return *this;
         }
         
@@ -108,6 +110,7 @@ namespace Layout
                 case 'x': mX += BIOS::LCD::Draw(mX, mRect.top, mF, mB, CShapes_check_box); break;
                 case 'X': BIOS::LCD::Draw(mX, mRect.top, mF, mB, CShapes_check_box);
                     mX += BIOS::LCD::Draw(mX, mRect.top, RGB565(ff0000), RGBTRANS, CShapes_check_on); break;
+                //case '\n': mX += BIOS::LCD::Print(mX, mRect.top, mF, mB, '\n'); break;
                 default:
                 {
                     char str[2] = {c, 0};
@@ -209,6 +212,36 @@ namespace Layout
             {
                 *r << Color(RGBTRANS, RGB565(b0b0b0)) << '<' << mValue << Select(false);
                 *r << Color(RGBTRANS, RGB565(b0b0b0)) << '>';
+            } else
+            {
+                *r << Color(RGBTRANS, RGB565(ffffff)) << '<' << mValue << Select(false);
+                *r << Color(RGBTRANS, RGB565(ffffff)) << '>';
+            }
+            *r << Color(RGB565(b0b0b0), RGBTRANS);
+        }
+    };
+
+    class RadioButton : public Sublayout
+    {
+        bool mB;
+        const char* mValue;
+    public:
+        RadioButton(bool b, const char* name) : mB(b), mValue(name)
+        {
+        }
+
+        virtual void Visit(Render* r) const
+        {
+            if (!r->IsSelected())
+            {
+                if (!mB)
+                {
+                    *r << Color(RGBTRANS, RGB565(505050)) << '<' << Color(RGB565(b0b0b0), RGB565(505050)) << mValue << Select(false);
+                    *r << Color(RGBTRANS, RGB565(505050)) << '>';
+                } else {
+                    *r << Color(RGBTRANS, RGB565(b0b0b0)) << '<' << mValue << Select(false);
+                    *r << Color(RGBTRANS, RGB565(b0b0b0)) << '>';
+                }
             } else
             {
                 *r << Color(RGBTRANS, RGB565(ffffff)) << '<' << mValue << Select(false);

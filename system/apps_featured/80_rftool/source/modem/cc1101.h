@@ -496,7 +496,7 @@ public:
         int e = root2[min(t/12, 7)];
         e = min(max(0, e), 3);
         int m = (t >> e) - 4;
-        m = min(max(0, e), 3);
+        m = min(max(0, m), 3);
 
         _ASSERT(m >= 0 && m <= 3 && e >= 0 && e <= 3);
         mRegisters[MDMCFG4] &= 0x0f;    // eemm....
