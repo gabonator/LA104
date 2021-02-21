@@ -1,0 +1,1 @@
+cp build/100i2ct.elf /Volumes/LA104/100i2ct.elf
