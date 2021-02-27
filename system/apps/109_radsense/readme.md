@@ -1,7 +1,7 @@
 Radsense
 ===========
 
-[Climateguard radsense](https://climateguard.ru/) geiger tube module. Application is based on [this github code](https://github.com/climateguard/ for arduino
+[Climateguard radsense](https://climateguard.ru/) geiger tube module. Application is based on [this github code](https://github.com/climateguard/) for arduino
 
 ## Dosimeter characteristics:
 - Geiger–Muller tube: SBM 20-1
