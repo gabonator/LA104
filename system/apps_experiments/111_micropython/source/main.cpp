@@ -1,16 +1,8 @@
 #include <library.h>
-//#include <stdint.h>
-//#include <assert.h>
-//#include <stdio.h>
-//#include <string.h>
-/*
-#include "py/compile.h"
-#include "py/repl.h"
-*/
+
 extern "C" {
 #include "py/gc.h"
 #include "py/lexer.h"
-//#include "py/mperrno.h"
 #include "py/runtime.h"
 #include "lib/utils/pyexec.h"
 }
@@ -26,8 +18,7 @@ static char heap[2048];
 #ifdef _ARM
 __attribute__((__section__(".entry")))
 #endif
-
-int main(int argc, char* argv[]) {
+int _main() {
     int stack_dummy;
     stack_top = (char *)&stack_dummy;
 
@@ -40,6 +31,7 @@ int main(int argc, char* argv[]) {
     BIOS::DBG::Print("[run]");
     pyexec_frozen_module("frozentest.py");
     BIOS::DBG::Print("[done]");
+    BIOS::SYS::DelayMs(1000);
     mp_deinit();
 
     return 0;
@@ -58,3 +50,10 @@ return;
     gc_dump_info();
 }
 #endif
+
+void _HandleAssertion(const char* file, int line, const char* cond)
+{
+   BIOS::DBG::Print("Assertion failed");
+    while (1);
+}
+

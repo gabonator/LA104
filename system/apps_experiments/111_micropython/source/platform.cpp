@@ -55,10 +55,15 @@ extern "C" void mp_hal_stdout_tx_strn_cooked(const char *str, size_t len) {
 
 extern "C" void dprint(const char * format, ...)
 {
-static int y=0;
-    BIOS::LCD::Print(0, y, 0xffff, 0x0000, format);
-    BIOS::SYS::DelayMs(5000);
-y+=14;
+    char buf[128];
+    char* bbuf = buf;
+
+    va_list args;
+        
+    va_start( args, format );
+    vsprintf( bbuf, format, args );
+    va_end(args);
+    BIOS::DBG::Print(buf);
 }
 
 #ifdef _APPLE_

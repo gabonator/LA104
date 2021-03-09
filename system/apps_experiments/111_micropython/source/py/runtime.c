@@ -216,12 +216,8 @@ mp_obj_t mp_load_build_class(void) {
 void dprint(const char * format, ...);
 
 void mp_store_name(qstr qst, mp_obj_t obj) {
-
-dprint("store name - begin\n");
-
     DEBUG_OP_printf("store name %s <- %p\n", qstr_str(qst), obj);
     mp_obj_dict_store(MP_OBJ_FROM_PTR(mp_locals_get()), MP_OBJ_NEW_QSTR(qst), obj);
-dprint("store name - end\n");
 }
 
 void mp_delete_name(qstr qst) {
