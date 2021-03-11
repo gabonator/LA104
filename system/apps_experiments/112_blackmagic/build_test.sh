@@ -1,10 +1,9 @@
-# bez libm
 set -e
 
 mkdir -p build
 cd build
 
-arm-none-eabi-gcc -g -Wall -Os -Werror -fno-common -mcpu=cortex-m3 -mthumb -msoft-float -fno-exceptions -Wno-psabi -DLA104 -MD -c \
+gcc -Wall -Os -Werror -fno-common -fno-exceptions -DLA104 -MD -c \
 ../source/py/mpstate.c \
 ../source/py/nlr.c \
 ../source/py/nlrx86.c \
@@ -127,14 +126,13 @@ arm-none-eabi-gcc -g -Wall -Os -Werror -fno-common -mcpu=cortex-m3 -mthumb -msof
 ../source/glue.c \
   -I../source/
 
-arm-none-eabi-g++ -g -Os -Werror -fno-common -mcpu=cortex-m3 -mthumb -msoft-float -fno-exceptions -fno-rtti -fno-threadsafe-statics -Wno-psabi -MD -D DS213 -D _ARM -D STM32F10X_HD -c \
+g++ -Os -Werror -fno-common -fno-exceptions -fno-rtti -fno-threadsafe-statics -MD -D LA104 -std=c++11 -c \
   ../source/platform.cpp \
   ../source/main.cpp \
-  ../../../os_host/source/framework/Serialize.cpp \
   -I../source/ \
   -I../../../os_library/include/ 
 
-arm-none-eabi-gcc -g -fPIC -mcpu=cortex-m3 -mthumb -o output.elf -nostartfiles -T ../source/app.lds \
+gcc  -Wl,--stack,1024 -o output.elf  \
   mpstate.o \
   nlr.o \
   nlrx86.o \
@@ -255,18 +253,5 @@ arm-none-eabi-gcc -g -fPIC -mcpu=cortex-m3 -mthumb -o output.elf -nostartfiles -
   main.o \
   pyexec.o \
   platform.o \
-  Serialize.o \
   _frozen_mpy.o \
-  glue.o \
-  -lbios_la104 -L../../../os_library/build
-
-arm-none-eabi-objdump -d -S output.elf > output.asm
-
-nm --print-size --size-sort -gC output.elf | grep " B " > symbols_ram.txt
-nm --print-size --size-sort -gC output.elf | grep " T " > symbols_rom.txt
-nm --print-size --size-sort -gC output.elf > symbols_all.txt
-
-find . -type f -name '*.o' -delete
-find . -type f -name '*.d' -delete
-
-../../../../tools/elfstrip/elfstrip output.elf 111micro.elf
+  glue.o

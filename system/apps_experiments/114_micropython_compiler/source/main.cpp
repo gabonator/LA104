@@ -35,10 +35,10 @@ static char heap[2048*2];
 
 STATIC void fd_print_strn(void *env, const char *str, size_t len) {
     //std::cout << "\n=========code========\n";
-    for (int i=0; i<len; i++)
-    {
         mWriter << CStream((uint8_t*)str, len);
 //        char 
+    for (int i=0; i<len; i++)
+    {
         BIOS::DBG::Print("0x%02x, ", (uint8_t)str[i]);
     }
     //std::cout << "\n=========code========\n";
@@ -104,7 +104,7 @@ print("uPy")
 print("a long string that is not interned")
 print("a string that has unicode αβγ chars")
 print(b"bytes 1234\x01")
-print(123456789)
+print(123456780+9)
 for i in range(4):
     print(i)
 )--";
@@ -132,6 +132,8 @@ __attribute__((__section__(".entry")))
 #endif
 int _main() {
     BIOS::DBG::Print("[a]");
+    _ASSERT(sizeof(gFatSharedBuffer) >= BIOS::SYS::GetAttribute(BIOS::SYS::EAttribute::DiskSectorSize));
+    BIOS::FAT::SetSharedBuffer(gFatSharedBuffer);
 
     int stack_dummy;
     stack_top = (char *)&stack_dummy;
@@ -156,6 +158,7 @@ int _main() {
     
     mp_deinit();
          BIOS::DBG::Print("[f]");
+        BIOS::FAT::SetSharedBuffer(nullptr);
 
     return 0;
 }

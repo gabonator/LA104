@@ -288,10 +288,6 @@ bool mp_obj_equal(mp_obj_t o1, mp_obj_t o2) {
 }
 
 mp_int_t mp_obj_get_int(mp_const_obj_t arg) {
-    assert(0);
-    return 0;
-#if GABO
-
     // This function essentially performs implicit type conversion to int
     // Note that Python does NOT provide implicit type conversion from
     // float to int in the core expression language, try some_list[1.0].
@@ -307,7 +303,6 @@ mp_int_t mp_obj_get_int(mp_const_obj_t arg) {
         mp_obj_t res = mp_unary_op(MP_UNARY_OP_INT, (mp_obj_t)arg);
         return mp_obj_int_get_checked(res);
     }
-#endif
 }
 
 mp_int_t mp_obj_get_int_truncated(mp_const_obj_t arg) {

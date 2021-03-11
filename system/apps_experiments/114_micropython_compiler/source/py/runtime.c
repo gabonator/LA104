@@ -202,7 +202,7 @@ mp_obj_t mp_load_global(qstr qst) {
     }
     return elem->value;
 }
-#if GABO
+
 mp_obj_t mp_load_build_class(void) {
     DEBUG_OP_printf("load_build_class\n");
     #if MICROPY_CAN_OVERRIDE_BUILTINS
@@ -214,7 +214,9 @@ mp_obj_t mp_load_build_class(void) {
         }
     }
     #endif
-    return MP_OBJ_FROM_PTR(&mp_builtin___build_class___obj);
+    assert(0); // gabo
+    return 0;
+    //return MP_OBJ_FROM_PTR(&mp_builtin___build_class___obj);
 }
 void ddprintf(const char * format, ...);
 
@@ -1017,7 +1019,6 @@ STATIC mp_obj_t mp_obj_new_checked_fun(const mp_obj_type_t *type, mp_obj_t fun) 
     return MP_OBJ_FROM_PTR(o);
 }
 
-#endif
 #endif // MICROPY_BUILTIN_METHOD_CHECK_SELF_ARG
 
 // Given a member that was extracted from an instance, convert it correctly

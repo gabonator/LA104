@@ -676,8 +676,7 @@ STATIC bool fold_constants(parser_t *parser, uint8_t rule_id, size_t num_args) {
                     return false;
                 }
             }
-            assert(0);
-            //arg0 = mp_binary_op(op, arg0, arg1);
+            arg0 = mp_binary_op(op, arg0, arg1);
         }
     } else if (rule_id == RULE_factor_2) {
         // folding for unary ops: + - ~
