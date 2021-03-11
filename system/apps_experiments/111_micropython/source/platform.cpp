@@ -52,7 +52,7 @@ extern "C" void mp_hal_stdout_tx_strn_cooked(const char *str, size_t len) {
         mp_hal_stdout_tx_strn(last, str - last);
     }
 }
-
+/*
 extern "C" void dprint(const char * format, ...)
 {
     char buf[128];
@@ -65,7 +65,7 @@ extern "C" void dprint(const char * format, ...)
     va_end(args);
     BIOS::DBG::Print(buf);
 }
-
+*/
 #ifdef _APPLE_
 
 #include <stdlib.h>

@@ -63,13 +63,14 @@ STATIC bool repl_display_debugging_info = 0;
 // EXEC_FLAG_PRINT_EOF prints 2 EOF chars: 1 after normal output, 1 after exception output
 // EXEC_FLAG_ALLOW_DEBUGGING allows debugging info to be printed after executing the code
 // EXEC_FLAG_IS_REPL is used for REPL inputs (flag passed on to mp_compile)
-STATIC int parse_compile_execute(const void *source, mp_parse_input_kind_t input_kind, int exec_flags) {
+//gabo
+/*STATIC*/ int parse_compile_execute(const void *source, mp_parse_input_kind_t input_kind, int exec_flags) {
     int ret = 0;
     #if MICROPY_REPL_INFO
     uint32_t start = 0;
     #endif
 
-    #ifdef MICROPY_BOARD_BEFORE_PYTHON_EXEC
+#ifdef MICROPY_BOARD_BEFORE_PYTHON_EXEC
     MICROPY_BOARD_BEFORE_PYTHON_EXEC(input_kind, exec_flags);
     #endif
 
@@ -178,7 +179,7 @@ STATIC int parse_compile_execute(const void *source, mp_parse_input_kind_t input
     return ret;
 }
 
-#if MICROPY_ENABLE_COMPILER
+#if MICROPY_ENABLE_COMPILER && gabo
 
 // This can be configured by a port (and even configured to a function to be
 // computed dynamically) to indicate the maximum number of bytes that can be

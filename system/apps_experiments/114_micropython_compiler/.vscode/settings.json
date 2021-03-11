@@ -1,0 +1,17 @@
+{
+    "cortex-debug.armToolchainPath": "/Applications/ARM/bin",
+    "files.associations": {
+        "__locale": "c",
+        "__threading_support": "c",
+        "bitset": "c",
+        "__hash": "c",
+        "memory": "c",
+        "optional": "c",
+        "string": "c",
+        "string_view": "c",
+        "system_error": "c",
+        "type_traits": "c",
+        "utility": "c",
+        "vector": "c"
+    }
+}

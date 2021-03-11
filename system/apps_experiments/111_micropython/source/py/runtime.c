@@ -213,7 +213,6 @@ mp_obj_t mp_load_build_class(void) {
     return MP_OBJ_FROM_PTR(&mp_builtin___build_class___obj);
 }
 
-void dprint(const char * format, ...);
 
 void mp_store_name(qstr qst, mp_obj_t obj) {
     DEBUG_OP_printf("store name %s <- %p\n", qstr_str(qst), obj);
@@ -1514,10 +1513,15 @@ NORETURN void m_malloc_fail(size_t num_bytes) {
         MP_ERROR_TEXT("memory allocation failed, allocating %u bytes"), (uint)num_bytes);
 }
 
+extern void dprint(const char*);
+
 NORETURN void mp_raise_msg(const mp_obj_type_t *exc_type, mp_rom_error_text_t msg) {
+    
     if (msg == NULL) {
+        dprint("raise ------");
         nlr_raise(mp_obj_new_exception(exc_type));
     } else {
+        dprint(msg);
         nlr_raise(mp_obj_new_exception_msg(exc_type, msg));
     }
 }
