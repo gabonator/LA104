@@ -70,7 +70,7 @@ Refer to this [tutorial](resources/tutorial_building)
 | ![87mlx906.elf](resources/appicons/chip.png) | devices | MLX90614 non cotact thermo | [apps_unfinished/87_mlx90614](system/apps_unfinished/87_mlx90614/) |
 | ![106mpr12.elf](resources/appicons/chip.png) | devices | MPR121 12 channel toch sensor | [apps_experiments/106_mpr121](system/apps_experiments/106_mpr121/) |
 | ![34scope.elf](resources/appicons/chip.png) | devices | PCF8591t I2C ADC | [apps/test34_scope](system/apps/test34_scope/) |
-| ![109radse.elf](resources/appicons/radsens.png) | devices | Radsens dosimeter | [apps_unfinished/109_echoosc](system/apps_unfinished/109_echoosc/) |
+| ![109radse.elf](resources/appicons/radsens.png) | devices | Radsens dosimeter | [apps/109_radsense](system/apps/109_radsense/) |
 | ![95sht20.elf](resources/appicons/chip.png) | devices | SHT20 temperature humidity | [apps_experiments/95_sht20](system/apps_experiments/95_sht20/) |
 | ![45simcom.elf](resources/appicons/chip.png) | devices | SIMCOM gprs modem | [apps/test45_simcom](system/apps/test45_simcom/) |
 | ![96tm1637.elf](resources/appicons/chip.png) | devices | TM1637 7-segment display | [apps_experiments/96_tm1637](system/apps_experiments/96_tm1637/)<br>[https://youtu.be/8FxnDp6G_iQ?t=580](https://youtu.be/8FxnDp6G_iQ?t=580) |
@@ -108,9 +108,9 @@ Refer to this [tutorial](resources/tutorial_building)
 
 ##### New applications
 
-- MH-Z19B - [apps/110_mhz19b](system/apps/110_mhz19b/)
-- Hunter X-core controller - [apps/115_hunter](system/apps/115_hunter/)
-- Climateguard radsens dosimeter - [apps_unfinished/109_echoosc](system/apps_unfinished/109_echoosc/)
+- MH-Z19B NDIR CO2 sensor in UART mode - [apps/110_mhz19b](system/apps/110_mhz19b/)
+- Hunter X-core controller using proprietary one wire protocol - [apps/115_hunter](system/apps/115_hunter/)
+- Climateguard radsens I2C dosimeter with GM tube and 400V inverter - [apps/109_radsense](system/apps/109_radsense/)
 
 ##### Avrisp programmer
 
