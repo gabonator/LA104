@@ -98,7 +98,7 @@ Refer to this [tutorial](resources/tutorial_building)
 | ![103servo.elf](resources/appicons/servo.png) | tools | Servo controller PCA9685 | [apps_featured/103_servo](system/apps_featured/103_servo/)<br>[https://youtu.be/heYFrqVF1P4](https://youtu.be/heYFrqVF1P4) |
 | ![72uartm.elf](resources/appicons/uartmon.png) | tools | UART monitor | [apps_featured/72_uartmon](system/apps_featured/72_uartmon/) |
 | ![74invt.elf](resources/appicons/vfd_invt.png) | tools | Invt VFD RS485 visualizer | [apps_featured/74_invtvisual](system/apps_featured/74_invtvisual/)<br>[https://youtu.be/0Ns7AHVvmX0](https://youtu.be/0Ns7AHVvmX0) |
-| ![63ws_104.elf](resources/appicons/ws2812.png) | tools | WS2812 addressable led tester | [apps_featured/test63_ws2812](system/apps_featured/test63_ws2812/)<br>[https://youtu.be/4fWqZBbjQPc,8FxnDp6G_iQ?t=281](https://youtu.be/4fWqZBbjQPc,8FxnDp6G_iQ?t=281)<br>[https://youtu.be/4fWqZBbjQPc,8FxnDp6G_iQ?t=281](https://youtu.be/4fWqZBbjQPc,8FxnDp6G_iQ?t=281) |
+| ![63ws_104.elf](resources/appicons/ws2812.png) | tools | WS2812 addressable led tester | [apps_featured/test63_ws2812](system/apps_featured/test63_ws2812/)<br>[https://youtu.be/4fWqZBbjQPc](https://youtu.be/4fWqZBbjQPc)<br>[https://youtu.be/8FxnDp6G_iQ?t=281](https://youtu.be/8FxnDp6G_iQ?t=281) |
 | ![104avris.elf](resources/appicons/avrisp.png) | usb | Atmel ISP programmer | [apps_usb/104_avrisp](system/apps_usb/104_avrisp/) |
 | ![24ncdc.elf](resources/appicons/cdc.png) | usb | Serial link | [apps_usb/test24_usbcdc](system/apps_usb/test24_usbcdc/) |
 | ![25hid.elf](resources/appicons/hid.png) | usb | Human interface device | [apps_usb/test25_hid](system/apps_usb/test25_hid/) |
