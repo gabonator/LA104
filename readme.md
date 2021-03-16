@@ -65,43 +65,52 @@ Refer to this [tutorial](resources/tutorial_building)
 | ![56ds1307.elf](resources/appicons/chip.png) | devices | DS1307 real time clock | [apps_experiments/test56_ds1307](system/apps_experiments/test56_ds1307/) |
 | ![57ds3231.elf](resources/appicons/chip.png) | devices | DS3231 real time clock | [apps_experiments/test57_ds3231](system/apps_experiments/test57_ds3231/) |
 | ![36espwww.elf](resources/appicons/chip.png) | devices | ESP8266 uart wifi server | [apps/test36_esp_server](system/apps/test36_esp_server/) |
-| ![84maxdis.elf](resources/appicons/chip.png) | devices | MAX7219 display driver | [apps_experiments/84_max7219](system/apps_experiments/84_max7219/) |
+| ![84maxdis.elf](resources/appicons/chip.png) | devices | MAX7219 display driver | [apps_experiments/84_max7219](system/apps_experiments/84_max7219/)<br>[https://youtu.be/8FxnDp6G_iQ?t=603](https://youtu.be/8FxnDp6G_iQ?t=603) |
+| ![110co2.elf](resources/appicons/mhz19b.png) | devices | MH-Z19B | [apps/110_mhz19b](system/apps/110_mhz19b/) |
 | ![87mlx906.elf](resources/appicons/chip.png) | devices | MLX90614 non cotact thermo | [apps_unfinished/87_mlx90614](system/apps_unfinished/87_mlx90614/) |
 | ![106mpr12.elf](resources/appicons/chip.png) | devices | MPR121 12 channel toch sensor | [apps_experiments/106_mpr121](system/apps_experiments/106_mpr121/) |
 | ![34scope.elf](resources/appicons/chip.png) | devices | PCF8591t I2C ADC | [apps/test34_scope](system/apps/test34_scope/) |
+| ![109radse.elf](resources/appicons/radsens.png) | devices | Radsens dosimeter | [apps_unfinished/109_echoosc](system/apps_unfinished/109_echoosc/) |
 | ![95sht20.elf](resources/appicons/chip.png) | devices | SHT20 temperature humidity | [apps_experiments/95_sht20](system/apps_experiments/95_sht20/) |
 | ![45simcom.elf](resources/appicons/chip.png) | devices | SIMCOM gprs modem | [apps/test45_simcom](system/apps/test45_simcom/) |
-| ![96tm1637.elf](resources/appicons/chip.png) | devices | TM1637 7-segment display | [apps_experiments/96_tm1637](system/apps_experiments/96_tm1637/) |
+| ![96tm1637.elf](resources/appicons/chip.png) | devices | TM1637 7-segment display | [apps_experiments/96_tm1637](system/apps_experiments/96_tm1637/)<br>[https://youtu.be/8FxnDp6G_iQ?t=580](https://youtu.be/8FxnDp6G_iQ?t=580) |
 | ![13mp3.elf](resources/appicons/chip.png) | devices | YX5300 MP3 player | [apps/test13_mp3](system/apps/test13_mp3/) |
-| ![90eink.elf](resources/appicons/eink.png) | display | eInk display image loader | [apps_featured/90_epd_image](system/apps_featured/90_epd_image/) |
-| ![81image.elf](resources/appicons/imgview.png) | display | Image viewer | [apps/81_image](system/apps/81_image/) |
-| ![102oled.elf](resources/appicons/oledssd.png) | display | SSD1306 oled test | [apps_experiments/102_ssd1306](system/apps_experiments/102_ssd1306/) |
-| ![99cube04.elf](resources/appicons/app.png) | fun | Rotating cube | [apps/99_3d](system/apps/99_3d/) |
+| ![90eink.elf](resources/appicons/eink.png) | display | eInk display image loader | [apps_featured/90_epd_image](system/apps_featured/90_epd_image/)<br>[https://youtu.be/8FxnDp6G_iQ?t=524](https://youtu.be/8FxnDp6G_iQ?t=524) |
+| ![81image.elf](resources/appicons/imgview.png) | display | Image viewer | [apps/81_image](system/apps/81_image/)<br>[https://youtu.be/8FxnDp6G_iQ?t=626](https://youtu.be/8FxnDp6G_iQ?t=626) |
+| ![102oled.elf](resources/appicons/oledssd.png) | display | SSD1306 oled test | [apps_experiments/102_ssd1306](system/apps_experiments/102_ssd1306/)<br>[https://youtu.be/8FxnDp6G_iQ?t=501](https://youtu.be/8FxnDp6G_iQ?t=501) |
+| ![99cube04.elf](resources/appicons/app.png) | fun | Rotating cube | [apps/99_3d](system/apps/99_3d/)<br>[https://youtu.be/8FxnDp6G_iQ?t=645](https://youtu.be/8FxnDp6G_iQ?t=645) |
 | ![39lcd.elf](resources/appicons/app.png) | fun | Scroll test | [apps_experiments/test39_lcd](system/apps_experiments/test39_lcd/) |
 | ![4snake.elf](resources/appicons/app.png) | fun | Snake game | [apps/test4_snake](system/apps/test4_snake/) |
 | ![2import.elf](resources/appicons/app.png) | fun | Sierpinski triangle | [apps_experiments/test2_import](system/apps_experiments/test2_import/) |
 | ![85eetest.elf](resources/appicons/eeview.png) | i2c | I2C EEPROM memory viewer | [apps_featured/85_i2ceeprom](system/apps_featured/85_i2ceeprom/) |
-| ![37icscan.elf](resources/appicons/i2cscan.png) | i2c | I2C bus scanner | [apps_featured/test37_i2cscan](system/apps_featured/test37_i2cscan/) |
+| ![37icscan.elf](resources/appicons/i2cscan.png) | i2c | I2C bus scanner | [apps_featured/test37_i2cscan](system/apps_featured/test37_i2cscan/)<br>[https://youtu.be/8FxnDp6G_iQ?t=446](https://youtu.be/8FxnDp6G_iQ?t=446) |
 | ![80rftool.elf](resources/appicons/rftool.png) | rftools | RF analyser synthesizer | [apps_featured/80_rftool/test](system/apps_featured/80_rftool/test/)<br>[https://youtu.be/Gwyi00NKBNg](https://youtu.be/Gwyi00NKBNg) |
 | ![82sanal.elf](resources/appicons/spectrum.png) | rftools | Spectrum analyser | [apps/82_specan](system/apps/82_specan/)<br>[https://youtu.be/Gwyi00NKBNg](https://youtu.be/Gwyi00NKBNg) |
 | ![79ccosc.elf](resources/appicons/wusbosc.png) | rftools | WebUSB rf analyser | [apps/79_cc1101osc](system/apps/79_cc1101osc/)<br>[https://youtu.be/Gwyi00NKBNg](https://youtu.be/Gwyi00NKBNg) |
 | ![105avrfl.elf](resources/appicons/avrflash.png) | tools | Atmel firmware flasher | [apps/105_avrprogrammer](system/apps/105_avrprogrammer/)<br>[https://youtu.be/yC3a1zbonJ0](https://youtu.be/yC3a1zbonJ0) |
 | ![15charla.elf](resources/appicons/charmap.png) | tools | Character map | [apps/test15_charmap](system/apps/test15_charmap/) |
 | ![30dcf77.elf](resources/appicons/dcf77.png) | tools | DCF77 decoder | [apps/test30_dcf77](system/apps/test30_dcf77/) |
-| ![33temper.elf](resources/appicons/dstemper.png) | tools | DS1820 temperature grapher | [apps_featured/test33_temper](system/apps_featured/test33_temper/) |
-| ![49gpio.elf](resources/appicons/gpio.png) | tools | GPIO and PWM controller | [apps_featured/test49_gpio](system/apps_featured/test49_gpio/) |
+| ![33temper.elf](resources/appicons/dstemper.png) | tools | DS1820 temperature grapher | [apps_featured/test33_temper](system/apps_featured/test33_temper/)<br>[https://youtu.be/8FxnDp6G_iQ?t=331](https://youtu.be/8FxnDp6G_iQ?t=331) |
+| ![49gpio.elf](resources/appicons/gpio.png) | tools | GPIO and PWM controller | [apps_featured/test49_gpio](system/apps_featured/test49_gpio/)<br>[https://youtu.be/8FxnDp6G_iQ?t=190](https://youtu.be/8FxnDp6G_iQ?t=190) |
+| ![115huntr.elf](resources/appicons/hunter.png) | tools | Hunter X-core controller | [apps/115_hunter](system/apps/115_hunter/) |
 | ![21mplayl.elf](resources/appicons/midiplay.png) | tools | MIDI player | [apps_featured/test21_midiplay](system/apps_featured/test21_midiplay/)<br>[https://youtu.be/f3DCqy-3lNo](https://youtu.be/f3DCqy-3lNo) |
 | ![22seqen.elf](resources/appicons/sequence.png) | tools | Sequencer and analyser | [apps/test22_sequencer](system/apps/test22_sequencer/)<br>[https://youtu.be/D8OnXzE7OwU](https://youtu.be/D8OnXzE7OwU) |
 | ![103servo.elf](resources/appicons/servo.png) | tools | Servo controller PCA9685 | [apps_featured/103_servo](system/apps_featured/103_servo/)<br>[https://youtu.be/heYFrqVF1P4](https://youtu.be/heYFrqVF1P4) |
 | ![72uartm.elf](resources/appicons/uartmon.png) | tools | UART monitor | [apps_featured/72_uartmon](system/apps_featured/72_uartmon/) |
 | ![74invt.elf](resources/appicons/vfd_invt.png) | tools | Invt VFD RS485 visualizer | [apps_featured/74_invtvisual](system/apps_featured/74_invtvisual/)<br>[https://youtu.be/0Ns7AHVvmX0](https://youtu.be/0Ns7AHVvmX0) |
-| ![63ws_104.elf](resources/appicons/ws2812.png) | tools | WS2812 addressable led tester | [apps_featured/test63_ws2812](system/apps_featured/test63_ws2812/)<br>[https://youtu.be/4fWqZBbjQPc](https://youtu.be/4fWqZBbjQPc) |
+| ![63ws_104.elf](resources/appicons/ws2812.png) | tools | WS2812 addressable led tester | [apps_featured/test63_ws2812](system/apps_featured/test63_ws2812/)<br>[https://youtu.be/4fWqZBbjQPc,8FxnDp6G_iQ?t=281](https://youtu.be/4fWqZBbjQPc,8FxnDp6G_iQ?t=281)<br>[https://youtu.be/4fWqZBbjQPc,8FxnDp6G_iQ?t=281](https://youtu.be/4fWqZBbjQPc,8FxnDp6G_iQ?t=281) |
 | ![104avris.elf](resources/appicons/avrisp.png) | usb | Atmel ISP programmer | [apps_usb/104_avrisp](system/apps_usb/104_avrisp/) |
 | ![24ncdc.elf](resources/appicons/cdc.png) | usb | Serial link | [apps_usb/test24_usbcdc](system/apps_usb/test24_usbcdc/) |
 | ![25hid.elf](resources/appicons/hid.png) | usb | Human interface device | [apps_usb/test25_hid](system/apps_usb/test25_hid/) |
 | ![26midi.elf](resources/appicons/midi.png) | usb | Midi to uart | [apps_usb/test26_midi](system/apps_usb/test26_midi/) |
     
 #### News
+
+##### New applications
+
+- MH-Z19B - [apps/110_mhz19b](system/apps/110_mhz19b/)
+- Hunter X-core controller - [apps/115_hunter](system/apps/115_hunter/)
+- Climateguard radsens dosimeter - [apps_unfinished/109_echoosc](system/apps_unfinished/109_echoosc/)
 
 ##### Avrisp programmer
 

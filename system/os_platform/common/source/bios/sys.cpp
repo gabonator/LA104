@@ -99,6 +99,7 @@ namespace BIOS
       static uint32_t dummy2 = 0;
       switch (eAttribute)
       {
+        case EAttribute::DeviceType: return (uintptr_t)"LA104-emu";
         case EAttribute::CharRom: return (uintptr_t)font;
         case EAttribute::ScreenWidth: return 320;
         case EAttribute::ScreenHeight: return 240;

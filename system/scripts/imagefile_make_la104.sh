@@ -5,3 +5,4 @@ sudo mkdir /Volumes/LA104
 sudo mount -t msdos /dev/disk2 /Volumes/LA104
 cp -a ../build/image_la104/ /Volumes/LA104
 sudo hdiutil detach /dev/disk2
+cp la104.fs ../os_platform/mac_sdl/data/la104.fat

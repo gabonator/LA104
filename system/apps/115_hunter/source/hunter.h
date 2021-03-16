@@ -1,25 +1,10 @@
 // https://www.hackster.io/sshumate/hunter-sprinkler-wifi-remote-control-4ea918
 // Sebastien
 // https://github.com/ecodina/hunter-wifi/blob/master/esp8266-hunter-sprinkler/lib/HunterRoam/HunterRoam.cpp
-/*
-#include "hunter.h"
 
-HunterStart(2,10); 
-delay(60000); 
-HunterStop(2); // Start zone 2 for 10 minutes, wait 1 min and stop
-delay(15000);
-Serial.println("Start program C");
-HunterProgram(3);
-
-===== File hunter.h =====
-*/
 // This makes inverting the signal easy
-#define HUNTER_ONE 0
-#define HUNTER_ZERO 1
-
-#define START_INTERVAL 900
-#define SHORT_INTERVAL 208
-#define LONG_INTERVAL 1875
+enum { HUNTER_ONE = 1, HUNTER_ZERO = 0 };
+enum { START_INTERVAL = 900, SHORT_INTERVAL = 208, LONG_INTERVAL = 1875 };
 
 #define HUNTER_PIN BIOS::GPIO::EPin::P1
 
@@ -37,6 +22,11 @@ void delayMicroseconds(int us)
 void HunterInit()
 {
   BIOS::GPIO::PinMode(HUNTER_PIN, BIOS::GPIO::EMode::Output);
+}
+
+void HunterDeinit()
+{
+  BIOS::GPIO::PinMode(HUNTER_PIN, BIOS::GPIO::EMode::Input);
 }
 
 void HunterStop(byte zone);

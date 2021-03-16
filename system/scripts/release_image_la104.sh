@@ -65,7 +65,7 @@ echo -n "{\"description\":{\"short\":\"I2C\",\"long\":\"I2C bus tools\"},\"icon\
 
 cp $FROM/37icscan.elf $TO/i2c/i2cscan.elf
 cp $ICON/magnifier.bmp $TO/i2c/i2cscan.bmp
-echo -n "{\"description\":{\"short\":\"I2C scanner\",\"long\":\"I2C bus scanner\"},\"icon\":\"i2cscan.bmp\",execute:\"i2cscan.elf\",order:10}" > $TO/i2c/i2cscan.lnk
+echo -n "{\"description\":{\"short\":\"I2C scanner\",\"long\":\"I2C bus scanner\"},\"icon\":\"i2cscan.bmp\",execute:\"i2cscan.elf\",order:10,youtube:\"8FxnDp6G_iQ?t=446\"}" > $TO/i2c/i2cscan.lnk
 
 cp ../apps_featured/test37_i2cscan/devices.txt $TO/i2c/devices.txt
 cp $FROM/85eetest.elf $TO/i2c/eeview.elf
@@ -146,17 +146,16 @@ cp $ICON/fpicture.bmp $TO/display/display.bmp
 cp $FROM/90eink.elf $TO/display/eink.elf
 cp $ICON/eink.bmp $TO/display/eink.bmp
 cp ../apps_featured/90_epd_image/res/*.bmp $TO/display/
-echo -n "{\"description\":{short:\"eInk\",long:\"eInk display image loader\"},\"icon\":\"eink.bmp\",\"execute\":\"eink.elf\"}" > $TO/display/eink.lnk
+echo -n "{\"description\":{short:\"eInk\",long:\"eInk display image loader\"},\"icon\":\"eink.bmp\",\"execute\":\"eink.elf\",\"youtube\":\"8FxnDp6G_iQ?t=524\"}" > $TO/display/eink.lnk
 
 cp $FROM/81image.elf $TO/display/imgview.elf
 cp $ICON/picture.bmp $TO/display/imgview.bmp
 cp ../apps/81_image/res/*.bmp $TO/display/
-echo -n "{\"description\":{short:\"Image view\",long:\"Image viewer\"},\"icon\":\"imgview.bmp\",\"execute\":\"imgview.elf\"}" > $TO/display/imgview.lnk
+echo -n "{\"description\":{short:\"Image view\",long:\"Image viewer\"},\"icon\":\"imgview.bmp\",\"execute\":\"imgview.elf\",\"youtube\":\"8FxnDp6G_iQ?t=626\"}" > $TO/display/imgview.lnk
 
 cp $FROM/102oled.elf $TO/display/oledssd.elf
 cp $ICON/picture.bmp $TO/display/oledssd.bmp
-echo -n "{\"description\":{short:\"Oled test\",long:\"SSD1306 oled test\"},\"icon\":\"oledssd.bmp\",\"execute\":\"oledssd.elf\"}" > $TO/display/oledssd.lnk
-
+echo -n "{\"description\":{short:\"Oled test\",long:\"SSD1306 oled test\"},\"icon\":\"oledssd.bmp\",\"execute\":\"oledssd.elf\",youtube:\"8FxnDp6G_iQ?t=501\"}" > $TO/display/oledssd.lnk
 
 echo -n "{\"description\":{short:\"Help\",long:\"Help\"},\"icon\":\"../help.bmp\",\"execute\":\"../viewtxt.elf help.txt\",order:200}" >> $TO/display/help.lnk
 
@@ -196,18 +195,20 @@ cp $FROM/49gpio.elf $TO/tools/gpio.elf
 cp $FROM/21mplayl.elf $TO/tools/midiplay.elf
 cp $FROM/105avrfl.elf $TO/tools/avrflash.elf
 cp $FROM/103servo.elf $TO/tools/servo.elf
+cp $FROM/115huntr.elf $TO/tools/hunter.elf
 
 echo -n "{\"description\":{short:\"Character map\",long:\"Character map\"},\"icon\":\"charmap.bmp\",\"execute\":\"charmap.elf\",order:50}" > $TO/tools/charmap.lnk
 echo -n "{\"description\":{short:\"DCF77\",long:\"DCF77 decoder\"},\"icon\":\"dcf77.bmp\",\"execute\":\"dcf77.elf\",order:40}" > $TO/tools/dcf77.lnk
-echo -n "{\"description\":{short:\"DS1820\",long:\"DS1820 temperature grapher\"},\"icon\":\"dstemper.bmp\",\"execute\":\"dstemper.elf\",order:70}" > $TO/tools/dstemper.lnk
-echo -n "{\"description\":{short:\"GPIO\",long:\"GPIO and PWM controller\"},\"icon\":\"gpio.bmp\",\"execute\":\"gpio.elf\",order:90}" > $TO/tools/gpio.lnk
+echo -n "{\"description\":{short:\"DS1820\",long:\"DS1820 temperature grapher\"},\"icon\":\"dstemper.bmp\",\"execute\":\"dstemper.elf\",order:70,youtube:\"8FxnDp6G_iQ?t=331\"}" > $TO/tools/dstemper.lnk
+echo -n "{\"description\":{short:\"GPIO\",long:\"GPIO and PWM controller\"},\"icon\":\"gpio.bmp\",\"execute\":\"gpio.elf\",order:90,youtube:\"8FxnDp6G_iQ?t=190\"}" > $TO/tools/gpio.lnk
 echo -n "{\"description\":{short:\"Sequencer\",long:\"Sequencer and analyser\"},\"icon\":\"sequence.bmp\",\"execute\":\"sequence.elf\",order:60,youtube:\"D8OnXzE7OwU\"}" > $TO/tools/sequence.lnk
-echo -n "{\"description\":{short:\"UART monitor\",long:\"UART monitor\"},\"icon\":\"uartmon.bmp\",\"execute\":\"uartmon.elf\"}" > $TO/tools/uartmon.lnk
+echo -n "{\"description\":{short:\"UART monitor\",long:\"UART monitor\"},\"icon\":\"uartmon.bmp\",\"execute\":\"uartmon.elf\",video:\"8FxnDp6G_iQ?t=412\"}" > $TO/tools/uartmon.lnk
 echo -n "{\"description\":{short:\"VFD Invt\",long:\"Invt VFD RS485 visualizer\"},\"icon\":\"vfd_invt.bmp\",\"execute\":\"vfd_invt.elf\",youtube:\"0Ns7AHVvmX0\"}" > $TO/tools/vfd_invt.lnk
-echo -n "{\"description\":{short:\"WS2812\",long:\"WS2812 addressable led tester\"},\"icon\":\"ws2812.bmp\",\"execute\":\"ws2812.elf\",order:100,youtube:\"4fWqZBbjQPc\"}" > $TO/tools/ws2812.lnk
+echo -n "{\"description\":{short:\"WS2812\",long:\"WS2812 addressable led tester\"},\"icon\":\"ws2812.bmp\",\"execute\":\"ws2812.elf\",order:100,youtube:\"4fWqZBbjQPc,8FxnDp6G_iQ?t=281\"}" > $TO/tools/ws2812.lnk
 echo -n "{\"description\":{\"short\":\"MIDI\",\"long\":\"MIDI player\"},\"icon\":\"midiplay.bmp\",\"execute\":\"midiplay.elf\",youtube:\"f3DCqy-3lNo\"}" > $TO/tools/midiplay.lnk
 echo -n "{\"description\":{short:\"AvrFlash\",long:\"Atmel firmware flasher\"},\"icon\":\"avrflash.bmp\",\"execute\":\"avrflash.elf\",order:20, youtube:\"yC3a1zbonJ0\"}" > $TO/tools/avrflash.lnk
 echo -n "{\"description\":{short:\"Servo\",long:\"Servo controller PCA9685\"},\"icon\":\"servo.bmp\",\"execute\":\"servo.elf\",order:65,youtube:\"heYFrqVF1P4\"}" > $TO/tools/servo.lnk
+echo -n "{\"description\":{short:\"Hunter\",long:\"Hunter X-core controller\"},\"icon\":\"hunter.bmp\",\"execute\":\"hunter.elf\",order:66}" > $TO/tools/hunter.lnk
 
 cp $ICON/charmap.bmp $TO/tools/charmap.bmp
 cp $ICON/dcf77.bmp $TO/tools/dcf77.bmp
@@ -220,6 +221,8 @@ cp $ICON/ws2812.bmp $TO/tools/ws2812.bmp
 cp $ICON/music.bmp $TO/tools/midiplay.bmp
 cp $ICON/arduino.bmp $TO/tools/avrflash.bmp
 cp $ICON/servo.bmp $TO/tools/servo.bmp
+cp $ICON/hunter.bmp $TO/tools/hunter.bmp
+
 cp ../apps_featured/test21_midiplay/midi/laisla.mid $TO/tools/laisla.mid
 cp ../apps/105_avrprogrammer/arduino/blink.hex $TO/tools/blink.hex
 cp ../apps/105_avrprogrammer/arduino/wheel.hex $TO/tools/wheel.hex
@@ -244,13 +247,16 @@ Tools
      .   .   .  
      .   .   .
      GND P2  VCC
-  - "Servo controller PCA9685" - Use PCA9685 to use up to 16 servo motors
+  - "Servo controller PCA9685" - Use PCA9685 to use up to 16 servo motors (demo)
+  - "Rainbird X-core controller" - Rainbird X-core irrigation controller remote control application 
 
 EOM
 
 #devices
 mkdir $TO/devices
 cp $ICON/fchip.bmp $TO/devices/devices.bmp
+cp $ICON/radsens.bmp $TO/devices/radsens.bmp
+cp $ICON/co2.bmp $TO/devices/mhz19b.bmp
 echo -n "{\"description\":{\"short\":\"Devices\",\"long\":\"Device drivers\"},\"icon\":\"devices.bmp\",order:7}" > $TO/devices/index.lnk
 
 cp $FROM/45simcom.elf $TO/devices/simcom.elf
@@ -268,6 +274,8 @@ cp $FROM/95sht20.elf $TO/devices/sht20.elf
 cp $FROM/96tm1637.elf $TO/devices/tm1637.elf
 cp $FROM/87mlx906.elf $TO/devices/mlx90614.elf
 cp $FROM/106mpr12.elf $TO/devices/mpr121.elf
+cp $FROM/109radse.elf $TO/devices/radsens.elf
+cp $FROM/110co2.elf $TO/devices/mhz19b.elf
 
 echo -n "{\"description\":{short:\"APDS9960\",long:\"APDS9960 color gesture sensor\"},\"icon\":\"chip.bmp\",\"execute\":\"apds9960.elf\"}" > $TO/devices/apds9960.lnk
 echo -n "{\"description\":{short:\"BMP085\",long:\"BMP085 Barometric sensor\"},\"icon\":\"chip.bmp\",\"execute\":\"bmp085.elf\"}" > $TO/devices/bmp085.lnk
@@ -275,15 +283,17 @@ echo -n "{\"description\":{short:\"DHT22\",long:\"DHT11/DHT22 temperature humidi
 echo -n "{\"description\":{short:\"DS1307\",long:\"DS1307 real time clock\"},\"icon\":\"chip.bmp\",\"execute\":\"ds1307.elf\"}" > $TO/devices/ds1307.lnk
 echo -n "{\"description\":{short:\"DS3231\",long:\"DS3231 real time clock\"},\"icon\":\"chip.bmp\",\"execute\":\"ds3231.elf\"}" > $TO/devices/ds3231.lnk
 echo -n "{\"description\":{short:\"ESP8266\",long:\"ESP8266 uart wifi server\"},\"icon\":\"chip.bmp\",\"execute\":\"esp8266.elf\"}" > $TO/devices/esp8266.lnk
-echo -n "{\"description\":{short:\"MAX7219\",long:\"MAX7219 display driver\"},\"icon\":\"chip.bmp\",\"execute\":\"max7219.elf\"}" > $TO/devices/max7219.lnk
+echo -n "{\"description\":{short:\"MAX7219\",long:\"MAX7219 display driver\"},\"icon\":\"chip.bmp\",\"execute\":\"max7219.elf\",\"youtube\":\"8FxnDp6G_iQ?t=603\"}" > $TO/devices/max7219.lnk
 echo -n "{\"description\":{short:\"PCF8591t\",long:\"PCF8591t I2C ADC\"},\"icon\":\"chip.bmp\",\"execute\":\"pcf8591t.elf\"}" > $TO/devices/pcf8591t.lnk
 echo -n "{\"description\":{short:\"SIMCOM\",long:\"SIMCOM gprs modem\"},\"icon\":\"chip.bmp\",\"execute\":\"simcom.elf\"}" > $TO/devices/simcom.lnk
 echo -n "{\"description\":{short:\"YX5300\",long:\"YX5300 MP3 player\"},\"icon\":\"chip.bmp\",\"execute\":\"yx5300.elf\"}" > $TO/devices/yx5300.lnk
 echo -n "{\"description\":{short:\"BMP180\",long:\"BMP180/BMP085 barometer\"},\"icon\":\"chip.bmp\",\"execute\":\"bmp180.elf\"}" > $TO/devices/bmp180.lnk
 echo -n "{\"description\":{short:\"SHT20\",long:\"SHT20 temperature humidity\"},\"icon\":\"chip.bmp\",\"execute\":\"sht20.elf\"}" > $TO/devices/sht20.lnk
-echo -n "{\"description\":{short:\"TM1637\",long:\"TM1637 7-segment display\"},\"icon\":\"chip.bmp\",\"execute\":\"tm1637.elf\"}" > $TO/devices/tm1637.lnk
+echo -n "{\"description\":{short:\"TM1637\",long:\"TM1637 7-segment display\"},\"icon\":\"chip.bmp\",\"execute\":\"tm1637.elf\",\"youtube\":\"8FxnDp6G_iQ?t=580\"}" > $TO/devices/tm1637.lnk
 echo -n "{\"description\":{short:\"MLX90614\",long:\"MLX90614 non cotact thermo\"},\"icon\":\"chip.bmp\",\"execute\":\"mlx90614.elf\"}" > $TO/devices/mlx90614.lnk
 echo -n "{\"description\":{short:\"MPR121\",long:\"MPR121 12 channel toch sensor\"},\"icon\":\"chip.bmp\",\"execute\":\"mpr121.elf\"}" > $TO/devices/mpr121.lnk
+echo -n "{\"description\":{short:\"RADSENS\",long:\"Radsens dosimeter\"},\"icon\":\"radsens.bmp\",\"execute\":\"radsens.elf\"}" > $TO/devices/radsens.lnk
+echo -n "{\"description\":{short:\"MHZ19B\",long:\"MH-Z19B\"},\"icon\":\"mhz19b.bmp\",\"execute\":\"mhz19b.elf\"}" > $TO/devices/mhz19b.lnk
 
 cp $ICON/chip.bmp $TO/devices/chip.bmp
 
@@ -298,6 +308,8 @@ for other devices wiring instructions see the application folder or source code 
 
 https://github.com/gabonator/LA104/tree/master/system/apps_experiments
 
+  - "Radsens dosimeter" - Climateguard radsense I2C dosimeter
+  - "MH-Z19B" - UART Non dispersive infrared (NDIR) CO2 sensor test application
 EOM
 
 # usb
@@ -362,7 +374,7 @@ Application groups
 
 Version information
 ---------------------
-oct/2020 release
+mar/2021 release
 EOM
 
 mkdir $TO/fun
@@ -374,7 +386,7 @@ cp $FROM/2import.elf $TO/fun/triangle.elf
 cp $FROM/4snake.elf $TO/fun/snake.elf
 cp $FROM/39lcd.elf $TO/fun/scroll.elf
 
-echo -n "{\"description\":{short:\"Cube\",long:\"Rotating cube\"},\"icon\":\"app.bmp\",\"execute\":\"cube.elf\"}" > $TO/fun/cube.lnk
+echo -n "{\"description\":{short:\"Cube\",long:\"Rotating cube\"},\"icon\":\"app.bmp\",\"execute\":\"cube.elf\",\"youtube\":\"8FxnDp6G_iQ?t=645\"}" > $TO/fun/cube.lnk
 echo -n "{\"description\":{short:\"Triangle\",long:\"Sierpinski triangle\"},\"icon\":\"app.bmp\",\"execute\":\"triangle.elf\"}" > $TO/fun/triangle.lnk
 echo -n "{\"description\":{short:\"Snake\",long:\"Snake game\"},\"icon\":\"app.bmp\",\"execute\":\"snake.elf\"}" > $TO/fun/snake.lnk
 echo -n "{\"description\":{short:\"Scroll\",long:\"Scroll test\"},\"icon\":\"app.bmp\",\"execute\":\"scroll.elf\"}" > $TO/fun/scroll.lnk

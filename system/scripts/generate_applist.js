@@ -154,7 +154,9 @@ getFiles("../", "build.sh").then(l => l.filter(app => app.path.substr(0,4) == "a
     var icon = "!["+ref.internal.split("/").slice(-1)[0]+"](resources/appicons/"+app.newIcon+")";
     var folder = "["+ref.folder.slice(0,-1)+"](system/"+ref.folder+")";
     if (app.youtube)
-      folder += "<br\>[https://youtu.be/"+app.youtube+"](https://youtu.be/"+app.youtube+")";
+      app.youtube.split(",").forEach(yt =>
+        folder += "<br\>[https://youtu.be/"+app.youtube+"](https://youtu.be/"+app.youtube+")"
+      );
     console.log("| " + icon + " | " + app.group + " | " + app.desc + " | " + folder + " |");
   }
 });

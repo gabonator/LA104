@@ -203,7 +203,7 @@ char* CDirInfo::mRoot = {0};
 
 class CBrowser : public CWnd, public CSmallFont, public CMenuEnumerator
 {
-    CDirInfo mItemsStorage[16];
+    CDirInfo mItemsStorage[32];
     CArray<CDirInfo> mItems;
     int mCursor{0};
     int mScroll{0};

@@ -11,7 +11,6 @@ uint16_t drawBuffer[32*32];
 
 CRect InvalidRect(0, 0, 0, 0);
 
-
 class CPwm
 {
     bool mOnline{false};
@@ -21,6 +20,7 @@ public:
     bool begin()
     {
         mOnline = false;
+
         if (!mPwmDriver.begin())
         {
             //BIOS::DBG::Print("Failed to initialize driver!\n");
@@ -1128,7 +1128,7 @@ int _main(void)
 {
     CONSOLE::colorBack = RGB565(202020);
 
-    APP::Init("Servo test");
+    APP::Init("DEMO: Servo test");
     APP::Status("");
 
     if (setup())

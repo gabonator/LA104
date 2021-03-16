@@ -44,7 +44,7 @@ public:
 	CStream( int16_t& n ) : m_pBuffer( &n ), m_nOffset( 0 ), m_nLength( sizeof(int16_t) ) {}
 	CStream( uint8_t& n ) : m_pBuffer( &n ), m_nOffset( 0 ), m_nLength( sizeof(uint8_t) ) {}
 	CStream( int8_t& n ) : m_pBuffer( &n ), m_nOffset( 0 ), m_nLength( sizeof(int8_t) ) {}
-#ifndef __APPLE__
+#if !defined(__APPLE__) && !defined(EMSCRIPTEN)
 	CStream( int& n ) : m_pBuffer( &n ), m_nOffset( 0 ), m_nLength( sizeof(int) ) {}
 #endif
 	

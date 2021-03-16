@@ -54,7 +54,8 @@ void setup()
   uint8_t sensorChipId = radSens.getChipId(); /*Returns chip id, default value: 0x7D.*/
 
   CONSOLE::Print("Chip id: 0x%02x\n", sensorChipId);
-  _ASSERT(sensorChipId == 0x7d);
+  if (sensorChipId == 0x7d)
+    CONSOLE::Print("Wrong chip id, should be 0x7d!\n");
 
   uint8_t firmWareVer = radSens.getFirmwareVersion(); /*Returns firmware version.*/
 
@@ -71,13 +72,17 @@ void setup()
   radSens.setSensitivity(55); /*Sets the value coefficient used for calculating
                                 the radiation intensity*/
 
-  _ASSERT(radSens.getSensitivity() == 55);
-  CONSOLE::Print("Ok\n");
+  if (radSens.getSensitivity() == 55) 
+    CONSOLE::Print("Ok\n");
+  else
+    CONSOLE::Print("Fail!\n");
 
   CONSOLE::Print("setSensitivity(105)... ");
   radSens.setSensitivity(105);
-  _ASSERT(radSens.getSensitivity() == 105);
-  CONSOLE::Print("Ok\n");
+  if (radSens.getSensitivity() == 105) 
+    CONSOLE::Print("Ok\n");
+  else
+    CONSOLE::Print("Fail!\n");
 
   delay(1000);
 
@@ -99,8 +104,11 @@ void setup()
   CONSOLE::Print("setHVGeneratorState(true)... ");
   radSens.setHVGeneratorState(true);
   bool hvGeneratorState = radSens.getHVGeneratorState();
-  _ASSERT(hvGeneratorState == true);
-  CONSOLE::Print("Ok\n\n");               
+  if(hvGeneratorState)
+    CONSOLE::Print("Ok\n\n");               
+  else
+    CONSOLE::Print("Fail\n\n");               
+
   CONSOLE::Print(T("+----------+----------+-------------+\n"));
   CONSOLE::Print(T("| Dynamic  | Static   | Pulse count |\n"));
   CONSOLE::Print(T("| [uR/h]   | [uR/h]   |             |\n"));
