@@ -1,0 +1,4 @@
+{
+    "cortex-debug.armToolchainPath": "/Applications/ARM/bin",
+    "cortex-debug.JLinkGDBServerPath": "/opt/SEGGER/JLink"
+}
