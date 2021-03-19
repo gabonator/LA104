@@ -109,7 +109,7 @@ add_executable(application ${main_src} ${bios_src} ${framework_src} ${gui_src} $
 add_definitions(-DLA104)
 add_definitions(-DCIRCUITPY_ENABLE_MPY_NATIVE=0)
 add_definitions(-DCIRCUITPY_FULL_BUILD=0)
-add_definitions(-DMICROPY_ENABLE_COMPILER=0)
+add_definitions(-DMICROPY_ENABLE_COMPILER=1)
 #add_definitions(-DMICROPY_PORT_BUILTINS=0)
 add_definitions(-DMICROPY_ENABLE_EXTERNAL_IMPORT=0)
 

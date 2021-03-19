@@ -411,8 +411,7 @@ raw_repl_reset:
         }
     }
 }
-// gabo
-#if 0
+
 int pyexec_friendly_repl(void) {
     vstr_t line;
     vstr_init(&line, 32);
@@ -535,7 +534,6 @@ friendly_repl_reset:
         }
     }
 }
-#endif
 
 #endif // MICROPY_REPL_EVENT_DRIVEN
 #endif // MICROPY_ENABLE_COMPILER

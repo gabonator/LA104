@@ -188,7 +188,8 @@ STATIC void mp_help_print_obj(const mp_obj_t obj) {
 STATIC mp_obj_t mp_builtin_help(size_t n_args, const mp_obj_t *args) {
     if (n_args == 0) {
         // print a general help message. Translate only works on single strings on one line.
-        const compressed_string_t* compressed = translate("Welcome to Adafruit CircuitPython %s!\n\nPlease visit learn.adafruit.com/category/circuitpython for project guides.\n\nTo list built-in modules please do `help(\"modules\")`.\n");
+        const compressed_string_t* compressed =
+            translate("Welcome to Adafruit CircuitPython %s!\n\nPlease visit learn.adafruit.com/category/circuitpython for project guides.\n\nTo list built-in modules please do `help(\"modules\")`.\n");
         char decompressed[decompress_length(compressed)];
         decompress(compressed, decompressed);
         mp_printf(MP_PYTHON_PRINTER, decompressed, MICROPY_GIT_TAG);

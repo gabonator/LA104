@@ -1,5 +1,8 @@
 #include <library.h>
 
+#include <iostream>
+#include <string>
+
 extern "C" {
 #include "py/gc.h"
 #include "py/lexer.h"
@@ -36,7 +39,13 @@ bool mp_hal_is_interrupted(void) { return false; }
 
 int readline(vstr_t *line, const char *prompt)
 {
-    _ASSERT(0);
+    std::string l;
+    std::cout << prompt;
+    std::getline(std::cin, l);
+    _ASSERT(l.length() < line->alloc);
+    line->len = l.length();
+    strcpy(line->buf, l.c_str());
+    //fgets(line->buf, line->len, stdin);
     return 0;
 }
 
@@ -64,11 +73,29 @@ extern "C" mp_raw_code_t *mp_raw_code_load_mem(const byte *buf, size_t len);
 
 static char *stack_top;
 #if MICROPY_ENABLE_GC
-static char heap[2048];
+static char heap[2048*32];
 #endif
 #if MICROPY_ENABLE_PYSTACK
-static char stack[2048];
+static char stack[2048*32];
 #endif
+
+int run_repl(void) {
+    int exit_code = PYEXEC_FORCED_EXIT;
+//    stack_resize();
+//    filesystem_flush();
+//    supervisor_allocation* heap = allocate_remaining_memory();
+//    start_mp(heap);
+//    autoreload_suspend();
+//    new_status_color(REPL_RUNNING);
+//    if (pyexec_mode_kind == PYEXEC_MODE_RAW_REPL) {
+//        exit_code = pyexec_raw_repl();
+//    } else {
+        exit_code = pyexec_friendly_repl();
+//    }
+//    cleanup_after_vm(heap);
+//    autoreload_resume();
+    return exit_code;
+}
 
 #ifdef _ARM
 __attribute__((__section__(".entry")))
@@ -96,6 +123,9 @@ int _main() {
     parse_compile_execute(p, MP_PARSE_FILE_INPUT, EXEC_FLAG_SOURCE_IS_RAW_CODE, NULL);
 
     BIOS::DBG::Print("[done]");
+    
+    run_repl();
+
     BIOS::SYS::DelayMs(1000);
     mp_deinit();
 
