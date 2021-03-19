@@ -26,7 +26,7 @@ namespace APP
         Status((const char*)status);
     }
 
-void Init(const char* title)
+    void Init(const char* title)
     {
 #ifdef CONSOLE_MODE_B
         CONSOLE::window = CRect(8, 16, BIOS::LCD::Width-8, BIOS::LCD::Height-14);

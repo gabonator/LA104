@@ -25,11 +25,25 @@ function CalcBandwidthFix(bw)
   var root2 = [0, 1, 2, 2, 3, 3, 3, 3];
   var t = GetOscFrequency() / 8 / bw;
   var _e = root2[Math.floor(t/12)];
-//  var _m = Math.floor(t / (1<<_e) - 4);
   var _m = (Math.floor(t) >> _e) - 4;
+  if (_m > 3)
+  {
+    _e++;
+    _m = (Math.floor(t) >> _e) - 4;
+  }
+  _e = Math.min(Math.max(0, _e), 3);
+  _m = Math.min(Math.max(0, _m), 3);
+  
   return {e:_e, m:_m};
 }
+/*
+    var _calc = CalcBandwidthFix(67708);
 
+console.log(_calc);
+    var _bw = GetBandwidth(_calc.m, _calc.e);
+console.log(_bw);
+return;
+*/
 for (var e=0; e<=3; e++)
   for (var m=0; m<=3; m++)
   {
@@ -50,4 +64,4 @@ for (var e=0; e<=3; e++)
   bw * (4+m) = osc/8/(2^e)
   m = (osc/8/(2^e) - 4*bw) / bw
 
-*/
+//*/

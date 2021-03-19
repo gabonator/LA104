@@ -13,10 +13,10 @@
             "request": "launch",
             "cwd": "${workspaceRoot}",
             "executable": "${workspaceRoot}/build/output.elf",
-            "gdbpath" : "/Users/gabrielvalky/Downloads/gcc-arm-none-eabi-7-2018-q2-update/bin/arm-none-eabi-gdb",
+            "gdbpath" : "/Applications/ARM/bin/arm-none-eabi-gdb",
             "autorun": [
                 "target remote localhost:3333",
-                "symbol-file ./${workspaceRoot}/build/61devin.elf",
+                "symbol-file ./${workspaceRoot}/build/111micro.elf",
                 "monitor reset"
                 ]
         }    ]

@@ -155,7 +155,7 @@ getFiles("../", "build.sh").then(l => l.filter(app => app.path.substr(0,4) == "a
     var folder = "["+ref.folder.slice(0,-1)+"](system/"+ref.folder+")";
     if (app.youtube)
       app.youtube.split(",").forEach(yt =>
-        folder += "<br\>[https://youtu.be/"+app.youtube+"](https://youtu.be/"+app.youtube+")"
+        folder += "<br\>[https://youtu.be/"+yt+"](https://youtu.be/"+yt+")"
       );
     console.log("| " + icon + " | " + app.group + " | " + app.desc + " | " + folder + " |");
   }

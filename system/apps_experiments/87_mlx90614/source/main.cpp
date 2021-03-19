@@ -53,6 +53,7 @@ int _main(void)
     {
       loop();
     }
+    Wire.end();
     return 0;
 }
 

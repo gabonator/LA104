@@ -8,6 +8,7 @@ class TwoWire
 {
 public:
   void begin();
+  void end();
   bool beginTransmission(int addr);
   int read();
   void write(int d);

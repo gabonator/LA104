@@ -6,8 +6,24 @@ using namespace BIOS;
 void check(const char*) {}
 void TwoWire::begin() 
 {
+  GPIO::PinMode(GPIO::EPin::P1, GPIO::EMode::Output);
+  GPIO::PinMode(GPIO::EPin::P2, GPIO::EMode::Output);
+  GPIO::DigitalWrite(GPIO::EPin::P1, 0);
+  GPIO::DigitalWrite(GPIO::EPin::P2, 0);
+  BIOS::SYS::DelayMs(200);
   GPIO::PinMode(GPIO::EPin::P1, GPIO::EMode::I2c);
   GPIO::PinMode(GPIO::EPin::P2, GPIO::EMode::I2c);
+}
+
+void TwoWire::end() 
+{
+  GPIO::PinMode(GPIO::EPin::P1, GPIO::EMode::Output);
+  GPIO::PinMode(GPIO::EPin::P2, GPIO::EMode::Output);
+  GPIO::DigitalWrite(GPIO::EPin::P1, 0);
+  GPIO::DigitalWrite(GPIO::EPin::P2, 0);
+  BIOS::SYS::DelayMs(200);
+  GPIO::PinMode(GPIO::EPin::P1, GPIO::EMode::Input);
+  GPIO::PinMode(GPIO::EPin::P2, GPIO::EMode::Input);
 }
 
 bool TwoWire::beginTransmission(int addr)  
