@@ -473,7 +473,7 @@ void mainInit()
 {
 #ifdef __APPLE__
     BIOS::FAT::Init();
-    BIOS::OS::SetArgument((char*)"RFTOOL/RFTOOL.ELF");
+    BIOS::OS::SetArgument((char*)"RFTOOLS/RFTOOL.ELF");
 #endif
     _ASSERT(sizeof(gFatSharedBuffer) >= BIOS::SYS::GetAttribute(BIOS::SYS::EAttribute::DiskSectorSize));
     BIOS::FAT::SetSharedBuffer(gFatSharedBuffer);

@@ -31,8 +31,8 @@ public:
         long now = BIOS::SYS::GetTick();
 
         meas[0] = (int)(sin(now*0.0002)*128+128);
-        meas[3] = (now % 20000 > 6000) ? 0 : 255;
-        meas[7] = ((now/2)%1000)*128/1000;
+        meas[1] = (now % 20000 > 6000) ? 0 : 255;
+        meas[2] = ((now/2)%1000)*128/1000;
         return true;
     }
 #endif

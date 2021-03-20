@@ -175,7 +175,8 @@ public:
         if (mDrawState.x<m_rcClient.right)
         {
             CRect rcClear(mDrawState.x, m_rcClient.top+1, m_rcClient.right-1, m_rcClient.bottom-1);
-            BIOS::LCD::Bar(rcClear, k);
+            if (rcClear.Width() > 0)
+                BIOS::LCD::Bar(rcClear, k);
         }
         mDrawState.finished = true;
     }
