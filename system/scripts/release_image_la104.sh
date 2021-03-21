@@ -370,6 +370,7 @@ Application groups
   - "USB Applications" - mouse simulator, usb to uart converter
   - "Display tools" - Image viewer for LA104 and led/oled/eink displays
   - "Device info" - shows information about this device
+  - "Development" - development tools, currently only circuit python
   - "Just for fun" - non technical applications
 
 Version information
@@ -390,6 +391,19 @@ echo -n "{\"description\":{short:\"Cube\",long:\"Rotating cube\"},\"icon\":\"app
 echo -n "{\"description\":{short:\"Triangle\",long:\"Sierpinski triangle\"},\"icon\":\"app.bmp\",\"execute\":\"triangle.elf\"}" > $TO/fun/triangle.lnk
 echo -n "{\"description\":{short:\"Snake\",long:\"Snake game\"},\"icon\":\"app.bmp\",\"execute\":\"snake.elf\"}" > $TO/fun/snake.lnk
 echo -n "{\"description\":{short:\"Scroll\",long:\"Scroll test\"},\"icon\":\"app.bmp\",\"execute\":\"scroll.elf\"}" > $TO/fun/scroll.lnk
+
+cp $ICON/games.bmp $TO/fun/app.bmp
+
+
+mkdir $TO/devel
+cp $ICON/fdevel.bmp $TO/devel/devel.bmp
+echo -n "{\"description\":{\"short\":\"Devel\",\"long\":\"Development\"},\"icon\":\"devel.bmp\",order:-150}" > $TO/devel/index.lnk
+
+cp ../apps_featured/113_circuitpython/scripts/*.py $TO/devel/
+cp $ICON/cpython.bmp $TO/devel/cpython.bmp
+cp $FROM/113cirpy.elf $TO/devel/cpython.elf
+
+echo -n "{\"description\":{short:\"CiPython\",long:\"Circuit python\"},\"icon\":\"cpython.bmp\",\"execute\":\"cpython.elf\"}" > $TO/devel/cpython.lnk
 
 cp $ICON/games.bmp $TO/fun/app.bmp
 )

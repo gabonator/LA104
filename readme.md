@@ -58,6 +58,7 @@ Refer to this [tutorial](resources/tutorial_building)
 | ![17analys.elf](resources/appicons/analyser.png) |  | Logic analyser | [apps/test17_official](system/apps/test17_official/) |
 | ![61devin.elf](resources/appicons/devinfo.png) |  | Device info | [apps_featured/61_devinfo](system/apps_featured/61_devinfo/) |
 | ![29fileman_la104.elf](resources/appicons/fileman.png) |  | File manager | [apps_shell/test29_fileman](system/apps_shell/test29_fileman/) |
+| ![113cirpy.elf](resources/appicons/cpython.png) | devel | Circuit python | [apps_featured/113_circuitpython](system/apps_featured/113_circuitpython/) |
 | ![14apds1.elf](resources/appicons/chip.png) | devices | APDS9960 color gesture sensor | [apps_experiments/test14_apds9960](system/apps_experiments/test14_apds9960/) |
 | ![11i2c.elf](resources/appicons/chip.png) | devices | BMP085 Barometric sensor | [apps_experiments/test11_i2c_api](system/apps_experiments/test11_i2c_api/) |
 | ![92bmp180.elf](resources/appicons/chip.png) | devices | BMP180/BMP085 barometer | [apps_experiments/92_bmp180](system/apps_experiments/92_bmp180/) |

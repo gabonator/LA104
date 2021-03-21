@@ -86,4 +86,10 @@ namespace CONSOLE
         while (*bbuf)
             Putch(*bbuf++);
     }
+    
+    void Clear()
+    {
+        BIOS::LCD::Bar(window, colorBack);
+        cursor = window.TopLeft();
+    }
 }
