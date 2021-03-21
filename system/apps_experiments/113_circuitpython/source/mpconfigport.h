@@ -30,11 +30,14 @@
 
 
 // gabo
+//#define DEBUG_printf printf
+//#define MICROPY_DEBUG_VERBOSE 1
+#define MICROPY_EMIT_INLINE_THUMB_ARMV7M 0
 #define INTERNAL_FLASH_FILESYSTEM 0
 #define QSPI_FLASH_FILESYSTEM 0
 #define SPI_FLASH_FILESYSTEM 0
 #define DISABLE_FILESYSTEM 1
-
+#define MICROPY_EMIT_INLINE_THUMB_FLOAT 0
 
 
 #include <stdint.h>

@@ -1,7 +1,8 @@
 #include <library.h>
-
+#ifdef __APPLE__
 #include <iostream>
 #include <string>
+#endif
 
 extern "C" {
 #include "py/gc.h"
@@ -12,6 +13,8 @@ extern "C" {
 #include "supervisor/shared/safe_mode.h"
 #include "py/emitglue.h"
 #include "py/stackctrl.h"
+
+#include "py/objlist.h"
 }
 
 extern "C" {
@@ -39,6 +42,7 @@ bool mp_hal_is_interrupted(void) { return false; }
 
 int readline(vstr_t *line, const char *prompt)
 {
+#ifdef __APPLE__
     std::string l;
     std::cout << prompt;
     std::getline(std::cin, l);
@@ -46,6 +50,12 @@ int readline(vstr_t *line, const char *prompt)
     line->len = l.length();
     strcpy(line->buf, l.c_str());
     //fgets(line->buf, line->len, stdin);
+#else
+    BIOS::SYS::DelayMs(1000);
+    static int counter = 0;
+    sprintf(line->buf, "print(\"ahoj %d\")", counter++);
+    line->len = strlen(line->buf);
+#endif
     return 0;
 }
 
@@ -73,37 +83,22 @@ extern "C" mp_raw_code_t *mp_raw_code_load_mem(const byte *buf, size_t len);
 
 static char *stack_top;
 #if MICROPY_ENABLE_GC
-static char heap[2048*32];
+static char heap[4096];
 #endif
 #if MICROPY_ENABLE_PYSTACK
-static char stack[2048*32];
+//static char stack[2048*32*8];
+static char stack[1024];
 #endif
-
-int run_repl(void) {
-    int exit_code = PYEXEC_FORCED_EXIT;
-//    stack_resize();
-//    filesystem_flush();
-//    supervisor_allocation* heap = allocate_remaining_memory();
-//    start_mp(heap);
-//    autoreload_suspend();
-//    new_status_color(REPL_RUNNING);
-//    if (pyexec_mode_kind == PYEXEC_MODE_RAW_REPL) {
-//        exit_code = pyexec_raw_repl();
-//    } else {
-        exit_code = pyexec_friendly_repl();
-//    }
-//    cleanup_after_vm(heap);
-//    autoreload_resume();
-    return exit_code;
-}
+    char linebuf[1024];
 
 #ifdef _ARM
 __attribute__((__section__(".entry")))
 #endif
 int _main() {
+BIOS::DBG::Print("start====");
     int stack_dummy;
 
-    mp_stack_set_limit(2000 * (BYTES_PER_WORD / 4));
+    mp_stack_set_limit(20000 * (BYTES_PER_WORD / 4));
     mp_stack_set_top(&stack_dummy);
     
     #if MICROPY_ENABLE_PYSTACK
@@ -118,13 +113,58 @@ int _main() {
 
     mp_stack_ctrl_init();
 
-    BIOS::DBG::Print("[run]");
-    mp_raw_code_t* p = mp_raw_code_load_mem(test_py, test_py_len);
-    parse_compile_execute(p, MP_PARSE_FILE_INPUT, EXEC_FLAG_SOURCE_IS_RAW_CODE, NULL);
 
-    BIOS::DBG::Print("[done]");
+//    BIOS::DBG::Print("[run]");
+//    mp_raw_code_t* p = mp_raw_code_load_mem(test_py, test_py_len);
+//    parse_compile_execute(p, MP_PARSE_FILE_INPUT, EXEC_FLAG_SOURCE_IS_RAW_CODE, NULL);
+//
+//    BIOS::DBG::Print("[done]");
+
+//    mp_init();
+//    mp_obj_list_init((mp_obj_list_t*)mp_sys_path, 0);
+//    mp_obj_list_append(mp_sys_path, MP_OBJ_NEW_QSTR(MP_QSTR_)); // current dir (or base dir of the script)
+//    mp_obj_list_append(mp_sys_path, MP_OBJ_NEW_QSTR(MP_QSTR__slash_));
+//    // Frozen modules are in their own pseudo-dir, e.g., ".frozen".
+//    // Prioritize .frozen over /lib.
+//    //mp_obj_list_append(mp_sys_path, MP_OBJ_NEW_QSTR(MP_FROZEN_FAKE_DIR_QSTR));
+//    mp_obj_list_append(mp_sys_path, MP_OBJ_NEW_QSTR(MP_QSTR__slash_lib));
+//
+//    mp_obj_list_init((mp_obj_list_t*)mp_sys_argv, 0);
+
     
-    run_repl();
+    //strcpy(linebuf, "print('ahoj' + str(-7/3))");
+    //strcpy(linebuf, "3+5");
+    strcpy(linebuf, R"--(print("uPy")
+print("a long string that is not interned")
+print("a string that has unicode αβγ chars")
+print(b"bytes 1234\x01")
+print(123456789)
+for i in range(4):
+   print(i)
+)--");
+
+    vstr_t line;
+    line.alloc = 1023;
+    line.len = strlen(linebuf);
+    line.buf = linebuf;
+    line.fixed_buf = true;
+BIOS::DBG::Print("E");BIOS::SYS::DelayMs(1000);
+    
+
+#define EXEC_FLAG_PRINT_EOF (1)
+#define EXEC_FLAG_ALLOW_DEBUGGING (2)
+#define EXEC_FLAG_IS_REPL (4)
+#define EXEC_FLAG_SOURCE_IS_RAW_CODE (8)
+#define EXEC_FLAG_SOURCE_IS_VSTR (16)
+#define EXEC_FLAG_SOURCE_IS_FILENAME (32)
+
+    mp_parse_input_kind_t parse_input_kind = MP_PARSE_FILE_INPUT; //MP_PARSE_EVAL_INPUT; //MP_PARSE_SINGLE_INPUT;
+
+    int ret = parse_compile_execute(&line, parse_input_kind, EXEC_FLAG_ALLOW_DEBUGGING /*| EXEC_FLAG_IS_REPL*/ | EXEC_FLAG_SOURCE_IS_VSTR, NULL);
+
+BIOS::DBG::Print("F");BIOS::SYS::DelayMs(1000);
+    
+    pyexec_friendly_repl();
 
     BIOS::SYS::DelayMs(1000);
     mp_deinit();
@@ -146,7 +186,7 @@ void gc_collect(void) {
 }
 #endif
 
-void _HandleAssertion(const char* file, int line, const char* cond)
+extern "C" void _HandleAssertion(const char* file, int line, const char* cond)
 {
    BIOS::DBG::Print("Assertion failed");
     while (1);

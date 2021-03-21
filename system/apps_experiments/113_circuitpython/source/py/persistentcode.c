@@ -60,7 +60,10 @@
 // this function computes that (could make it a fixed constant, but it
 // would need to be defined in mpconfigport.h).
 STATIC int mp_small_int_bits(void) {
-    /*
+#ifdef __APPLE__
+    //gabo
+    return 31;
+#endif
     mp_int_t i = MP_SMALL_INT_MAX;
     int n = 1;
     while (i != 0) {
@@ -68,9 +71,6 @@ STATIC int mp_small_int_bits(void) {
         ++n;
     }
     return n;
-     */
-    //gabo
-    return 31;
 }
 #endif
 

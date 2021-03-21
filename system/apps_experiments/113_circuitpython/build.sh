@@ -4,7 +4,7 @@ set -e
 mkdir -p build
 cd build
 
-arm-none-eabi-gcc -Wall -Os -Werror -fno-common -mcpu=cortex-m3 -mthumb -msoft-float -fno-exceptions -Wno-psabi -MD -DLA104 -DCIRCUITPY_ENABLE_MPY_NATIVE=0 -DCIRCUITPY_FULL_BUILD=0 -DMICROPY_ENABLE_COMPILER=0 -DMICROPY_ENABLE_EXTERNAL_IMPORT=0 -c \
+arm-none-eabi-gcc -Wall -Os -Werror -fno-common -mcpu=cortex-m3 -mthumb -msoft-float -fno-exceptions -Wno-psabi -MD -DLA104 -DCIRCUITPY_ENABLE_MPY_NATIVE=0 -DCIRCUITPY_FULL_BUILD=0 -DMICROPY_ENABLE_COMPILER=1 -DMICROPY_ENABLE_EXTERNAL_IMPORT=0 -c \
 ../source/py/mpstate.c \
 ../source/py/nlr.c \
 ../source/py/nlrx86.c \

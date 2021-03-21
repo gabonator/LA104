@@ -27,6 +27,10 @@
 #include "py/smallint.h"
 
 bool mp_small_int_mul_overflow(mp_int_t x, mp_int_t y) {
+#ifdef __APPLE__
+    //gabo
+    return false;
+#endif
     // Check for multiply overflow; see CERT INT32-C
     if (x > 0) { // x is positive
         if (y > 0) { // x and y are positive
