@@ -38,7 +38,8 @@
 #define SPI_FLASH_FILESYSTEM 0
 #define DISABLE_FILESYSTEM 1
 #define MICROPY_EMIT_INLINE_THUMB_FLOAT 0
-
+#define CIRCUITPY_TOUCHIO 0
+#define CIRCUITPY_MINI 1
 
 #include <stdint.h>
 

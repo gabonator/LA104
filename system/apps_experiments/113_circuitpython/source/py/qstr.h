@@ -40,6 +40,9 @@ enum {
 #ifndef NO_QSTR
 #define QENUM(id) id,
 #include "genhdr/qstrdefs.enum.h"
+#define QDEF(...)
+#include "genhdr/qstrdefs.mini.h"
+#undef QDEF
 #undef QENUM
 #endif
     MP_QSTRnumber_of, // no underscore so it can't clash with any of the above

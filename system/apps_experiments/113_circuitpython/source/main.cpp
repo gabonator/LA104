@@ -24,25 +24,35 @@ _mp_dummy_t mp_sys_stdout_obj;
 _mp_dummy_t mp_sys_stderr_obj;
 
 void assert_heap_ok() {}
+const char* translation = nullptr;
+int dummy[1];
+compressed_string_t* dummyTranslation = (compressed_string_t*)&dummy;
 char* decompress(const compressed_string_t* compressed, char* decompressed) {
-    _ASSERT(0);
-    return (char*)"???";
+    _ASSERT(translation && compressed == dummyTranslation);
+    strcpy(decompressed, translation);
+    return decompressed;
 }
 
 uint16_t decompress_length(const compressed_string_t* compressed) {
-    return 3;
+    _ASSERT(translation && compressed == dummyTranslation);
+    return strlen(translation)+1;
 }
 const compressed_string_t* translate(const char* c)
 {
-    BIOS::DBG::Print("error: '%s'", c);
-    _ASSERT(0);
-    return nullptr;
+    translation = c;
+    return dummyTranslation;
 }
+
 bool mp_hal_is_interrupted(void) { return false; }
 
 int readline(vstr_t *line, const char *prompt)
 {
+    BIOS::KEY::GetKey();
 #ifdef __APPLE__
+    fprintf(stdout, "%s", prompt);
+    fgets(line->buf, line->alloc, stdin);
+    line->len = strlen(line->buf);
+    /*
     std::string l;
     std::cout << prompt;
     std::getline(std::cin, l);
@@ -50,6 +60,7 @@ int readline(vstr_t *line, const char *prompt)
     line->len = l.length();
     strcpy(line->buf, l.c_str());
     //fgets(line->buf, line->len, stdin);
+     */
 #else
     BIOS::SYS::DelayMs(1000);
     static int counter = 0;
@@ -100,91 +111,64 @@ BIOS::DBG::Print("start====");
 
     mp_stack_set_limit(20000 * (BYTES_PER_WORD / 4));
     mp_stack_set_top(&stack_dummy);
-    
-    #if MICROPY_ENABLE_PYSTACK
     mp_pystack_init(stack, stack + (sizeof(stack) / sizeof(size_t)));
-    #endif
-
-    #if MICROPY_ENABLE_GC
     gc_init(heap, heap + sizeof(heap));
-    #endif
-
     mp_init();
-
     mp_stack_ctrl_init();
 
-
-//    BIOS::DBG::Print("[run]");
-//    mp_raw_code_t* p = mp_raw_code_load_mem(test_py, test_py_len);
-//    parse_compile_execute(p, MP_PARSE_FILE_INPUT, EXEC_FLAG_SOURCE_IS_RAW_CODE, NULL);
-//
-//    BIOS::DBG::Print("[done]");
-
-//    mp_init();
-//    mp_obj_list_init((mp_obj_list_t*)mp_sys_path, 0);
-//    mp_obj_list_append(mp_sys_path, MP_OBJ_NEW_QSTR(MP_QSTR_)); // current dir (or base dir of the script)
-//    mp_obj_list_append(mp_sys_path, MP_OBJ_NEW_QSTR(MP_QSTR__slash_));
-//    // Frozen modules are in their own pseudo-dir, e.g., ".frozen".
-//    // Prioritize .frozen over /lib.
-//    //mp_obj_list_append(mp_sys_path, MP_OBJ_NEW_QSTR(MP_FROZEN_FAKE_DIR_QSTR));
-//    mp_obj_list_append(mp_sys_path, MP_OBJ_NEW_QSTR(MP_QSTR__slash_lib));
-//
-//    mp_obj_list_init((mp_obj_list_t*)mp_sys_argv, 0);
-
-    
-    //strcpy(linebuf, "print('ahoj' + str(-7/3))");
-    //strcpy(linebuf, "3+5");
     strcpy(linebuf, R"--(print("uPy")
 print("a long string that is not interned")
 print("a string that has unicode αβγ chars")
 print(b"bytes 1234\x01")
 print(123456789)
-for i in range(4):
-   print(i)
+           
+import mini
+colors = [0x404080, 0x4060b0, 0x4080d0, 0x40a0ff]
+for x in range(0, 320/20):
+  for y in range(0, 200/20):
+    i = x + y
+    c = colors[i % 4]
+    mini.color(c)
+    mini.bar(x*20, y*20, x*20+18, y*20+18)
 )--");
+//
+//    mini.print(30, 60, "ahoj")
 
+    /*
+     i = (x+y)%4
+r
+     */
     vstr_t line;
     line.alloc = 1023;
     line.len = strlen(linebuf);
     line.buf = linebuf;
     line.fixed_buf = true;
-BIOS::DBG::Print("E");BIOS::SYS::DelayMs(1000);
     
 
-#define EXEC_FLAG_PRINT_EOF (1)
-#define EXEC_FLAG_ALLOW_DEBUGGING (2)
-#define EXEC_FLAG_IS_REPL (4)
-#define EXEC_FLAG_SOURCE_IS_RAW_CODE (8)
-#define EXEC_FLAG_SOURCE_IS_VSTR (16)
-#define EXEC_FLAG_SOURCE_IS_FILENAME (32)
+    #define EXEC_FLAG_ALLOW_DEBUGGING (2)
+    #define EXEC_FLAG_SOURCE_IS_VSTR (16)
 
-    mp_parse_input_kind_t parse_input_kind = MP_PARSE_FILE_INPUT; //MP_PARSE_EVAL_INPUT; //MP_PARSE_SINGLE_INPUT;
+    mp_parse_input_kind_t parse_input_kind = MP_PARSE_FILE_INPUT;  //MP_PARSE_SINGLE_INPUT;
 
     int ret = parse_compile_execute(&line, parse_input_kind, EXEC_FLAG_ALLOW_DEBUGGING /*| EXEC_FLAG_IS_REPL*/ | EXEC_FLAG_SOURCE_IS_VSTR, NULL);
-
-BIOS::DBG::Print("F");BIOS::SYS::DelayMs(1000);
     
-    pyexec_friendly_repl();
+    //pyexec_friendly_repl();
 
-    BIOS::SYS::DelayMs(1000);
+    BIOS::SYS::DelayMs(5000);
     mp_deinit();
 
     return 0;
 }
 
-#if MICROPY_ENABLE_GC
 void gc_collect(void) {
     // WARNING: This gc_collect implementation doesn't try to get root
     // pointers from CPU registers, and thus may function incorrectly.
     BIOS::DBG::Print("[gc_collect]");
-//return;
-//    void *dummy;
-//    gc_collect_start();
-//    gc_collect_root(&dummy, ((mp_uint_t)stack_top - (mp_uint_t)&dummy) / sizeof(mp_uint_t));
-//    gc_collect_end();
-//    gc_dump_info();
+    gc_collect_start();
+//    #if CIRCUITPY_DISPLAYIO
+//    gc_collect_root((void**)heap, sizeof(heap) / sizeof(uint32_t));
+    gc_collect_end();
 }
-#endif
 
 extern "C" void _HandleAssertion(const char* file, int line, const char* cond)
 {
@@ -192,3 +176,54 @@ extern "C" void _HandleAssertion(const char* file, int line, const char* cond)
     while (1);
 }
 
+
+int lcdColor = 0xffff;
+int lcdBack = 0x0000;
+
+extern "C" mp_obj_t mini_color_set(mp_obj_t value)
+{
+    uint32_t color = mp_obj_get_int(value);
+    lcdColor = RGB32TO565(color);
+    return mp_const_none;
+}
+
+extern "C" mp_obj_t mini_back_set(mp_obj_t value)
+{
+    uint32_t color = mp_obj_get_int(value);
+    lcdBack = RGB32TO565(color);
+    return mp_const_none;
+}
+
+extern "C" mp_obj_t mini_print(size_t n_args, const mp_obj_t *args) {
+    (void)n_args;
+
+    mp_int_t x, y;
+    if (!mp_obj_get_int_maybe(args[0], &x) ||
+        !mp_obj_get_int_maybe(args[1], &y) ||
+        !MP_OBJ_IS_STR(args[2]))
+    {
+        mp_raise_ValueError(translate("wrong args"));
+        return mp_const_none;
+    }
+
+    size_t len = 0;
+    const char* msg = mp_obj_str_get_data(args[2], &len);
+
+    BIOS::LCD::Print(x, y, lcdColor, lcdBack, msg);
+    return mp_const_none;
+}
+
+extern "C" mp_obj_t mini_bar(size_t n_args, const mp_obj_t *args) {
+    (void)n_args;
+    mp_int_t x1, y1, x2, y2;
+    if (!mp_obj_get_int_maybe(args[0], &x1) ||
+        !mp_obj_get_int_maybe(args[1], &y1) ||
+        !mp_obj_get_int_maybe(args[2], &x2) ||
+        !mp_obj_get_int_maybe(args[3], &y2))
+    {
+        mp_raise_ValueError(translate("wrong args"));
+        return mp_const_none;
+    }
+    BIOS::LCD::Bar(x1, y1, x2, y2, lcdColor);
+    return mp_const_none;
+}

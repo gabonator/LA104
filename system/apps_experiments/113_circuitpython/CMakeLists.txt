@@ -81,8 +81,8 @@ file(GLOB application_sensor_src
 )
 
 file(GLOB application_frozen_src
-    "source/frozen/*.c"
-    "source/frozen/*.h"
+    "source/bindings/*.c"
+    "source/bindings/*.h"
 )
 
 file(GLOB application_utils_src
@@ -100,7 +100,7 @@ endif()
 source_group("application" FILES ${application_src})
 source_group("application\\py" FILES ${application_graph_src})
 source_group("application\\extmod" FILES ${application_sensor_src})
-source_group("application\\frozen" FILES ${application_frozen_src})
+source_group("application\\bindings" FILES ${application_frozen_src})
 source_group("application\\lib\\utils" FILES ${application_utils_src})
 source_group("include" FILES "include/library.h")
 

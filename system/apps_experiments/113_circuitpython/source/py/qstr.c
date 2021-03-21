@@ -108,6 +108,9 @@ const qstr_pool_t mp_qstr_const_pool = {
 #define QDEF(id, str) str,
 #define TRANSLATION(id, length, compressed...)
 #include "genhdr/qstrdefs.generated.h"
+#define QENUM(...)
+#include "genhdr/qstrdefs.mini.h"
+#undef QENUM
 #undef TRANSLATION
 #undef QDEF
 #endif

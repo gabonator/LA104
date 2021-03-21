@@ -123,6 +123,7 @@ arm-none-eabi-gcc -Wall -Os -Werror -fno-common -mcpu=cortex-m3 -mthumb -msoft-f
 ../source/lib/utils/pyexec.c \
 ../source/frozen/test.c \
 ../source/glue.c \
+../source/bindings/mini.c \
   -I../source/
 
 arm-none-eabi-g++ -Os -Werror -fno-common -mcpu=cortex-m3 -mthumb -msoft-float -fno-exceptions -fno-rtti -fno-threadsafe-statics -Wno-psabi -MD -D DS213 -D _ARM -D STM32F10X_HD -c \
@@ -253,6 +254,7 @@ arm-none-eabi-gcc -fPIC -mcpu=cortex-m3 -mthumb -o output.elf -nostartfiles -T .
   platform.o \
   test.o \
   glue.o \
+  mini.o \
   -lbios_la104 -lm -L../../../os_library/build
 
 arm-none-eabi-objdump -d -S output.elf > output.asm
