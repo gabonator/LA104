@@ -1,10 +1,21 @@
 #include <library.h>
-#ifdef __APPLE__
-#include <iostream>
-#include <string>
-#endif
+#include "../../../os_host/source/framework/Console.h"
+#include "../../../os_host/source/framework/SimpleApp.h"
+#include "../../../os_host/source/framework/BufferedIo.h"
+#include "file/shapes.h"
+#include "file/layout.h"
+#include "file/file.h"
 
 extern "C" {
+//#include "py/gc.h"
+//#include "py/runtime.h"
+#include "py/mpconfig.h"
+#include "genhdr/mpversion.h"
+#include "py/lexer.h"
+#include "py/runtime.h"
+#include "py/parse.h"
+#include "py/repl.h"
+#include "lib/utils/pyexec.h"
 #include "py/gc.h"
 #include "py/lexer.h"
 #include "py/runtime.h"
@@ -13,8 +24,332 @@ extern "C" {
 #include "supervisor/shared/safe_mode.h"
 #include "py/emitglue.h"
 #include "py/stackctrl.h"
-
 #include "py/objlist.h"
+
+int parse_compile_execute(const void *source, mp_parse_input_kind_t input_kind, int exec_flags, pyexec_result_t *result);
+}
+
+
+uint8_t gFatSharedBuffer[BIOS::FAT::SharedBufferSize];
+
+static const char CShapes_cursor[] =
+"\x0e"
+"            .."
+"            .."
+"            .."
+"            .."
+"            .."
+"            .."
+"            .."
+"            ..";
+
+const char* replPreset[] = {"help()", "help(\"modules\")", "mini.listScript()", "mini.loadScript()", "print(\"Hello!\")", "355/113", "42 + "};
+
+char heap[1024*5];
+char stack[1024*2];
+//char code[1024];
+
+
+class CPython
+{
+public:
+    char mQuery[32];
+    
+    void Init()
+    {
+        int stack_dummy;
+        mp_stack_set_limit(20000 * (BYTES_PER_WORD / 4));
+        mp_stack_set_top(&stack_dummy);
+        mp_pystack_init(stack, stack + (sizeof(stack) / sizeof(size_t)));
+        gc_init(heap, heap + sizeof(heap));
+        mp_init();
+        mp_stack_ctrl_init();
+    }
+    
+    void Eval(char* query)
+    {
+        vstr_t line;
+        line.alloc = sizeof(mQuery);
+        line.len = strlen(mQuery);
+        line.buf = query;
+
+        Eval(line, false);
+    }
+
+    void Eval(vstr_t& line, bool file)
+    {
+        enum {
+            EXEC_FLAG_PRINT_EOF = (1),
+            EXEC_FLAG_ALLOW_DEBUGGING = (2),
+            EXEC_FLAG_IS_REPL = (4),
+            EXEC_FLAG_SOURCE_IS_RAW_CODE = (8),
+            EXEC_FLAG_SOURCE_IS_VSTR = (16),
+            EXEC_FLAG_SOURCE_IS_FILENAME = (32)
+        };
+
+        _ASSERT(!mp_repl_continue_with_input(vstr_null_terminated_str(&line)));
+        int ret = parse_compile_execute(&line, file ? MP_PARSE_FILE_INPUT : MP_PARSE_SINGLE_INPUT,
+            EXEC_FLAG_ALLOW_DEBUGGING | EXEC_FLAG_IS_REPL | EXEC_FLAG_SOURCE_IS_VSTR, NULL);
+//        if (ret & PYEXEC_FORCED_EXIT) {
+//            return ret;
+//        }
+    }
+};
+
+class CRepl : public CWnd
+{
+    int mReplPresetIndex{0};
+    CPython mPython;
+    CFileDialog mFile;
+    CFileFilterSuffix mFilter{".PY"};
+    CBufferedReader mReader;
+    bool mBanner{true};
+    
+public:
+    void Create()
+    {
+        CWnd::Create("main", CWnd::WsVisible, CRect(0, 0, BIOS::LCD::Width, BIOS::LCD::Height), nullptr);
+        
+        Clear();
+        
+        strcpy(mPython.mQuery, replPreset[mReplPresetIndex]);
+        ShowQuery();
+        
+        SetTimer(500);
+        mPython.Init();
+    }
+    
+    void Clear()
+    {
+        APP::Init("Circuit python " MICROPY_VERSION_STRING);
+        CONSOLE::Clear();
+        CONSOLE::Color(RGB565(b0b0b0));
+        if (mBanner)
+        {
+            CONSOLE::Print("%s\n", MICROPY_FULL_VERSION_INFO);
+            mBanner = false;
+        }
+        APP::Status("");
+    }
+    
+    void PrintAnswer(const char* msg, size_t len)
+    {
+        CONSOLE::Color(RGB565(b0b0b0));
+        for (int i=0; i<len; i++)
+            if (msg[i] != '\r')
+                CONSOLE::Putch(msg[i]);
+    }
+    
+    void PrintError(const char* msg, size_t len)
+    {
+        CONSOLE::Color(RGB565(ffff00));
+        for (int i=0; i<len; i++)
+            if (msg[i] != '\r')
+                CONSOLE::Putch(msg[i]);
+    }
+    
+    virtual void OnKey(BIOS::KEY::EKey key)
+    {
+        if (key == BIOS::KEY::EKey::Up && mReplPresetIndex > 0)
+        {
+            mReplPresetIndex--;
+            strcpy(mPython.mQuery, replPreset[mReplPresetIndex]);
+            ShowQuery();
+        }
+        if (key == BIOS::KEY::EKey::Down && mReplPresetIndex < COUNT(replPreset)-1)
+        {
+            mReplPresetIndex++;
+            strcpy(mPython.mQuery, replPreset[mReplPresetIndex]);
+            ShowQuery();
+        }
+        if (key == BIOS::KEY::EKey::Enter)
+        {
+            ShowQuery(false);
+            HideCursor();
+            CONSOLE::Print("\n");
+            if (strcmp(mPython.mQuery, "mini.loadScript()") == 0)
+            {
+                LoadScript();
+            } else
+            if (strcmp(mPython.mQuery, "mini.listScript()") == 0)
+            {
+                ListScript();
+            } else
+            {
+                mPython.Eval(mPython.mQuery);
+            }
+            ShowQuery();
+        }
+    }
+        
+    void LoadScript()
+    {
+        if (mFile.ModalShow(nullptr, "Load python script", &mFilter))
+        {
+            CONSOLE::Clear();
+            APP::Status(mFile.GetFilename());
+            
+            if (mReader.Open(mFile.GetFilename()))
+            {
+                vstr_t line;
+                line.alloc = BufferSectorSize;
+                line.len = mReader.GetFileSize();
+                line.buf = (char*)mReader.GetBuffer();
+                mReader.Close();
+                                
+                gc_collect();
+                mPython.Eval(line, true);
+                
+                BIOS::KEY::EKey key;
+                while ((key = BIOS::KEY::GetKey()) == BIOS::KEY::None);
+                Clear();
+            } else {
+                Clear();
+                const char* message = "cannot open file\n";
+                PrintError(message, strlen(message));
+            }
+        } else {
+            Clear();
+            const char* message = "loadScript() failed\n";
+            PrintError(message, strlen(message));
+        }
+        SetFocus();
+    }
+
+    void ListScript()
+    {
+        if (mFile.ModalShow(nullptr, "Load python script", &mFilter))
+        {
+            CONSOLE::Clear();
+            CONSOLE::Color(RGB565(b0b0b0));
+            ShowQuery(false);
+            PrintAnswer("\n", 1);
+            if (mReader.Open(mFile.GetFilename()))
+            {
+                PrintAnswer((char*)mReader.GetBuffer(), mReader.GetFileSize());
+            }
+        } else {
+            Clear();
+            const char* message = "loadScript() failed\n";
+            PrintError(message, strlen(message));
+        }
+        SetFocus();
+    }
+
+    void ShowQuery(bool active = true)
+    {
+        HideCursor();
+        if (CONSOLE::cursor.x > CONSOLE::window.left)
+            BIOS::LCD::Bar(CONSOLE::window.left , CONSOLE::cursor.y, CONSOLE::cursor.x, CONSOLE::cursor.y+14, CONSOLE::colorBack);
+        CONSOLE::cursor.x = CONSOLE::window.left;
+        CONSOLE::Color(active ? RGB565(00ff00) : RGB565(aaffaa));
+        CONSOLE::Print(">>> ");
+        CONSOLE::Color(active ? RGB565(ffffff) : RGB565(aaffaa));
+        CONSOLE::Print(mPython.mQuery);
+        if (active)
+            ShowCursor();
+    }
+    
+    void BlinkCursor()
+    {
+        static bool on = false;
+        if (!HasFocus())
+            return;
+
+        if (on)
+            ShowCursor();
+        else
+            HideCursor();
+        on = !on;
+    }
+
+    void ShowCursor()
+    {
+        BIOS::LCD::Draw(CONSOLE::cursor.x, CONSOLE::cursor.y,
+                        CONSOLE::colorFront, CONSOLE::colorBack,
+                        CShapes_cursor);
+    }
+
+    void HideCursor()
+    {
+        CONSOLE::Print(" \x08");
+    }
+    
+    virtual void OnTimer()
+    {
+        BlinkCursor();
+    }
+    
+    
+};
+
+CRepl mRepl;
+
+bool errorMessage = false;
+
+extern "C" void mp_hal_stdout_tx_str(const char *str)
+{
+    if (errorMessage)
+        mRepl.PrintError(str, strlen(str));
+    else
+        mRepl.PrintAnswer(str, strlen(str));
+}
+extern "C" void mp_hal_stdout_tx_strn(const char *str, size_t len)
+{
+    if (len == 1 && str[0] == 4)
+    {
+        mRepl.PrintAnswer("error:", 6);
+    }
+    
+    if (errorMessage)
+        mRepl.PrintError(str, len);
+    else
+        mRepl.PrintAnswer(str, len);
+}
+
+extern "C" void mp_hal_set_interrupt_char(char c) {
+    errorMessage = c == -1;
+}
+
+
+
+#ifdef _ARM
+__attribute__((__section__(".entry")))
+#endif
+int _main(void)
+{
+#ifdef __APPLE__
+    BIOS::OS::SetArgument((char*)"devel/cpython.elf");
+#endif
+    _ASSERT(sizeof(gFatSharedBuffer) >= BIOS::SYS::GetAttribute(BIOS::SYS::EAttribute::DiskSectorSize));
+    BIOS::FAT::SetSharedBuffer(gFatSharedBuffer);
+
+    mRepl.Create();
+    mRepl.SetFocus();
+    BIOS::KEY::EKey key;
+    while ((key = BIOS::KEY::GetKey()) != BIOS::KEY::EKey::Escape)
+    {
+        if (key != BIOS::KEY::EKey::None)
+        {
+            mRepl.OnKey(key);
+        }
+        mRepl.WindowMessage(CWnd::WmTick);
+    }
+
+    BIOS::FAT::SetSharedBuffer(nullptr);
+    return 0;
+}
+
+
+
+
+#if 1
+#ifdef __APPLE__
+#include <iostream>
+#include <string>
+#endif
+
+extern "C" {
 }
 
 extern "C" {
@@ -93,19 +428,12 @@ extern "C" void mp_hal_stdout_tx_str(const char *str);
 extern "C" mp_raw_code_t *mp_raw_code_load_mem(const byte *buf, size_t len);
 
 static char *stack_top;
-#if MICROPY_ENABLE_GC
-static char heap[4096];
-#endif
-#if MICROPY_ENABLE_PYSTACK
-//static char stack[2048*32*8];
-static char stack[1024];
-#endif
     char linebuf[1024];
 
 #ifdef _ARM
-__attribute__((__section__(".entry")))
+//__attribute__((__section__(".entry")))
 #endif
-int _main() {
+int _mainxx() {
 BIOS::DBG::Print("start====");
     int stack_dummy;
 
@@ -121,7 +449,11 @@ print("a long string that is not interned")
 print("a string that has unicode αβγ chars")
 print(b"bytes 1234\x01")
 print(123456789)
-           
+for a in range(4):
+    print(a)
+for b in range(4):
+   print(b)
+
 import mini
 colors = [0x404080, 0x4060b0, 0x4080d0, 0x40a0ff]
 for x in range(0, 320/20):
@@ -152,7 +484,7 @@ r
 
     int ret = parse_compile_execute(&line, parse_input_kind, EXEC_FLAG_ALLOW_DEBUGGING /*| EXEC_FLAG_IS_REPL*/ | EXEC_FLAG_SOURCE_IS_VSTR, NULL);
     
-    //pyexec_friendly_repl();
+    pyexec_friendly_repl();
 
     BIOS::SYS::DelayMs(5000);
     mp_deinit();
@@ -163,7 +495,7 @@ r
 void gc_collect(void) {
     // WARNING: This gc_collect implementation doesn't try to get root
     // pointers from CPU registers, and thus may function incorrectly.
-    BIOS::DBG::Print("[gc_collect]");
+//    BIOS::DBG::Print("[gc_collect]");
     gc_collect_start();
 //    #if CIRCUITPY_DISPLAYIO
 //    gc_collect_root((void**)heap, sizeof(heap) / sizeof(uint32_t));
@@ -227,3 +559,5 @@ extern "C" mp_obj_t mini_bar(size_t n_args, const mp_obj_t *args) {
     BIOS::LCD::Bar(x1, y1, x2, y2, lcdColor);
     return mp_const_none;
 }
+
+#endif

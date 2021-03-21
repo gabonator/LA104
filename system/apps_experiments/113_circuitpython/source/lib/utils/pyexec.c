@@ -77,12 +77,10 @@ int parse_compile_execute(const void *source, mp_parse_input_kind_t input_kind, 
     if (nlr_push(&nlr) == 0) {
         mp_obj_t module_fun;
         //gabo
-//        #if MICROPY_MODULE_FROZEN_MPY
         if (exec_flags & EXEC_FLAG_SOURCE_IS_RAW_CODE) {
             // source is a raw_code object, create the function
             module_fun = mp_make_function_from_raw_code(source, MP_OBJ_NULL, MP_OBJ_NULL);
         } else
-//        #endif
         {
             #if MICROPY_ENABLE_COMPILER
             mp_lexer_t *lex;

@@ -90,6 +90,11 @@ file(GLOB application_utils_src
     "source/lib/utils/*.h"
 )
 
+file(GLOB application_utils2_src
+    "source/lib/mp-readline/*.c"
+    "source/lib/mp-readline/*.h"
+)
+
 if (DESKTOP)           	
 source_group("source\\main" FILES ${main_src})
 source_group("source\\bios" FILES ${bios_src})
@@ -102,9 +107,10 @@ source_group("application\\py" FILES ${application_graph_src})
 source_group("application\\extmod" FILES ${application_sensor_src})
 source_group("application\\bindings" FILES ${application_frozen_src})
 source_group("application\\lib\\utils" FILES ${application_utils_src})
+source_group("application\\lib\\mp-readline" FILES ${application_utils2_src})
 source_group("include" FILES "include/library.h")
 
-add_executable(application ${main_src} ${bios_src} ${framework_src} ${gui_src} ${application_src} ${application_graph_src} ${application_sensor_src} ${application_frozen_src} ${application_utils_src})
+add_executable(application ${main_src} ${bios_src} ${framework_src} ${gui_src} ${application_src} ${application_graph_src} ${application_sensor_src} ${application_frozen_src} ${application_utils_src} ${application_utils2_src})
 
 add_definitions(-DLA104)
 add_definitions(-DCIRCUITPY_ENABLE_MPY_NATIVE=0)

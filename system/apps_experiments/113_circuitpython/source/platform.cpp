@@ -13,19 +13,14 @@ extern "C" mp_uint_t mp_hal_ticks_ms(void) {
     return BIOS::SYS::GetTick();
 }
 
-extern "C" void mp_hal_set_interrupt_char(char c) {
-}
+//extern "C" void mp_hal_set_interrupt_char(char c) {
+//}
 
-extern "C" void mp_hal_stdout_tx_str(const char *str) 
-{
-    BIOS::DBG::Print(str);
-}
-
-extern "C" void mp_hal_stdout_tx_strn(const char *str, size_t len) 
-{
-  while(len--)
-    BIOS::DBG::Print("%c", *str++);
-}
+extern "C" void mp_hal_stdout_tx_strn(const char *str, size_t len);
+extern "C" void mp_hal_stdout_tx_str(const char *str);
+//{
+//    BIOS::DBG::Print(str);
+//}
 
 extern "C" int mp_hal_stdin_rx_chr(void) 
 { 

@@ -108,8 +108,8 @@ STATIC void mp_help_print_modules(void) {
     mp_obj_list_sort(1, &list, (mp_map_t*)&mp_const_empty_map);
 
     // print the list of modules in a column-first order
-    #define NUM_COLUMNS (4)
-    #define COLUMN_WIDTH (18)
+    #define NUM_COLUMNS (2)
+    #define COLUMN_WIDTH (16)
     size_t len;
     mp_obj_t *items;
     mp_obj_list_get(list, &len, &items);
