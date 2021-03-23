@@ -28,6 +28,9 @@
 #ifndef STM32_MPCONFIGPORT_H__
 #define STM32_MPCONFIGPORT_H__
 
+#define MICROPY_MPHALPORT_H "mpconfigboard.h"
+
+void mp_hal_set_interrupt_char(int c); // TODO: fix
 
 // gabo
 //#define DEBUG_printf printf
@@ -48,10 +51,6 @@
 
 extern uint8_t _ld_default_stack_size;
 
-// 24kiB stack
-// #define CIRCUITPY_DEFAULT_STACK_SIZE            0x6000
-#define CIRCUITPY_DEFAULT_STACK_SIZE            ((uint32_t) &_ld_default_stack_size)
-
 #include "py/circuitpy_mpconfig.h"
 
 // Board flags:
@@ -66,13 +65,9 @@ extern uint8_t _ld_default_stack_size;
 #endif
 
 // Peripheral implementation counts
-#define MAX_UART 1
-#define MAX_I2C 1
-#define MAX_SPI 1
+#define MAX_UART 0
+#define MAX_I2C 0
+#define MAX_SPI 0
 
-#define MICROPY_PORT_ROOT_POINTERS \
-    void *cpy_uart_obj_all[MAX_UART]; \
-    void *cpy_i2c_obj_all[MAX_I2C]; \
-	CIRCUITPY_COMMON_ROOT_POINTERS
 
 #endif  // __INCLUDED_MPCONFIGPORT_H

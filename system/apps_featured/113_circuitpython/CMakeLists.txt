@@ -17,6 +17,7 @@ endif()
 include_directories("../../os_host/source")
 include_directories("source/py")
 include_directories("source/extmod")
+include_directories("source/circuitpython")
 include_directories("source/")
 
 if (DESKTOP)           	
@@ -71,28 +72,29 @@ file(GLOB application_src
 )
 
 file(GLOB application_graph_src
-    "source/py/*.c"
-    "source/py/*.h"
+    "source/circuitpython/py/*.c"
+    "source/circuitpython/py/*.h"
 )
 
 file(GLOB application_sensor_src
-    "source/extmod/*.c"
-    "source/extmod/*.h"
+    "source/circuitpython/extmod/*.c"
+    "source/circuitpython/extmod/*.h"
 )
 
 file(GLOB application_frozen_src
     "source/bindings/*.c"
+    "source/bindings/*.cpp"
     "source/bindings/*.h"
 )
 
 file(GLOB application_utils_src
-    "source/lib/utils/*.c"
-    "source/lib/utils/*.h"
+    "source/circuitpython/lib/utils/*.c"
+    "source/circuitpython/lib/utils/*.h"
 )
 
 file(GLOB application_utils2_src
-    "source/lib/mp-readline/*.c"
-    "source/lib/mp-readline/*.h"
+    "source/circuitpython/lib/mp-readline/*.c"
+    "source/circuitpython/lib/mp-readline/*.h"
 )
 
 if (DESKTOP)           	

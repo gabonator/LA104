@@ -104,7 +104,7 @@
 #define MICROPY_PY_IO_FILEIO             (1)
 #define MICROPY_PY_GC                    (1)
 // Supplanted by shared-bindings/math
-#define MICROPY_PY_MATH                  (0)
+#define MICROPY_PY_MATH                  (1) // gabo???
 #define MICROPY_PY_MICROPYTHON_MEM_INFO  (0)
 // Supplanted by shared-bindings/struct
 #define MICROPY_PY_STRUCT                (0)

@@ -209,3 +209,14 @@ static const char sigXLX[] =
 "              "
 "              "
 "              ";
+
+static const char CShapes_cursor[] =
+"\x0e"
+"            .."
+"            .."
+"            .."
+"            .."
+"            .."
+"            .."
+"            .."
+"            ..";
