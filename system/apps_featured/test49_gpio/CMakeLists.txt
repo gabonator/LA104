@@ -2,15 +2,18 @@ cmake_minimum_required(VERSION 2.8)
 cmake_policy(SET CMP0054 NEW)
 cmake_policy(SET CMP0025 NEW)
 project(LA140_emulator)
-
+set(CMAKE_CXX_COMPILER clang)
 set(CMAKE_SUPPRESS_REGENERATION true)
-set (CMAKE_CXX_STANDARD 17)
+set (CMAKE_CXX_STANDARD 11)
 
 # call "brew install sdl2"
+
 
 if (ARM)
 include_directories("../../os_platform/common/include")
 endif()
+
+include_directories("../../os_host/source")
 
 if (DESKTOP)           	
 find_package(SDL2 REQUIRED)
@@ -42,13 +45,15 @@ file(GLOB main_src
 )
 
 file(GLOB linker_script
-    "../../apps/test49_gpio/app.lds"
+    "source/app.lds"
 )
 endif()
 
+include_directories("source/")
+
 file(GLOB application_src
-    "../../apps/test49_gpio/*.cpp"
-    "../../apps/test49_gpio/*.h"
+    "*.cpp"
+    "*.h"
 )
 
 if (DESKTOP)           	
@@ -69,14 +74,13 @@ source_group("include" FILES "../../os_platform/common/include")
 
 file(GLOB application_exec
   ${main_src} ${bios_src} ${framework_src} 
-  ${gui_src} ${application_src} ${application_devices_src} ${application_codecs_src} 
-  ${application_layouts_src} ${application_utils_src} ${application_controls_src} 
-  ${application_layouts_file_src} ${application_layouts_meas_src} ${application_layouts_modem_src}
+  ${gui_src} ${application_src}
 )
 
 add_executable(application ${application_exec})
 
 add_definitions(-DEMULATED)
+add_definitions(-DLA104)
 
 if (ARM)
 target_link_libraries(application m)

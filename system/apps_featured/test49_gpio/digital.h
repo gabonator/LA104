@@ -7,7 +7,7 @@ class CDigital : public CWindow
 		CGpio::EPin pin;
 		const char* id;
 		bool enabled;
-		enum {OnlyInput, Input, Output} dir;
+		enum {OnlyInput, Input, InputPu, InputPd, Output} dir;
 		bool logic;
 		bool prev;
 
@@ -16,7 +16,19 @@ class CDigital : public CWindow
 			if (!enabled)
 				return CGpio::EDirection::Disabled;
 			else
-				return dir == TRow::Output ? CGpio::EDirection::Output : CGpio::EDirection::Input;
+            {
+                switch (dir)
+                {
+                    case OnlyInput: return CGpio::EDirection::Input;
+                    case Input: return CGpio::EDirection::Input;
+                    case InputPu: return CGpio::EDirection::InputPullUp;
+                    case InputPd: return CGpio::EDirection::InputPullDown;
+                    case Output: return CGpio::EDirection::Output;
+                    default:
+                        _ASSERT(0);
+                        return CGpio::EDirection::Input;
+                }
+            }
 		}
 	};
 	
@@ -101,10 +113,24 @@ public:
 			return;
 		}
 
-		if (row.dir == TRow::OnlyInput)
-			DrawSingleToggler(_x+40, _y, "Input");
-		else
-			DrawToggler(_x+40, _y, "In", "Out", row.dir == TRow::Input ? 0 : 1, selected ? mCol - 1 : -1);
+        switch (row.dir)
+        {
+            case TRow::OnlyInput:
+                DrawSingleToggler(_x+40, _y, "Input");
+                break;
+            case TRow::Input:
+                DrawToggler(_x+40, _y, "In ", "Out", 0, selected ? mCol - 1 : -1);
+                break;
+            case TRow::InputPu:
+                DrawToggler(_x+40, _y, "In\x18", "Out", 0, selected ? mCol - 1 : -1);
+                break;
+            case TRow::InputPd:
+                DrawToggler(_x+40, _y, "In\x19", "Out", 0, selected ? mCol - 1 : -1);
+                break;
+            case TRow::Output:
+                DrawToggler(_x+40, _y, "In ", "Out", 1, selected ? mCol - 1 : -1);
+                break;
+        }
 		
 		//LCD::Rectangle(CRect(_x+180, _y+1, _x+180+80, _y+14-1), gControl);
 		
@@ -216,7 +242,7 @@ public:
 		{
 			if (mConfig[mRow].dir == TRow::OnlyInput)
 				return;
-			if (mConfig[mRow].dir == TRow::Input && mCol == 2)
+			if (mConfig[mRow].dir != TRow::Output && mCol == 2)
 				return;
 			
 			mCol++;
@@ -226,7 +252,8 @@ public:
 		{
 			mRow--;
 
-			if (mConfig[mRow].dir == TRow::Input && mCol == 3)
+			if ((mConfig[mRow].dir == TRow::Input || mConfig[mRow].dir == TRow::InputPu ||
+                 mConfig[mRow].dir == TRow::InputPd) && mCol == 3)
 				mCol = 2;
 
 			DrawLine(mRow+1);
@@ -237,7 +264,8 @@ public:
 		{
 			mRow++;
 
-			if (mConfig[mRow].dir == TRow::Input && mCol == 3)
+            if ((mConfig[mRow].dir == TRow::Input || mConfig[mRow].dir == TRow::InputPu ||
+                 mConfig[mRow].dir == TRow::InputPd) && mCol == 3)
 				mCol = 2;
 
 			DrawLine(mRow-1);
@@ -263,7 +291,14 @@ public:
 				}
 				if (mCol == 1)
 				{
-					row.dir = TRow::Input;
+                    switch (row.dir)
+                    {
+                        case TRow::OnlyInput: _ASSERT(0);
+                        case TRow::Input: row.dir = TRow::InputPu; break;
+                        case TRow::InputPu: row.dir = TRow::InputPd; break;
+                        case TRow::InputPd: row.dir = TRow::Input; break;
+                        case TRow::Output: row.dir = TRow::Input; break;
+                    }
 					mGpio.SetDirection(row.pin, row.GetDirection());
 				}
 				if (mCol == 2)

@@ -24,7 +24,7 @@ public:
 class CGpio
 {
 public:
-	enum EDirection {Disabled, Input, Output};
+	enum EDirection {Disabled, Input, InputPullUp, InputPullDown, Output};
 	using EPin = BIOS::GPIO::EPin;
 	
 	void SetDirection(EPin pin, EDirection dir)
@@ -35,6 +35,12 @@ public:
 			case Input:
 				GPIO::PinMode(pin, GPIO::EMode::Input);
 				break;
+            case InputPullUp:
+                GPIO::PinMode(pin, (GPIO::EMode)(GPIO::EMode::Input | GPIO::EMode::PullUp));
+                break;
+            case InputPullDown:
+                GPIO::PinMode(pin, (GPIO::EMode)(GPIO::EMode::Input | GPIO::EMode::PullDown));
+                break;
 			case Output:
 				GPIO::PinMode(pin, GPIO::EMode::Output);
 				break;
