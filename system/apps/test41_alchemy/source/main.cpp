@@ -13,6 +13,8 @@
 #include "devices/raw.h"
 #include "devices/infra.h"
 
+uint8_t gFatSharedBuffer[BIOS::FAT::SharedBufferSize];
+
 CDeviceCC1101 mDeviceRadio;
 CDeviceRaw mDeviceRaw;
 CDeviceInfra mDeviceInfra;
@@ -262,6 +264,9 @@ void mainFinish()
 #else
 int _main(void)
 {
+    _ASSERT(sizeof(gFatSharedBuffer) >= BIOS::SYS::GetAttribute(BIOS::SYS::EAttribute::DiskSectorSize));
+    BIOS::FAT::SetSharedBuffer(gFatSharedBuffer);
+
     app.Create("WaveAlchemy", CWnd::WsVisible | CWnd::WsTick, CRect(0, 0, BIOS::LCD::Width, BIOS::LCD::Height), nullptr);
     app.WindowMessage( CWnd::WmPaint );
     
@@ -279,6 +284,7 @@ int _main(void)
     }
     
     app.Destroy();
+    BIOS::FAT::SetSharedBuffer(nullptr);
     return 0;
 }
 #endif
