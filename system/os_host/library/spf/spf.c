@@ -44,7 +44,8 @@ void sfp_printchar(char **str, int c)
 #define PAD_DECIMALS 4
 
 #if defined(EMSCRIPTEN)
-#define va_list SPF::va_list
+// Required by older version of emscripten
+// #define va_list SPF::va_list
 #endif
 #if defined(EMSCRIPTEN) || defined(__APPLE__)
 #define register

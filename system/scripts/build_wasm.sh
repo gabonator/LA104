@@ -3,14 +3,7 @@
 #
 # To setup wasm building environment:
 #
-#   git clone https://github.com/emscripten-core/emsdk.git
-#   ./emsdk install latest
-#   ./emsdk activate latest
-#
-# check "which emcc" and remove references in /usr/local
-# call emsdk_env.sh to setup environment, or set path to utilities:
-# PATH=$PATH:~/Documents/git/ext/emsdk/upstream/emscripten
-# PATH=$PATH:~/Documents/git/ext/emsdk/upstream/bin
+# brew install emscripten
 #
 
 buildApp () {
