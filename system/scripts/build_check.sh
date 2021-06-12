@@ -3,6 +3,7 @@ echo Checking building environment
 
 if [ "`which arm-none-eabi-gcc`" == "" ]; then
   echo "[ERROR] arm-none-eabi-gcc not found!"
+  echo "[ERROR] download here: https://developer.arm.com/tools-and-software/open-source-software/developer-tools/gnu-toolchain/gnu-rm/downloads"
   exit 1
 fi
 
