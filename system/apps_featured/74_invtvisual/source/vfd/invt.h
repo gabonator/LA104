@@ -3,14 +3,12 @@ class CVfd : public CVfdComm
 {
   const long mReadTimeout{15};
   const long mNoResponseTimeout{100};
-  
-  typedef void(*TPacketHandler)(const CVfdPacket& p);
-  typedef void(*TErrorHandler)();
-  
+    
   CVfdPacket mReceivePacket;
   long mLastReceive{0};
   long mPacketSent{0};
   uint8_t mDeviceAddress{1};
+    
   enum ECommand
   {
     Read = 0x03,
@@ -18,6 +16,19 @@ class CVfd : public CVfdComm
     Diagnostics = 0x08,
     Abnormal = 0x80
   };
+ 
+public:
+  enum EError
+  {
+    UartError = 1,
+    CrcError = 2,
+    BufferOverflow = 3,
+    Timeout = 4
+  };
+    
+private:
+  typedef void(*TPacketHandler)(const CVfdPacket& p);
+  typedef void(*TErrorHandler)(CVfd::EError);
 
   TPacketHandler mPacketHandler{nullptr};
   TErrorHandler mErrorHandler{nullptr};
@@ -32,12 +43,26 @@ public:
   {
     long now = SYS::GetTick();
     
+    if (hasError())
+    {
+        if (mErrorHandler)
+          mErrorHandler(UartError);
+        else
+          Serial_print("ERROR: GPIO read error\n");
+
+        cleanup();
+    }
+      
     if (available())
     {
       if (mReceivePacket.isFull())
       {
-        Serial_print("ERROR: Receive packet full!\n");
-        mReceivePacket.clear();
+        if (mErrorHandler)
+          mErrorHandler(BufferOverflow);
+        else
+          Serial_print("ERROR: Receive packet buffer overflow!\n");
+
+        cleanup();
       }
       mReceivePacket.add(read());
       mLastReceive = now;
@@ -55,36 +80,35 @@ public:
       } else
       {
         if (mErrorHandler)
-          mErrorHandler();
+          mErrorHandler(CrcError);
         else
           Serial_print("ERROR: Broken packet read\n");        
       }
       
-      mLastReceive = 0;
-      mPacketSent = 0;
-      mReceivePacket.clear();
-      
-      mPacketHandler = nullptr;
-      mErrorHandler = nullptr;
+      cleanup();
     }
 
     if (mPacketSent != 0 && now - mPacketSent > mNoResponseTimeout)
     {
       if (mErrorHandler)
-        mErrorHandler();
+        mErrorHandler(Timeout);
       else
         Serial_print("ERROR: Response timeout\n");
 
-    
-      mLastReceive = 0;
-      mPacketSent = 0;
-      mReceivePacket.clear();
-      
-      mPacketHandler = nullptr;
-      mErrorHandler = nullptr;
+      cleanup();
     }
   }
-
+    
+  void cleanup()
+  {
+    mLastReceive = 0;
+    mPacketSent = 0;
+    mReceivePacket.clear();
+  
+    mPacketHandler = nullptr;
+    mErrorHandler = nullptr;
+  }
+    
   CVfd& send(const CVfdPacket& p)
   {
     Serial_print("Send ");

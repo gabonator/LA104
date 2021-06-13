@@ -14,6 +14,8 @@ class CVfdComm
     ControlRe = pinRE,
   };
     
+  uint32_t* mGpioStatus{nullptr};
+
 public:
   void setup()
   {    
@@ -24,6 +26,7 @@ public:
     GPIO::PinMode((GPIO::EPin)UartRX, GPIO::Uart);
     GPIO::PinMode((GPIO::EPin)UartTX, GPIO::Uart);
     GPIO::UART::Setup(19200, GPIO::UART::EConfig(GPIO::UART::length8 | GPIO::UART::parityEven | GPIO::UART::stopBits1));
+    mGpioStatus = (uint32_t*)BIOS::SYS::GetAttribute(BIOS::SYS::EAttribute::GpioStatus);
   }
   
   void write(const uint8_t* buf, int length)
@@ -55,5 +58,13 @@ public:
 //    CONSOLE::Print("%02x ", v);
 //    CONSOLE::Color(RGB565(ffffff));
     return v;
+  }
+    
+  bool hasError()
+  {
+      if (*mGpioStatus == 0)
+          return false;
+      *mGpioStatus = 0;
+      return true;
   }
 };

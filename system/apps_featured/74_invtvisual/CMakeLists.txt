@@ -1,17 +1,16 @@
-# for use in LA104/system/hybrid folder
-
 cmake_minimum_required(VERSION 2.8)
 cmake_policy(SET CMP0054 NEW)
 cmake_policy(SET CMP0025 NEW)
 project(LA140_emulator)
-
+set(CMAKE_CXX_COMPILER clang)
 set(CMAKE_SUPPRESS_REGENERATION true)
-set (CMAKE_CXX_STANDARD 17)
+set (CMAKE_CXX_STANDARD 11)
 
 # call "brew install sdl2"
 
+
 if (ARM)
-include_directories("../os_library/include")
+include_directories("../../os_platform/common/include")
 endif()
 
 include_directories("../../os_host/source")
@@ -19,12 +18,12 @@ include_directories("../../os_host/source")
 if (DESKTOP)           	
 find_package(SDL2 REQUIRED)
 include_directories(${SDL2_INCLUDE_DIRS})
-include_directories("include/")
+#include_directories("include/")
 include_directories("../../os_platform/common/include")
 
 file(GLOB main_src 
-    "../../os_platform/apple/source/sdlmain.cpp"
-    "../../os_platform/apple/source/sdlhal.h"
+    "../../os_platform/mac_sdl/source/sdlmain.cpp"
+    "../../os_platform/mac_sdl/source/sdlhal.h"
     "../../os_platform/common/include/library.h"
 )
 
@@ -38,28 +37,19 @@ file(GLOB framework_src
     "../../os_platform/common/source/framework/*.h"
 )
 
-
-file(GLOB spf_src
-    "../../os_host/library/spf/*.cpp"
-    "../../os_host/library/spf/*.h"
-)
-
-
-file(GLOB gui_src
-    "../../os_platform/common/source/gui/*.cpp"
-    "../../os_platform/common/source/gui/*.h"
-)
 endif()
 
 if (ARM)
 file(GLOB main_src 
-    "../os_host/source/framework/Wnd.cpp"
+    "../../os_host/source/framework/Wnd.cpp"
 )
 
 file(GLOB linker_script
-    "../apps_experiments/test33_temper/app.lds"
+    "source/app.lds"
 )
 endif()
+
+include_directories("source/")
 
 file(GLOB application_src
     "source/*.cpp"
@@ -71,25 +61,38 @@ file(GLOB application_graph_src
     "source/graph/*.h"
 )
 
-file(GLOB application_sensor_src
+file(GLOB application_vfd_src
     "source/vfd/*.cpp"
     "source/vfd/*.h"
 )
 
 if (DESKTOP)           	
-source_group("source\\main" FILES "source/sdlmain.cpp")
-source_group("source\\bios" FILES ${bios_src})
-source_group("source\\framework" FILES ${framework_src})
-source_group("source\\gui" FILES ${gui_src})
+
+#file(GLOB application_sdl
+#    "../os_platform/mac_sdl/sdlmain.cpp"
+#    "../os_platform/mac_sdl/sdlhal.h"
+#)
+
+source_group("platform\\main" FILES ${main_src})
+source_group("platform\\bios" FILES ${bios_src})
+source_group("platform\\framework" FILES ${framework_src})
+#source_group("source\\gui" FILES ${gui_src})
 endif()
 
 source_group("application" FILES ${application_src})
 source_group("application\\graph" FILES ${application_graph_src})
-source_group("application\\sensor" FILES ${application_sensor_src})
-source_group("include" FILES "include/library.h")
+source_group("application\\vfd" FILES ${application_vfd_src})
+source_group("include" FILES "../../os_platform/common/include")
 
-add_executable(application ${main_src} ${bios_src} ${framework_src} ${gui_src} ${application_src} ${application_graph_src} ${application_sensor_src})
+file(GLOB application_exec
+  ${main_src} ${bios_src} ${framework_src} 
+  ${gui_src} ${application_src} ${application_graph_src} ${application_vfd_src} 
+  ${application_oscilloscope_src} 
+)
 
+add_executable(application ${application_exec})
+
+add_definitions(-DEMULATED)
 add_definitions(-DLA104)
 
 if (ARM)

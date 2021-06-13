@@ -1,7 +1,7 @@
 #include <library.h>
 #include <algorithm>
 
-#include "assert.h"
+#include "xassert.h"
 #include "pressure.h"
 
 using namespace BIOS;
@@ -31,7 +31,9 @@ class CApplication : public CWnd
 	int mErrorCounter{0};
 	float mLastDrawnFrequency{-1.f};
 	CVfdAttributes::EOperation mLastDrawnOperation{CVfdAttributes::EOperation::Unknown};
-
+    long mErrorShown{0};
+    bool mConnected{false};
+    
 public:
     void Create(const char* pszId, ui16 dwFlags, const CRect& rc, CWnd* pParent)
     {
@@ -53,7 +55,7 @@ public:
         CRect rc1(m_rcClient);
         rc1.bottom = 14;
         GUI::Background(rc1, RGB565(4040b0), RGB565(404040));
-        BIOS::LCD::Print(8, 0, RGB565(ffffff), RGBTRANS, "Invt VFD visualizer, valky.eu, 2020");
+        BIOS::LCD::Print(8, 0, RGB565(ffffff), RGBTRANS, "Invt VFD visualizer, valky.eu, 2021");
 
 		CRect rc2(m_rcClient);
 		rc2.top = rc2.bottom-14;
@@ -81,9 +83,10 @@ public:
 		if (mManager.IsComm())
 			OnComm();
 
-		if (mManager.IsCommError())
+        CVfdManager::EError error = mManager.IsCommError();
+		if (error != CVfdManager::EError::None)
 		{
-			OnCommError();
+			OnCommError(error);
 			if (mHasValidData && mErrorCounter++ > 10)
 			{
 				BIOS::SYS::Beep(1000);
@@ -245,6 +248,7 @@ public:
 		const char* deviceId = mAttributes.GetIdentify();
 		int x = 8;
 		x += BIOS::LCD::Printf(x, rc2.top, RGB565(808080), RGBTRANS, "Connected: %s", deviceId);
+        mConnected = true;
 	}
 	
 	void OnComm()
@@ -253,14 +257,43 @@ public:
 		GUI::Background(rc2, RGB565(404040), RGB565(202020));
 
 		BIOS::LCD::Printf(BIOS::LCD::Width-16, BIOS::LCD::Height-14, RGB565(00ff00), RGBTRANS, "%c", mAnimPattern[mAnimPhase++&7]);
+        
+        if (mErrorShown != 0)
+        {
+            long now = BIOS::SYS::GetTick();
+            if (now - mErrorShown > 1000)
+            {
+                mErrorShown = 0;
+                if (mConnected)
+                    OnConnect();
+            }
+        }
 	}
 
-	void OnCommError()
+	void OnCommError(CVfdManager::EError error)
 	{
 		CRect rc2(m_rcClient.right-16, m_rcClient.bottom-14, m_rcClient.right-8, m_rcClient.bottom);
 		GUI::Background(rc2, RGB565(404040), RGB565(202020));
 
 		BIOS::LCD::Printf(BIOS::LCD::Width-16, BIOS::LCD::Height-14, RGB565(ff0000), RGBTRANS, "%c", mAnimPattern[mAnimPhase++&7]);
+        
+        const char *desc = "Unknown";
+        switch (error)
+        {
+            case CVfdManager::None: desc = "None"; break;
+            case CVfdManager::UartError: desc = "UartError"; break;
+            case CVfdManager::CrcError: desc = "CrcError"; break;
+            case CVfdManager::BufferOverflow: desc = "BufferOverflow"; break;
+            case CVfdManager::Timeout:
+                if (!mConnected)
+                    return;
+                desc = "Timeout";
+                break;
+            case CVfdManager::PacketShort: desc = "PacketShort"; break;
+            case CVfdManager::PacketHead: desc = "PacketHead"; break;
+        }
+        BIOS::LCD::Printf(0, BIOS::LCD::Height-14, RGB565(ffffff), RGB565(ff5555), " Error: %s ", desc);
+        mErrorShown = BIOS::SYS::GetTick();
 	}
 };
 

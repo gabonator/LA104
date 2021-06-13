@@ -3,13 +3,26 @@ class CVfdManager
 	CVfdAttributes mAttributes;
 	CVfd gVfd;
 
+public:
+    enum EError {
+        None = 0,
+        UartError = CVfd::UartError,
+        CrcError = CVfd::CrcError,
+        BufferOverflow = CVfd::BufferOverflow,
+        Timeout = CVfd::Timeout,
+
+        PacketShort = 10,
+        PacketHead = 11,
+    };
+    
+private:
 	const long mRequestLimit{100};
 	int mRequestBase{0};
 	int mRequestCount{0};
 	int mOkPacketCounter{0};
 	
 	bool mNotifyComm{false};
-	bool mNotifyError{false};
+    EError mNotifyError{None};
 	bool mNotifyId{false};
 	bool mNotifyData{false};
 	
@@ -46,9 +59,9 @@ public:
 					processing = false;
 					_this->onPacket(packet);
 				})
-				.onError([]() {
+				.onError([](CVfd::EError error) {
 					processing = false;
-					_this->onError();
+					_this->onError(error);
 				});
 		}
 		
@@ -60,7 +73,7 @@ public:
 		// only read packets
 		if (packet.getLength() < 5)
 		{
-			mNotifyError = true;
+			mNotifyError = PacketShort;
 			return;
 		}
 		
@@ -69,7 +82,7 @@ public:
 			packet[2] != 2*mRequestCount ||
 			packet.getLength() != 3+mRequestCount*2+2)
 		{
-			mNotifyError = true;
+			mNotifyError = PacketHead;
 			return;
 		}
 
@@ -133,9 +146,9 @@ public:
 		mNotifyComm = true;
 	}
 	
-	void onError()
+	void onError(CVfd::EError error)
 	{
-		mNotifyError = true;
+		mNotifyError = (CVfdManager::EError)error;
 	}
 		
 	void buildRequest(CVfdPacket& packet)
@@ -197,12 +210,11 @@ public:
 		return true;
 	}
 	
-	bool IsCommError()
+	EError IsCommError()
 	{
-		if (!mNotifyError)
-			return false;
-		mNotifyError = false;
-		return true;
+        EError last = mNotifyError;
+		mNotifyError = EError::None;
+		return last;
 	}
 };
 
@@ -246,11 +258,15 @@ public:
 	}
 	bool IsConnect()
 	{
+        return false;
 		static int x = 0;
 		return x++ == 5;
 	}
-	bool IsCommError()
+    CVfdManager::EError IsCommError()
 	{
-		return false;
+        static int x = 0;
+        if (x++ % 20 == 0)
+            return (CVfdManager::EError)((x/20)%20);
+		return CVfdManager::EError::None;
 	}
 };
