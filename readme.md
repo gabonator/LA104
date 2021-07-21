@@ -3,7 +3,7 @@
 
 
 # LA104 pocket logic analyser operating system
-(I will focus on DS213 in this fork)
+## (I will focus on DS213 in this fork)
 
 LA104 is another nice piece of handheld hardware coming from [e-design / miniware company](http://www.miniware.com.cn/) similar to their previous product - pocket digital storage oscillosope DS203. 
 
