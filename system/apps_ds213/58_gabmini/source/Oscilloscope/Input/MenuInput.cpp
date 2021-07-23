@@ -92,6 +92,7 @@ CWndMenuInput::CWndMenuInput()
 	{
 		MainWnd.m_wndTReferences.Invalidate();
 		MainWnd.m_wndZoomBar.Invalidate();
+		MainWnd.m_wndGraph.Invalidate();
 		// if the osccilloscope window is freezed, inform to redraw it
 		if ( !BIOS::ADC::Enabled() )
 		{
