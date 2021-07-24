@@ -111,7 +111,7 @@ public:
 
 	virtual void OnKey(int nKey) override
 	{
-		if ( nKey == BIOS::KEY::Left && m_proLevel-1 == CValueProvider::Yes )
+		if ( nKey == BIOS::KEY::Left && m_proLevel.Get() > 0)
 		{
 			m_proLevel--;
 			SendMessage(m_pParent, ToWord('r', 'u'), 0);
@@ -125,7 +125,37 @@ public:
 		{
 			SendMessage(m_pParent, ToWord('m', 'r'), 0);
 		}
-
+		if( nKey == BIOS::KEY::F3 )
+		{
+			ui16 clrSource = RGB565(ff00ff);
+			switch( Settings.Trig.Source )
+			{
+				case CSettings::Trigger::_CH1:
+					Settings.Trig.Source = CSettings::Trigger::_CH2;
+					clrSource = Settings.CH2.u16Color; 
+					break;
+				case CSettings::Trigger::_CH2:
+					Settings.Trig.Source = CSettings::Trigger::_CH3;
+					clrSource = Settings.CH3.u16Color; 
+					break;
+				case CSettings::Trigger::_CH3:
+					Settings.Trig.Source = CSettings::Trigger::_CH4;
+					clrSource = Settings.CH4.u16Color; 
+					break;
+				case CSettings::Trigger::_CH4:
+					Settings.Trig.Source = CSettings::Trigger::_CH1;
+					clrSource = Settings.CH1.u16Color; 
+					break;
+				default:
+					break;
+			}
+			ui16 y = Settings.Trig.nLevel;
+			y = (y * (CWndGraph::DivsY*CWndGraph::BlkY)) >> 8;
+			BIOS::LCD::Draw( 0, m_rcClient.bottom - y-2, 
+				clrSource, RGBTRANS, CShapes::trig_base );
+			SendMessage(m_pParent, ToWord('r', 'u'), 0);
+			CWnd::Invalidate();
+		}
 		CWnd::OnKey( nKey );
 	}
 

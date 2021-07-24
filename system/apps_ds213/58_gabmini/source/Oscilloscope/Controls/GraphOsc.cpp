@@ -224,6 +224,24 @@ void CWndOscGraph::OnPaintTY()
 	ui8 en2 = Settings.CH2.Enabled == CSettings::AnalogChannel::_YES;
 	ui8 en3 = Settings.CH3.Enabled == CSettings::DigitalChannel::_YES;
 	ui8 en4 = Settings.CH4.Enabled == CSettings::DigitalChannel::_YES;
+	ui16 clrSource = RGB565(ff00ff);
+	switch ( Settings.Trig.Source )
+	{
+		case CSettings::Trigger::_CH1: 
+			clrSource = Settings.CH1.u16Color; 
+			break;
+		case CSettings::Trigger::_CH2: 
+			clrSource = Settings.CH2.u16Color; 
+			break;
+		case CSettings::Trigger::_CH3: 
+			clrSource = Settings.CH3.u16Color; 
+			break;
+		case CSettings::Trigger::_CH4: 
+			clrSource = Settings.CH4.u16Color; 
+			break;
+		case CSettings::Trigger::_Math: 
+			_ASSERT(0);
+	}
 
 	ui16 clrShade1 = 0, clrShade2 = 0, clrShade12 = 0;
 
@@ -455,7 +473,7 @@ void CWndOscGraph::OnPaintTY()
 		if ( bTrigger && (x & 1) == 1 )
 		{
 			ui16 y = (Settings.Trig.nLevel*(DivsY*BlkY))>>8;
-			column[y] = RGB565(404040);
+			column[y] = clrSource;
 		}
 		if ( nMarkerY1 > 0 )
 			column[nMarkerY1] = Settings.MarkY1.u16Color;

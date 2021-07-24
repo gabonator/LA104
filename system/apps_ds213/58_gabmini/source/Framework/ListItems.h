@@ -14,9 +14,10 @@ public:
 		m_Max = max;
 	}
 
-	virtual VPNavigate operator +(si8 d)
+	virtual VPNavigate operator +(int d)
 	{
 		return ( *m_pVal + d >= 0 && *m_pVal + d <= m_Max ) ? Yes : No; 
+		//return (*m_pVal == m_Max) ? No : Yes;
 	}
 
 	virtual void operator++(int)
@@ -67,7 +68,7 @@ public:
 		m_nMax = _max;
 	}
 
-	virtual VPNavigate operator +(si8 d)
+	virtual VPNavigate operator +(int d)
 	{
 		si16 n = (*m_pVal) + d;
 		return ( n >= m_nMin && n <= m_nMax ) ? Yes : No; 
@@ -125,7 +126,7 @@ public:
 		m_nMax = _max;
 	}
 
-	virtual VPNavigate operator +(si8 d)
+	virtual VPNavigate operator +(int d)
 	{
 		T n = (*m_pVal) + d;
 		return ( n >= m_nMin && n <= m_nMax ) ? Yes : No; 
@@ -169,7 +170,7 @@ public:
 		m_pVal = pColor;
 	}
 
-	virtual VPNavigate operator +(si8 d)
+	virtual VPNavigate operator +(int d)
 	{
 		return Disabled; 
 	}
@@ -202,7 +203,7 @@ public:
 		m_pName = pName;
 	}
 
-	virtual VPNavigate operator +(si8 d)
+	virtual VPNavigate operator +(int d)
 	{
 		return Disabled;
 	}
@@ -280,7 +281,7 @@ public:
 		_ASSERT(0);
 	}
 
-	virtual VPNavigate operator +(si8 d)
+	virtual VPNavigate operator +(int d)
 	{
 		if (d > 0 && GetValue() < 15)
 			return Yes;

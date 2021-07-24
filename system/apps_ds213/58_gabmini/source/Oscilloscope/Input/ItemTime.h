@@ -18,9 +18,9 @@ public:
 	}
 
 	virtual void OnPaint() override
-	{
+	{			
 		ui16 clr = RGB565(000000);
-
+	
 		CWndMenuItem::OnPaint();
 		int x = m_rcClient.left + 12 + MarginLeft;
 		int y = m_rcClient.top;
@@ -40,8 +40,8 @@ public:
 
 	virtual void OnKey(int nKey) override
 	{
-		if ( nKey == BIOS::KEY::Left && m_proResolution-1 == CValueProvider::Yes )
-		{
+		if ( nKey == BIOS::KEY::Left && m_proResolution.Get() > 0)
+		{						
 			m_proResolution--;
 			Invalidate();
 			SendMessage(m_pParent, ToWord('i', 'u'), (ui32)(NATIVEPTR)m_pInfo);
@@ -54,10 +54,12 @@ public:
 		}
 		if ( nKey == BIOS::KEY::Enter )
 		{
+			Invalidate();
 			SendMessage(m_pParent, ToWord('m', 't'), (ui32)(NATIVEPTR)&m_proResolution);
 		}
 		CWnd::OnKey( nKey );
 	}
+
 };
 
 #endif

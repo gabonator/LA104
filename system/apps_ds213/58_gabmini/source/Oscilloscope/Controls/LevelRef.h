@@ -9,6 +9,25 @@ public:
 
 	virtual void OnPaint()
 	{
+		ui16 clrSource = RGB565(ff00ff);
+
+		switch ( Settings.Trig.Source )
+		{
+			case CSettings::Trigger::_CH1: 
+				clrSource = Settings.CH1.u16Color; 
+				break;
+			case CSettings::Trigger::_CH2: 
+				clrSource = Settings.CH2.u16Color; 
+				break;
+			case CSettings::Trigger::_CH3: 
+				clrSource = Settings.CH3.u16Color; 
+				break;
+			case CSettings::Trigger::_CH4: 
+				clrSource = Settings.CH4.u16Color; 
+				break;
+			case CSettings::Trigger::_Math: 
+				_ASSERT(0);
+		}
 		//BIOS::LCD::Bar( m_rcClient, RGB565(000000) );
 		GUI::Background(m_rcClient, RGB565(101010), RGB565(404040));
 		//if ( Settings.Trig.Sync != CSettings::Trigger::_None )                                           
@@ -16,7 +35,7 @@ public:
 			ui16 y = Settings.Trig.nLevel;
 			y = (y * (CWndGraph::DivsY*CWndGraph::BlkY)) >> 8;
 			BIOS::LCD::Draw( m_rcClient.left, m_rcClient.bottom - y-5, 
-				RGB565(606060), RGBTRANS, CShapes::trig_base );
+				clrSource, RGBTRANS, CShapes::trig_base );
 		}
 		if ( Settings.CH2.Enabled )
 		{

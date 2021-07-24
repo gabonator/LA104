@@ -39,8 +39,8 @@ public:
 
 	virtual void OnKey(int nKey) override
 	{
-		if ( nKey == BIOS::KEY::Left && (*m_pProvider)-1 == CValueProvider::Yes )
-		{
+		if ( nKey == BIOS::KEY::Left && (*m_pProvider).Get() != 0 )
+		{			
 			(*m_pProvider)--;
 			Invalidate();
 			SendMessage(m_pParent, ToWord('u', 'p'), 0);
