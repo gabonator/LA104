@@ -56,6 +56,7 @@ namespace MEMORY
   {
     uint32_t* p = (uint32_t*)ptr;
     *p = value;
+    return 0;
   }
 
   uint32_t Mask32(uint32_t ptr, uint32_t mask, uint32_t value)
@@ -63,6 +64,7 @@ namespace MEMORY
     uint32_t* p = (uint32_t*)ptr;
     *p &= ~mask;
     *p |= value;
+    return 0;
   }
 }
 

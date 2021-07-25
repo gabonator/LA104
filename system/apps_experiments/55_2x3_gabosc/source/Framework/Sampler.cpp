@@ -3,7 +3,7 @@
 
 namespace Sampler
 {
-	constexpr INT Samples =  BIOS::ADC::NumSamples;
+	constexpr int Samples =  BIOS::ADC::NumSamples;
 	BIOS::ADC::TSample::SampleType memory[Samples];
 	
 	void Copy()

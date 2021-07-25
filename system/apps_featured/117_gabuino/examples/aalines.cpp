@@ -1,4 +1,3 @@
-
 #include <library.h>
 
 using namespace BIOS;

@@ -60,7 +60,7 @@ namespace RPC
       return addr;
 
     if (memcmp(name, "_ZN4BIOS", 8) == 0)
-      addr = ::GetProcAddress(name);
+      addr = BIOS::SYS::GetProcAddress(name);
 
     return addr;
   }

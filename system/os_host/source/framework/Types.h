@@ -16,11 +16,10 @@ void _HandleAssertion(const char*, int, const char*);
 
 #define _STR(x) #x
 #ifndef _ASSERT
-#define  _ASSERT(e) {if(!(e)) _HandleAssertion(__FILE__, __LINE__, _STR(e)); }
+#define _ASSERT(e) {if(!(e)) _HandleAssertion(__FILE__, __LINE__, _STR(e)); }
 #endif
 #define ToWord(a, b) (ui16)(((a)<<8)|(b))
 #define ToDword(a, b, c, d) (ui32)((ToWord(d, c)<<16)|ToWord(b,a))
-//#define NULL nullptr
 #ifdef __APPLE__
 #define min(a,b) std::min(a,b)
 #define max(a,b) std::max(a,b)
@@ -48,11 +47,8 @@ typedef int BOOL;
 #else
 typedef bool BOOL;
 #endif
-typedef float FLOAT;
-typedef int INT;
 typedef const char * PCSTR;
 typedef char * PSTR;
-//typedef char CHAR;
 #ifndef WIN32
 typedef uint32_t UINT;
 #endif

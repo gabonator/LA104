@@ -320,9 +320,9 @@ class AnalogChannel : public CSerialize
 		int m_nVolume;
 		int m_nStandby;
 		
-		FLOAT m_fTimeRes;
-		FLOAT m_fCH1Res;
-		FLOAT m_fCH2Res;
+		float m_fTimeRes;
+		float m_fCH1Res;
+		float m_fCH2Res;
 
 		int m_bUartTest;
 		int m_bUartEcho;	// not saved in settings
