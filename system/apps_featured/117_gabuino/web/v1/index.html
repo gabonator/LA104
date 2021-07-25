@@ -10,7 +10,7 @@ function compile()
   var xhr = new XMLHttpRequest();
   var formData = new FormData();
   formData.append("file", new Blob([code], {type : 'text/plain'}), "moj.txt");
-  xhr.open('post', "http://cloud.valky.eu:8382/", true);
+  xhr.open('post', "https://cloud.valky.eu:8382/", true);
   xhr.send(formData);
   xhr.onload  = function() {
     var jsonResponse = JSON.parse(xhr.responseText);
