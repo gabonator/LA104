@@ -1,0 +1,265 @@
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<script src="binary-parser/context.js"></script>
+<script src="binary-parser/binary_parser.js"></script>
+<script src="parseelf.js"></script>
+<script>
+
+function compile()
+{
+  var code = html_editor.getValue();
+  var xhr = new XMLHttpRequest();
+  var formData = new FormData();
+  formData.append("file", new Blob([code], {type : 'text/plain'}), "moj.txt");
+  xhr.open('post', "http://cloud.valky.eu:8382/", true);
+  xhr.send(formData);
+  xhr.onload  = function() {
+    var jsonResponse = JSON.parse(xhr.responseText);
+    if (jsonResponse.code == 0)
+      processElf( Uint8Array.from(atob(jsonResponse.files["app.elf"]), c => c.charCodeAt(0)) );//   atob(jsonResponse.files["app.elf"]));
+    else
+      console.log(jsonResponse.stderr);
+  };
+}
+
+function writeDword(ofs, val)
+{
+  globalBlob[ofs-globalOffset+3] = val >> 24;
+  globalBlob[ofs-globalOffset+2] = val >> 16;
+  globalBlob[ofs-globalOffset+1] = val >> 8;
+  globalBlob[ofs-globalOffset+0] = val >> 0;
+}
+
+function run()
+{
+  BIOS.memWrite(globalOffset, globalBlob)
+  .then( () => BIOS.exec(globalOffset|1));
+}
+
+function stop()
+{
+  BIOS.stop()
+}
+
+var globalOffset;
+var globalBlob;
+var globalResolve = [];
+function processElf(elf)
+{
+  var elfinfo = parseElf(elf);
+
+  elfinfo.relocations.forEach(r => console.log(r.name + " -> " + r.addr));
+  elfinfo.sections.forEach(s => console.log(s.name + " - " + s.addr.toString(16) + " - " + (s.addr + s.size).toString(16)));
+  var begin = elfinfo.sections[0].addr;
+  var end = elfinfo.sections[elfinfo.sections.length-1].addr + elfinfo.sections[elfinfo.sections.length-1].size;
+  console.log("blob size " + (end-begin));
+  if (end - begin > 5*1024)
+    throw "too big blob";
+// TODO: BSS!!!!
+  var appblob = new Uint8Array(end-begin);
+  for (var i=0; i<elfinfo.sections.length; i++)
+  {
+    var section = elfinfo.sections[i];
+    section.data.copyTo(appblob, section.addr - begin);
+  }
+  for (var i=0; i<elfinfo.relocations.length; i++)
+  {
+    var rel = elfinfo.relocations[i];
+    globalResolve.push({...rel});
+//    writeDword(appblob, rel.addr, symbolCache[rel.name])
+  }
+
+  console.log("flash to: "+begin.toString(16) + " entry: "+elfinfo.entry.toString(16));
+  console.log(appblob);
+  globalOffset = begin;
+  globalBlob = appblob;
+  continueResolve();
+}
+
+function continueResolve()
+{
+  if (globalResolve.length == 0)
+    return;
+  var symbol = globalResolve.shift();
+  BIOS.getProcAddr(symbol.name).then( (ptr) =>
+  {
+    console.log(symbol.addr.toString(16) + " <- " + ptr.toString(16))
+    writeDword(symbol.addr, ptr);
+    continueResolve();
+  })
+}
+
+</script>
+
+<div id="my_control">
+<input type=button value="compile" onclick="compile()"></input>
+<input type=button id="connect" value="connect">
+<div id="status"></div>
+<input type=button id="run" value="run" onclick="run()">
+<input type=button id="stop" value="stop" onclick="stop()">
+
+
+ahoj
+</div>
+
+<div id="my_html">
+</div>
+<!-- this works using xmp and NOT when using div's! -->
+<xmp id="my_html_hidden">
+#include <library.h>
+//#include "../../os_host/source/framework/Console.h"
+//#include "../../os_host/source/framework/SimpleApp.h"
+
+using namespace BIOS;
+
+__attribute__((__section__(".entry")))
+int main(void)
+{
+//    APP::Init("Test app");
+//    APP::Status("Bla bla bla");
+
+    BIOS::KEY::EKey key;
+    while ((key = KEY::GetKey()) != BIOS::KEY::EKey::Escape)
+    {
+      EVERY(5000)
+      {
+//        CONSOLE::Print("Ahoj! "); 
+BIOS::DBG::Print("Ahoj!");
+      }
+
+      SYS::DelayMs(50);
+    }
+    
+    return 0;
+}
+
+void _HandleAssertion(const char* file, int line, const char* cond)
+{
+/*    CONSOLE::Color(RGB565(ffff00));
+    CONSOLE::Print("Assertion failed in ");
+    CONSOLE::Print(file);
+    CONSOLE::Print(" [%d]: %s", line, cond);*/
+    while (1);
+}
+
+</xmp>
+
+<style>
+#my_html {
+position: absolute;
+top: 0;
+right: 50%;
+bottom: 0;
+left: 0;
+}
+#my_control {
+position: absolute;
+top: 0;
+right: 0;
+bottom: 0;
+left: 50%;
+}
+#my_html_hidden {
+display: none;
+}
+
+.ace_gutter-cell.ace_breakpoint{ 
+    border-radius: 20px 0px 0px 20px; 
+//    box-shadow: 0px 0px 1px 1px #248c46 inset; 
+background:#ff5555;
+}
+</style>
+
+<!--<script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.1.01/ace.js"></script>-->
+
+<script src="https://rawgithub.com/ajaxorg/ace-builds/master/src/ace.js" type="text/javascript" charset="utf-8"></script>
+<script src="https://rawgithub.com/ajaxorg/ace-builds/master/src/ext-language_tools.js" type="text/javascript" charset="utf-8"></script>
+
+<!--<script src="ace/ace.js"></script>-->
+
+<script>
+// comments represent dynamic environment set up
+
+// this is in an external js file
+
+var html_editor;
+function initAceEditor() {
+ace.require("ace/ext/language_tools");
+
+html_editor = ace.edit("my_html");
+html_editor.setTheme("ace/theme/xcode");
+html_editor.getSession().setMode("ace/mode/c_cpp");
+html_editor.setFontSize("15px") ;
+html_editor.setPrintMarginColumn(false);
+html_editor.session.setValue($("#my_html_hidden").text());
+html_editor.setOptions({
+//maxLines: 20,
+    enableBasicAutocompletion: true
+});
+
+
+var langTools = ace.require("ace/ext/language_tools");
+var rhymeCompleter = {
+        getCompletions: function(editor, session, pos, prefix, callback) {
+
+console.log(prefix);
+
+          callback(null, {name: "blabotat", value: "blabotat", score: 10, meta: "rhyme"})
+
+        }
+    }
+    langTools.addCompleter(rhymeCompleter);
+
+html_editor.on("guttermousedown", function(e) {
+    var target = e.domEvent.target; 
+    if (target.className.indexOf("ace_gutter-cell") == -1)
+        return; 
+    if (!html_editor.isFocused()) 
+        return; 
+  
+  console.log(e.clientX > 25 + target.getBoundingClientRect().left);
+  
+  console.log(e.clientX, 25 + target.getBoundingClientRect().left);
+  
+    if (e.clientX > 25 + target.getBoundingClientRect().left) 
+        return; 
+
+    var breakpoints = e.editor.session.getBreakpoints(row, 0);
+var row = e.getDocumentPosition().row;
+if(typeof breakpoints[row] === typeof undefined)
+    e.editor.session.setBreakpoint(row);
+else
+    e.editor.session.clearBreakpoint(row);
+    e.stop();
+})
+
+
+
+}
+
+// the function is called at the end of a function that
+// includes a getJSON() request to a Python script which
+// queries a MongoDB database and json dumps the results.  
+// eg loadMyContent() {
+// getJSON() and return content
+initAceEditor()
+// }
+
+// Problems when using div instead of xmp:  
+
+// In Firebug I can *see* the required HTML in the 'response'
+// and 'json' tabs ie:
+// <div id="acey_html_hidden"><html>test</html></div>
+// but the Ace edior is just showing:
+// test
+
+// In Firebug's HTML view of the hidden div, when using <div> tags, the <html> tags have been stripped out.  
+//
+//When using <xmp> tags the <html> tags have not been stripped out.  
+
+
+
+</script>
+
+    <script src="serial.js"></script>
+    <script src="comm.js"></script>
+    <script src="bios.js"></script>

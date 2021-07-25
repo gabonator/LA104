@@ -5,8 +5,15 @@
 //https://www.spriters-resource.com/arcade/arkanoidiirevengeofdoh/sheet/60830/
 
 uint32_t pattern[] = {0x00000011, 0x23444333, 0x33333452, 0x11110000, 0x06776001, 0x34433222, 0x22222342, 0x11100000, 0x67777602, 0x44322111, 0x11122235, 0x21100000, 0x66776603, 0x43221011, 0x11111234, 0x21100000, 0x06666125, 0x32110601, 0x11111123, 0x52100000, 0x00000234, 0x21111011, 0x11111113, 0x45210000, 0x11122353, 0x21111111, 0x11111112, 0x34522111, 0x55544532, 0x11111000, 0x00000111, 0x23344555, 0x33333452, 0x11110000, 0x00000011, 0x23444333, 0x22222342, 0x11100000, 0x06776001, 0x34433222, 0x11122235, 0x21100000, 0x67777602, 0x44322111, 0x11111234, 0x21100000, 0x66776603, 0x43221011, 0x11111123, 0x52100000, 0x06666125, 0x32110601, 0x11111113, 0x45210000, 0x00000234, 0x21111011, 0x11111112, 0x34522111, 0x11122353, 0x21111111, 0x00000111, 0x23344555, 0x55544532, 0x11111000};
+
 int palette[] = {RGB565(0031a6), RGB565(000095), RGB565(000085), RGB565(000084), RGB565(000073), RGB565(000074), RGB565(0000b6), RGB565(0021c7)};
 
+uint32_t powerup[] = {0x01111111, 0x11111110, 0x01111111, 0x11111110, 0x01111111, 0x11111110, 0x01111111, 0x11111110, 0x01111111, 0x11111110, 0x01111222, 0x22211110, 0x01111220, 0x11111110, 0x01111220, 0x11111110, 0x13333223, 0x33333311, 0x13333333, 0x33333311, 0x13333333, 0x33333311, 0x13333333, 0x33333311, 0x13333333, 0x33333311, 0x13333300, 0x00003311, 0x13333222, 0x22233311, 0x13333220, 0x33333311, 0x34444220, 0x44444411, 0x31444444, 0x44444411, 0x31444444, 0x44444411, 0x31444444, 0x44444411, 0x31444444, 0x44444411, 0x31444444, 0x44444411, 0x31444400, 0x00004411, 0x31444220, 0x44444411, 0x14444220, 0x44444441, 0x14444224, 0x44444441, 0x14444444, 0x44444441, 0x14444444, 0x44444441, 0x14444444, 0x44444441, 0x14444444, 0x44444441, 0x14444444, 0x44444441, 0x14444222, 0x22244441, 0x14444220, 0x44444441, 0x14444220, 0x44444441, 0x14444444, 0x44444441, 0x14444444, 0x44444441, 0x14444444, 0x44444441, 0x14444444, 0x44444441, 0x14444444, 0x44444441, 0x14444400, 0x00004441, 0x11444222, 0x22244411, 0x11444220, 0x44444411, 0x11444224, 0x44444411, 0x11444444, 0x44444411, 0x11444444, 0x44444411, 0x11444444, 0x44444411, 0x11444444, 0x44444411, 0x11444444, 0x44444411, 0x01111100, 0x00001110, 0x01111220, 0x11111110, 0x01111220, 0x11111110, 0x01111221, 0x11111110, 0x01111111, 0x11111110, 0x01111111, 0x11111110, 0x01111111, 0x11111110, 0x01111111, 0x11111110};
+
+int poweruppal[] = {RGB565(000000), RGB565(f70000), RGB565(f7f700), RGB565(f7f7f7), RGB565(a50000)};
+
+uint16_t powerupbuf[16*7];
+uint16_t ballbuf[11*11];
 
 class CGameBreakout
 {
@@ -41,7 +48,17 @@ public:
         for (int y=0; y<mapRows; y++)
             for (int x=0; x<mapCols; x++)
                 map[index++] = (x+y)%6;
-        
+
+        for (int x=0; x<mapCols; x++)
+        {
+            map[x] = -1;
+            map[mapCols+x] = -1;
+            if ((x&1) == 1)
+                map[(mapRows-1)*mapCols + x] = 6;
+        }
+        for (int y=0; y<mapRows; y++)
+            map[y*mapCols + mapCols/2] = -1;
+
         drawBackground(mScreen);
         BIOS::LCD::Rectangle(mScreen, RGB565(ffffff));
         drawMap();
@@ -71,6 +88,35 @@ public:
             }
     }
     
+    void drawPowerup(int _x, int _y, int p)
+    {
+        CRect rcCurrent(_x, _y, _x+16, _y+7);
+        static CRect rcLast;
+        
+        if (rcLast.IsValid())
+        {
+            BIOS::LCD::BufferBegin(rcLast);
+            BIOS::LCD::BufferWrite(powerupbuf, 16*7);
+            BIOS::LCD::BufferEnd();
+        }
+        
+        BIOS::LCD::BufferBegin(rcCurrent);
+        BIOS::LCD::BufferRead(powerupbuf, 16*7);
+        BIOS::LCD::BufferEnd();
+        
+        rcLast = rcCurrent;
+        for (int y=0; y<7; y++)
+            for (int x=0; x<16; x++)
+            {
+                int pix = powerup[p*2+y*16+x/8] >> (28-4*(x&7));
+                pix &= 0xf;
+                int color = poweruppal[pix];
+                if (color != RGBTRANS)
+                    BIOS::LCD::PutPixel(_x+x, _y+y, color);
+            }
+
+    }
+    
     void loop()
     {
         mPaddle.x = mBall.x / 16;
@@ -82,6 +128,12 @@ public:
         drawBall();
         drawPaddle();
         moveBall();
+        static int p=0;
+        static int y=100;
+        drawPowerup(100, y, (p++/4) & 7);
+        y++;
+        if (y>200)
+            y = 20;
         
         int dirx[] = {-1, 0, +1, 0,  -1, -1, +1, +1};
         int diry[] = {0, -1, 0, +1,  -1, +1, -1, +1};
@@ -104,6 +156,9 @@ public:
     
     void removeBlock(int p)
     {
+        if (map[p] == 6)
+            return;
+        
         map[p] = -1;
         CRect rc = GetBlockRect(p);
         clearRect(mScreen, rc);
@@ -111,8 +166,10 @@ public:
     
     void drawMap()
     {
-        int colors[] = {RGB565(ffb0b0), RGB565(bbffbb), RGB565(bbbbff),
-            RGB565(ffffbb), RGB565(ffbbff), RGB565(bbffff)};
+        int colors[] = {RGB565(ffaaaa), RGB565(aaffaa), RGB565(aaaaff),
+            RGB565(ffffaa), RGB565(ffaaff), RGB565(aaffff),
+            RGB565(ffffff)
+        };
         
         int p = 0;
         
@@ -166,10 +223,22 @@ public:
         static CRect rcLast;
         
         if (rcLast.IsValid())
-            clearRect(mScreen, rcLast);
-        
+        {
+            BIOS::LCD::BufferBegin(rcLast);
+            BIOS::LCD::BufferWrite(ballbuf, 11*11);
+            BIOS::LCD::BufferEnd();
+        }
+
         rcLast = CRect(mBall.x/16 - mBallRadius, mBall.y/16 - mBallRadius,
                        mBall.x/16 + mBallRadius, mBall.y/16 + mBallRadius);
+
+        BIOS::LCD::BufferBegin(rcLast);
+        BIOS::LCD::BufferRead(ballbuf, 11*11);
+        BIOS::LCD::BufferEnd();
+
+//        if (rcLast.IsValid())
+//            clearRect(mScreen, rcLast);
+        
                 
         for (int y=-mBallRadius; y<mBallRadius; y++)
             for (int x=-mBallRadius; x<mBallRadius; x++)
