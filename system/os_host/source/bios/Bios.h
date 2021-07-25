@@ -20,9 +20,13 @@ namespace BIOS
       GpioStatus, KeyMask, 
       FlashReadRange, FlashWriteRange, FlashAlertRange,
       BatteryVoltage, Charging,
-      GpioI2cSpeed};
+      GpioI2cSpeed,
+      SystemRamBegin, SystemRamEnd,
+      SystemRomBegin, SystemRomEnd,
+      EndStack};
 
     uintptr_t GetAttribute(EAttribute eInternal);
+    uintptr_t GetProcAddress(char* proc);
   }
 
   namespace LCD

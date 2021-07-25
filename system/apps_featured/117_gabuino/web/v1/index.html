@@ -4,13 +4,18 @@
 <script src="parseelf.js"></script>
 <script>
 
+var usessl = location.protocol === 'https:'
+
 function compile()
 {
   var code = html_editor.getValue();
   var xhr = new XMLHttpRequest();
   var formData = new FormData();
   formData.append("file", new Blob([code], {type : 'text/plain'}), "moj.txt");
-  xhr.open('post', "https://cloud.valky.eu:8382/", true);
+  if (usessl)
+    xhr.open('post', "https://cloud.valky.eu:8383/", true);
+   else
+    xhr.open('post', "http://cloud.valky.eu:8382/", true);
   xhr.send(formData);
   xhr.onload  = function() {
     var jsonResponse = JSON.parse(xhr.responseText);

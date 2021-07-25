@@ -28,7 +28,10 @@ extern "C"
       GpioStatus, KeyMask, 
       FlashReadRange, FlashWriteRange, FlashAlertRange,
       BatteryVoltage, Charging,
-      GpioI2cSpeed};
+      GpioI2cSpeed,
+      SystemRamBegin, SystemRamEnd,
+      SystemRomBegin, SystemRomEnd,
+      EndStack};
 
   void Set_Posi(uint_fast16_t x, uint_fast16_t y);
   void Set_Pixel(uint_fast16_t Color);

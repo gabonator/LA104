@@ -423,7 +423,7 @@ uint32_t ElfExecute( char* strName )
 					char strSymbolName[128];
 					fw >> CStream(&strSymbolName, sizeof(strSymbolName)); 
 
-					uint32_t dwProcAddr = GetProcAddress( strSymbolName );
+					uint32_t dwProcAddr = BIOS::SYS::GetProcAddress( strSymbolName );
 					if (!dwProcAddr)
 					{
                                           BIOS::DBG::Print("Symbol '");

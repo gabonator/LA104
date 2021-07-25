@@ -31,12 +31,9 @@ public:
   virtual void Example(CAttributes& attributes) override
   {
     // -512 (-51.2 C) ... 999 (+99.9 C)
-    attributes["temperature10"] = 171; // 17.1 C
-    attributes["humidity"] = 99; // 99 %
-    attributes["id"] = 38;
-	attributes["battery_low"] = 0;
-    attributes["channel"] = 1;
-    attributes["junk"] = 2;
+    attributes["data_0"] = 0x8b00f8f3; 
+    attributes["data_1"] = 0x09000000;
+    attributes["id"] = 36;
   }
 
   virtual bool Demodulate(const CArray<uint16_t>& pulse, CAttributes& attributes) override
@@ -48,30 +45,6 @@ public:
 
     if (!PulseToBytes(pulse, b, length))
       return false;
-      /*
-//TODO: !!!!!!
-    attributes["length"] = length;
-
-    int bytes = b.GetSize();
-    int data = 0;
-    for (int i=0; i<bytes; i++)
-    {
-      bool last = i==bytes-1;
-      data <<= 8;
-      data |= b[i];
-      if ((i&3)==3 || last)
-      {
-        switch (i/4) // store as dword
-        {
-          case 0: attributes["data64_0"] = data; break;
-          case 1: attributes["data64_1"] = data; break;
-          case 2: attributes["data64_2"] = data; break;
-          default: _ASSERT(0);
-        }
-        data = 0;
-      }
-    }
-      */
       BitstreamToAttributes(b, length, attributes);
       Analyse(attributes, b, length);
       return true;
@@ -105,33 +78,29 @@ public:
         attributes["temperature10"] = temp;
 
         /* Nibble 6,7 is humidity */
-        attributes["humidity"] = (uint8_t)(((b[3]&0x0F)<<4)|(b[4]>>4));
+        attributes["humidity"] = ((b[3]&0x0F) << 4) | (b[4] >> 4);
 
     return true;
   }
 
   virtual bool Modulate(const CAttributes& attr, CArray<uint16_t>& pulse) override
   {
-/*
     int temp = attr["temperature10"];
-    int hum = (attr["humidity"] + 28) | 128;
+    int hum = attr["humidity"];
 
-    int nibblesData[9];
-    CArray<int> nibbles(nibblesData, COUNT(nibblesData));
+    uint8_t nibblesData[5];
+    CArray<uint8_t> nibbles(nibblesData, COUNT(nibblesData));
 
-    nibbles.Add(attr["id"] & 0xf);
-    nibbles.Add(Reverse2(attr["channel"]) | (attr["id"] >> 4) << 2);
-    nibbles.Add(attr["battery_low"] | (attr["junk"] << 1));
-    nibbles.Add(temp & 15);
-    nibbles.Add((temp >> 4) & 15);
-    nibbles.Add((temp >> 8) & 15);
-    nibbles.Add(hum & 15);
-    nibbles.Add((hum >> 4) & 15);
-    
-    nibbles.Add(Sum(nibbles) & 15);
+    nibbles.Add(attr["id"]);
+    int t = attr["battery_low"] ? 0x80 : 0x00;
+    t |= (attr["channel"] - 1) << 4;
+    t |= (temp>>8) & 0x0f;
+    nibbles.Add(t);
+    nibbles.Add(temp & 0xff);
+    nibbles.Add(0xf0 | (hum & 0xf0)>>4);
+    nibbles.Add((hum & 0x0f) << 4);
 
-    NibblesToPulse(nibbles, pulse);
-*/
+    BytesToPulse(nibbles, 36, pulse);
     return true;
   }
     
@@ -197,8 +166,9 @@ private:
             }
         }
 
-        if ((i&7) != 0) // TODO!
+        //if ((i&7) != 0) 
         {
+            nibble <<= 4; // align to full byte
             bytes.Add(nibble);
             if (bytes.GetMaxSize() == bytes.GetSize())
                 return true;
@@ -208,23 +178,24 @@ private:
         return true;
     }
 
-  bool NibblesToPulse(const CArray<int>& nibbles, CArray<uint16_t>& pulse)
-  {
-    if (nibbles.GetSize() != 9)
-      return false;
-
+  bool BytesToPulse(const CArray<uint8_t>& bytes, int length, CArray<uint16_t>& pulse)
+  {                                   
     pulse.Add(PulseDuration(1));
     pulse.Add(PulseDuration(8));
 
-    for (int i=0; i<nibbles.GetSize(); i++)
+    for (int i=0; i<length; i++)
     {
-      for (int j=0; j<4; j++)
+      int bit = (bytes[i/8] >> (7-(i&7))) & 1;
+      if (bit)
       {
         pulse.Add(PulseDuration(1));
-        pulse.Add(PulseDuration((nibbles[i] & (1<<j)) ? 4 : 2));
+        pulse.Add(PulseDuration(4));
+      } else
+      {
+        pulse.Add(PulseDuration(1));
+        pulse.Add(PulseDuration(2));
       }
     }
-
     return true;
   }
 
@@ -242,7 +213,7 @@ private:
     {
         if (attributes.indexOf("temperature10") != -1)
         {
-            if (attributes["humidity"] == 0)
+            if (attributes["humidity"] != 0)
             {
                 sprintf(desc, "Ch: <%d> Temp: <%d.%d\xf8""C> Humidity: <%d%%>",
                 (int)attributes["channel"], (int)attributes["temperature10"] / 10, (int)attributes["temperature10"] % 10, (int)attributes["humidity"]);

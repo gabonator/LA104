@@ -61,7 +61,7 @@ namespace MEMORY
 
   int GetKey2()
   {
-    EventLoop();
+//    EventLoop();
     if (running)
       return BIOS::KEY::GetKey();
     else

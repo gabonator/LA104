@@ -74,10 +74,11 @@ int main(void)
       MEMORY::SaveStack(); // not possible, to recover regs, but possible to recover stack
     }
  */
-    if (/*MEMORY::running &&*/ memcmp(buf, "DBG::Stop()", 11) == 0)
+//    if (/*MEMORY::running &&*/ memcmp(buf, "DBG::Stop()", 11) == 0)
+    if (MEMORY::running)
     {
         //save stack?
-//      if (memcmp(buf, "DBG::Stop()", 11) == 0)
+      if (memcmp(buf, "DBG::Stop()", 11) == 0)
         evaluator.Evaluate((char*)buf);
     }
     else if (MEMORY::writeCount > 0 && len > 0)
@@ -98,7 +99,6 @@ int main(void)
   });
 
   BIOS::KEY::EKey key;
-  BIOS::LCD::BufferBegin(CRect(0, 0, 100, 100));
 
   while ((key = BIOS::KEY::GetKey()) != BIOS::KEY::Escape) 
   {

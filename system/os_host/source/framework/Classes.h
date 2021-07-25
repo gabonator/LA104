@@ -24,10 +24,10 @@ public:
 
 class CRect {
 public:
-	CRect()
+	CRect() :
+        left(0), top(0), right(0), bottom(0)
 	{
 	}
-
 	CRect( int _left, int _top, int _right, int _bottom ) :
 	  left(_left), top(_top), right(_right), bottom(_bottom)
 	{
@@ -117,6 +117,15 @@ public:
 			return false;
 		return true;
 	}
+
+    bool operator == (const CRect& rcTest)
+    {
+        return left == rcTest.left &&
+            right == rcTest.right &&
+            top == rcTest.top &&
+            bottom == rcTest.bottom;
+    }
+
 
 	int left, top, right, bottom;
 };

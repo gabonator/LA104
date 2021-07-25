@@ -16,6 +16,7 @@ namespace BIOS
     void DelayMs(int intervalMs) {}
     bool LoadFpga(char* path) {return true;}
     uintptr_t GetAttribute(EAttribute eInternal) { return 0; }
+    uintptr_t GetProcAddress(char* proc) { return 0; }
   }
 
   namespace LCD
