@@ -22,7 +22,7 @@
 #include "basic.h"
 #include "tools.h"
 
-#include <stdlib.h>
+//#include <stdlib.h>
 
 __BEGIN_DECLS
 

@@ -1,3 +1,4 @@
+#pragma once
 /*
  * Terminal-BASIC is a lightweight BASIC-like language interpreter
  * Copyright (C) 2017-2018 Andrey V. Skvortsov <starling13@mail.ru>

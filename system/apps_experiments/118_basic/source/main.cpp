@@ -8,12 +8,14 @@
 #include "arduino/Print.h"
 #include "terminal-basic/vt100.hpp"
 
-
 class Output : public VT100::Print
 {
+public:
+    Output() : VT100::Print() {}
+    ~Output() {}
     void clear() override {}
 protected:
-    uint8_t getCursorX() override {}
+    uint8_t getCursorX() override { return 0; }
     void setCursor(uint8_t, uint8_t) override {}
     void setCursorX(uint8_t) override {}
     void writeChar(uint8_t c) override {assert(0);}
@@ -35,9 +37,10 @@ protected:
                 else
                     assert(0);
             }
-            return;
+            return 0;
         }
         CONSOLE::Putch(c);        
+        return 0;
     }
 
 private:
@@ -47,8 +50,8 @@ private:
 void HAL_initialize_concrete() { }
 
 void HAL_finalize() { }
-HAL_nvram_address_t HAL_nvram_getsize() { }
-uint8_t HAL_nvram_read(HAL_nvram_address_t addr) { }
+HAL_nvram_address_t HAL_nvram_getsize() { return 0; }
+uint8_t HAL_nvram_read(HAL_nvram_address_t addr) { return 0; }
 void HAL_nvram_write(HAL_nvram_address_t addr, uint8_t byte) {}
 void HAL_terminal_write(HAL_terminal_t t, uint8_t b) {}
 uint8_t HAL_terminal_read(HAL_terminal_t t) { return 0; }
@@ -60,29 +63,22 @@ uint32_t HAL_time_gettime_ms() { return BIOS::SYS::GetTick(); }
 void HAL_time_sleep_ms(uint32_t ms) { BIOS::SYS::DelayMs(ms); }
 void HAL_update() { HAL_update_concrete(); }
 
-#include "terminal-basic/basic_math.hpp"
-static BASIC::Math mathBlock;
+//#include "terminal-basic/basic_math.hpp"
+//static BASIC::Math mathBlock;
 
-Stream _stream;
-Print _print;
-Output _output;
-BASIC::Interpreter basic(_stream, _output, BASIC::SINGLE_PROGSIZE);
 
 bool setup()
 {
     GUI::Background(CRect(0, 14, BIOS::LCD::Width, BIOS::LCD::Height-14), RGB565(0000b0), RGB565(4040d0));
-//    game.setup(CRect(10, 14+20, BIOS::LCD::Width-10, BIOS::LCD::Height-14-20));
     
-    basic.addModule(&mathBlock);
+//    basic.addModule(&mathBlock);
 
     return true;
 }
 
 void loop(BIOS::KEY::EKey key)
 {
-    basic.step();
-//    game.loop();
-//    BIOS::SYS::DelayMs(5);
+//    basic.step();
 }
 
 #ifdef _ARM
@@ -95,12 +91,18 @@ int _main(void)
     APP::Init("BASIC Interpreter");
     APP::Status("");
 
+Stream _stream;
+Print _print;
+Output _output;
+BASIC::Interpreter basic(_stream, _output, BASIC::SINGLE_PROGSIZE);
+
     if (setup())
     {
         BIOS::KEY::EKey key;
         while ((key = BIOS::KEY::GetKey()) != BIOS::KEY::EKey::Escape)
         {
-          loop(key);
+//          loop(key);
+            basic.step();
         }
     }
     return 0;
@@ -113,3 +115,20 @@ void _HandleAssertion(const char* file, int line, const char* cond)
     BIOS::DBG::Print(" [%d]: %s\n", line, cond);
     while (1);
 }
+
+#ifndef __APPLE__
+void *__dso_handle = (void *)nullptr;
+
+extern "C" void __cxa_pure_virtual(void)
+{
+  _ASSERT(!"Pure virtual call");
+}
+
+extern "C" void* _sbrk() { _ASSERT(0); return 0; }
+
+void operator delete(void*, unsigned int)
+{
+  _ASSERT(0);
+}
+
+#endif

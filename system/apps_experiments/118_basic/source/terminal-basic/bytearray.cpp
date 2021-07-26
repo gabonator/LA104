@@ -21,7 +21,7 @@
 
 #include "Print.h"
 #include "ascii.hpp"
-#include <stdlib.h>
+//#include <stdlib.h>
 
 ByteArray::ByteArray() :
 _data(nullptr), _size(0), _ownsData(false)

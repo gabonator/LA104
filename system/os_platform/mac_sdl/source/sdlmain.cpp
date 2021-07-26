@@ -2,6 +2,7 @@
 #include <SDL_render.h>
 #include <iostream>
 #include <vector>
+#include <list>
 #include "sdlhal.h"
 
 //CHal* gHal{nullptr};
@@ -10,6 +11,8 @@ CHal* gHal = &sdlHal;
 
 void _main(void);
 const int pixelSize = 2;
+
+std::list<char> keyboardInput;
 
 std::vector< unsigned char > pixels( BIOS::LCD::Width * BIOS::LCD::Height * 4, 0 );
 void sdl_blit();
@@ -83,7 +86,7 @@ void sdl_init()
      SDL_TEXTUREACCESS_STREAMING,
      BIOS::LCD::Width, BIOS::LCD::Height
      );
-
+    SDL_StartTextInput();
 //     gHal = new CSdlHal;
 }
 
@@ -125,8 +128,21 @@ void sdl_loop()
     
     while( SDL_PollEvent( &event ) )
     {
+        if (SDL_TEXTINPUT == event.type)
+        {
+            char* str = event.text.text;
+            while (*str)
+                keyboardInput.push_back(*str++);
+        }
         if (SDL_KEYDOWN == event.type)
+        {
+            if (event.key.keysym.scancode == SDL_SCANCODE_RETURN)
+                keyboardInput.push_back('\r');
+            if (event.key.keysym.scancode == SDL_SCANCODE_BACKSPACE)
+                keyboardInput.push_back('\x08');
             lastKey = event.key.keysym.scancode;
+            //lastChar = event.key.keysym.;
+        }
 
         if( ( SDL_QUIT == event.type ) ||
            ( SDL_KEYDOWN == event.type && SDL_SCANCODE_ESCAPE == event.key.keysym.scancode ) )

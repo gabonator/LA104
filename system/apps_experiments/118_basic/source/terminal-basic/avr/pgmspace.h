@@ -1,3 +1,4 @@
+#if 0
 /*
  * Libarduinoemulator is a simple library to emulate ArduinoIDE API on a Linux PC
  * Copyright (C) 2016, 2017 Andrey V. Skvortsov <starling13@mail.ru>
@@ -38,3 +39,14 @@
 #endif /* ARDUINO_ARCH_AVR */
 
 #endif /* PGMSPACE_H */
+#endif
+
+#define PGM_P const char*
+#define PROGMEM
+#define pgm_read_byte(a) (*((const uint8_t*)a))
+#define pgm_read_word(a) (*a)
+#define pgm_read_ptr(a) (*a)
+#define strcpy_P(a,b) strcpy(a,b)
+#define strcmp_P(a,b) strcmp(a,b)
+#define memcpy_P(a,b,c) memcpy(a,b,c)
+

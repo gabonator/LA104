@@ -31,6 +31,7 @@
 #include "basic_interpreter.hpp"
 
 #if USEMATH
+#error gabo nechce math
 #if !USE_REALS
 #error Math module requires real arithmetics support
 #endif

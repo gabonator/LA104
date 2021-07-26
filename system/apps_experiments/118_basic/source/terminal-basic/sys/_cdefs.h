@@ -20,7 +20,7 @@
 #ifndef CDEFS_H
 #define CDEFS_H
 
-#ifdef ARDUINO
+//#ifdef ARDUINO
 
 /* C++ needs to know that types and declarations are C, not C++.  */
 #ifdef	__cplusplus
@@ -31,8 +31,8 @@
 # define __END_DECLS
 #endif
 
-#else
-#include_next <sys/cdefs.h>
-#endif
+//#else
+//#include_next <sys/cdefs.h>
+//#endif
 
 #endif /* CDEFS_H */

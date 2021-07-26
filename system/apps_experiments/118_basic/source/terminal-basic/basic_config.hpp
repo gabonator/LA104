@@ -38,7 +38,7 @@
 	/*
 	 * Mathematical functions support
 	 */
-	#define USEMATH  1
+	#define USEMATH  0 //gabo
 	#if USEMATH
 		/*
 		 * SIN COS TAN COT

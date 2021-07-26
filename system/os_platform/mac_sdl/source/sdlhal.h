@@ -12,6 +12,7 @@ int getPixel(int x, int y);
 bool sdl_running();
 int sdl_lastKey();
 void sdl_loop();
+extern std::list<char> keyboardInput;
 
 class CSdlHal : public CHal
 {
@@ -112,7 +113,7 @@ public:
         ioctl(fd, FIONREAD, &count);
         return count>0;
 #else
-        return false;
+        return keyboardInput.size() > 0;
 #endif
     }
     
@@ -123,7 +124,9 @@ public:
         _ASSERT(read(fd, &data, 1) == 1);
         return data;
 #else
-        return 0;
+        uint8_t data = keyboardInput.front();
+        keyboardInput.pop_front();
+        return data;
 #endif
     }
     

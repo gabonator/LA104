@@ -22,7 +22,7 @@
 #include "basic_program.hpp"
 
 #include <assert.h>
-#include <stdlib.h>
+//#include <stdlib.h>
 #include <string.h>
 
 #include "basic_interpreter.hpp"
