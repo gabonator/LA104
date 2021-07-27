@@ -2,8 +2,26 @@ var COMM = {
   debug: true,
   _open: false,
   _send: () => 0,
-  _onReceive: () => 0
+  _defReceive: (data) => {
+    var msg = new TextDecoder().decode(data);
+    COMM._defEval(msg)
+  },
+  _defEval: (msg) => 
+  {
+    if (msg.indexOf("_DBGPRINT('<script>") == 0)
+    {
+      var inside = msg.match("<script>(.*)</script>");
+      if (inside)
+        setTimeout(inside[1], 0);
+      return;
+    }
+    if (msg.indexOf("_DBGPRINT(") == 0)
+      setTimeout(msg, 0);
+  },
+  _onReceive: () => 0,
 };
+
+COMM._onReceive = COMM._defReceive;
 
 
   document.addEventListener('DOMContentLoaded', event => {
@@ -43,15 +61,14 @@ COMM._sendRaw = function(msg)
             let msg = new TextDecoder().decode(data)
             console.log("< " + msg);
           }
-
           COMM._onReceive(data);
         }
         port.onReceiveError = error => {
           console.error(error);
         };
-      }/*, error => {
+      }, error => {
         statusDisplay.textContent = error;
-      }*/);
+      });
     }
 
     function onUpdateLed() {

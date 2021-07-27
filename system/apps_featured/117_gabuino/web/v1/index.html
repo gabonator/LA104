@@ -6,6 +6,11 @@
 
 var usessl = location.protocol === 'https:'
 
+function _DBGPRINT(msg)
+{
+  document.querySelector("#debug").innerHTML += msg;
+}
+
 function compile()
 {
   var code = html_editor.getValue();
@@ -20,10 +25,59 @@ function compile()
   xhr.onload  = function() {
     var jsonResponse = JSON.parse(xhr.responseText);
     if (jsonResponse.code == 0)
+    {
       processElf( Uint8Array.from(atob(jsonResponse.files["app.elf"]), c => c.charCodeAt(0)) );//   atob(jsonResponse.files["app.elf"]));
+      clearError();
+    }
     else
-      console.log(jsonResponse.stderr);
+      handleError(jsonResponse.stderr);
+      //console.log(jsonResponse.stderr);
   };
+}
+
+
+var editor_markers = [];
+var annotations = [];
+function clearError()
+{            
+  annotations = [];  
+  for (var i=0; i<editor_markers.length; i++)
+    html_editor.getSession().removeMarker(editor_markers[i]);
+  editor_markers = [];                                                                         
+  html_editor.getSession().setAnnotations([]);
+}
+
+function addError(line, column, msg)
+{
+  annotations.push({
+  row: line-1,
+  column: column,
+  text: msg,
+  type: "error" // also warning and information
+  });
+
+  //editor_markers.push( html_editor.session.addMarker(new Range(8, 0, 9, 0),
+  //"activeBreakpoint", "line") );
+
+  editor_markers.push(html_editor.getSession().addMarker(new aceRange(line-1, 0, line-1, 200), "errorHighlight", "line", true));
+}
+
+function handleError(stderr)
+{
+  console.log(stderr);
+  annotations = [];
+  var errors = stderr.split("\n");
+  for (var i=0; i<errors.length; i++)
+  {
+    var error = errors[i];
+    var matches = error.match("\\<stdin\\>:(\\d+):(\\d+): (.*)$");
+    if (matches)
+    {
+//      console.log(error);
+      addError(parseInt(matches[1]), parseInt(matches[2]), matches[3]);
+    }
+  }
+  html_editor.getSession().setAnnotations(annotations);
 }
 
 function writeDword(ofs, val)
@@ -34,10 +88,27 @@ function writeDword(ofs, val)
   globalBlob[ofs-globalOffset+0] = val >> 0;
 }
 
+function clearBss(blob, ofs, len)
+{
+  for (var i=0; i<len; i++)
+    blob[i+ofs] = 0;
+}
+
 function run()
 {
+  document.querySelector("#debug").innerHTML = "";
+
+  var checksum = 0;
+  for (var i=0; i<globalBlob.length; i++)
+    checksum += globalBlob[i];
+
   BIOS.memWrite(globalOffset, globalBlob)
-  .then( () => BIOS.exec(globalOffset|1));
+  .then( (chk) => {
+    if (checksum != chk)
+      alert("checksum wrong!");
+    else
+      BIOS.exec(globalOffset|1)
+  });
 }
 
 function stop()
@@ -45,6 +116,15 @@ function stop()
   BIOS.stop()
 }
 
+function frame()
+{
+  BIOS.frame().then(f => {
+    var arr = [];
+    for (var i=0; i<f.length; i++) arr.push("0x"+ ("00000000"+f[i].toString(16)).substr(-8));
+    console.log(arr);
+    //console.log(f.map(x=>"0x"+x.toString(16)))
+  });
+}
 var globalOffset;
 var globalBlob;
 var globalResolve = [];
@@ -64,7 +144,10 @@ function processElf(elf)
   for (var i=0; i<elfinfo.sections.length; i++)
   {
     var section = elfinfo.sections[i];
-    section.data.copyTo(appblob, section.addr - begin);
+    if (section.name != ".bss")
+      section.data.copyTo(appblob, section.addr - begin);
+    else
+      clearBss(appblob, section.addr - begin, section.size);
   }
   for (var i=0; i<elfinfo.relocations.length; i++)
   {
@@ -80,13 +163,25 @@ function processElf(elf)
   continueResolve();
 }
 
+var resolveCache = {};
+
 function continueResolve()
 {
   if (globalResolve.length == 0)
     return;
   var symbol = globalResolve.shift();
+  if (typeof(resolveCache[symbol.name]) != "undefined")
+  {
+    ptr = resolveCache[symbol.name];
+    console.log(symbol.addr.toString(16) + " <- " + ptr.toString(16) + " cached " + symbol.name)
+    writeDword(symbol.addr, ptr);
+    continueResolve();
+    return;
+  }
+
   BIOS.getProcAddr(symbol.name).then( (ptr) =>
   {
+    resolveCache[symbol.name] = ptr;
     console.log(symbol.addr.toString(16) + " <- " + ptr.toString(16))
     writeDword(symbol.addr, ptr);
     continueResolve();
@@ -101,9 +196,13 @@ function continueResolve()
 <div id="status"></div>
 <input type=button id="run" value="run" onclick="run()">
 <input type=button id="stop" value="stop" onclick="stop()">
-
-
-ahoj
+<input type=button id="frame" value="frame" onclick="frame()">
+<div id="debug" style="background:#f0f0f0; width:100%; white-space: pre-wrap;     
+    display: block;
+    unicode-bidi: embed;
+    font-family: monospace;
+    white-space: pre-wrap;">
+</div>
 </div>
 
 <div id="my_html">
@@ -172,6 +271,11 @@ display: none;
 //    box-shadow: 0px 0px 1px 1px #248c46 inset; 
 background:#ff5555;
 }
+
+.errorHighlight{
+  position:absolute;
+  background-color:rgb(255, 55, 55, 0.2);
+}
 </style>
 
 <!--<script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.1.01/ace.js"></script>-->
@@ -187,8 +291,10 @@ background:#ff5555;
 // this is in an external js file
 
 var html_editor;
+var aceRange;
 function initAceEditor() {
 ace.require("ace/ext/language_tools");
+aceRange = ace.require("ace/range").Range
 
 html_editor = ace.edit("my_html");
 html_editor.setTheme("ace/theme/xcode");

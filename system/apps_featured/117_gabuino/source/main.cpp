@@ -23,14 +23,21 @@ usbd_device* _usbd_dev = nullptr;
 
 CEvaluator evaluator;
 
+void _PrepareRun()
+{
+  command[0] = 0; // otherwise it would infinitelly call Execute
+}
+
 void EventLoop()
 {
+
     if (command[0])
     {
       int result = evaluator.Evaluate(command);
       command[0] = 0;
       TERMINAL::Print("{ret:%d}", result);
     }
+
     EVERY(1000)
     {
       if (MEMORY::running)
@@ -38,6 +45,11 @@ void EventLoop()
       else
         BIOS::LCD::Printf(BIOS::LCD::Width-16, BIOS::LCD::Height-14, RGB565(b0b0b0), RGB565(404040), "%c", anim[animphase++&7]);
     }
+}
+
+void _yield()
+{
+	EventLoop();
 }
 
 __attribute__((__section__(".entry")))
@@ -60,6 +72,19 @@ int main(void)
   BIOS::LCD::Print(rcWindow.left+8, rcWindow.top+2, RGB565(000000), RGBTRANS, "Info");
   BIOS::LCD::Print(rcWindow.left+8, rcWindow.top+30, RGB565(000000), RGBTRANS, "Connect the device to computer");
 
+  BIOS::OS::SetInterruptVector(BIOS::OS::IHardFaultException, []() {
+    for (int i=0; i<100; i++)
+      BIOS::DBG::Print("Hard fault! ");
+    
+    // https://www.programmersought.com/article/90375648886/
+    // NVIC_SystemReset();
+    __asm("LDR R0, =0xE000ED0C");
+    __asm("LDR R1, =0x05FA0004");
+    __asm("STR R1, [R0]");
+    while (1);
+    // TODO: reset hard fault vector back!
+  });
+
   BIOS::OS::TInterruptHandler isrOld = BIOS::OS::GetInterruptVector(BIOS::OS::IUSB_LP_CAN_RX0_IRQ);
   BIOS::OS::SetInterruptVector(BIOS::OS::IUSB_LP_CAN_RX0_IRQ, []() {});
   _usbd_dev = usb_setup();
@@ -75,22 +100,31 @@ int main(void)
     }
  */
 //    if (/*MEMORY::running &&*/ memcmp(buf, "DBG::Stop()", 11) == 0)
-    if (MEMORY::running)
-    {
-        //save stack?
-      if (memcmp(buf, "DBG::Stop()", 11) == 0)
-        evaluator.Evaluate((char*)buf);
-    }
-    else if (MEMORY::writeCount > 0 && len > 0)
+    if (MEMORY::writeCount > 0 && len > 0)
     {
       MEMORY::HandleWrite(buf, len);
       if (MEMORY::writeCount == 0)
         strcpy(command, "MEM::Done();");
+      return;
     }
-    else 
+
+    if (memcmp(buf, "DBG::Frame()", 12) == 0)
     {
-      memcpy(command, buf, len);
+      BIOS::SYS::Beep(100);
+      MEMORY::_Frame();
     }
+
+    if (MEMORY::running)
+    {
+        //save stack?
+      if (memcmp(buf, "DBG::Stop()", 11) == 0)
+      {
+        evaluator.Evaluate((char*)buf);
+        return;
+      }
+    }
+
+    memcpy(command, buf, len);
 //    MEMORY::isr = false;
   });
 

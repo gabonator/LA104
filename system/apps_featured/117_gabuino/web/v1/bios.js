@@ -23,7 +23,7 @@ var BIOS =
   {                 
     return new Promise((resolve, reject) =>
     {
-      COMM._onReceive = data => resolve(new TextDecoder().decode(data));
+      COMM._onReceive = data => { COMM._onReceive = COMM._defReceive; resolve(new TextDecoder().decode(data));  };
       COMM._send(command);
     });
   },
@@ -31,14 +31,14 @@ var BIOS =
   {                 
     return new Promise((resolve, reject) =>
     {
-      COMM._onReceive = data => resolve(data);
+      COMM._onReceive = data => { COMM._onReceive = COMM._defReceive; resolve(data); };
     });
   },
   rpcPeek: () =>
   {                 
     return new Promise((resolve, reject) =>
     {
-      COMM._onReceive = data => resolve(new TextDecoder().decode(data));
+      COMM._onReceive = data => { COMM._onReceive = COMM._defReceive; resolve(new TextDecoder().decode(data)); }
     });
   },
 
@@ -59,9 +59,21 @@ var BIOS =
       COMM._sendRaw(buf);
       return BIOS.rpcPeek();
        })
-    .then( json => { if (typeof(BIOS.safeeval(json).ret) == "undefined") throw "problem"; return Promise.resolve(); })
+    .then( json => { if (typeof(BIOS.safeeval(json).ret) == "undefined") throw "problem"; return BIOS.retval(json); })
   },
   getProcAddr: (name) => BIOS.rpcCall('SYS::GetProcAddress(\"'+name+'\");').then( BIOS.retval ),
-  exec: (addr) => BIOS.rpcCall('DBG::Exec(0x'+addr.toString(16)+')').then( BIOS.retval ),
+  exec: (addr) => BIOS.rpcCall('DBG::Exec(0x'+addr.toString(16)+')').then( ret =>
+  {
+    if (BIOS.safeeval(ret))
+      return BIOS.retval(ret);
+    else
+      COMM._defEval(ret);
+  }),
   stop: () => BIOS.rpcCall('DBG::Stop()').then( BIOS.retval ),
+  frame: () => BIOS.rpcCall('DBG::Frame()')
+    .then( json => { if (typeof(BIOS.safeeval(json).bulk) == "undefined") throw "problem"; return BIOS.rpcPeekRaw(); } )
+    .then( rawdata => { BIOS._rawData = rawdata; /*console.log("raw:"+rawdata.byteLength); */return BIOS.rpcPeek(); })
+    .then( json => { if (typeof(BIOS.safeeval(json).ret) == "undefined") throw "problem"; 
+      return Promise.resolve(new Uint32Array(BIOS._rawData.buffer)); })
+
 };

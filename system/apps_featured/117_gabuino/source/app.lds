@@ -3,7 +3,7 @@ MEMORY
 /*  rom (rx)  : ORIGIN = 0x0801ed00, LENGTH = 60K*/
   rom (rx) : ORIGIN = 0x08064100, LENGTH = 80K
 
-  ram (rwx) : ORIGIN = 0x20004800, LENGTH = 4K
+  ram (rwx) : ORIGIN = 0x20004780, LENGTH = 4K
   ramuser (rwx) : ORIGIN = 0x20005000, LENGTH = 8K
   null (rwx): ORIGIN = 0x00001000, LENGTH = 8K
 }

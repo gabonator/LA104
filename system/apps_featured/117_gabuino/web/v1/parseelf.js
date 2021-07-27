@@ -93,8 +93,8 @@ function parseElf(elf)
     var elfSection = Elf32_Shdr.parse(shdrBuf);
 
     var sectionName = elf.stringAt(stringTable.offset + elfSection.name);
-//    console.log({name:(sectionName+"         ").substr(0,12), //*fofs:elfSection.offset, */
-//      range:("000"+elfSection.addr.toString(16)).substr(-8) + "-" + ("000"+(elfSection.addr + elfSection.size).toString(16)).substr(-8), size:elfSection.size});
+    console.log({name:(sectionName+"         ").substr(0,12), //*fofs:elfSection.offset, */
+      range:("000"+elfSection.addr.toString(16)).substr(-8) + "-" + ("000"+(elfSection.addr + elfSection.size).toString(16)).substr(-8), size:elfSection.size});
     if (sectionName==".rel.plt")
       sections.relplt = {...elfSection};
     if (sectionName==".dynsym")

@@ -7,6 +7,9 @@ namespace RPC
     if (strcmp(command, "SYS::GetProcAddress")==0)
       return (uint32_t)MEMORY::GetProcAddress2;
 
+    if (strcmp(command, "SYS::GetProcAddress")==0)
+      return (uint32_t)MEMORY::GetProcAddress2;
+
     if (strcmp(command, "MEM::Write")==0)
       return (uint32_t)MEMORY::Write;
     if (strcmp(command, "MEM::Read")==0)
@@ -20,6 +23,10 @@ namespace RPC
       return (uint32_t)MEMORY::Exec;
     if (strcmp(command, "DBG::Stop")==0)
       return (uint32_t)MEMORY::Stop;
+    if (strcmp(command, "DBG::Frame")==0)
+      return (uint32_t)MEMORY::Frame;
+//    if (strcmp(command, "DBG::GetDebugBuffer")==0)
+//      return (uint32_t)MEMORY::GetDebugBuffer;
 //    if (strcmp(command, "DBG::Trace")==0)
 //      return (uint32_t)MEMORY::Trace;
 
@@ -41,6 +48,7 @@ namespace RPC
 
   uint32_t GetProcAddress(char* name)
   {
+
     uint32_t addr = GetRpcAdress(name);
     if (addr)
       return addr;
