@@ -1,10 +1,12 @@
 #https://developer.arm.com/open-source/gnu-toolchain/gnu-rm/downloads
 
+#https://developer.arm.com/open-source/gnu-toolchain/gnu-rm/downloads
+
 mkdir -p build
 cd build
 
 arm-none-eabi-g++ -Wall -Os -Werror -fno-common -mcpu=cortex-m3 -mthumb -msoft-float -fno-exceptions -fno-rtti -fno-threadsafe-statics -Wno-psabi -D DS213 -D _ARM -D STM32F10X_HD -MD -c \
-	../main.cpp \
+	../source/main.cpp \
 	../../../os_host/source/framework/Wnd.cpp \
   ../../../os_host/source/framework/Utils.cpp \
   ../../../os_host/source/framework/Serialize.cpp \
