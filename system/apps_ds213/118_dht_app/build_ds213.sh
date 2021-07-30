@@ -20,7 +20,7 @@ arm-none-eabi-gcc -Os -fPIC -mcpu=cortex-m3 -mthumb -o output.elf -nostartfiles 
 
 arm-none-eabi-objdump -d -S output.elf > output.asm
 
-../../../../tools/elfstrip/elfstrip output.elf 9dht.elf
+../../../../tools/elfstrip/elfstrip output.elf 118dht.elf
 # ../../../elfdump/elfdump vimeas1.elf
 
 find . -type f -name '*.o' -delete
