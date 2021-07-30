@@ -2,6 +2,7 @@ convert co2.png -resize 64x64 -background transparent -gravity Center -extent 64
 convert radioactive.png -resize 64x64 -background transparent -gravity Center -extent 64x64 -alpha on radsens.bmp
 convert hunter.png -resize 64x64 -background transparent -gravity Center -extent 64x64 -alpha on hunter.bmp
 convert circuitpython.png -resize 64x64 -background transparent -gravity Center -extent 64x64 -alpha on cpython.bmp
+convert dht.png -resize 64x64 -background transparent -gravity Center -extent 64x64 -alpha on dht.bmp
 #convert hammer.png -resize 64x64 -background transparent -gravity Center -extent 64x64 -alpha on hammer.bmp
 
 convert folder.png -resize 64x64 -background transparent -gravity Center -extent 64x64 compo1.png
