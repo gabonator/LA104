@@ -5,7 +5,6 @@ using namespace BIOS;
 typedef int fix16_t;
 void drawline_aa(fix16_t fx1, fix16_t fy1, fix16_t fx2, fix16_t fy2, int color);
 
-__attribute__((__section__(".entry")))
 int main(void)
 {
     int x = 0, y = 0;

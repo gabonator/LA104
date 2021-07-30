@@ -2,7 +2,6 @@
 
 using namespace BIOS;
 
-__attribute__((__section__(".entry")))
 int main(void)
 {
     BIOS::KEY::EKey key;

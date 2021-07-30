@@ -15,18 +15,25 @@ var COMM = {
         setTimeout(inside[1], 0);
       return;
     }
-    if (msg.indexOf("_DBGPRINT(") == 0)
+    if (msg.indexOf("_DBGPRINT(") == 0 || msg.indexOf("_DBGEVENT(") == 0)
       setTimeout(msg, 0);
   },
   _onReceive: () => 0,
+
+  setDisconnected: () => 0,
+  setConnected: () => 0,
+  setConnecting: () => 0,
+  setNoDevices: () => 0,
+  setConnectFailed: () => 0,
+  doConnect: () => 0
 };
 
 COMM._onReceive = COMM._defReceive;
 
 
   document.addEventListener('DOMContentLoaded', event => {
-    let connectButton = document.querySelector("#connect");
-    let statusDisplay = document.querySelector('#status');
+//    let connectButton = document.querySelector("#connect");
+//    let statusDisplay = document.querySelector('#status');
     let port;
 
     let ascii = (s => s.split('').map(c=>c.charCodeAt(0)) );
@@ -52,8 +59,7 @@ COMM._sendRaw = function(msg)
       port.connect().then(() => {
         COMM._open = true;
 
-        statusDisplay.textContent = '';
-        connectButton.textContent = 'Disconnect';
+        COMM.setConnected();
 
         port.onReceive = data => {
           if (COMM.debug)
@@ -67,7 +73,8 @@ COMM._sendRaw = function(msg)
           console.error(error);
         };
       }, error => {
-        statusDisplay.textContent = error;
+        COMM.setConnectFailed(error);
+//        statusDisplay.textContent = error;
       });
     }
 
@@ -78,28 +85,34 @@ COMM._sendRaw = function(msg)
       toggle();     
     };
 
-    connectButton.addEventListener('click', function() {
+    COMM.doConnect = () => {
       if (port) {
         port.disconnect();
         COMM._open = false;
-        connectButton.textContent = 'Connect';
-        statusDisplay.textContent = '';
+        COMM.setDisconnected();
+//        connectButton.textContent = 'Connect';
+//        statusDisplay.textContent = '';
         port = null;
       } else {
         serial.requestPort().then(selectedPort => {
           port = selectedPort;
           connect();
         }).catch(error => {
-          statusDisplay.textContent = error;
+          //statusDisplay.textContent = error;
+          COMM.setConnectFailed(error);
         });
       }
-    });
+    };
 
     serial.getPorts().then(ports => {
       if (ports.length == 0) {
-        statusDisplay.textContent = 'No device found.';
+        COMM.setNoDevices();
+
+//        statusDisplay.textContent = 'No device found.';
       } else {
-        statusDisplay.textContent = 'Connecting...';
+        COMM.setConnecting();
+
+//        statusDisplay.textContent = 'Connecting...';
         port = ports[0];
         connect();
       }

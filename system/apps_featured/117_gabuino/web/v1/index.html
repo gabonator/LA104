@@ -1,376 +1,298 @@
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-<script src="binary-parser/context.js"></script>
-<script src="binary-parser/binary_parser.js"></script>
-<script src="parseelf.js"></script>
-<script>
+<!doctype html>
+<html lang="en">
+  <head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
-var usessl = location.protocol === 'https:'
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+
+    <style>
+    #my_html {
+    position: absolute;
+    top: 60px;
+    right: 600px;
+    bottom: 0;
+    left: 0;
+    }
+    #my_control {
+    position: absolute;
+    top: 52px;
+    right: 0px;
+    bottom: 0;
+    width: 600px;
+    padding: 8px;
+    }
+    #my_html_hidden {
+    display: none;
+    }
+
+    .ace_gutter-cell.ace_breakpoint{ 
+        border-radius: 20px 0px 0px 20px; 
+        background:#ff5555;
+    }
+
+    .errorHighlight{
+      position:absolute;
+      background-color:rgb(255, 55, 55, 0.2);
+    }
+    </style>
+
+    <title>Gabuino</title>
+  </head>
+  <body>
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+    <script src="https://rawgithub.com/ajaxorg/ace-builds/master/src/ace.js" type="text/javascript" charset="utf-8"></script>
+    <script src="https://rawgithub.com/ajaxorg/ace-builds/master/src/ext-language_tools.js" type="text/javascript" charset="utf-8"></script>
+    <script src="compiler.js"></script>
+    <script src="editor.js"></script>
+    <script src="serial.js"></script>
+    <script src="comm.js"></script>
+    <script src="bios.js"></script>
+    <!--<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>-->
+    <script src="binary-parser/context.js"></script>
+    <script src="binary-parser/binary_parser.js"></script>
+    <script src="parseelf.js"></script>
+    <script src="examples.js"></script>
+
+<nav class="navbar navbar-expand-lg navbar-light bg-light">
+  <a class="navbar-brand" href="#"><img src="gabuino.png" height=32></a>
+  <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+    <span class="navbar-toggler-icon"></span>
+  </button>
+
+  <div class="collapse navbar-collapse" id="navbarSupportedContent">
+    <ul class="navbar-nav mr-auto">
+      <li class="nav-item dropdown">
+        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+          Examples
+        </a>
+        <div class="dropdown-menu" aria-labelledby="navbarDropdown" id="_examples">
+<!--
+          <a class="dropdown-item" href="#">Blink</a>
+          <a class="dropdown-item" href="#">Random numbers</a>
+          <div class="dropdown-divider"></div>
+          <a class="dropdown-item" href="#">WS2812 addressable leds</a>
+          <a class="dropdown-item" href="#">GPS module</a>
+-->
+        </div>
+      </li>
+
+      <li class="nav-item dropdown">
+        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+          File
+        </a>
+        <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+          <a class="dropdown-item" href="#">Save</a>
+          <a class="dropdown-item" href="#">Save as...</a>
+          <a class="dropdown-item" href="#">Delete</a>
+          <div class="dropdown-divider"></div>
+          <a><h6 class="dropdown-header">Stored programs</h6></a>
+          <a class="dropdown-item" href="#">User program 1</a>
+          <a class="dropdown-item" href="#">User program 2</a>
+        </div>
+      </li>
+
+
+      <button class="btn btn-sm btn-outline-secondary mr-2" type="button" id="_connect">Connected</button>
+      <a class="navbar-text mr-2" id="_connectText">Device not found</a>
+    </ul>
+    <form class="form-inline my-2 my-lg-0">
+      <button class="btn btn-outline-success mr-1 my-2 my-sm-0" type="button" id="_run">
+<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-play" viewBox="3 3 12 12">
+  <path d="M10.804 8 5 4.633v6.734L10.804 8zm.792-.696a.802.802 0 0 1 0 1.392l-6.363 3.692C4.713 12.69 4 12.345 4 11.692V4.308c0-.653.713-.998 1.233-.696l6.363 3.692z"/>
+</svg>
+Run</button>
+
+      <button class="btn btn-success mr-1 my-2 my-sm-0" type="button" id="_stop">
+<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-stop" viewBox="3 3 12 12">
+  <path d="M3.5 5A1.5 1.5 0 0 1 5 3.5h6A1.5 1.5 0 0 1 12.5 5v6a1.5 1.5 0 0 1-1.5 1.5H5A1.5 1.5 0 0 1 3.5 11V5zM5 4.5a.5.5 0 0 0-.5.5v6a.5.5 0 0 0 .5.5h6a.5.5 0 0 0 .5-.5V5a.5.5 0 0 0-.5-.5H5z"/>
+</svg>
+Stop</button>
+    </form>
+  </div>
+</nav>
+
+
+
+<div id="my_control">
+
+<div class="card">
+<article class="card-body">
+<h4 class="card-title mb-4 mt-1">Compilation</h4>
+  <div class="form-group" id="_compilationText">
+  </div>
+</article>
+</div>
+
+<br>
+
+<div class="card">
+<article class="card-body">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h4 class="card-title mb-4 mt-1">Debug console</h4>
+        <div>
+            <button type="button" class="btn btn-outline-success">Clear</button>
+            <button type="button" class="btn btn-outline-success">Pause</button>
+        </div>
+    </div>
+
+  <div class="form-group" id="_debugText" style="white-space: pre-wrap; "></div>
+</article>
+</div>
+<br>
+
+<div class="card">
+<article class="card-body">
+<h4 class="card-title mb-4 mt-1">Testing</h4>
+  <input type=button id="frame" value="frame" onclick="frame()">
+  <input type=button id="screenshot" value="screenshot" onclick="screenshot()">
+</article>
+</div>
+
+
+</div>
+
+
+<script>
+$('#_connect').on('click', function(event) {
+//  event.preventDefault(); // To prevent following the link (optional)
+  COMM.doConnect();
+});
+
+$('#_run').on('click', function(event) {
+  var newCode = html_editor.getValue();
+
+  if (typeof(lastCode) != "undefined" && lastCode == newCode)
+  {
+    // reset bss!
+    run();
+    return;
+  }
+  lastCode = newCode;
+
+
+  var tick0 = (new Date).getTime();
+  var tick1, tick2, tick3;
+
+  compile()
+  .then( (elf) => {
+    tick1 = (new Date).getTime();
+    $("#_compilationText").text("Compilation took " + (tick1-tick0) + "ms.\n");  
+    return elf;
+  })
+  .then( elf => processElf(elf))
+  .then( (stats) => {
+    tick2 = (new Date).getTime();
+    $("#_compilationText").append("Processing took " + (tick2-tick1) + "ms.\n");  
+    $("#_debugText").text("");
+  })
+  .then( () => resolveImports())
+  .then( () => {
+    tick3 = (new Date).getTime();
+    $("#_compilationText").append("Resolving relocations took " + (tick3-tick2) + "ms.\n");  
+    $("#_debugText").text("");
+  })
+  .then( () => flash() )
+  .then( () =>
+  {
+    tick4 = (new Date).getTime();
+    $("#_compilationText").append("Flashing took " + (tick4-tick3) + "ms.\n");  
+    $("#_compilationText").append("Application size " + globalBlob.length + " bytes\n");  
+    return run();
+  })
+  .catch( stderr =>
+  {
+    $("#_compilationText").text("Failed: <pre>"+stderr.split("<stdin>:").join("")+"</pre>");  
+  });
+
+});
+
+$('#_stop').on('click', function(event) {
+  stop();
+});
+
+COMM.setDisconnected = () => { 
+  $("#_connect").text("Connect"); 
+  $("#_connectText").text("Disconnected"); 
+  $("#_connect").removeClass("btn-outline-secondary").addClass("btn-secondary");
+};
+COMM.setConnected = () => { 
+  $("#_connect").text("Disconnect"); 
+  $("#_connectText").text("Connected"); 
+  $("#_connect").removeClass("btn-secondary").addClass("btn-outline-secondary");
+};
+COMM.setConnecting = () => { 
+  $("#_connect").text("Connecting..."); 
+  $("#_connectText").text(""); 
+  $("#_connect").removeClass("btn-secondary").addClass("btn-outline-secondary");
+};
+COMM.setConnectFailed = (err) => { 
+  $("#_connect").text("Connect"); 
+  $("#_connectText").text(err ? err : "Connection failed"); 
+  $("#_connect").removeClass("btn-outline-secondary").addClass("btn-secondary");
+};
+COMM.setNoDevices = () => {
+  $("#_connect").text("Connect"); 
+  $("#_connectText").text("Not connected"); 
+  $("#_connect").removeClass("btn-outline-secondary").addClass("btn-secondary");
+};
 
 function _DBGPRINT(msg)
 {
-  document.querySelector("#debug").innerHTML += msg;
+  $("#_debugText").append(msg);
 }
 
-function compile()
+function _DBGEVENT(e)
 {
-  var code = html_editor.getValue();
-  var xhr = new XMLHttpRequest();
-  var formData = new FormData();
-  formData.append("file", new Blob([code], {type : 'text/plain'}), "moj.txt");
-  if (usessl)
-    xhr.open('post', "https://cloud.valky.eu:8383/", true);
-   else
-    xhr.open('post', "http://cloud.valky.eu:8382/", true);
-  xhr.send(formData);
-  xhr.onload  = function() {
-    var jsonResponse = JSON.parse(xhr.responseText);
-    if (jsonResponse.code == 0)
-    {
-      processElf( Uint8Array.from(atob(jsonResponse.files["app.elf"]), c => c.charCodeAt(0)) );//   atob(jsonResponse.files["app.elf"]));
-      clearError();
-    }
-    else
-      handleError(jsonResponse.stderr);
-      //console.log(jsonResponse.stderr);
-  };
+  console.log("Program finished: "+e);
+//  $("#_debugText").append();
 }
 
 
-var editor_markers = [];
-var annotations = [];
-function clearError()
-{            
-  annotations = [];  
-  for (var i=0; i<editor_markers.length; i++)
-    html_editor.getSession().removeMarker(editor_markers[i]);
-  editor_markers = [];                                                                         
-  html_editor.getSession().setAnnotations([]);
-}
-
-function addError(line, column, msg)
+for (var i in examples)
 {
-  annotations.push({
-  row: line-1,
-  column: column,
-  text: msg,
-  type: "error" // also warning and information
+  $("#_examples").append('<a class="dropdown-item" href="#">'+i+'</a>');
+}
+
+var elements = $("#_examples").children("a"); //.dropdown-item");
+
+for (var i=0; i<elements.length; i++)
+{
+  elements[i].addEventListener('click', (event) => {
+    html_editor.setValue(examples[event.target.innerText])
+//    alert(`Clicked ${event.target.innerText}!`);
   });
-
-  //editor_markers.push( html_editor.session.addMarker(new Range(8, 0, 9, 0),
-  //"activeBreakpoint", "line") );
-
-  editor_markers.push(html_editor.getSession().addMarker(new aceRange(line-1, 0, line-1, 200), "errorHighlight", "line", true));
-}
-
-function handleError(stderr)
-{
-  console.log(stderr);
-  annotations = [];
-  var errors = stderr.split("\n");
-  for (var i=0; i<errors.length; i++)
-  {
-    var error = errors[i];
-    var matches = error.match("\\<stdin\\>:(\\d+):(\\d+): (.*)$");
-    if (matches)
-    {
-//      console.log(error);
-      addError(parseInt(matches[1]), parseInt(matches[2]), matches[3]);
-    }
-  }
-  html_editor.getSession().setAnnotations(annotations);
-}
-
-function writeDword(ofs, val)
-{
-  globalBlob[ofs-globalOffset+3] = val >> 24;
-  globalBlob[ofs-globalOffset+2] = val >> 16;
-  globalBlob[ofs-globalOffset+1] = val >> 8;
-  globalBlob[ofs-globalOffset+0] = val >> 0;
-}
-
-function clearBss(blob, ofs, len)
-{
-  for (var i=0; i<len; i++)
-    blob[i+ofs] = 0;
-}
-
-function run()
-{
-  document.querySelector("#debug").innerHTML = "";
-
-  var checksum = 0;
-  for (var i=0; i<globalBlob.length; i++)
-    checksum += globalBlob[i];
-
-  BIOS.memWrite(globalOffset, globalBlob)
-  .then( (chk) => {
-    if (checksum != chk)
-      alert("checksum wrong!");
-    else
-      BIOS.exec(globalOffset|1)
-  });
-}
-
-function stop()
-{
-  BIOS.stop()
-}
-
-function frame()
-{
-  BIOS.frame().then(f => {
-    var arr = [];
-    for (var i=0; i<f.length; i++) arr.push("0x"+ ("00000000"+f[i].toString(16)).substr(-8));
-    console.log(arr);
-    //console.log(f.map(x=>"0x"+x.toString(16)))
-  });
-}
-var globalOffset;
-var globalBlob;
-var globalResolve = [];
-function processElf(elf)
-{
-  var elfinfo = parseElf(elf);
-
-  elfinfo.relocations.forEach(r => console.log(r.name + " -> " + r.addr));
-  elfinfo.sections.forEach(s => console.log(s.name + " - " + s.addr.toString(16) + " - " + (s.addr + s.size).toString(16)));
-  var begin = elfinfo.sections[0].addr;
-  var end = elfinfo.sections[elfinfo.sections.length-1].addr + elfinfo.sections[elfinfo.sections.length-1].size;
-  console.log("blob size " + (end-begin));
-  if (end - begin > 5*1024)
-    throw "too big blob";
-// TODO: BSS!!!!
-  var appblob = new Uint8Array(end-begin);
-  for (var i=0; i<elfinfo.sections.length; i++)
-  {
-    var section = elfinfo.sections[i];
-    if (section.name != ".bss")
-      section.data.copyTo(appblob, section.addr - begin);
-    else
-      clearBss(appblob, section.addr - begin, section.size);
-  }
-  for (var i=0; i<elfinfo.relocations.length; i++)
-  {
-    var rel = elfinfo.relocations[i];
-    globalResolve.push({...rel});
-//    writeDword(appblob, rel.addr, symbolCache[rel.name])
-  }
-
-  console.log("flash to: "+begin.toString(16) + " entry: "+elfinfo.entry.toString(16));
-  console.log(appblob);
-  globalOffset = begin;
-  globalBlob = appblob;
-  continueResolve();
-}
-
-var resolveCache = {};
-
-function continueResolve()
-{
-  if (globalResolve.length == 0)
-    return;
-  var symbol = globalResolve.shift();
-  if (typeof(resolveCache[symbol.name]) != "undefined")
-  {
-    ptr = resolveCache[symbol.name];
-    console.log(symbol.addr.toString(16) + " <- " + ptr.toString(16) + " cached " + symbol.name)
-    writeDword(symbol.addr, ptr);
-    continueResolve();
-    return;
-  }
-
-  BIOS.getProcAddr(symbol.name).then( (ptr) =>
-  {
-    resolveCache[symbol.name] = ptr;
-    console.log(symbol.addr.toString(16) + " <- " + ptr.toString(16))
-    writeDword(symbol.addr, ptr);
-    continueResolve();
-  })
-}
-
+};
 </script>
 
-<div id="my_control">
-<input type=button value="compile" onclick="compile()"></input>
-<input type=button id="connect" value="connect">
-<div id="status"></div>
-<input type=button id="run" value="run" onclick="run()">
-<input type=button id="stop" value="stop" onclick="stop()">
-<input type=button id="frame" value="frame" onclick="frame()">
-<div id="debug" style="background:#f0f0f0; width:100%; white-space: pre-wrap;     
-    display: block;
-    unicode-bidi: embed;
-    font-family: monospace;
-    white-space: pre-wrap;">
-</div>
-</div>
 
 <div id="my_html">
 </div>
-<!-- this works using xmp and NOT when using div's! -->
-<xmp id="my_html_hidden">
-#include <library.h>
-//#include "../../os_host/source/framework/Console.h"
-//#include "../../os_host/source/framework/SimpleApp.h"
+
+<xmp id="my_html_hidden">#include <library.h>
 
 using namespace BIOS;
 
 __attribute__((__section__(".entry")))
 int main(void)
 {
-//    APP::Init("Test app");
-//    APP::Status("Bla bla bla");
-
     BIOS::KEY::EKey key;
     while ((key = KEY::GetKey()) != BIOS::KEY::EKey::Escape)
     {
       EVERY(5000)
       {
-//        CONSOLE::Print("Ahoj! "); 
-BIOS::DBG::Print("Ahoj!");
+         BIOS::DBG::Print("Ahoj!");
       }
-
       SYS::DelayMs(50);
     }
     
     return 0;
 }
-
-void _HandleAssertion(const char* file, int line, const char* cond)
-{
-/*    CONSOLE::Color(RGB565(ffff00));
-    CONSOLE::Print("Assertion failed in ");
-    CONSOLE::Print(file);
-    CONSOLE::Print(" [%d]: %s", line, cond);*/
-    while (1);
-}
-
 </xmp>
 
-<style>
-#my_html {
-position: absolute;
-top: 0;
-right: 50%;
-bottom: 0;
-left: 0;
-}
-#my_control {
-position: absolute;
-top: 0;
-right: 0;
-bottom: 0;
-left: 50%;
-}
-#my_html_hidden {
-display: none;
-}
-
-.ace_gutter-cell.ace_breakpoint{ 
-    border-radius: 20px 0px 0px 20px; 
-//    box-shadow: 0px 0px 1px 1px #248c46 inset; 
-background:#ff5555;
-}
-
-.errorHighlight{
-  position:absolute;
-  background-color:rgb(255, 55, 55, 0.2);
-}
-</style>
-
-<!--<script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.1.01/ace.js"></script>-->
-
-<script src="https://rawgithub.com/ajaxorg/ace-builds/master/src/ace.js" type="text/javascript" charset="utf-8"></script>
-<script src="https://rawgithub.com/ajaxorg/ace-builds/master/src/ext-language_tools.js" type="text/javascript" charset="utf-8"></script>
-
-<!--<script src="ace/ace.js"></script>-->
-
-<script>
-// comments represent dynamic environment set up
-
-// this is in an external js file
-
-var html_editor;
-var aceRange;
-function initAceEditor() {
-ace.require("ace/ext/language_tools");
-aceRange = ace.require("ace/range").Range
-
-html_editor = ace.edit("my_html");
-html_editor.setTheme("ace/theme/xcode");
-html_editor.getSession().setMode("ace/mode/c_cpp");
-html_editor.setFontSize("15px") ;
-html_editor.setPrintMarginColumn(false);
-html_editor.session.setValue($("#my_html_hidden").text());
-html_editor.setOptions({
-//maxLines: 20,
-    enableBasicAutocompletion: true
-});
-
-
-var langTools = ace.require("ace/ext/language_tools");
-var rhymeCompleter = {
-        getCompletions: function(editor, session, pos, prefix, callback) {
-
-console.log(prefix);
-
-          callback(null, {name: "blabotat", value: "blabotat", score: 10, meta: "rhyme"})
-
-        }
-    }
-    langTools.addCompleter(rhymeCompleter);
-
-html_editor.on("guttermousedown", function(e) {
-    var target = e.domEvent.target; 
-    if (target.className.indexOf("ace_gutter-cell") == -1)
-        return; 
-    if (!html_editor.isFocused()) 
-        return; 
-  
-  console.log(e.clientX > 25 + target.getBoundingClientRect().left);
-  
-  console.log(e.clientX, 25 + target.getBoundingClientRect().left);
-  
-    if (e.clientX > 25 + target.getBoundingClientRect().left) 
-        return; 
-
-    var breakpoints = e.editor.session.getBreakpoints(row, 0);
-var row = e.getDocumentPosition().row;
-if(typeof breakpoints[row] === typeof undefined)
-    e.editor.session.setBreakpoint(row);
-else
-    e.editor.session.clearBreakpoint(row);
-    e.stop();
-})
-
-
-
-}
-
-// the function is called at the end of a function that
-// includes a getJSON() request to a Python script which
-// queries a MongoDB database and json dumps the results.  
-// eg loadMyContent() {
-// getJSON() and return content
-initAceEditor()
-// }
-
-// Problems when using div instead of xmp:  
-
-// In Firebug I can *see* the required HTML in the 'response'
-// and 'json' tabs ie:
-// <div id="acey_html_hidden"><html>test</html></div>
-// but the Ace edior is just showing:
-// test
-
-// In Firebug's HTML view of the hidden div, when using <div> tags, the <html> tags have been stripped out.  
-//
-//When using <xmp> tags the <html> tags have not been stripped out.  
-
-
-
-</script>
-
-    <script src="serial.js"></script>
-    <script src="comm.js"></script>
-    <script src="bios.js"></script>
+</body>
+</html>    

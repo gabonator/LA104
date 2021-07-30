@@ -61,16 +61,12 @@ int main(void)
 
   rcClient.bottom = 14;
   GUI::Background(rcClient, RGB565(4040b0), RGB565(404040));
-  BIOS::LCD::Print(8, rcClient.top, RGB565(ffffff), RGBTRANS, "Remote control");
+  BIOS::LCD::Print(8, rcClient.top, RGB565(ffffff), RGBTRANS, "Gabuino");
 
   rcClient.bottom = BIOS::LCD::Height;
   rcClient.top = BIOS::LCD::Height-14;
   BIOS::LCD::Bar(rcClient, RGB565(404040));
-
-  CRect rcWindow(40, 14+80, BIOS::LCD::Width-40, BIOS::LCD::Height-80);
-  GUI::Window(rcWindow, RGB565(ffffff));
-  BIOS::LCD::Print(rcWindow.left+8, rcWindow.top+2, RGB565(000000), RGBTRANS, "Info");
-  BIOS::LCD::Print(rcWindow.left+8, rcWindow.top+30, RGB565(000000), RGBTRANS, "Connect the device to computer");
+  BIOS::LCD::Print(8, rcClient.top, RGB565(ffffff), RGBTRANS, "Waiting for USB connection");
 
   BIOS::OS::SetInterruptVector(BIOS::OS::IHardFaultException, []() {
     for (int i=0; i<100; i++)

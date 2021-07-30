@@ -4,7 +4,6 @@ using namespace BIOS;
 
 int counter = 0;
 
-__attribute__((__section__(".entry")))
 int main(void)
 {
     BIOS::KEY::EKey key;

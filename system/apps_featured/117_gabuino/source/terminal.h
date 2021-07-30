@@ -32,7 +32,7 @@ bool cdc_waitReady()
     if (cdc_transmitReady())
       return true;
   }
-BIOS::DBG::Print("wr:");
+  BIOS::DBG::Print("wrerr");
   return false;
 }
 
@@ -51,6 +51,36 @@ bool BulkTransfer(uint8_t* buffer, int length)
       return false;
 
     buffer += toSend;
+    length -= toSend;
+  }
+
+  if (zlp)
+  {
+    if (!cdc_waitReady())
+      return false;
+
+    if (!cdc_transmit(buffer, 0))
+      return false;
+  }
+
+  return true;
+}
+
+template <typename T>
+bool BulkTransfer(int length, T prepare) //void(*prepare)(uint8_t* buffer, int bytes))
+{
+  uint8_t buffer[CDC_MAX_USB_PACKET_SIZE];
+  bool zlp = length && (length % CDC_MAX_USB_PACKET_SIZE == 0);
+
+  while (length > 0)
+  {
+    int toSend = min(CDC_MAX_USB_PACKET_SIZE, length);
+    if (!cdc_waitReady())
+      return false;
+
+    prepare(buffer, toSend);
+    cdc_transmit(buffer, toSend);
+
     length -= toSend;
   }
 

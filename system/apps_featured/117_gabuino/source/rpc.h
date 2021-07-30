@@ -25,6 +25,10 @@ namespace RPC
       return (uint32_t)MEMORY::Stop;
     if (strcmp(command, "DBG::Frame")==0)
       return (uint32_t)MEMORY::Frame;
+    if (strcmp(command, "DBG::Running")==0)
+      return (uint32_t)MEMORY::Running;
+    if (strcmp(command, "DBG::ReturnValue")==0)
+      return (uint32_t)MEMORY::ReturnValue;
 //    if (strcmp(command, "DBG::GetDebugBuffer")==0)
 //      return (uint32_t)MEMORY::GetDebugBuffer;
 //    if (strcmp(command, "DBG::Trace")==0)

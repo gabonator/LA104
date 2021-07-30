@@ -11,6 +11,7 @@ namespace MEMORY
   bool running = false;
   bool shouldStop = false;
   int writeSum = 0;
+  int userRetVal = 0x66667777;
 
 //  RingBufCPP<uint16_t, 128> debugPrintBuffer;
 //  char debugPrintBuffer[128] = {0};
@@ -63,14 +64,28 @@ namespace MEMORY
   int Exec(uint32_t ptr)
   {
     _ASSERT(ptr == 0x20005001);
+    userRetVal = 0x66667777;
 
     typedef int(*TFunc)();
     _PrepareRun();
     shouldStop = false;
     running = true;
-    int retval = ((TFunc)ptr)();
+    userRetVal = ((TFunc)ptr)();
     running = false;
-    return retval;
+
+    TERMINAL::Print("_DBGEVENT(1)");
+
+    return userRetVal;
+  }
+
+  int Running()
+  {
+    return running;
+  }
+
+  int ReturnValue()
+  {
+    return userRetVal;
   }
 
   int Stop()
@@ -90,15 +105,46 @@ namespace MEMORY
 
   void DbgPrint2(const char * format, ...)
   {
+    const char* prefix = "_DBGPRINT(\"";
+    const char* suffix = "\");";
+    const int prefixlen = strlen(prefix);
+    const int suffixlen = strlen(suffix);
+
+    int len = strlen(format);
+    for (int i=0; i<len; i++)
+      if (format[i] == '%')
+      {
+//, [](uint8_t* buf, int bytes)
         _ASSERT(strlen(format) < sizeof(tempBuf)-16);
 
-	strcpy(tempBuf, "_DBGPRINT(\"");
+	strcpy(tempBuf, prefix);
         va_list args;        
         va_start( args, format );
         vsprintf( tempBuf+11, format, args );
-        strcat(tempBuf, "\");");
+        strcat(tempBuf, suffix);
 
-	TERMINAL::BulkTransfer((uint8_t*)tempBuf, strlen(tempBuf));
+        _ASSERT(strlen(tempBuf) < sizeof(tempBuf)-16);
+        TERMINAL::BulkTransfer((uint8_t*)tempBuf, strlen(tempBuf));
+        return;
+      }
+
+    // static text
+    int counter = 0;
+    TERMINAL::BulkTransfer(prefixlen+suffixlen+len, [&](uint8_t* buf, int bytes)
+    {
+      for (int i=0; i<bytes; i++, counter++)
+      {
+        if (counter < prefixlen)
+          buf[i] = prefix[counter];
+        else if (counter < prefixlen+len)
+          buf[i] = format[counter-prefixlen];
+        else
+        {
+           _ASSERT(counter - prefixlen - len < suffixlen);
+           buf[i] = suffix[counter - prefixlen - len];
+        }
+      }
+    });
   }
 
   uint32_t GetProcAddress2(char* name)
