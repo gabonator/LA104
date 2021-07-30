@@ -1,6 +1,5 @@
 #https://developer.arm.com/open-source/gnu-toolchain/gnu-rm/downloads
 
-
 mkdir -p build
 cd build
 
@@ -10,15 +9,11 @@ arm-none-eabi-g++ -Wall -Os -Werror -fno-common -mcpu=cortex-m3 -mthumb -msoft-f
   ../../../os_host/source/framework/Utils.cpp \
   ../../../os_host/source/framework/Serialize.cpp \
   ../../../os_host/source/gui/Controls.cpp \
-  ../CoreOscilloscope.cpp \
-  ../Sampler.cpp \
   -I../../../os_library/include/ 
 #arm-none-eabi-gcc -fPIC -mcpu=cortex-m3 -mthumb -o output.elf -nostartfiles -Wl,--unresolved-symbols=ignore-all -T ../app.lds ./main.o 
 arm-none-eabi-gcc -Os -fPIC -mcpu=cortex-m3 -mthumb -o output.elf -nostartfiles -T ../app.lds \
  ./main.o \
- ./Sampler.o \
  ./Serialize.o \
- ./CoreOscilloscope.o \
  ./Utils.o -lbios_ds213 -L../../../os_library/build -lm
 
 arm-none-eabi-objdump -d -S output.elf > output.asm
