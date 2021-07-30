@@ -1,7 +1,6 @@
 #include <library.h>
 #include "shapes.h"
 #include "DHT.h"
-#include "CoreOscilloscope.h"
 #include "Delay.h"
 
 class CVisualMeasure
@@ -12,9 +11,6 @@ class CVisualMeasure
 public:
   void Create()
   {
-    BIOS::ADC::Enable( true );
-    CCoreOscilloscope::ConfigureAdc();
-    CCoreOscilloscope::ConfigureTrigger();
     m_Sensor.Create( BIOS::ADC::EInput::CH1 );
   }
 
@@ -48,11 +44,11 @@ public:
     }
 
     x = _x; y += 16;
-    sprintf(buf, "Temperature=%f" "\xf8" "C   ", m_Sensor.GetTemperature());
+    sprintf(buf, "Temperature=%2f" "\xf8" "C   ", m_Sensor.GetTemperature());
     BIOS::LCD::Print(x, y, RGB565(ffffff), RGB565(b0b0b0), buf);
 
     x = _x; y += 16;
-    sprintf(buf, "Humidity=%f%%   ", m_Sensor.GetHumidity());
+    sprintf(buf, "Humidity=%2f%%   ", m_Sensor.GetHumidity());
     BIOS::LCD::Print(x, y, RGB565(ffffff), RGB565(b0b0b0), buf);
   }
 
