@@ -1,18 +1,21 @@
 #pragma once
 #include <library.h>
-#include "Sampler.h"
-#include <math.h>
-#include "../../os_host/source/framework/Utils.h"
-#include "../../os_host/source/framework/Serialize.h"
 
 class CPin
 {
   BIOS::ADC::EInput m_pin;
-  volatile uint32_t data;
-  volatile uint8_t ch1;
+
 public:
   void Create( BIOS::ADC::EInput input )
   {
+    //Setup ADC
+    BIOS::ADC::Enable( true );
+    BIOS::ADC::ConfigureInput( BIOS::ADC::EInput::CH1, BIOS::ADC::ECouple::DC, BIOS::ADC::EResolution::_1V , 105*4);
+    BIOS::ADC::ConfigureInput( BIOS::ADC::EInput::CH2, BIOS::ADC::ECouple::DC, BIOS::ADC::EResolution::_1V , 122*4);
+    BIOS::ADC::ConfigureTimebase(50e-6f);
+  //	BIOS::ADC::ConfigureBuffer( arrLen[ (NATIVEENUM)Settings.Time.Resolution ] );
+    BIOS::ADC::Restart(0);
+    BIOS::ADC::ConfigureTrigger(0, 0, BIOS::ADC::ETriggerType::None, BIOS::ADC::EInput::CH1 );
     m_pin = input;
   }
 
@@ -37,14 +40,14 @@ public:
     BIOS::DAC::SetMode(BIOS::DAC::EMode::LogicHigh, 0, 0);
   }
 
-  bool Get()
+  /*bool Get()
   {
     data = BIOS::ADC::Get();
     ch1 = (uint8_t)((data) & 0xff);
     //BIOS::DBG::Print("#%d#\n", ch1);
     BIOS::ADC::Restart(0);
     return (ch1 > 15) ? true : false;
-  }
+  }*/
 
   void operator =(bool b)
   {
@@ -54,8 +57,8 @@ public:
       High();
   }
 
-  operator const bool ()
+  /*operator const bool ()
   {
   	return Get();
-  }
+  }*/
 };
