@@ -222,7 +222,7 @@ examples =
     '\n' +
     'int main(void)\n' +
     '{\n' +
-    '    BIOS::DBG::Print("Hello world!\\n");\n' +
+    '    BIOS::DBG::Print("Hello world!");\n' +
     '    return 724;\n' +
     '}\n',
   'label.cpp': '#include <library.h>\n' +

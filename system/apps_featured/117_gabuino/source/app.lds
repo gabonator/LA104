@@ -13,12 +13,15 @@ MEMORY
 SECTIONS
   {
     .text : {
+      _addressRomBegin = .;
       *(.entry)
       *(.text*)        /* Program code */
       *(.rodata*)      /* Read only data */
+      _addressRomEnd = .;
     } >rom
 
     .data : {
+      _addressRamBegin = .;
       *(.data*)        /* Data memory */
     } >ram
 
@@ -31,8 +34,12 @@ SECTIONS
     } >ram
 
   .rel.plt : { *(.rel.plt)  } > rom
-  .plt : { *(.plt) } > rom
-  .got : { *(.got.plt) *(.got) } > ram /* relocation fixed by memory write! */
+  .plt : { *(.plt) 
+      _addressRomEnd = .;
+} > rom
+  .got : { *(.got.plt) *(.got) 
+      _addressRamEnd = .;
+} > ram /* relocation fixed by memory write! */
   .dynsym : { *(.dynsym) } > null
   .dynstr : { *(.dynstr) } > null
 

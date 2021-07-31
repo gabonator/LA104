@@ -114,13 +114,12 @@ namespace MEMORY
     for (int i=0; i<len; i++)
       if (format[i] == '%')
       {
-//, [](uint8_t* buf, int bytes)
         _ASSERT(strlen(format) < sizeof(tempBuf)-16);
 
 	strcpy(tempBuf, prefix);
         va_list args;        
         va_start( args, format );
-        vsprintf( tempBuf+11, format, args );
+        vsprintf( tempBuf+prefixlen, format, args );
         strcat(tempBuf, suffix);
 
         _ASSERT(strlen(tempBuf) < sizeof(tempBuf)-16);
@@ -177,6 +176,23 @@ namespace MEMORY
     return 90;
   }
 
+  int Screenshot()
+  {
+    TERMINAL::Print("{bulk:%d,bps:16}", BIOS::LCD::Width*BIOS::LCD::Height*2);
+    BIOS::LCD::BufferBegin(CRect(0, 0, BIOS::LCD::Width, BIOS::LCD::Height));
+    int x = 0, y = 0;
+    TERMINAL::BulkTransfer(BIOS::LCD::Width*BIOS::LCD::Height*2, [&](uint8_t* buf, int bytes)
+    {
+      for (int i=0; i<bytes; i+=2)
+      {
+        uint16_t color = BIOS::LCD::BufferRead();
+        buf[i] = color>>8;
+        buf[i+1] = (uint8_t)color;
+      }
+    });
+    BIOS::LCD::BufferEnd();
+    return 0;
+  }
 /*
   int Trace()
   {

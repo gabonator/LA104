@@ -29,6 +29,9 @@ namespace RPC
       return (uint32_t)MEMORY::Running;
     if (strcmp(command, "DBG::ReturnValue")==0)
       return (uint32_t)MEMORY::ReturnValue;
+
+    if (strcmp(command, "DBG::Screenshot")==0)
+      return (uint32_t)MEMORY::Screenshot;
 //    if (strcmp(command, "DBG::GetDebugBuffer")==0)
 //      return (uint32_t)MEMORY::GetDebugBuffer;
 //    if (strcmp(command, "DBG::Trace")==0)

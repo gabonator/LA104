@@ -9,7 +9,8 @@ function compile()
     var formData = new FormData();
     formData.append("file", new Blob([code], {type : 'text/plain'}), "moj.txt");
 
-    xhr.open('post', "https://api.valky.eu/gabuino/", true);
+    xhr.open('post', "https://api.valky.eu/gabuino/compile.php", true);
+//    xhr.open('post', "localhost:8382/compile", true);
     xhr.send(formData);
     xhr.onload  = function() {
       var jsonResponse = JSON.parse(xhr.responseText);
