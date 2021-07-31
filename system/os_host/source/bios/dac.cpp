@@ -1,6 +1,6 @@
 #include "Bios.h"
 
-#if defined(DS203)
+#if defined(DS203) || defined(DS203HD)
 #include "ds203/dac.cpp"
 #endif
 
