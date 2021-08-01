@@ -57,6 +57,9 @@
     <script src="binary-parser/binary_parser.js"></script>
     <script src="parseelf.js"></script>
     <script src="examples.js"></script>
+    <script src="debugger.js"></script>
+    <script src="dsym_os.js"></script>
+    <script src="dsym_gabuino.js"></script>
 
 <nav class="navbar navbar-expand-lg navbar-light bg-light">
   <a class="navbar-brand" href="#"><img src="gabuino.png" height=32></a>
@@ -71,13 +74,6 @@
           Examples
         </a>
         <div class="dropdown-menu" aria-labelledby="navbarDropdown" id="_examples">
-<!--
-          <a class="dropdown-item" href="#">Blink</a>
-          <a class="dropdown-item" href="#">Random numbers</a>
-          <div class="dropdown-divider"></div>
-          <a class="dropdown-item" href="#">WS2812 addressable leds</a>
-          <a class="dropdown-item" href="#">GPS module</a>
--->
         </div>
       </li>
 
@@ -135,8 +131,9 @@ Stop</button>
     <div class="d-flex justify-content-between align-items-center mb-3">
         <h4 class="card-title mb-4 mt-1">Debug console</h4>
         <div>
+            <button type="button" class="btn btn-outline-success">Screenshot</button>
             <button type="button" class="btn btn-outline-success">Clear</button>
-            <button type="button" class="btn btn-outline-success">Pause</button>
+<!--            <button type="button" class="btn btn-outline-success">Pause</button>-->
         </div>
     </div>
 
@@ -148,6 +145,7 @@ Stop</button>
 <div class="card">
 <article class="card-body">
 <h4 class="card-title mb-4 mt-1">Testing</h4>
+  <input type=button id="frame" value="Start debugging" onclick="debug()">
   <input type=button id="frame" value="frame" onclick="frame()">
   <input type=button id="screenshot" value="screenshot" onclick="screenshot()">
 </article>

@@ -1,6 +1,6 @@
 dsym['os_la104'] = [
-{addr:0x20000000,len:10212,type:'range',name:'ram'}
-{addr:0x08008000,len:45084,type:'range',name:'rom'}
+{addr:0x20000000,len:10212,type:'range',name:'ram'},
+{addr:0x08008000,len:45084,type:'range',name:'rom'},
 {addr:0x20000174,len:16,type:'data',name:'AHBPrescTable'},
 {addr:0x08010654,len:32,type:'code',name:'Bot_Abort'},
 {addr:0x08008198,len:16,type:'code',name:'BusFaultException'},

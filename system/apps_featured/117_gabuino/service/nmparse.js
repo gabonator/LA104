@@ -36,8 +36,8 @@ function fadr(e) { return "0x"+ ("00000000"+e.toString(16)).substr(-8); }
 ///console.log(syms); return;
 console.log("dsym['"+id+"'] = [");
 if (consts["_addressRamBegin"])
-  console.log("{addr:"+fadr(consts["_addressRamBegin"])+",len:"+(consts["_addressRamEnd"]-consts["_addressRamBegin"])+",type:'range',name:'ram'}")
+  console.log("{addr:"+fadr(consts["_addressRamBegin"])+",len:"+(consts["_addressRamEnd"]-consts["_addressRamBegin"])+",type:'range',name:'ram'},")
 if (consts["_addressRomBegin"])
-  console.log("{addr:"+fadr(consts["_addressRomBegin"])+",len:"+(consts["_addressRomEnd"]-consts["_addressRomBegin"])+",type:'range',name:'rom'}")
+  console.log("{addr:"+fadr(consts["_addressRomBegin"])+",len:"+(consts["_addressRomEnd"]-consts["_addressRomBegin"])+",type:'range',name:'rom'},")
 console.log(syms.map(s=>"{addr:" + fadr(s.addr) + ",len:"+s.len+",type:'"+s.type+"',name:'"+s.id+"'},").join("\n"))
 console.log("]");

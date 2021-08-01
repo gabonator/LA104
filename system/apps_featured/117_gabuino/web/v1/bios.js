@@ -74,6 +74,21 @@ var BIOS =
     .then( json => { if (typeof(BIOS.safeeval(json).bulk) == "undefined") throw "problem"; return BIOS.rpcPeekRaw(); } )
     .then( rawdata => { BIOS._rawData = rawdata; /*console.log("raw:"+rawdata.byteLength); */return BIOS.rpcPeek(); })
     .then( json => { if (typeof(BIOS.safeeval(json).ret) == "undefined") throw "problem"; 
-      return Promise.resolve(new Uint32Array(BIOS._rawData.buffer)); })
-
+      return Promise.resolve(new Uint32Array(BIOS._rawData.buffer)); }),
+  screenshot: () => BIOS.rpcCall('DBG::Screenshot()')
+    .then( json => { if (typeof(BIOS.safeeval(json).bulk) == "undefined") throw "problem"; COMM.debug--; return BIOS.rpcPeekRaw(); } )
+    .then( rawdata => { BIOS._rawData = [rawdata]; return BIOS.rpcPeekRaw(); })
+    .then( rawdata => { BIOS._rawData.push(rawdata); return BIOS.rpcPeekRaw(); })
+    .then( rawdata => { BIOS._rawData.push(rawdata); COMM.debug++; return BIOS.rpcPeek(); })
+    .then( json => { 
+      // workaround for 64kb transfer limitation
+      if (typeof(BIOS.safeeval(json).ret) == "undefined") throw "problem"; 
+        return Promise.resolve(Uint16Array.from(
+          function*() { 
+            yield* new Uint16Array(BIOS._rawData[0].buffer); 
+            yield* new Uint16Array(BIOS._rawData[1].buffer); 
+            yield* new Uint16Array(BIOS._rawData[2].buffer); 
+          }()
+        )) 
+    } ),
 };
