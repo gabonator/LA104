@@ -1,6 +1,6 @@
 # Gabuino
 
-!(gabuino)[gabuino.png]
+![gabuino](readme.png)
 
 In-browser development environment for STM32:
 - Inspired by arduino
