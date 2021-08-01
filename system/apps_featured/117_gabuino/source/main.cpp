@@ -106,7 +106,6 @@ int main(void)
 
     if (memcmp(buf, "DBG::Frame()", 12) == 0)
     {
-      BIOS::SYS::Beep(100);
       MEMORY::_Frame();
     }
 

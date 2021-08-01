@@ -15,7 +15,9 @@ namespace MEMORY
 
 //  RingBufCPP<uint16_t, 128> debugPrintBuffer;
 //  char debugPrintBuffer[128] = {0};
-  uint32_t debugStackFrames[20];
+  CArray<uint32_t> debugStackFrames;
+  uint32_t debugStackFramesData[65]; // TODO: wasting!
+
   char tempBuf[200];
 
 
@@ -159,9 +161,15 @@ namespace MEMORY
   {
     static uint32_t *SP;
     asm("mrs %0, msp" : "=r"(SP) : :);
-    uint32_t *stack = SP+6;
-    for (int i=0; i<20; i++)
-      debugStackFrames[i] = stack[i];
+    uint32_t* stack = SP+6;
+    uint32_t* endStack = (uint32_t*)(BIOS::SYS::GetAttribute(BIOS::SYS::EAttribute::EndStack));
+
+    int count = 0;
+    for (count=0; count<COUNT(debugStackFramesData) && stack < endStack; count++)
+      debugStackFramesData[count] = *stack++;
+
+    debugStackFrames.Init(debugStackFramesData, count);
+    debugStackFrames.SetSize(count);
     return 0;
   }
 
@@ -169,10 +177,10 @@ namespace MEMORY
   {
     if (debugStackFrames[0] == 0xffffffff)
       return -1;
-    TERMINAL::Print("{bulk:%d,bps:32}", sizeof(debugStackFrames));
-    TERMINAL::BulkTransfer((uint8_t*)debugStackFrames, sizeof(debugStackFrames));
+    TERMINAL::Print("{bulk:%d,bps:32}", debugStackFrames.GetSize()*4);
+    TERMINAL::BulkTransfer((uint8_t*)debugStackFrames.GetData(), debugStackFrames.GetSize()*4);
     // mark invalid
-    debugStackFrames[0] = 0xffffffff;
+    debugStackFrames[0] = 0xaaaaaaaa;
     return 90;
   }
 

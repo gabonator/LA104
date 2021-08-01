@@ -1,6 +1,6 @@
 dsym['gabuino'] = [
-{addr:0x20004780,len:1488,type:'range',name:'ram'}
-{addr:0x08064100,len:12076,type:'range',name:'rom'}
+{addr:0x20004780,len:1488,type:'range',name:'ram'},
+{addr:0x08064100,len:12076,type:'range',name:'rom'},
 {addr:0x0806451c,len:20,type:'code',name:'_HandleAssertion'},
 {addr:0x0806450c,len:16,type:'code',name:'_PrepareRun()'},
 {addr:0x08064df4,len:4,type:'code',name:'_yield()'},
@@ -38,7 +38,7 @@ dsym['gabuino'] = [
 {addr:0x08065c2c,len:48,type:'code',name:'_usbd_standard_request_interface'},
 {addr:0x08064fac,len:68,type:'code',name:'aggregate_register_callback'},
 {addr:0x08064f7c,len:48,type:'code',name:'aggregate_register_config_callback'},
-{addr:0x20005000,len:8192,type:'data',name:'appblob'},
+//{addr:0x20005000,len:8192,type:'data',name:'appblob'},
 {addr:0x08065148,len:12,type:'code',name:'cdc_set_receive_callback'},
 {addr:0x080650a4,len:28,type:'code',name:'cdc_setup'},
 {addr:0x08065170,len:44,type:'code',name:'cdc_transmit'},

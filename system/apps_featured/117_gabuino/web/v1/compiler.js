@@ -78,15 +78,6 @@ function stop()
   BIOS.stop()
 }
 
-function frame()
-{
-  BIOS.frame().then(f => {
-    var arr = [];
-    for (var i=0; i<f.length; i++) arr.push("0x"+ ("00000000"+f[i].toString(16)).substr(-8));
-    console.log(arr);
-    //console.log(f.map(x=>"0x"+x.toString(16)))
-  });
-}
 var globalOffset;
 var globalBlob;
 var globalResolve = [];
