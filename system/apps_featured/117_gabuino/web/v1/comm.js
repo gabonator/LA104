@@ -8,11 +8,11 @@ var COMM = {
   },
   _defEval: (msg) => 
   {
-    if (msg.indexOf("_DBGPRINT('<script>") == 0)
+    if (msg.indexOf("_DBGPRINT('<script>") == 0 || msg.indexOf("_DBGPRINT(`<script>") == 0)
     {
-      var inside = msg.match("<script>(.*)</script>");
+      var inside = msg.split("\n").join("<_br_>").match("<script>(.*)</script>");
       if (inside)
-        setTimeout(inside[1], 0);
+        setTimeout(inside[1].split("<_br_>").join("\n"), 0);
       return;
     }
     if (msg.indexOf("_DBGPRINT(") == 0 || msg.indexOf("_DBGEVENT(") == 0)

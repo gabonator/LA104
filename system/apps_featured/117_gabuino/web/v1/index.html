@@ -167,6 +167,7 @@ $('#_run').on('click', function(event) {
   if (typeof(lastCode) != "undefined" && lastCode == newCode)
   {
     // reset bss!
+    $("#_debugText").text("");
     run();
     return;
   }
@@ -241,7 +242,8 @@ COMM.setNoDevices = () => {
 
 function _DBGPRINT(msg)
 {
-  $("#_debugText").append(msg);
+document.getElementById("_debugText").innerHTML += msg;
+//  $("#_debugText").append(msg);
 }
 
 function _DBGEVENT(e)

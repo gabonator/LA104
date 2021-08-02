@@ -5,8 +5,9 @@
 #include "evaluator.h"
 #include "webusb/webusb.h"
 
-uint8_t appblob[4096*2] __attribute__((section(".usersection")));
+//uint8_t appblob[4096*2] __attribute__((section(".usersection")));
 
+bool continuous = 0;
 char command[128] = {0};
 const char anim[] = "|/-\\|/-\\";
 int animphase = 0;
@@ -30,8 +31,7 @@ void _PrepareRun()
 
 void EventLoop()
 {
-
-    if (command[0])
+    if (!continuous && command[0])
     {
       int result = evaluator.Evaluate(command);
       command[0] = 0;
@@ -117,6 +117,20 @@ int main(void)
         evaluator.Evaluate((char*)buf);
         return;
       }
+    }
+
+    if (len == 64)
+    {
+      continuous = true;
+      memcpy(command, buf, len);
+      return;
+    }
+    if (continuous)
+    {
+      _ASSERT(len < 64);
+      strcat(command, (char*)buf);
+      continuous = false;
+      return;
     }
 
     memcpy(command, buf, len);

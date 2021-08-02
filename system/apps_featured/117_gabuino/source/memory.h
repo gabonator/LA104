@@ -107,8 +107,8 @@ namespace MEMORY
 
   void DbgPrint2(const char * format, ...)
   {
-    const char* prefix = "_DBGPRINT(\"";
-    const char* suffix = "\");";
+    const char* prefix = "_DBGPRINT(`";
+    const char* suffix = "`);";
     const int prefixlen = strlen(prefix);
     const int suffixlen = strlen(suffix);
 
