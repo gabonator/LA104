@@ -6,7 +6,10 @@
 
 LA104 is another nice piece of handheld hardware coming from [e-design / miniware company](http://www.miniware.com.cn/) similar to their previous product - pocket digital storage oscillosope DS203. 
 
-This time they designed wholly digital device without analog circuitry featuring 4 general purpose IO signals and 4 digital inputs processed by [AG1K FPGA chip](http://www.alta-gate.com/products.aspx?id=43&p=14), the processor used is the same as in DS203 - STM32F103VCT6. Device is battery powered, charged through USB micro connector, its display (ILI9341) offers resolution of 320x240 pixels and the storage EEPROM has this time capacity of 8MB. Check the [scheme here](resources/LA104%20V1.5B_SCH.pdf)
+This time they designed wholly digital device without analog circuitry featuring 4 general purpose IO signals and 4 digital inputs processed by [AG1K FPGA chip](http://www.alta-gate.com/products.aspx?id=43&p=14), the processor used is the same as in DS203 - STM32F103VCT6. Device is battery powered, charged through USB micro connector, its display (ILI9341) offers resolution of 320x240 pixels and the storage EEPROM has this time capacity of 8MB. Check the schematics for supported devices:
+* LA104 - [Scheme here](resources/LA104%20V1.5B_SCH.pdf)
+* DS213 - [Scheme here](resources/DS213%20V2.0_SCH.pdf)
+* DS203 - [Scheme here](resources/DS203%20V2.7_SCH.pdf)
 
 ![Product brief](resources/productBrief.png)
 
