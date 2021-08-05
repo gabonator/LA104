@@ -37,6 +37,19 @@ function writeDword(ofs, val)
   globalBlob[ofs-globalOffset+0] = val >> 0;
 }
 
+function readDword(ofs)
+{
+  var t = 0;
+  t = globalBlob[ofs-globalOffset+3]; 
+  t <<= 8;
+  t |= globalBlob[ofs-globalOffset+2];
+  t <<= 8;
+  t |= globalBlob[ofs-globalOffset+1];
+  t <<= 8;
+  t |= globalBlob[ofs-globalOffset+0];
+  return t;
+}
+
 function clearBss(blob, ofs, len)
 {
   for (var i=0; i<len; i++)
@@ -67,9 +80,18 @@ function flash()
 }
 
 function run()
-{
-  BIOS.exec(globalOffset|1)//.then( () => resolve() )
-  // we do not know if the program keeps running or has ended with return code
+{   
+  console.log("globalInit");
+  var prepare = Promise.resolve();
+  if (globalInit.length > 0)
+  {
+    prepare = globalInit.reduce((p, x) => p.then(_ => BIOS.exec(x|1)), Promise.resolve())
+//    for (var i=0; i<globalInit.length; i++)
+//      BIOS.exec(globalInit[i]|1); // we should chain these!
+  }
+  
+  prepare.then( () => BIOS.exec(globalOffset|1) )//.then( () => resolve() )
+    // we do not know if the program keeps running or has ended with return code
   return Promise.resolve();
 }
 
@@ -80,6 +102,7 @@ function stop()
 
 var globalOffset;
 var globalBlob;
+var globalInit;
 var globalResolve = [];
 function processElf(elf)
 {
@@ -96,6 +119,8 @@ function processElf(elf)
       throw "too big blob";
   // TODO: BSS!!!!
     var appblob = new Uint8Array(end-begin);
+    globalBlob = appblob;
+    var init = [];
     for (var i=0; i<elfinfo.sections.length; i++)
     {
       var section = elfinfo.sections[i];
@@ -103,6 +128,14 @@ function processElf(elf)
         section.data.copyTo(appblob, section.addr - begin);
       else
         clearBss(appblob, section.addr - begin, section.size);
+
+      if (section.name == ".init_array")
+      {
+        globalOffset = begin;
+        globalBlob = appblob;
+        for (var i=0; i<section.size; i+=4)
+          init.push(readDword(section.addr + i));
+      }
     }
     for (var i=0; i<elfinfo.relocations.length; i++)
     {
@@ -115,6 +148,7 @@ function processElf(elf)
     console.log(appblob);
     globalOffset = begin;
     globalBlob = appblob;
+    globalInit = init;
     resolve(elfinfo)
 //    continueResolve(resolve);
   });

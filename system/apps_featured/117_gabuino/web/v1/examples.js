@@ -218,7 +218,7 @@ examples =
     '    \n' +
     '    return 0;\n' +
     '}',
-  'gabo.cpp': '#include <library.h>\n' +
+  'demo.cpp': '#include <library.h>\n' +
     '\n' +
     'using namespace BIOS;\n' +
     '\n' +
@@ -239,7 +239,7 @@ examples =
     '        y = y1;\n' +
     '\n' +
     '        if ((c++ % 1000) == 0)\n' +
-    '            DBG::Print("%d lines, ", c/1000);\n' +
+    '            DBG::Print("<b>%d</b> lines, ", c);\n' +
     '    }\n' +
     '    \n' +
     '    return 0;\n' +
@@ -404,6 +404,54 @@ examples =
     '}\n' +
     '\n' +
     '\n',
+  'flappybird.cpp': '// Play flappy bird in browser, press F1 on LA104 to jump\n' +
+    '// Based on Tiny flappy bird by Daniel Bark:\n' +
+    '//   https://github.com/danba340/tiny-flappy-bird\n' +
+    '\n' +
+    '#include <library.h>\n' +
+    '\n' +
+    'int main(void)\n' +
+    '{\n' +
+    '    BIOS::DBG::Print(R"(<canvas id="c" width="400" height="400" style="background:gray"></canvas>)");\n' +
+    '\n' +
+    '    BIOS::DBG::Print(R"(<script>\n' +
+    '    context = document.getElementById("c").getContext("2d");\n' +
+    '    bird = new Image();\n' +
+    '    bird.src = "https://raw.githubusercontent.com/danba340/tiny-flappy-bird/master/bird.png";\n' +
+    '    birdX = birdDY = score = bestScore = 0;\n' +
+    '    interval = birdSize = pipeWidth = topPipeBottomY = 24;\n' +
+    '    birdY = pipeGap = 200;\n' +
+    '    canvasSize = pipeX = 400;\n' +
+    '    c.onclick = () => (birdDY = 9);\n' +
+    '    setInterval(() => {\n' +
+    '      context.fillStyle = "skyblue";\n' +
+    '      context.fillRect(0,0,canvasSize,canvasSize); // Draw sky\n' +
+    '      birdY -= birdDY -= 0.5; // Gravity\n' +
+    '      context.drawImage(bird, birdX, birdY, birdSize * (524/374), birdSize); // Draw bird\n' +
+    '      context.fillStyle = "green";\n' +
+    '      pipeX -= 8; // Move pipe\n' +
+    '      pipeX < -pipeWidth && // Pipe off screen?\n' +
+    '        ((pipeX = canvasSize), (topPipeBottomY = pipeGap * Math.random())); // Reset pipe and randomize gap.\n' +
+    '      context.fillRect(pipeX, 0, pipeWidth, topPipeBottomY); // Draw top pipe\n' +
+    '      context.fillRect(pipeX, topPipeBottomY + pipeGap, pipeWidth, canvasSize); // Draw bottom pipe\n' +
+    '      context.fillStyle = "black";\n' +
+    '      context.fillText(score++, 9, 25); // Increase and draw score\n' +
+    '      bestScore = bestScore < score ? score : bestScore; // New best score?\n' +
+    "      context.fillText('Best: '+bestScore, 9, 50); // Draw best score\n" +
+    '      (((birdY < topPipeBottomY || birdY > topPipeBottomY + pipeGap) && pipeX < birdSize * (524/374))// Bird hit pipe?\n' +
+    '       || birdY > canvasSize) && // Bird falls off screen\n' +
+    '      ((birdDY = 0), (birdY = 200), (pipeX = canvasSize), (score = 0)); // Bird died\n' +
+    '    }, interval)\n' +
+    '  </script>)");\n' +
+    '\n' +
+    '    BIOS::KEY::EKey key;\n' +
+    '    while ((key = BIOS::KEY::GetKey()) != BIOS::KEY::EKey::Escape)\n' +
+    '    {\n' +
+    '        if (key == BIOS::KEY::EKey::Enter)\n' +
+    '            BIOS::DBG::Print(R"(<script>birdDY=9</script>)");\n' +
+    '    }\n' +
+    '    return 0;\n' +
+    '}\n',
   'gps.cpp': '#include <library.h>\n' +
     '\n' +
     'using namespace BIOS;\n' +
@@ -599,15 +647,102 @@ examples =
     '    \n' +
     '    return 0;\n' +
     '}',
-  'map.cpp': '#include <library.h>\n' +
+  'melody.cpp': '// plays Axel F on internal piezo speaker of LA104\n' +
+    '#include <library.h>\n' +
+    '#include <math.h>\n' +
     '\n' +
-    'int main(void)\n' +
+    'void WriteTim8(int reg, uint16_t val)\n' +
     '{\n' +
-    `    BIOS::DBG::Print("<div style='position:relative;'>");\n` +
-    `    BIOS::DBG::Print("<div style='position:absolute; left:0px; top:80px; width:400px; height:200px;'><img src='https://www.world-maps.org/images/wor32k6.jpg'></div>");\n` +
-    `    BIOS::DBG::Print("<div style='position:absolute; left:60px; top:120px; width:8px; height:8px; background:#ff0000;'>On top</div>");\n` +
-    '    BIOS::DBG::Print("</div>");\n' +
+    '  *((uint16_t*)(0x40013400 + reg)) = val;\n' +
+    '}\n' +
+    '\n' +
+    'void SoundOn()\n' +
+    '{\n' +
+    '  WriteTim8(0x20, 0x3000);\n' +
+    '  WriteTim8(0x00, 0x0081);\n' +
+    '  WriteTim8(0x40, 150); // volume\n' +
+    '}\n' +
+    '\n' +
+    'void SoundOff()\n' +
+    '{\n' +
+    '  WriteTim8(0x20, 0x0000);\n' +
+    '  WriteTim8(0x00, 0x0080);\n' +
+    '}\n' +
+    '\n' +
+    'void Sound(int f)\n' +
+    '{\n' +
+    '    WriteTim8(0x24, 0);\n' +
+    '    WriteTim8(0x28, 15-1);\n' +
+    '    int div = 72e6/15/f;\n' +
+    '    WriteTim8(0x2c, div-1);\n' +
+    '    //BIOS::DBG::Print("f=%d, div=%d, ", f, div);\n' +
+    '    SoundOn();\n' +
+    '}\n' +
+    '\n' +
+    'int C=0, Cis=1, D=2, Dis=3, E=4, F=5, Fis=6, G=7, Gis=8, A=9, Ais=10, B=11, None=12;\n' +
+    'const int BPM = 120;\n' +
+    '\n' +
+    'const int Beat = 60000 / BPM;\n' +
+    'int Whole = Beat*4;\n' +
+    'int Half = Whole/2;\n' +
+    'int Quarter = Whole/4;\n' +
+    'int Eigth = Whole/8;\n' +
+    'int Sixteenth = Whole/16;\n' +
+    'int Thirtysecond = Whole/32;\n' +
+    'int WholeDot = Whole*1.5;\n' +
+    'int HalfDot = Half*1.5;\n' +
+    'int QuarterDot = Quarter*1.5;\n' +
+    'int EigthDot = Eigth*1.5;\n' +
+    'int SixteenthDot = Sixteenth*1.5;\n' +
+    'int ThirtysecondDot = Thirtysecond*1.5;\n' +
+    '\n' +
+    'int Frequency(int note, int octave)\n' +
+    '{\n' +
+    '  const int table[] = {4186, 4434, 4698, 4978, 5274, 5587, 5915, 6271, 6644, 7040, 7458, 7902};\n' +
+    '  return table[note] >> (4-octave);\n' +
+    '}\n' +
+    '\n' +
+    'void Play(int note, int octave, int length)\n' +
+    '{\n' +
+    '  if (note != None) \n' +
+    '    Sound(Frequency(note, octave));\n' +
+    '\n' +
+    '  //BIOS::DBG::Print("len=%d, ", length);\n' +
+    '  BIOS::SYS::DelayMs(length);\n' +
+    '  SoundOff();\n' +
+    '  BIOS::SYS::DelayMs(10);\n' +
+    '}\n' +
+    '\n' +
+    'int main()\n' +
+    '{\n' +
+    '    // generated from http://x.valky.eu/klavirgen\n' +
+    '    Play(G, 2, Quarter);\n' +
+    '    Play(Ais, 2, EigthDot);\n' +
+    '    Play(G, 2, Sixteenth);\n' +
+    '    Play(None, 0, Sixteenth);\n' +
+    '    Play(G, 2, Sixteenth);\n' +
+    '    Play(C, 3, Eigth);\n' +
+    '    Play(G, 2, Eigth);\n' +
+    '    Play(F, 2, Eigth);\n' +
+    '    Play(G, 2, Quarter);\n' +
+    '    Play(D, 3, EigthDot);\n' +
+    '    Play(G, 2, Sixteenth);\n' +
+    '    Play(None, 0, Sixteenth);\n' +
+    '    Play(G, 2, Sixteenth);\n' +
+    '    Play(Dis, 3, Eigth);\n' +
+    '    Play(D, 3, Eigth);\n' +
+    '    Play(Ais, 2, Eigth);\n' +
+    '    Play(G, 2, Eigth);\n' +
+    '    Play(D, 3, Eigth);\n' +
+    '    Play(G, 3, Eigth);\n' +
+    '    Play(G, 2, Sixteenth);\n' +
+    '    Play(F, 2, Sixteenth);\n' +
+    '    Play(None, 0, Sixteenth);\n' +
+    '    Play(F, 2, Sixteenth);\n' +
+    '    Play(D, 2, Eigth);\n' +
+    '    Play(A, 2, Eigth);\n' +
+    '    Play(G, 2, Half);\n' +
+    '\n' +
     '    return 0;\n' +
-    '}\n',
-  'return.cpp': '#include <library.h>\n\nint main(void)\n{\n    return 724;\n}\n'
+    '}\n'
 }

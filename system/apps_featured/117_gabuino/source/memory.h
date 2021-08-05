@@ -65,7 +65,7 @@ namespace MEMORY
 
   int Exec(uint32_t ptr)
   {
-    _ASSERT(ptr == 0x20005001);
+    _ASSERT((ptr & 1) && (ptr >= 0x20005001));
     userRetVal = 0x66667777;
 
     typedef int(*TFunc)();

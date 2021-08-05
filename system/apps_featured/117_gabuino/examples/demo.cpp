@@ -19,7 +19,7 @@ int main(void)
         y = y1;
 
         if ((c++ % 1000) == 0)
-            DBG::Print("%d lines, ", c/1000);
+            DBG::Print("<b>%d</b> lines, ", c);
     }
     
     return 0;
