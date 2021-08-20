@@ -1,5 +1,5 @@
 dsym['gabuino'] = [
-{addr:0x20004780,len:1680,type:'range',name:'ram'},
+{addr:0x20004780,len:1780,type:'range',name:'ram'},
 {addr:0x08040100,len:12380,type:'range',name:'rom'},
 {addr:0x08040540,len:20,type:'code',name:'_HandleAssertion'},
 {addr:0x08040530,len:16,type:'code',name:'_PrepareRun()'},

@@ -34,11 +34,15 @@ function decodeAddr(addr)
       var symbol = symlist[j];
       if (symbol.type != "range" && addr >= symbol.addr && addr < symbol.addr + symbol.len)
       {
-        ret.push(symbol.name);
+        ret.push("("+i+") " + symbol.name);
       }
     }
   }
-  return ret.length ? ret : null;
+  if (!ret.length)
+    return null
+  if (ret.length > 1)
+    throw "multiple symbols!";
+  return ret[0];
 }
 
 function frame()
@@ -48,8 +52,16 @@ function frame()
 //    for (var i=0; i<f.length; i++) arr.push("0x"+ ("00000000"+f[i].toString(16)).substr(-8));
     for (var i=0; i<f.length; i++) arr.push(f[i]); //"0x"+ ("00000000"+f[i].toString(16)).substr(-8));
 
-    console.log(arr.map(p => "0x"+ ("00000000"+p.toString(16)).substr(-8)));
-    console.log(arr.map(decodeAddr).filter(x => x));
+//    console.log(arr.map(p => "0x"+ ("00000000"+p.toString(16)).substr(-8)));
+//    console.log(arr.map(decodeAddr).filter(x => x));
+
+  console.log(arr.map(a => {
+    dec = decodeAddr(a);
+    if (!dec)
+      return "0x"+ ("00000000"+a.toString(16)).substr(-8);
+    else
+      return "0x"+ ("00000000"+a.toString(16)).substr(-8) + " " + dec;
+  }));
     //console.log(f.map(x=>"0x"+x.toString(16)))
   });
 }
@@ -88,4 +100,27 @@ function screenshot()
     _DBGPRINT(element);
   });
 
+}
+
+function assembly()
+{
+  return new Promise( (resolve, reject) =>
+  {
+    var code = html_editor.getValue();
+    code = code.split("int main(").join("int __attribute__((__section__(\".entry\"))) main(");
+    var xhr = new XMLHttpRequest();
+    var formData = new FormData();
+    formData.append("file", new Blob([code], {type : 'text/plain'}), "moj.txt");
+
+//    xhr.open('post', "https://api.valky.eu/gabuino/debug.php", true);
+//    xhr.open('post', "http://cloud.valky.eu:8382/debug", true);
+    xhr.open('post', "http://localhost:8382/debug", true);
+    xhr.send(formData);
+    xhr.onload  = function() {
+      var jsonResponse = JSON.parse(xhr.responseText);
+//      setTimeout(jsonResponse.stdout, 0);
+      $("#_testing").html(jsonResponse.stdout)
+      console.log(jsonResponse);
+    };
+  });
 }
