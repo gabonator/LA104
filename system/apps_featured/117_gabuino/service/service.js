@@ -86,7 +86,6 @@ app.post('/debug', function(req, res)
 
   debug(textIn).then( out =>
   {
-console.log( "aaaaaaaa")
     res.end(JSON.stringify(out));
   });
 });
@@ -335,19 +334,19 @@ function debug(code)
   .then( (r) => 
   {
     if (r.code != 0) 
-      throw "compilation failed";
+      throw "compilation failed - 1";
   })
   .then( () => exec("arm-none-eabi-g++", cflags +  " -nostartfiles -T ../source/app.lds "/*-Os */ + "-o test.elf ../source/test.cpp", {cwd:_appbase + "/build"}) )
   .then( (r) => 
   {
     if (r.code != 0) 
-      throw "compilation failed";
+      throw "compilation failed - 2";
   })
   .then( () => exec("arm-none-eabi-objdump", "-l -C -d -S test.elf", {cwd:_appbase + "/build"}) ) // TODO: in stdout
   .then( (r) => 
   {
     if (r.code != 0) 
-      throw "compilation failed";
+      throw "compilation failed - 3";
     fs.writeFileSync(_appbase + "/build/objdump.asm", r.stdout);
   })
   .then( () => exec("node", "matchasm.js "+_appbase+"/build/test_gcc.asm "+_appbase+"/build/objdump.asm"))
@@ -355,7 +354,12 @@ function debug(code)
   {
     console.log("done!!!");
     if (r.code != 0) 
-      throw "symbol processing failed";
+      throw "symbol processing failed - 4";
     return r;
   })
+  .catch( (e) =>
+  {
+    console.log(e);
+    return JSON.stringify({error:e});
+  });
 }

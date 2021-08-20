@@ -104,6 +104,7 @@ function screenshot()
 
 function assembly()
 {
+  store_code();
   return new Promise( (resolve, reject) =>
   {
     var code = html_editor.getValue();
@@ -119,7 +120,7 @@ function assembly()
     xhr.onload  = function() {
       var jsonResponse = JSON.parse(xhr.responseText);
 //      setTimeout(jsonResponse.stdout, 0);
-      $("#_testing").html(jsonResponse.stdout)
+      $("#_testing").html("<pre>"+jsonResponse.stdout+"</pre>")
       console.log(jsonResponse);
     };
   });
