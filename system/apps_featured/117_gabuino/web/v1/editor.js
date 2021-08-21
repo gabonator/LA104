@@ -48,21 +48,21 @@ function handleError(stderr)
 var html_editor;
 var aceRange;
 function initAceEditor() {
-ace.require("ace/ext/language_tools");
-aceRange = ace.require("ace/range").Range
+  ace.require("ace/ext/language_tools");
+  aceRange = ace.require("ace/range").Range
 
-html_editor = ace.edit("my_html");
-html_editor.setTheme("ace/theme/xcode");
-html_editor.getSession().setMode("ace/mode/c_cpp");
-html_editor.setFontSize("15px") ;
-html_editor.setPrintMarginColumn(false);
-html_editor.session.setValue($("#my_html_hidden").text());
-html_editor.setOptions({
-//maxLines: 20,
-    enableBasicAutocompletion: true
-});
+  html_editor = ace.edit("my_html");
+  html_editor.setTheme("ace/theme/xcode");
+  html_editor.getSession().setMode("ace/mode/c_cpp");
+  html_editor.setFontSize("15px") ;
+  html_editor.setPrintMarginColumn(false);
+//  html_editor.session.setValue($("#my_html_hidden").text());
+  html_editor.setOptions({
+  //maxLines: 20,
+      enableBasicAutocompletion: true
+  });
 
-
+/*
 var langTools = ace.require("ace/ext/language_tools");
 var rhymeCompleter = {
         getCompletions: function(editor, session, pos, prefix, callback) {
@@ -74,32 +74,39 @@ console.log(prefix);
         }
     }
     langTools.addCompleter(rhymeCompleter);
+*/
+  html_editor.on("guttermousedown", function(e) {
+      var target = e.domEvent.target; 
+      if (target.className.indexOf("ace_gutter-cell") == -1)
+          return; 
+      if (!html_editor.isFocused()) 
+          return; 
+    
+  //  console.log(e.clientX > 25 + target.getBoundingClientRect().left);  
+  //  console.log(e.clientX, 25 + target.getBoundingClientRect().left);
+    
+      if (e.clientX > 50 + target.getBoundingClientRect().left) 
+          return; 
 
-html_editor.on("guttermousedown", function(e) {
-    var target = e.domEvent.target; 
-    if (target.className.indexOf("ace_gutter-cell") == -1)
-        return; 
-    if (!html_editor.isFocused()) 
-        return; 
-  
-  console.log(e.clientX > 25 + target.getBoundingClientRect().left);
-  
-  console.log(e.clientX, 25 + target.getBoundingClientRect().left);
-  
-    if (e.clientX > 25 + target.getBoundingClientRect().left) 
-        return; 
+      var row = e.getDocumentPosition().row;
+      e.stop();
 
-    var breakpoints = e.editor.session.getBreakpoints(row, 0);
-var row = e.getDocumentPosition().row;
-if(typeof breakpoints[row] === typeof undefined)
-    e.editor.session.setBreakpoint(row);
-else
-    e.editor.session.clearBreakpoint(row);
-    e.stop();
-})
+      debuggerTryBreakpoint(row).then( (row) =>
+      {
+console.log("set row " + row);
+        if (row == -1)
+          return;
+                                                           
+        var breakpoints = e.editor.session.getBreakpoints(/*newRow, 0*/);
 
+  //      var row = e.getDocumentPosition().row;
+        if(typeof breakpoints[row] === typeof undefined)
+            e.editor.session.setBreakpoint(row);
+        else
+            e.editor.session.clearBreakpoint(row);
+      });
 
-
+  });
 }
 
 // the function is called at the end of a function that

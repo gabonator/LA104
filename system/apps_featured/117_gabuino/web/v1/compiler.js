@@ -80,7 +80,7 @@ function flash()
 }
 
 function run()
-{   
+{ 
   console.log("globalInit");
   var prepare = Promise.resolve();
   if (globalInit.length > 0)
@@ -89,7 +89,7 @@ function run()
 //    for (var i=0; i<globalInit.length; i++)
 //      BIOS.exec(globalInit[i]|1); // we should chain these!
   }
-  
+  running = true;
   prepare.then( () => BIOS.exec(globalOffset|1) )//.then( () => resolve() )
     // we do not know if the program keeps running or has ended with return code
   return Promise.resolve();

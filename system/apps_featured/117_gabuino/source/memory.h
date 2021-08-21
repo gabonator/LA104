@@ -9,6 +9,7 @@ namespace MEMORY
   uint8_t* writePtr = nullptr;
   int writeCount = 0;
   bool running = false;
+  bool trapped = false;
   bool shouldStop = false;
   int writeSum = 0;
   int userRetVal = 0x66667777;
@@ -16,7 +17,7 @@ namespace MEMORY
 //  RingBufCPP<uint16_t, 128> debugPrintBuffer;
 //  char debugPrintBuffer[128] = {0};
   CArray<uint32_t> debugStackFrames;
-  uint32_t debugStackFramesData[65]; // TODO: wasting!
+  uint32_t debugStackFramesData[90]; // TODO: wasting!
 
   char tempBuf[200];
 
@@ -105,6 +106,20 @@ namespace MEMORY
       return BIOS::KEY::EKey::Escape;
   }
 
+  int DelayMs2(int duration)
+  {
+    while (duration>20)
+    {
+      EventLoop();
+      BIOS::SYS::DelayMs(20);
+      duration -= 20;
+    }
+    EventLoop();
+    if (duration > 0)
+      BIOS::SYS::DelayMs(duration);    
+    return 0;
+  }
+
   void DbgPrint2(const char * format, ...)
   {
     const char* prefix = "_DBGPRINT(`";
@@ -154,6 +169,8 @@ namespace MEMORY
       return (uint32_t)MEMORY::GetKey2;
     if (strcmp(name, "_ZN4BIOS3DBG5PrintEPKcz") == 0)
       return (uint32_t)MEMORY::DbgPrint2;
+    if (strcmp(name, "_ZN4BIOS3SYS7DelayMsEi") == 0)
+      return (uint32_t)MEMORY::DelayMs2;
     return BIOS::SYS::GetProcAddress(name);
   }
 
@@ -199,6 +216,12 @@ namespace MEMORY
       }
     });
     BIOS::LCD::BufferEnd();
+    return 0;
+  }
+
+  int Resume()
+  {
+    trapped = false;
     return 0;
   }
 /*

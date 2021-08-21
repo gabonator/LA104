@@ -4,6 +4,7 @@
 #include "rpc.h"
 #include "evaluator.h"
 #include "webusb/webusb.h"
+#include "debug.h"
 
 //uint8_t appblob[4096*2] __attribute__((section(".usersection")));
 
@@ -40,11 +41,23 @@ void EventLoop()
 
     EVERY(1000)
     {
-      if (MEMORY::running)
+      if (MEMORY::trapped)
+        BIOS::LCD::Printf(BIOS::LCD::Width-16, BIOS::LCD::Height-14, RGB565(b050ff), RGB565(404040), "%c", anim[animphase++&7]);
+      else if (MEMORY::running)
         BIOS::LCD::Printf(BIOS::LCD::Width-16, BIOS::LCD::Height-14, RGB565(ff5050), RGB565(404040), "%c", anim[animphase++&7]);
       else
         BIOS::LCD::Printf(BIOS::LCD::Width-16, BIOS::LCD::Height-14, RGB565(b0b0b0), RGB565(404040), "%c", anim[animphase++&7]);
     }
+}
+
+void Trap()
+{
+  MEMORY::trapped = true;
+  TERMINAL::Print("_DBGEVENT(2, 0x%02x)", trappedAddress);
+  trappedAddress += 2;
+  trappedAddress |= 1;
+  while (MEMORY::trapped)
+    EventLoop();
 }
 
 void _yield()
@@ -55,7 +68,6 @@ void _yield()
 __attribute__((__section__(".entry")))
 int main(void) 
 {
-
   CRect rcClient(0, 0, BIOS::LCD::Width, BIOS::LCD::Height);
   GUI::Background(rcClient, RGB565(404040), RGB565(101010));
 
@@ -80,6 +92,8 @@ int main(void)
     while (1);
     // TODO: reset hard fault vector back!
   });
+
+  BeginDebugSession();
 
   BIOS::OS::TInterruptHandler isrOld = BIOS::OS::GetInterruptVector(BIOS::OS::IUSB_LP_CAN_RX0_IRQ);
   BIOS::OS::SetInterruptVector(BIOS::OS::IUSB_LP_CAN_RX0_IRQ, []() {});
@@ -150,6 +164,8 @@ int main(void)
 
   BIOS::DBG::Print("USB end\n");
   BIOS::OS::SetInterruptVector(BIOS::OS::IUSB_LP_CAN_RX0_IRQ, isrOld);
+  EndDebugSession();
+
   // TODO: reset usb configuration
 //  BIOS::USB::InitializeMass();
   return 0;

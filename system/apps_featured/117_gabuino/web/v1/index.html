@@ -180,7 +180,7 @@ OS: Exec
 -->
   <input type=button id="frame" value="Start debugging" onclick="debug()">
   <input type=button id="frame" value="frame" onclick="frame()">
-  <input type=button id="assembly" value="assembly" onclick="assembly()">
+  <input type=button id="assembly" value="assembly" onclick="getAssembly()">
 </article>
 <div id="_testing"></div>
 </div>
@@ -190,6 +190,7 @@ OS: Exec
 
 
 <script>
+var running = false;
 $('#_connect').on('click', function(event) {
 //  event.preventDefault(); // To prevent following the link (optional)
   COMM.doConnect();
@@ -208,7 +209,7 @@ $('#_run').on('click', function(event) {
     return;
   }
   lastCode = newCode;
-
+  lastAssembly = null;
 
   var tick0 = (new Date).getTime();
   var tick1, tick2, tick3;
@@ -284,9 +285,15 @@ function _DBGPRINT(msg)
   $("#_debugText").append(msg);
 }
 
-function _DBGEVENT(e)
+function _DBGEVENT(e, arg)
 {
-  console.log("Program finished: "+e);
+  switch (e)
+  {
+    case 1: running = false; console.log("Program finished"); break;
+    case 2: console.log("Program trapped at 0x" + arg.toString(16)); break;
+    default: console.log("Unrecognized event " + e);
+  }
+ 
 //  $("#_debugText").append();
 }
 
@@ -337,7 +344,10 @@ int main(void)
    
 }
 
-
+function getAssembly()
+{
+  assembly().then( asm => $("#_testing").html("<pre>"+asm+"</pre>"));
+}
 document.addEventListener('DOMContentLoaded', () => load_code());
 
 </script>

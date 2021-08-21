@@ -69,6 +69,7 @@ var BIOS =
     else
       COMM._defEval(ret);
   }),
+  resume: () => BIOS.rpcCall('DBG::Resume()').then( BIOS.retval ),
   stop: () => BIOS.rpcCall('DBG::Stop()').then( BIOS.retval ),
   frame: () => BIOS.rpcCall('DBG::Frame()')
     .then( json => { if (typeof(BIOS.safeeval(json).bulk) == "undefined") throw "problem"; return BIOS.rpcPeekRaw(); } )

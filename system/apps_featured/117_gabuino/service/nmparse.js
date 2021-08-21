@@ -27,6 +27,7 @@ for(var i in s)
   var type="";
   if (m[3] == "T") type="code";
   else if (m[3] == "D") type="data";
+  else if (m[3] == "B") type="data";
   else continue;
   
   syms.push({addr:parseInt("0x"+m[1]),len:parseInt("0x"+m[2]),type:type,id:m[4]});
