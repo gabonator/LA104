@@ -1478,10 +1478,7 @@ Interpreter::readInput()
 		return false;
 
 	const uint8_t availableSize = PROGSTRINGSIZE - 1 - _inputPosition;
-    a = (uint8_t)a;
-    if (availableSize < a)
-        a = availableSize; // gabo
-	//a = min<uint8_t>(uint8_t(a), availableSize);
+	a = min(uint8_t(a), availableSize);
 
 	const size_t read = _input.readBytes(_inputBuffer + _inputPosition, a);
 	assert(read <= availableSize);

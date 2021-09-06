@@ -209,7 +209,7 @@ writeU64(uint64_t num, uint8_t *buf)
 }
 
 void
-readR32(float *num, const uint8_t *buf)
+readR32(float *num, const const uint8_t *buf)
 {
 	union R32 s;
 	

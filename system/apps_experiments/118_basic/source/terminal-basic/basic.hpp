@@ -22,7 +22,7 @@
 #ifndef BASIC_COMMON_HPP
 #define BASIC_COMMON_HPP
 
-//#include <stdio.h>
+#include <stdio.h>
 #include <inttypes.h>
 
 #include <Arduino.h>
@@ -38,7 +38,6 @@
       (defined __MINGW32__)
 #include "config_linux.hpp"
 #endif
-
 
 #include "basic.h"
 
@@ -134,8 +133,7 @@ constexpr const Integer MaxInteger = MAX_INTEGER;
 typedef ::long_integer_t LongInteger;
 constexpr const LongInteger MaxLongInteger = MAX_LONG_INTEGER;
 #endif // USE_LONGINT
-
-typedef ::INT INT; // GABO!!!
+typedef ::INT INT;
 // floating point type
 #if USE_REALS
 using Real = real_t;

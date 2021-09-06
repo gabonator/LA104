@@ -1832,11 +1832,8 @@ Parser::fMatrixOperation()
 		if (!_lexer.getNext())
 			return false;
 		if (_lexer.getToken() == Token::EQUALS) {
-			if (_lexer.getNext() && fMatrixExpression(buf)) {
-				_lexer.getNext();
-				return true;
-			} else
-				return false;
+			if (_lexer.getNext())
+				return fMatrixExpression(buf);
 		} else
 			return false;
 	} else if (_lexer.getToken() == Token::KW_PRINT) {
@@ -1890,15 +1887,15 @@ Parser::fMatrixExpression(const char *buf)
 	case Token::KW_ZER: // Zero matrix
 		if (getMode() == EXECUTE)
 			_interpreter.zeroMatrix(buf);
-		return true;
+		goto l_ok;
 	case Token::KW_CON: // Ones matrix
 		if (getMode() == EXECUTE)
 			_interpreter.onesMatrix(buf);
-		return true;
+		goto l_ok;
 	case Token::KW_IDN: // Identity matrix
 		if (getMode() == EXECUTE)
 			_interpreter.identMatrix(buf);
-		return true;
+		goto l_ok;
 	case Token::LPAREN: { // Scalar
 		Value v;
 		char first[IDSIZE];
@@ -1927,7 +1924,7 @@ Parser::fMatrixExpression(const char *buf)
 			if (getMode() == EXECUTE)
 				_interpreter.assignMatrix(buf, first, nullptr,
 				    mo);
-			return true;
+			goto l_ok;
 		} else
 			return false;
 	}
@@ -1938,7 +1935,7 @@ Parser::fMatrixExpression(const char *buf)
 	
 	char first[IDSIZE];
 	if (fIdentifier(first)) { // Matrix expression
-		if (_lexer.getNext()) {
+		if (_lexer.getNext() && _lexer.getToken()!= Token::COLON) {
 			switch (_lexer.getToken()) {
 			case Token::PLUS:
 				mo = Interpreter::MO_SUM;
@@ -1950,14 +1947,14 @@ Parser::fMatrixExpression(const char *buf)
 				mo = Interpreter::MO_MUL;
 				break;
 			default:
-				return false;
+				break;
 			}
 			char second[IDSIZE];
 			if (_lexer.getNext() && fIdentifier(second)) {
 				if (getMode() == EXECUTE)
 					_interpreter.assignMatrix(buf, first,
 					    second, mo);
-				return true;
+				goto l_ok;
 			} else
 				return false;
 		}
@@ -1965,7 +1962,10 @@ Parser::fMatrixExpression(const char *buf)
 			_interpreter.assignMatrix(buf, first);
 		return true;
 	}
-	return false;
+	return false;	
+l_ok:
+	_lexer.getNext();
+	return true;
 }
 
 #endif // USE_MATRIX

@@ -20,33 +20,18 @@
  */
 
 /**
- * @file basic_exteeprom.hpp
- * @brief I2C/SPI external eeprom functions and commands
+ * @brief Configuration for the PC terminal HAL implementation
  */
 
-#ifndef BASIC_EXTEEPROM_HPP
-#define BASIC_EXTEEPROM_HPP
+#ifndef HAL_PC_H
+#define HAL_PC_H
 
-#include "basic_functionblock.hpp"
+#if HAL_NVRAM
+#define HAL_PC_FILES_PATH "/terminal_basic_HAL"
+#endif
 
-namespace BASIC
-{
+#if HAL_EXTMEM
+#define HAL_PC_EXTMEM_DIR_PATH "extmem"
+#endif /* HAL_EXTMEM */
 
-class ExtEEPROM : public FunctionBlock
-{
-public:
-	explicit ExtEEPROM();
-private:
-	static bool com_echain(Interpreter&);
-	static bool com_eload(Interpreter&);
-	static bool com_esave(Interpreter&);
-	
-	static const FunctionBlock::command _commands[] PROGMEM;
-// FunctionBlock interface
-protected:
-	void _init() override;
-};
-
-} // namespace BASIC
-
-#endif // BASIC_EXTEEPROM_HPP
+#endif /* HAL_LINUX_H */

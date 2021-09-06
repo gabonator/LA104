@@ -22,7 +22,7 @@
 #include "basic_program.hpp"
 
 #include <assert.h>
-//#include <stdlib.h>
+#include <stdlib.h>
 #include <string.h>
 
 #include "basic_interpreter.hpp"
@@ -39,7 +39,6 @@ programSize(progsize)
 {
 	assert(_text != nullptr);
 	assert(progsize <= SINGLE_PROGSIZE);
-    _reset(); // gabo
 }
 
 Program::Line*
@@ -378,7 +377,9 @@ Program::addLine(
 	lexer.init(tempBuffer, true);
 	while (lexer.getNext()) {
 		const auto token = lexer.getToken();
-		if (token >= Token::INTEGER_IDENT &&
+		if (token == Token::KW_REM)
+			break;
+		else if (token >= Token::INTEGER_IDENT &&
 		    token <= Token::BOOL_IDENT) {
 			auto c = parser.getCommand(lexer.id());
 			if (c != nullptr) {

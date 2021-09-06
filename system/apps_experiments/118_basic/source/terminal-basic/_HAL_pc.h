@@ -20,44 +20,23 @@
  */
 
 /**
- * @brief Configuration for the Arduino core ESP32 HAL implementation
+ * @file _HAL_pc.h
+ * @brief private header of HAL PC implementations (POSIX/Win32)
  */
 
-#ifndef HAL_ESP32_H
-#define HAL_ESP32_H
+#ifndef _HAL_PC_H
+#define _HAL_PC_H
 
-#include "HAL_arduino.h"
+#include "HAL.h"
 
 #if HAL_NVRAM
-
-// Size of the SPIFFS file, used as NVRAM storage
-#define NVRAMSIZE 65536
-
-#endif /* HAL_NVRAM */
+extern int nvram_file;
+#endif
 
 #if HAL_EXTMEM
+extern int extmem_files[HAL_EXTMEM_NUM_FILES];
 
-/** External memory implementations **/
-/* SPIFFS external memory implementation */
-#define HAL_ESP32_EXTEM_SPIFFS 1
-/* SD card external memory implementation */
-#define HAL_ESP32_EXTEM_SD 2
-
-/* Used external memory implementation */
-#define HAL_ESP32_EXTMEM HAL_ESP32_EXTEM_SD
-
+extern char ext_root[256];
 #endif /* HAL_EXTMEM */
 
-void analogWrite(uint8_t, uint8_t);
-
-#if HAL_BUZZER
-
-#define HAL_BUZZER_ESP32_NONE 0
-#define HAL_BUZZER_ESP32_PWM 1
-
-#define HAL_BUZZER_ESP32 HAL_BUZZER_ESP32_PWM
-
-#endif /* HAL_BUZZER */
-
-#endif /* HAL_ESP32_H */
-
+#endif /* _HAL_PC_H */

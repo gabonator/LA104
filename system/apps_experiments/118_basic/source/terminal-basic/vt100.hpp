@@ -83,7 +83,7 @@ public:
 		EXT_NOTCOPYABLE(Print)
 	public:
 
-		//virtual ~Print() = default;
+		virtual ~Print() = default;
 		
 		virtual void clear() = 0;
 

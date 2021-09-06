@@ -16,16 +16,15 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#if 0
 #include "avr/pgmspace.h"
 #include "basic_config.h"
 #include "basic.h"
 
-//#if CONF_LEXER_LANG == LANG_EN
+#if CONF_LEXER_LANG == LANG_EN
 
 const uint8_t _basic_lexer_symbolsShift PROGMEM = 0;
 
-const uint8_t a_basic_lexer_tokenTable[] /*PROGMEM*/ = {
+const uint8_t _basic_lexer_tokenTable[] PROGMEM = {
 	ASCII_NUL,
 	'A', 'N', 'D',ASCII_NUL,                // 1
 #if USE_DUMP
@@ -147,6 +146,4 @@ const uint8_t a_basic_lexer_tokenTable[] /*PROGMEM*/ = {
 	ASCII_ETX
 };
 
-//#endif // CONF_LEXER_LANG
-
-#endif
+#endif // CONF_LEXER_LANG

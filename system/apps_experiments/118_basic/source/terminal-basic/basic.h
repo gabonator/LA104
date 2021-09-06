@@ -92,7 +92,6 @@ typedef int32_t long_integer_t;
 typedef long_integer_t INT;
 #define MAXINT MAX_LONG_INTEGER
 #else
-//gabo!!! INT uint16_t !!!
 typedef integer_t INT;
 #define MAXINT MAX_INTEGER
 #endif // USE_LONGINT

@@ -132,7 +132,7 @@
 /*
  * Use ANSI text attributes
  */
-#define USE_TEXTATTRIBUTES   1 // gabo
+#define USE_TEXTATTRIBUTES   1
 #if USE_TEXTATTRIBUTES
 	/*
 	 * Support of SPC(N) print command
@@ -174,7 +174,7 @@
  * Enabling packed structures reduces BASIC memory usage, but results to
  * unaligned memory acces. It should be desabled on ESP8266, Motorola 68k, etc.
  */
-#define USE_PACKED_STRUCT 0 // gabo
+#define USE_PACKED_STRUCT 0
 
 /*
  * High-level code optimisation mode

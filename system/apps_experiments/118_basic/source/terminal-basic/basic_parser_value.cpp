@@ -278,7 +278,7 @@ Parser::Value::printTo(Print& p) const
 #if USE_LONG_REALS
 	case LONG_REAL:
 	{
-		char buf[16];
+		char buf[18];
 		::sprintf(buf, "%- .10G", m_value.body.long_real);
 		if (buf[1] == '0' && buf[2] == '.')
 			memmove(buf+1, buf+2, 16-2);

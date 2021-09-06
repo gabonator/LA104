@@ -29,11 +29,15 @@
 
 /*
  * Enable NVRAM read/write functions
+ * 
+ * NVRAM provides a single storage space, preserved between software runs
  */
 #define HAL_NVRAM 1
 
 /*
- * Enable external memory interface functions
+ * Enable external memory interface
+ * 
+ * External memory is a simple filesystem model
  */
 #define HAL_EXTMEM 0
 #if HAL_EXTMEM
