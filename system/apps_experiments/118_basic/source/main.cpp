@@ -91,11 +91,12 @@ int _main(void)
     APP::Init("BASIC Interpreter");
     APP::Status("");
 
-Stream _stream;
-Print _print;
-Output _output;
-BASIC::Interpreter basic(_stream, _output, BASIC::SINGLE_PROGSIZE);
-
+    Stream _stream;
+    Print _print;
+    Output _output;
+    BASIC::Interpreter basic(_stream, _output, BASIC::SINGLE_PROGSIZE);
+    basic.newProgram();
+    
     if (setup())
     {
         BIOS::KEY::EKey key;
@@ -117,18 +118,10 @@ void _HandleAssertion(const char* file, int line, const char* cond)
 }
 
 #ifndef __APPLE__
-void *__dso_handle = (void *)nullptr;
 
 extern "C" void __cxa_pure_virtual(void)
 {
   _ASSERT(!"Pure virtual call");
 }
-
-extern "C" void* _sbrk() { _ASSERT(0); return 0; }
-
-void operator delete(void*, unsigned int)
-{
-  _ASSERT(0);
-}
-
 #endif
+

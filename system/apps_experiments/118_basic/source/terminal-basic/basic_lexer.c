@@ -211,6 +211,7 @@ basic_lexer_init(basic_lexer_context_t *self, const uint8_t *str, BOOLEAN tok)
 	self->string_pointer = 0;
 	self->string_to_parse = str;
 	self->tokenized = tok;
+    self->_error = BASIC_LEXER_ERROR_NOERROR;
 }
 
 #define SYM ((uint8_t)(self->string_to_parse[self->string_pointer]))

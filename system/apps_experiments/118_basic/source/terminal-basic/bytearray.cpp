@@ -37,14 +37,17 @@ void
 ByteArray::createData()
 {
 	if (_ownsData && _data != nullptr)
-		free(_data);
+    {
+        _ASSERT(0);
+		//free(_data);
+    }
 	
 	if (_size == 0) {
 		_data = nullptr;
 		return;
 	}
-	
-	_data = reinterpret_cast<uint8_t*>(malloc(_size));
+    _ASSERT(0);
+	//  _data = reinterpret_cast<uint8_t*>(malloc(_size));
 }
 
 size_t
