@@ -127,7 +127,7 @@
 /*
  * SAVE, LOAD and CHAIN commands support
  */
-#define USE_SAVE_LOAD        1
+#define USE_SAVE_LOAD        0
 
 /*
  * Use ANSI text attributes

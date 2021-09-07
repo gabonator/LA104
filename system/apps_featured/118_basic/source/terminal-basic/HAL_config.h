@@ -32,7 +32,7 @@
  * 
  * NVRAM provides a single storage space, preserved between software runs
  */
-#define HAL_NVRAM 1
+#define HAL_NVRAM 0
 
 /*
  * Enable external memory interface

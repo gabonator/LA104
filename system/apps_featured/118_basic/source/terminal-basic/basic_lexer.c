@@ -26,6 +26,11 @@
 #include "avr/pgmspace.h"
 #include "tools.h"
 
+// some very strange workaround
+#ifdef _ARM
+#include "basic_lexer_en.c"
+#endif
+
 extern const uint8_t _basic_lexer_tokenTable[] PROGMEM;
 
 const char sSTAR[] PROGMEM = "*";
@@ -158,9 +163,17 @@ lexer_number_scale(basic_lexer_context_t *self)
 			++self->string_pointer;
 			continue;
 		} else {
+            real_t pw = (real_t)1;
 			if (!sign)
-				scale = -scale;
-			real_t pw = powf((real_t) (10), (real_t) scale);
+            {
+                while (scale--)
+                    pw *= (real_t)0.1;
+            } else {
+                while (scale--)
+                    pw *= (real_t)10;
+            }
+            //scale = -scale;
+			//real_t pw = powf((real_t) (10), (real_t) scale);
 			basic_value_t pwv = basic_value_from_real(pw);
 			basic_value_multeq(&self->value, &pwv);
 			return TRUE;
@@ -457,7 +470,7 @@ static BOOLEAN
 _basic_lexer_tokenizedNext(basic_lexer_context_t *self)
 {
 	if (SYM != ASCII_NUL) {
-		self->token = SYM;
+		self->token = (basic_token_t)SYM;
 		++self->string_pointer;
 		switch (self->token) {
 		case BASIC_TOKEN_KW_TRUE:

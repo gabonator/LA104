@@ -1150,7 +1150,7 @@ Interpreter::save()
 	// Write program to EEPROM
 	for (Pointer p = 0; p < _program._textEnd; ++p) {
 		const uint8_t pb = _program._text[p];
-		HAL_nvram_write(p+sizeof(EEpromHeader_t), pb);
+		///HAL_nvram_write(p+sizeof(EEpromHeader_t), pb);
 #if SAVE_LOAD_CHECKSUM
 		// Compute program checksum
 		h.crc16 = _crc16_update(h.crc16, pb);
@@ -1164,7 +1164,8 @@ Interpreter::save()
 
 	if (crc == h.crc16) {
 #endif
-		HAL_nvram_write_buf(0, &h, sizeof(h));
+#error g
+		///HAL_nvram_write_buf(0, &h, sizeof(h));
 #if SAVE_LOAD_CHECKSUM
 	} else
 		raiseError(DYNAMIC_ERROR, BAD_CHECKSUM);

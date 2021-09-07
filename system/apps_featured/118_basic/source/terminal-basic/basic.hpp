@@ -22,7 +22,7 @@
 #ifndef BASIC_COMMON_HPP
 #define BASIC_COMMON_HPP
 
-#include <stdio.h>
+//#include <stdio.h>
 #include <inttypes.h>
 
 #include <Arduino.h>

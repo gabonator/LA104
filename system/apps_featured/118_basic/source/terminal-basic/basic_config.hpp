@@ -48,7 +48,7 @@
 		/*
 		 * ACS ASN ATN
 		 */
-		#define M_REVERSE_TRIGONOMETRIC 1
+		#define M_REVERSE_TRIGONOMETRIC 0
 		/*
 		 * CBR (cubic root) ...
 		 */
@@ -95,7 +95,7 @@
 	/*
 	 * Use ANSI color attributes
 	 */
-	#define USE_COLORATTRIBUTES       1
+	#define USE_COLORATTRIBUTES       0
 	/*
 	 * Set print zones width (tab spacing)
 	 */
