@@ -269,7 +269,17 @@ Parser::Value::printTo(Print& p) const
 		else
 			::dtostre(m_value.body.real, buf, 6, DTOSTR_ALWAYS_SIGN);
 #else
-		::sprintf(buf, "%- .6G", m_value.body.real);
+		//::sprintf(buf, "%- .6G", m_value.body.real);
+        if (m_value.body.real == floor(m_value.body.real))
+        {
+            int value = (int)m_value.body.real;
+            if (value >= 0)
+                ::sprintf(buf, " %d", (int)value);
+            else
+                ::sprintf(buf, "%d", (int)value);
+        }
+        else
+            ::sprintf(buf, "%f", m_value.body.real);
 #endif // ARDUINO
 		if (buf[1] == '0' && buf[2] == '.')
 			memmove(buf+1, buf+2, 14-2);

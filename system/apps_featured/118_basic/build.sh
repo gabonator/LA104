@@ -8,6 +8,8 @@ cd build
 
 #arm-none-eabi-g++ -Os -Werror -fno-common -mcpu=cortex-m3 -mthumb -msoft-float -fno-exceptions -fno-rtti -fno-threadsafe-statics -Wno-psabi -MD -D LA104 -D _ARM -D STM32F10X_HD -c \
 arm-none-eabi-g++ -g -Os -Werror -fno-common -mcpu=cortex-m3 -mthumb -msoft-float -fno-exceptions -fno-rtti -fno-threadsafe-statics -Wno-psabi -D LA104 -D _ARM -D STM32F10X_HD -c \
+  ../../../os_host/source/framework/Wnd.cpp \
+  ../../../os_host/source/framework/Serialize.cpp \
   ../source/main.cpp \
 ../source/terminal-basic/HAL.c \
 ../source/terminal-basic/basic.c \
@@ -32,6 +34,8 @@ arm-none-eabi-g++ -g -Os -Werror -fno-common -mcpu=cortex-m3 -mthumb -msoft-floa
   -I../../../os_library/include/ 
 
 arm-none-eabi-gcc -g -fPIC -mcpu=cortex-m3 -mthumb -o output.elf -nostartfiles -T ../source/app.lds \
+Wnd.o \
+Serialize.o \
 main.o \
 HAL.o \
 basic.o \

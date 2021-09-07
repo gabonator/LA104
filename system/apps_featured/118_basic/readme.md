@@ -10,4 +10,4 @@ Following projects were analysed for fasibility of porting them onto LA104 platf
 - https://sourceforge.net/projects/terminal-basic/files/latest/download
 - https://bitbucket.org/terminalbasicteam/terminalbasic/src/master/
 
-Terminal basic seems as the most sophisticated implementation of BASIC interpreter optimized for porting on lowend CPUs. Still in early experimental phase, but this project will be important part of the LA104 development package. Currently no building script provided for arm m3
+Terminal basic was chosen because it seems most sophisticated, parially written in C++ with simple interface for integrating into LA104-OS

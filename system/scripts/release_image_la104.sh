@@ -370,7 +370,7 @@ Application groups
   - "USB Applications" - mouse simulator, usb to uart converter
   - "Display tools" - Image viewer for LA104 and led/oled/eink displays
   - "Device info" - shows information about this device
-  - "Development" - development tools, currently only circuit python
+  - "Development" - development tools: Python interpreter, BASIC interpreter and Gabuino
   - "Just for fun" - non technical applications
 
 Version information
@@ -400,10 +400,17 @@ cp $ICON/fdevel.bmp $TO/devel/devel.bmp
 echo -n "{\"description\":{\"short\":\"Devel\",\"long\":\"Development\"},\"icon\":\"devel.bmp\",order:-150}" > $TO/devel/index.lnk
 
 cp ../apps_featured/113_circuitpython/scripts/*.py $TO/devel/
+cp ../apps_featured/118_basic/examples/*.bas $TO/devel/
 cp $ICON/cpython.bmp $TO/devel/cpython.bmp
+cp $ICON/gabuino.bmp $TO/devel/gabuino.bmp
+cp $ICON/basic.bmp $TO/devel/basic.bmp
 cp $FROM/113cirpy.elf $TO/devel/cpython.elf
+cp $FROM/117rt.elf $TO/devel/gabuino.elf
+cp $FROM/118basic.elf $TO/devel/basic.elf
 
 echo -n "{\"description\":{short:\"CiPython\",long:\"Circuit python\"},\"icon\":\"cpython.bmp\",\"execute\":\"cpython.elf\"}" > $TO/devel/cpython.lnk
+echo -n "{\"description\":{short:\"Basic\",long:\"Basic\"},\"icon\":\"basic.bmp\",\"execute\":\"basic.elf\"}" > $TO/devel/basic.lnk
+echo -n "{\"description\":{short:\"Gabuino\",long:\"Gabuino\"},\"icon\":\"gabuino.bmp\",\"execute\":\"gabuino.elf\"}" > $TO/devel/gabuino.lnk
 
 cp $ICON/games.bmp $TO/fun/app.bmp
 )

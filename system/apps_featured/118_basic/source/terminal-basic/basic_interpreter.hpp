@@ -579,6 +579,7 @@ private:
 #endif
 #endif // USE_SAVE_LOAD
 	// Interpreter FSM state
+public:
 	State			 _state;
 	State			 _lastState;
 	// Input oject
@@ -589,10 +590,12 @@ private:
 	Lexer			 _lexer;
 	// Syntactical analyzer object
 	Parser			 _parser;
+public:
 	//Input buffer
 	uint8_t			 _inputBuffer[PROGSTRINGSIZE];
 	// Position in the input buffer
 	uint8_t			 _inputPosition;
+private:
 	// Input variable name string;
 	char			 _inputVarName[VARSIZE];
 	// Global RESULT() variable

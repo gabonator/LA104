@@ -61,7 +61,9 @@ Refer to this [tutorial](resources/tutorial_building)
 | ![17analys.elf](resources/appicons/analyser.png) |  | Logic analyser | [apps/test17_official](system/apps/test17_official/) |
 | ![61devin.elf](resources/appicons/devinfo.png) |  | Device info | [apps_featured/61_devinfo](system/apps_featured/61_devinfo/) |
 | ![29fileman_la104.elf](resources/appicons/fileman.png) |  | File manager | [apps_shell/test29_fileman](system/apps_shell/test29_fileman/) |
+| ![118basic.elf](resources/appicons/basic.png) | devel | Basic | [apps_featured/118_basic](system/apps_featured/118_basic/) |
 | ![113cirpy.elf](resources/appicons/cpython.png) | devel | Circuit python | [apps_featured/113_circuitpython](system/apps_featured/113_circuitpython/) |
+| ![117rt.elf](resources/appicons/gabuino.png) | devel | Gabuino | [apps_featured/117_gabuino/examples](system/apps_featured/117_gabuino/examples/) |
 | ![14apds1.elf](resources/appicons/chip.png) | devices | APDS9960 color gesture sensor | [apps_experiments/test14_apds9960](system/apps_experiments/test14_apds9960/) |
 | ![11i2c.elf](resources/appicons/chip.png) | devices | BMP085 Barometric sensor | [apps_experiments/test11_i2c_api](system/apps_experiments/test11_i2c_api/) |
 | ![92bmp180.elf](resources/appicons/chip.png) | devices | BMP180/BMP085 barometer | [apps_experiments/92_bmp180](system/apps_experiments/92_bmp180/) |
@@ -71,7 +73,7 @@ Refer to this [tutorial](resources/tutorial_building)
 | ![36espwww.elf](resources/appicons/chip.png) | devices | ESP8266 uart wifi server | [apps/test36_esp_server](system/apps/test36_esp_server/) |
 | ![84maxdis.elf](resources/appicons/chip.png) | devices | MAX7219 display driver | [apps_experiments/84_max7219](system/apps_experiments/84_max7219/)<br>[https://youtu.be/8FxnDp6G_iQ?t=603](https://youtu.be/8FxnDp6G_iQ?t=603) |
 | ![110co2.elf](resources/appicons/mhz19b.png) | devices | MH-Z19B | [apps/110_mhz19b](system/apps/110_mhz19b/) |
-| ![87mlx906.elf](resources/appicons/chip.png) | devices | MLX90614 non cotact thermo | [apps_unfinished/87_mlx90614](system/apps_unfinished/87_mlx90614/) |
+| ![87mlx906.elf](resources/appicons/chip.png) | devices | MLX90614 non cotact thermo | [apps_experiments/87_mlx90614](system/apps_experiments/87_mlx90614/) |
 | ![106mpr12.elf](resources/appicons/chip.png) | devices | MPR121 12 channel toch sensor | [apps_experiments/106_mpr121](system/apps_experiments/106_mpr121/) |
 | ![34scope.elf](resources/appicons/chip.png) | devices | PCF8591t I2C ADC | [apps/test34_scope](system/apps/test34_scope/) |
 | ![109radse.elf](resources/appicons/radsens.png) | devices | Radsens dosimeter | [apps/109_radsense](system/apps/109_radsense/) |

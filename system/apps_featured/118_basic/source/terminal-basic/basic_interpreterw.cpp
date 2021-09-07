@@ -1164,8 +1164,7 @@ Interpreter::save()
 
 	if (crc == h.crc16) {
 #endif
-#error g
-		///HAL_nvram_write_buf(0, &h, sizeof(h));
+		HAL_nvram_write_buf(0, &h, sizeof(h));
 #if SAVE_LOAD_CHECKSUM
 	} else
 		raiseError(DYNAMIC_ERROR, BAD_CHECKSUM);
