@@ -77,6 +77,7 @@
 	#define USE_SEG     1
 	// HEX$ function, return string with hexsadecimal representation of the expression value
 	#define USE_HEX     1
+    #define USE_STRING     1
 #endif // USE_STRINGOPS
 /*
  * Clear program memory on NEW command
@@ -112,7 +113,7 @@
 #endif // USE_SAVE_LOAD
 
 // Convert all input to upper register
-#define AUTOCAPITALIZE    0
+#define AUTOCAPITALIZE    1
 
 /*
  * External memory filesystem module
@@ -169,7 +170,7 @@
 /*
  * GFX module
  */
-#define USE_GFX          0
+#define USE_GFX          1
 #if USE_GFX
 // Use drawing functions with explisit color setting
 #define GFX_EXP_COLOR 1
@@ -256,7 +257,7 @@
 /*
  * Max size of the program line
  */
-#define PROGSTRINGSIZE 80
+#define PROGSTRINGSIZE 127 // 128 cant use!?
 
 // Number of characters in variable name
 #define VARSIZE 5

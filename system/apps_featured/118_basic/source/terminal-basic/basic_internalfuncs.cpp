@@ -32,7 +32,6 @@ namespace BASIC
 {
 
 static const char intFuncs[] PROGMEM = {
-#if CONF_LEXER_LANG == LANG_EN
 	'A', 'B', 'S', ASCII_NUL,
 #if USE_ASC
 	'A', 'S', 'C', ASCII_NUL,
@@ -73,55 +72,15 @@ static const char intFuncs[] PROGMEM = {
 #endif
 	'S', 'G', 'N', ASCII_NUL,
 	'S', 'T', 'R', '$', ASCII_NUL,
+#if USE_STRING
+    'S', 'T', 'R', 'I', 'N', 'G', '$', ASCII_NUL,
+#endif
 	'T', 'I', 'M', 'E', ASCII_NUL,
-#elif CONF_LEXER_LANG == LANG_RU
-	'A', 'B', 'S', ASCII_NUL,
-#if USE_ASC
-	'A', 'S', 'C', ASCII_NUL,
-#endif
-#if USE_CHR
-	'C', 'H', 'R', '$', ASCII_NUL,
-#endif
-#if USE_HEX
-	'H', 'E', 'X', '$', ASCII_NUL,
-#endif
-#if USE_INKEY
-	'I', 'N', 'K', 'E', 'Y', '$', ASCII_NUL,
-#endif
-#if USE_REALS
-	'I', 'N', 'T', ASCII_NUL,
-#endif
-#if USE_PEEK_POKE
-	'P', 'E', 'E', 'K', ASCII_NUL,
-#endif
-	'R', 'E', 'S', ASCII_NUL,
-#if USE_RANDOM
-	'R', 'N', 'D', ASCII_NUL,
-#endif
-#if USE_SEG
-	'S', 'E', 'G', '$', ASCII_NUL,
-#endif
-	'S', 'G', 'N', ASCII_NUL,
-	'T', 'I', 'M', 'E', ASCII_NUL,
-#if USE_LEN
-	'�', '�', '�', '�', '�', ASCII_NUL,
-#endif
-#if USE_LEFT
-	'�', '�', '�', '$', ASCII_NUL,
-#endif
-#if USE_RIGHT
-	'�', '�', '�', '�', '$', ASCII_NUL,
-#endif
-#if USE_MID
-	'�', '�', '�', '�', '$', ASCII_NUL,
-#endif
-	'�', '�', '�', '$', ASCII_NUL,
-#endif // CONF_LANG
+
 	ASCII_ETX
 };
 
 const FunctionBlock::function InternalFunctions::funcs[] PROGMEM = {
-#if CONF_LEXER_LANG == LANG_EN
 	InternalFunctions::func_abs,
 #if USE_ASC
 	InternalFunctions::func_asc,
@@ -162,51 +121,10 @@ const FunctionBlock::function InternalFunctions::funcs[] PROGMEM = {
 #endif
 	InternalFunctions::func_sgn,
 	InternalFunctions::func_str,
+#if USE_STRING
+    InternalFunctions::func_string,
+#endif
 	InternalFunctions::func_tim,
-#elif CONF_LEXER_LANG == LANG_RU
-	InternalFunctions::func_abs,
-#if USE_ASC
-	InternalFunctions::func_asc,
-#endif
-#if USE_CHR
-	InternalFunctions::func_chr,
-#endif
-#if USE_HEX
-	InternalFunctions::func_hex,
-#endif
-#if USE_INKEY
-	InternalFunctions::func_inkey,
-#endif
-#if USE_REALS
-	InternalFunctions::func_int,
-#endif
-#if USE_PEEK_POKE
-	InternalFunctions::func_peek,
-#endif
-	InternalFunctions::func_result,
-#if USE_RANDOM
-	InternalFunctions::func_rnd,
-#endif
-#if USE_SEG
-	InternalFunctions::func_mid,
-#endif
-	InternalFunctions::func_sgn,
-	InternalFunctions::func_tim,
-	
-#if USE_LEN
-	InternalFunctions::func_len,
-#endif
-#if USE_LEFT
-	InternalFunctions::func_left,
-#endif
-#if USE_RIGHT
-	InternalFunctions::func_right,
-#endif
-#if USE_MID
-	InternalFunctions::func_mid,
-#endif
-	InternalFunctions::func_str,
-#endif // CONF_LANG
 	nullptr
 };
 
@@ -451,6 +369,40 @@ InternalFunctions::func_len(Interpreter &i)
 	return false;
 }
 #endif
+
+#if USE_STRING
+bool
+InternalFunctions::func_string(Interpreter& i)
+{
+    INT len, ch;
+    Parser::Value v0;
+    const char *str;
+    
+    if (i.popString(str)) {
+        ch = str[0];
+
+    } else {
+        if (!getIntegerFromStack(i, ch))
+            return false;
+    }
+    
+    if (!getIntegerFromStack(i, len))
+        return false;
+    
+        char buf[STRING_SIZE];
+        for(int i=0; i<len; i++)
+            buf[i] = ch;
+        buf[len]=0;
+        
+        i.pushString(buf);
+        Parser::Value v;
+        v.setType(Parser::Value::STRING);
+        if (i.pushValue(v))
+            return true;
+
+}
+
+#endif // USE_MID
 
 #if USE_REALS
 #define TYP Real

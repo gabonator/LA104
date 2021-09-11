@@ -402,6 +402,7 @@ Interpreter::step()
 		break;
 #endif // BASIC_MULTITERMINAL
 	case EXECUTE: {
+        /*
 		c = char(ASCII::NUL);
 		if (_input.available() > 0) {
 			c = _input.read();
@@ -409,6 +410,7 @@ Interpreter::step()
 			_inputBuffer[0] = c;
 #endif // USE_GET
 		}
+        */
 		Program::Line *s = _program.current(_program._current);
 		if (s != nullptr && c != char(ASCII::EOT)) {
 			bool res;
@@ -469,7 +471,20 @@ Interpreter::exec()
 void
 Interpreter::restore()
 {
-	_program._dataCurrent.index = _program._dataCurrent.position = 0;
+    _lexer.getNext();
+    if (_lexer.getToken() != Token::C_INTEGER)
+        return; // error
+    
+    Parser::Value v = _lexer.getValue();
+    _lexer.getNext();
+    
+    Program::Line *s = _program.lineByNumber(Integer(v));
+    if (s != nullptr)
+        _program._dataCurrent.index = _program.objectIndex(s);
+    else
+        raiseError(DYNAMIC_ERROR, NO_SUCH_LINE);
+
+    _program._dataCurrent.position = 0;
 	_dataParserContinue = false;
 }
 #endif // USE_DATA
@@ -962,7 +977,6 @@ Interpreter::popString(const char *&str)
 		_program.pop();
 		return true;
 	} else {
-		raiseError(DYNAMIC_ERROR, STRING_FRAME_SEARCH);
 		return false;
 	}
 }

@@ -439,7 +439,12 @@ Parser::fOperator()
 	case Token::KW_RESTORE:
 		if (getMode() == EXECUTE)
 			_interpreter.restore();
-		_lexer.getNext();
+        else
+        {
+            // RESTORE LINE
+            _lexer.getNext();
+            _lexer.getNext();
+        }
 		break;
 #endif // USE_DATA
 	case Token::KW_RETURN:
@@ -1559,6 +1564,15 @@ Parser::fCommand()
 		if (_lexer.getNext() && fExpression(v1) &&
 		    _lexer.getToken() == Token::COMMA && _lexer.getNext() &&
 		    fExpression(v2)) {
+            
+            // skip optional third parameter
+            if (_lexer.getToken() == Token::COMMA)
+            {
+                Value v3;
+                _lexer.getNext();
+                fExpression(v3);
+            }
+            
 			if (getMode() == EXECUTE)
 				_interpreter.locate(Integer(v1), Integer(v2));
 			return true;
@@ -1611,8 +1625,15 @@ Parser::fCommand()
 void
 Parser::fCommandArguments(FunctionBlock::command c)
 {
+    bool inParen = false;
 	while (_lexer.getNext()) {
 		Value v;
+        // arguments in parentheses
+        if (_lexer.getToken() == Token::LPAREN)
+        {
+            inParen = true;
+            continue;
+        }
 		if (fExpression(v)) {
 			// String value already on stack after fExpression
 			if (v.type() != Value::STRING &&
@@ -1620,6 +1641,15 @@ Parser::fCommandArguments(FunctionBlock::command c)
 				_interpreter.pushValue(v);
 		} else
 			break;
+        
+        if (inParen && _lexer.getToken() == Token::RPAREN)
+        {
+            inParen = false;
+            _lexer.getNext();
+            // LINE (....)-(....)
+            if (_lexer.getToken() == Token::MINUS)
+                continue;
+        }
 
 		if (_lexer.getToken() == Token::COMMA)
 			continue;
@@ -1808,12 +1838,24 @@ Parser::fIdentifierExpr(char *varName, Value &v)
 			} else
 				return false;
 		}
-	} else // variable
+	} else // function or variable
+    {
+        FunctionBlock::function f;
+        if ((f=_internal.getFunction(varName)) != nullptr) {
+            if (getMode() == EXECUTE) {
+                bool result = true;
+                result = ((*f)(_interpreter));
+                if (!result || !_interpreter.popValue(v))
+                    return false;
+            }
+            return true;
+        }
+        
 		if (getMode() == EXECUTE) {
 			varName[VARSIZE-1] = '\0';
 			_interpreter.valueFromVar(v, varName);
 		}
-	
+    }
 	return true;
 }
 

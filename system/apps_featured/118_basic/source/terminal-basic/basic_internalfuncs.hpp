@@ -70,6 +70,10 @@ private:
 #endif
 	static bool func_sgn(Interpreter&);
         static bool func_str(Interpreter&);
+#if USE_STRING
+    static bool func_string(Interpreter&);
+#endif
+
 	static bool func_tim(Interpreter&);
 #if USE_REALS
 #define ___TYP Real
