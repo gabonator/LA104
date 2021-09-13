@@ -26,6 +26,7 @@ arm-none-eabi-g++ -g -Os -Werror -fno-common -mcpu=cortex-m3 -mthumb -msoft-floa
 ../source/terminal-basic/basic_parserw.cpp \
 ../source/terminal-basic/basic_program.cpp \
 ../source/terminal-basic/basic_value.c \
+../source/terminal-basic/basic_gfx.cpp \
 ../source/terminal-basic/tools.c \
 ../source/terminal-basic/vt100.cpp \
   -I../source/ \
@@ -52,6 +53,7 @@ basic_parser_value.o \
 basic_parserw.o \
 basic_program.o \
 basic_value.o \
+basic_gfx.o \
 tools.o \
 vt100.o \
   -lbios_la104 -L../../../os_library/build -lm

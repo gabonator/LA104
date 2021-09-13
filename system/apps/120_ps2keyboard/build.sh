@@ -19,4 +19,4 @@ arm-none-eabi-readelf -all output.elf > output.txt
 find . -type f -name '*.o' -delete
 find . -type f -name '*.d' -delete
 
-../../../../tools/elfstrip/elfstrip output.elf 115keyb.elf
+../../../../tools/elfstrip/elfstrip output.elf 120keyb.elf

@@ -32,7 +32,6 @@ class GFXModule : public FunctionBlock
 {
 public:
 	explicit GFXModule();
-    virtual ~GFXModule();
 
 #if GFX_EXP_COLOR
 	static bool command_boxc(Interpreter&);

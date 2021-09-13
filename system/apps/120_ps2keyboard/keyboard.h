@@ -13,6 +13,7 @@ class CKeyboard
 public:
   void Attach()
   {
+#ifndef __APPLE__
     static CKeyboard* self;
     self = this;
     mOldHandler = BIOS::OS::GetInterruptVector(BIOS::OS::IEXTI15_10_IRQ);
@@ -21,12 +22,15 @@ public:
     });
 
     InitInterrupt();
+#endif
   }
 
   void Detach()
   {
+#ifndef __APPLE__
     StopInterrupt();
     BIOS::OS::SetInterruptVector(BIOS::OS::IEXTI15_10_IRQ, mOldHandler);
+#endif
   }
 
   char Get()

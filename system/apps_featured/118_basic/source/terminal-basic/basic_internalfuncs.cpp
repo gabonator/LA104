@@ -389,17 +389,15 @@ InternalFunctions::func_string(Interpreter& i)
     if (!getIntegerFromStack(i, len))
         return false;
     
-        char buf[STRING_SIZE];
-        for(int i=0; i<len; i++)
-            buf[i] = ch;
-        buf[len]=0;
-        
-        i.pushString(buf);
-        Parser::Value v;
-        v.setType(Parser::Value::STRING);
-        if (i.pushValue(v))
-            return true;
-
+    char buf[STRING_SIZE];
+    for(int i=0; i<len; i++)
+        buf[i] = ch;
+    buf[len]=0;
+    
+    i.pushString(buf);
+    Parser::Value v;
+    v.setType(Parser::Value::STRING);
+    return i.pushValue(v);
 }
 
 #endif // USE_MID
