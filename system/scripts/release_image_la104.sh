@@ -257,6 +257,7 @@ mkdir $TO/devices
 cp $ICON/fchip.bmp $TO/devices/devices.bmp
 cp $ICON/radsens.bmp $TO/devices/radsens.bmp
 cp $ICON/co2.bmp $TO/devices/mhz19b.bmp
+cp $ICON/ps2keyb.bmp $TO/devices/ps2keyb.bmp
 echo -n "{\"description\":{\"short\":\"Devices\",\"long\":\"Device drivers\"},\"icon\":\"devices.bmp\",order:7}" > $TO/devices/index.lnk
 
 cp $FROM/45simcom.elf $TO/devices/simcom.elf
@@ -276,6 +277,7 @@ cp $FROM/87mlx906.elf $TO/devices/mlx90614.elf
 cp $FROM/106mpr12.elf $TO/devices/mpr121.elf
 cp $FROM/109radse.elf $TO/devices/radsens.elf
 cp $FROM/110co2.elf $TO/devices/mhz19b.elf
+cp $FROM/120keyb.elf $TO/devices/ps2keyb.elf
 
 echo -n "{\"description\":{short:\"APDS9960\",long:\"APDS9960 color gesture sensor\"},\"icon\":\"chip.bmp\",\"execute\":\"apds9960.elf\"}" > $TO/devices/apds9960.lnk
 echo -n "{\"description\":{short:\"BMP085\",long:\"BMP085 Barometric sensor\"},\"icon\":\"chip.bmp\",\"execute\":\"bmp085.elf\"}" > $TO/devices/bmp085.lnk
@@ -294,6 +296,7 @@ echo -n "{\"description\":{short:\"MLX90614\",long:\"MLX90614 non cotact thermo\
 echo -n "{\"description\":{short:\"MPR121\",long:\"MPR121 12 channel toch sensor\"},\"icon\":\"chip.bmp\",\"execute\":\"mpr121.elf\"}" > $TO/devices/mpr121.lnk
 echo -n "{\"description\":{short:\"RADSENS\",long:\"Radsens dosimeter\"},\"icon\":\"radsens.bmp\",\"execute\":\"radsens.elf\"}" > $TO/devices/radsens.lnk
 echo -n "{\"description\":{short:\"MHZ19B\",long:\"MH-Z19B\"},\"icon\":\"mhz19b.bmp\",\"execute\":\"mhz19b.elf\"}" > $TO/devices/mhz19b.lnk
+echo -n "{\"description\":{short:\"Keyboard\",long:\"PS2 Keyboard\"},\"icon\":\"ps2keyb.bmp\",\"execute\":\"ps2keyb.elf\"}" > $TO/devices/ps2keyb.lnk
 
 cp $ICON/chip.bmp $TO/devices/chip.bmp
 
@@ -310,6 +313,7 @@ https://github.com/gabonator/LA104/tree/master/system/apps_experiments
 
   - "Radsens dosimeter" - Climateguard radsense I2C dosimeter
   - "MH-Z19B" - UART Non dispersive infrared (NDIR) CO2 sensor test application
+  - "PS2 Keyboard" - PS2 keyboard protocol decoder. Just attach a PS2 keyboard directly to your LA104 and start typing
 EOM
 
 # usb
