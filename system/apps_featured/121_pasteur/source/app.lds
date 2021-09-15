@@ -1,7 +1,9 @@
 MEMORY
 {
   rom (rx) : ORIGIN = 0x08020400, LENGTH = 20K
-  ram (rwx) : ORIGIN = 0x20005000, LENGTH = 10K
+/*  ram (rwx) : ORIGIN = 0x20005000, LENGTH = 10K */
+  ram (rwx) : ORIGIN = 0x20004800, LENGTH = 16K
+
   null (rwx): ORIGIN = 0x00001000, LENGTH = 4K
 }
 
@@ -17,6 +19,7 @@ SECTIONS
 
     .data : {
       *(.data)        /* Data memory */
+      *(.data*)        /* Data memory */
     } >ram AT >rom
 
   .bss : {

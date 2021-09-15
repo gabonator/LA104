@@ -142,7 +142,7 @@ public:
 
         for (int i=0; i<total; i += step)
         {
-            if (i < range.mMax)
+            if (i < forward(range.mMax))
                 drawTick(i);
 //            if (i > 0 && -i > range.mMin)
 //                drawTick(-i);

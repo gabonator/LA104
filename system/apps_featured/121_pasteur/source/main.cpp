@@ -295,7 +295,7 @@ public:
         MyGui::Window(rc2, MyGui::TitleColor);
         
 		// Initial range
-        mWndGraph.SetRange(Range{20*16, 100*16});
+        mWndGraph.SetRange(Range{20*16, 80*16});
         mYAxis.Update(mWndGraph.GetRange());
         mXAxis.Update(5000);
         
@@ -398,15 +398,16 @@ public:
 			if (mLog.IsOpened())
 				mLog.Append(data);
         }
+        static long lLastUpdate = 0;
+        long lNow = BIOS::SYS::GetTick();
+        if (lLastUpdate == 0)
+            lLastUpdate = lNow;
         
-        EVERY(5000)
+        if (lNow - lLastUpdate > 5000)
         {
+            lLastUpdate += 5000;
             Collect.Finish();
-            BIOS::LCD::Printf(10+16, 16+20+2-8, RGB565(000000), MyGui::TitleColor, Collect.Info());
-            char* info = Collect.Info();
-//            PrintBig(10+16, 16+20+2-8, RGB565(000000), info);
-
-
+            Collect.Info();
         }
     }
 	

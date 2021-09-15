@@ -1,10 +1,10 @@
 //#include <stdio.h>
-//#include <math.h>
+#include <math.h>
 //#include <stdlib.h>
 
 class CTempRingBuffer
 {
-    enum { mLength = 1024 };
+    enum { mLength = 256 }; // 128 -> 10 min recording
     float mBuffer[mLength];
     int mIndex{0};
     
@@ -64,8 +64,11 @@ public:
             if (pu > maxPu)
             {
                 maxPu = pu;
-                maxTemp = temp;
-                maxDuration = duration;
+                if (pu > 1)
+                {
+                    maxTemp = temp;
+                    maxDuration = duration;
+                }
             }
             if (pu < 1)
                 break;
@@ -139,7 +142,46 @@ int main()
 }
 */
 
-
+class CAccumulator
+{
+    float pu{0.0f};
+    const float margin{1.0f};
+    float lastT{-1};
+    float avgT{0};
+public:
+    void operator <<(float T)
+    {
+        if (lastT != -1)
+        {
+            avgT = (lastT + T) / 2.0 - margin;
+            if (avgT < 55.0f)
+            {
+                // pasterizacia by mala prebiehat od 55C
+                // ak klesneme pod 55C teoreticky bakterie sa uz mozu mnozit
+                // co PU nemodeluje - takze radsej zacneme od znova
+                pu = 0;
+            } else {
+                // akumulacia PU pre priemernu teplotu za predosle obdobie
+                const float dt = 5.0f; // 5s
+                pu += (dt/60.0f) * pow(1.393f, avgT-60);
+            }
+        }
+        lastT = T;
+    }
+    float Get()
+    {
+        return pu;
+    }
+    int RemainToPu(float targetPu)
+    {
+        if (pu >= targetPu)
+            return 0.f;
+            
+        float aux = (targetPu-pu)/pow(1.393f, avgT-60)*60;
+        return (aux > 60*20) ? 60*20 : (int)aux;
+    }
+};
+CAccumulator Accumulator;
 
 class CCollect
 {
@@ -153,6 +195,10 @@ class CCollect
   float mMaxMaxPu{0};
   float mMaxTemp{0};
   int mMaxDuration{0};
+
+  // accumulator
+  int mAccumulatorPu{0};
+  int mAccumulatorTo50{0};
 
 public:
   void Add(int value)
@@ -173,6 +219,9 @@ public:
       mBuffer << mMin;
         FindMax.FindMax(mMaxPu, mMaxTemp, mMaxDuration);
         mMaxMaxPu = max(mMaxMaxPu, mMaxPu);
+      Accumulator << mMin;
+      mAccumulatorPu = (int)Accumulator.Get();
+      mAccumulatorTo50 = (int)Accumulator.RemainToPu(50.f);
     }
     mSamples = 0;
   }
@@ -183,12 +232,19 @@ public:
       // BOTTOM: min 45 deg, max 49deg, maxPu: 17
       
       BIOS::LCD::Printf(8, BIOS::LCD::Height-16, RGB565(b0b0b0), RGB565(000000),
-            "min: %.1f\xf8" "C, max: %.1f\xf8" "C, maxPU: %d  ",
-            mMin, mMax, (int)mMaxMaxPu);
+            "min: %.1f\xf8" "C, max: %.1f\xf8" "C    ",
+            mMin, mMax);
 
     static char info[64];
-    sprintf(info, "PU: %d (%.1f" "\xf8" " %ds)  ",
-      (int)mMaxPu, mMaxTemp, mMaxDuration);
+    sprintf(info, "PU_flat: %d (%.1f" "\xf8" " %ds) max: %d ",
+      (int)mMaxPu, mMaxTemp, mMaxDuration, (int)mMaxMaxPu);
+
+            BIOS::LCD::Printf(10+16, 16+20+2-8-16, RGB565(b0b0b0), RGB565(404040), info);
+
+    sprintf(info, "PU_acc: %d (%02d:%02ds to 50 pu)  ",
+      (int)mAccumulatorPu, mAccumulatorTo50/60, mAccumulatorTo50%60);
+
+            BIOS::LCD::Printf(10+16, 16+20+2-8, RGB565(000000), MyGui::TitleColor, info);
     return info;
   }
 };
