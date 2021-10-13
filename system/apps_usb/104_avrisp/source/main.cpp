@@ -6,8 +6,12 @@
 #include "../../../os_host/source/framework/SimpleApp.h"
 #include "../../../os_host/source/framework/BufferedIo.h"
 
-//uint8_t gFatSharedBuffer[BIOS::FAT::SharedBufferSize];
-//CBufferedWriter mWriter;
+//#define LOGGING
+
+#ifdef LOGGING
+uint8_t gFatSharedBuffer[BIOS::FAT::SharedBufferSize];
+CBufferedWriter mWriter;
+#endif
 
 RingBufCPP<uint8_t, 512> serialReadPrority;
 volatile bool serialReadPriortyReady = false;
@@ -104,10 +108,11 @@ usbd_device* _usbd_dev = nullptr;
 __attribute__((__section__(".entry")))
 int main(void) 
 {
-//  _ASSERT(sizeof(gFatSharedBuffer) >= BIOS::SYS::GetAttribute(BIOS::SYS::EAttribute::DiskSectorSize));
-//  BIOS::FAT::SetSharedBuffer(gFatSharedBuffer);
-//  mWriter.Open((char*)"avrisp.txt");
-
+#ifdef LOGGING
+  _ASSERT(sizeof(gFatSharedBuffer) >= BIOS::SYS::GetAttribute(BIOS::SYS::EAttribute::DiskSectorSize));
+  BIOS::FAT::SetSharedBuffer(gFatSharedBuffer);
+  mWriter.Open((char*)"avrisp.txt");
+#endif
   APP::Init("AVRISP");
 
   BIOS::OS::TInterruptHandler isrOld = BIOS::OS::GetInterruptVector(BIOS::OS::IUSB_LP_CAN_RX0_IRQ);
@@ -151,7 +156,7 @@ int main(void)
     }
     if (serialRead.size() > 0)
     {
-/*
+#ifdef LOGGING
       mWriter << "RX: ";
       for (int i=0; i<serialRead.size(); i++)
       {
@@ -160,7 +165,7 @@ int main(void)
         mWriter << temp;
       }
       mWriter << "\n";
-*/
+#endif
 
       uint8_t* c1 = serialRead.peek(0);
       uint8_t* c2 = serialRead.peek(1);
@@ -170,14 +175,14 @@ int main(void)
       uint8_t* c6 = serialRead.peek(5);
       uint8_t* c7 = serialRead.peek(6);
       CONSOLE::Print("[rx: %d]:", serialRead.size());
-      if (c1) CONSOLE::Print(" %d", *c1);
+//      if (c1) CONSOLE::Print(" %d", *c1);
 //      if (c2) CONSOLE::Print(" %d", *c2);
 //      if (c3) CONSOLE::Print(" %d", *c3);
 //      if (c4) CONSOLE::Print(" %d", *c4);
 //      if (c5) CONSOLE::Print(" %d", *c5);
 //      if (c6) CONSOLE::Print(" %d", *c6);
 //      if (c7) CONSOLE::Print(" %d", *c7);
-      CONSOLE::Print(";");
+//      CONSOLE::Print(";");
     }
     avrisp_loop(pmode, error);
 
@@ -189,7 +194,7 @@ int main(void)
 
     if (serialWrite.size() > 0)
     {
-/*
+#ifdef LOGGING
       mWriter << "TX: ";
       for (int i=0; i<serialWrite.size(); i++)
       {
@@ -198,7 +203,7 @@ int main(void)
         mWriter << temp;
       }
       mWriter << "\n";
-*/
+#endif
       totalTx += serialWrite.size();
       BulkTransfer(serialWrite, serialWrite.size());
     }
@@ -215,8 +220,10 @@ int main(void)
 
   BIOS::DBG::Print("USB end\n");
   BIOS::OS::SetInterruptVector(BIOS::OS::IUSB_LP_CAN_RX0_IRQ, isrOld);
-//  mWriter.Close();
-//  BIOS::FAT::SetSharedBuffer(nullptr);
+#ifdef LOGGING
+  mWriter.Close();
+  BIOS::FAT::SetSharedBuffer(nullptr);
+#endif
   // TODO: reset usb configuration
 //  BIOS::USB::InitializeMass();
   return 0;

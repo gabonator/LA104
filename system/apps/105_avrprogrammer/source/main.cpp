@@ -100,6 +100,7 @@ bool DoFlashing(char* name)
     // only device code, page size, eeprom size
     memcpy(buffer, params84, sizeof(params84));
     constexpr uint8_t signature84[] = {0x1e, 0x93, 0x0c};
+    constexpr uint8_t signature45[] = {0x1e, 0x92, 0x06};
     set_parameters();
 
     start_pmode();
@@ -107,18 +108,24 @@ bool DoFlashing(char* name)
     signature[0] = spi_transaction(0x30, 0x00, 0x00, 0x00);
     signature[1] = spi_transaction(0x30, 0x00, 0x01, 0x00);
     signature[2] = spi_transaction(0x30, 0x00, 0x02, 0x00);
+
+    CONSOLE::Print("Chip signature: %02x%02x%02x: ", signature[0], signature[1], signature[2]);
     
-    if (signature[0] != signature84[0] || signature[1] != signature84[1] || signature[2] != signature84[2])
+    if (signature[0] == signature84[0] && signature[1] == signature84[1] && signature[2] == signature84[2])
+    {
+        CONSOLE::Print("ATTiny84\n"); 
+    } else
+    if (signature[0] == signature45[0] && signature[1] == signature45[1] && signature[2] == signature45[2])
+    {    
+        CONSOLE::Print("ATTiny45\n"); 
+    } else
     {
         CONSOLE::Color(RGB565(ff0000));
-        CONSOLE::Print("Wrong chip signature %02x%02x%02x, should be %02x%02x%02x\n",
-                       signature[0], signature[1], signature[2],
-                       signature84[0], signature84[1], signature84[2]);
-        return false;
+        CONSOLE::Print("Unknown\n");
+        CONSOLE::Color(RGB565(b0b0b0));
+//        return false;
     }
     
-    CONSOLE::Print("Chip signature: %02x%02x%02x\n", signature[0], signature[1], signature[2]);
-
     if(spi_transaction(0xac, 0x80, 0x00, 0x00) != 0x00)
     {
         CONSOLE::Color(RGB565(ff0000));
