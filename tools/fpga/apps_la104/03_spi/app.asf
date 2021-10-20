@@ -1,5 +1,5 @@
 set_location_assignment PIN_13 -to clk 
-set_location_assignment PIN_48 -to led 
+set_location_assignment PIN_36 -to led 
 set_location_assignment PIN_41 -to rst_n 
 
 set_location_assignment PIN_9 -to gpio[0]
