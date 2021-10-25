@@ -1,5 +1,7 @@
 # FPGA development experiments
 
+- pin definitions in ASF files are physical pin numbers, e.g. PIN_1 is top left pin, PIN_36 is signal PIN_22
+
 | pin | signal | function | assignment |
 |-----|--------|----------|------------|
 | 1   | PIN_36 | IO | test LED |
