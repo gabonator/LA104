@@ -37,6 +37,7 @@ begin
   if(~SSEL_active)
   begin
     bitcnt <= 3'b000;
+    $write("(reset counter)\n");
   end
   else
   if(SCK_risingedge)
@@ -66,17 +67,27 @@ always @(posedge clk)
 if(SSEL_active)
 begin
   if(SSEL_startmessage)
-    byte_data_sent <= cnt;  // first byte sent in a message is the message count
+  begin
+    //byte_data_sent <= cnt;  // first byte sent in a message is the message count
+    $write("(start msg)\n");
+    //$finish;
+
+  end
   else
   if(SCK_fallingedge)
   begin
     if(bitcnt==3'b000)
     begin
+      $write("(new byte)\n");
+
       cnt<=cnt+8'h01;
       byte_data_sent <= cnt;//8'h36;  // after that, we send 0s
     end
     else
+    begin
+//      $write("(push %d)", byte_data_sent[7]);
       byte_data_sent <= {byte_data_sent[6:0], 1'b0};
+    end
   end
 end
 
