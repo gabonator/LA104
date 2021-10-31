@@ -6,9 +6,6 @@ vluint64_t main_time = 0;
 
 void SpiCs(Vapp* top, bool cs)
 {
-    top->SCK = 1;
-    top->SSEL = !cs;
-
     top->clk = !top->clk;
     top->eval();
     top->clk = !top->clk;
@@ -26,12 +23,6 @@ void SpiCs(Vapp* top, bool cs)
 uint8_t SpiTick(Vapp* top, bool b)
 {
     top->MOSI = b;
-    top->clk = !top->clk;
-    top->eval();
-    top->clk = !top->clk;
-    top->eval();
-
-    top->SCK = 0;
 
     top->clk = !top->clk;
     top->eval();
@@ -45,6 +36,14 @@ uint8_t SpiTick(Vapp* top, bool b)
     top->clk = !top->clk;
     top->eval();
 
+    top->SCK = 0;
+
+    top->clk = !top->clk;
+    top->eval();
+    top->clk = !top->clk;
+    top->eval();
+
+//    printf("%d", top->MOSI);
     printf("%d", top->MISO);
     return top->MISO;
 }
@@ -78,11 +77,21 @@ int main(int argc, char** argv, char** env) {
 
     Vapp* top = new Vapp;  // Or use a const unique_ptr, or the VL_UNIQUE_PTR wrapper
 
+    top->SCK = 1;
+    top->SSEL = 1;
+    top->MOSI = 0;
     top->clk = 0;
 
-    uint8_t check[8] = {0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x07};
-    uint8_t buf[8] = {0};
+    uint8_t check[8] = {0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07};
+    uint8_t buf[8] = {0x12, 0x34, 0x56, 0x78, 0x9a, 0xbc, 0xde, 0xf0};
     SpiSend(top, buf, sizeof(buf));
+    printf("\n");
+    for (int i=0; i<sizeof(buf); i++)
+      printf("%02x ", buf[i]);
+    printf("\n");
+
+    SpiSend(top, buf, sizeof(buf));
+    printf("\n");
     for (int i=0; i<sizeof(buf); i++)
       printf("%02x ", buf[i]);
     printf("\n");

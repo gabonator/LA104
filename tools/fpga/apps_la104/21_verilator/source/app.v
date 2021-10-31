@@ -1,6 +1,6 @@
 // https://www.fpga4fun.com/SPI2.html
 
-module app(clk, SCK, MOSI, MISO, SSEL /*, LED*/);
+module app(clk, SCK, MOSI, MISO, SSEL);
 
 input clk;
 input SCK, SSEL, MOSI;
@@ -37,7 +37,6 @@ begin
   if(~SSEL_active)
   begin
     bitcnt <= 3'b000;
-    $write("(reset counter)\n");
   end
   else
   if(SCK_risingedge)
@@ -47,51 +46,50 @@ begin
     // implement a shift-left register (since we receive the data MSB first)
     byte_data_received <= {byte_data_received[6:0], MOSI_data};
   end
+  byte_received <= bitcnt == 3'b111 && SCK_risingedge && SSEL_active;
 end
 
-always @(posedge clk) byte_received <= SSEL_active && SCK_risingedge && (bitcnt==3'b111);
-
-// we use the LSB of the data received to control an LED
-reg LED;
-always @(posedge clk) if(byte_received) LED <= byte_data_received[0];
+always @(posedge clk) 
+  if (byte_received)
+  begin
+    $write("<reveived: 0x%02x>", byte_data_received);
+  end
 
 // transmit
 
 reg [7:0] byte_data_sent;
-
 reg [7:0] cnt;
-//always @(posedge clk) if(SSEL_startmessage) cnt<=cnt+8'h1;  // count the messages
-always @(posedge clk) if(SSEL_startmessage) cnt<=8'h00;  // count the messages
 
 always @(posedge clk)
 if(SSEL_active)
 begin
   if(SSEL_startmessage)
   begin
-    //byte_data_sent <= cnt;  // first byte sent in a message is the message count
+    // initial value
+    cnt <= 8'h00;
+    byte_data_sent <= 8'h00;  // first byte sent in a message is the message count
     $write("(start msg)\n");
-    //$finish;
-
   end
   else
   if(SCK_fallingedge)
   begin
+    if(bitcnt==3'b111)
+    begin
+      // prepare new value at end of byte
+      cnt <= cnt+8'h01;
+    end
     if(bitcnt==3'b000)
     begin
-      $write("(new byte)\n");
-
-      cnt<=cnt+8'h01;
-      byte_data_sent <= cnt;//8'h36;  // after that, we send 0s
+      $write("(set new byte: 0x%02x)\n", cnt);
+      byte_data_sent <= cnt;
     end
     else
     begin
-//      $write("(push %d)", byte_data_sent[7]);
       byte_data_sent <= {byte_data_sent[6:0], 1'b0};
     end
   end
 end
 
-//assign MISO = bitcnt[0];
 assign MISO = byte_data_sent[7];  // send MSB first
 // we assume that there is only one slave on the SPI bus
 // so we don't bother with a tri-state buffer for MISO
