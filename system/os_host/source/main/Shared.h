@@ -20,6 +20,7 @@ uintptr_t GetProcAddress(char* symbol)
     case 0x00009955: return (uint32_t)static_cast<char*(*)()>(BIOS::OS::GetArgument); //_ZN4BIOS2OS11GetArgumentEv
     case 0x00003cf9: return (uint32_t)static_cast<bool(*)()>(BIOS::OS::HasArgument); //_ZN4BIOS2OS11HasArgumentEv
     case 0x0000daaa: return (uint32_t)static_cast<void(*)(char*)>(BIOS::OS::SetArgument); //_ZN4BIOS2OS11SetArgumentEPc
+    case 0x0000b8cd: return (uint32_t)static_cast<bool(*)(char*, unsigned long&, bool)>(BIOS::OS::LoadExecutable); //_ZN4BIOS2OS14LoadExecutableEPcRmb
     case 0x00009001: return (uint32_t)static_cast<void(*)(unsigned long)>(BIOS::OS::EnableInterrupts); //_ZN4BIOS2OS16EnableInterruptsEm
     case 0x00008cd4: return (uint32_t)static_cast<uint32_t(*)()>(BIOS::OS::DisableInterrupts); //_ZN4BIOS2OS17DisableInterruptsEv
     case 0x000007cc: return (uint32_t)BIOS::OS::GetInterruptVector;

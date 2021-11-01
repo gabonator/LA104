@@ -144,17 +144,17 @@ public:
 	{
 	}
 
-	CArray( TYPE *pSource, int nLength )
+	CArray( TYPE *pSource, int nLength, int nCount = 0 )
 	{
 		m_arrElements = pSource;
-		m_nCount = 0;
+		m_nCount = nCount;
 		m_nMaxCount = nLength;
 	}
 	
-	void Init( TYPE *pSource, int nLength )
+	void Init( TYPE *pSource, int nLength, int nCount = 0 )
 	{
 		m_arrElements = pSource;
-		m_nCount = 0;
+		m_nCount = nCount;
 		m_nMaxCount = nLength;
 	}
 
@@ -264,15 +264,27 @@ public:
         return -1;
     }
 
-	TYPE* GetData()
-	{
-		return m_arrElements;
-	}
+    TYPE* GetData()
+    {
+        return m_arrElements;
+    }
 
     void Copy(const CArray<TYPE>& source)
     {
         SetSize(source.GetSize());
         for (int i=0; i<source.GetSize(); i++)
             m_arrElements[i] = source.m_arrElements[i];
+    }
+
+    bool operator ==(const CArray<TYPE>& other)
+    {
+        if (GetSize() != other.GetSize())
+            return false;
+
+        for (int i=0; i<GetSize(); i++)
+            if (m_arrElements[i] != other.m_arrElements[i])
+                return false;
+
+        return true;
     }
 };

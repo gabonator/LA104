@@ -147,6 +147,79 @@ uint8_t SPI3Transfer(uint8_t data)
     return *ptrSpiDr;
 }
 
+void Probe()
+{ 
+    #define SPI_BaudRatePrescaler_16        ((uint16_t)0x0018)
+    #define SPI_BaudRatePrescaler_32        ((uint16_t)0x0020)
+    #define SPI_BaudRatePrescaler_64        ((uint16_t)0x0028)
+    #define SPI_BaudRatePrescaler_128       ((uint16_t)0x0030)
+    #define SPI_BaudRatePrescaler_256       ((uint16_t)0x0038)
+    #define SPI_FirstBit_MSB                ((uint16_t)0x0000)
+    #define SPI_FirstBit_LSB                ((uint16_t)0x0080)
+
+    volatile uint16_t* ptrSpiCR1 = (uint16_t*)0x40003C00; // SPI3 Status reg
+    int clockDivider = SPI_BaudRatePrescaler_16;
+    const uint32_t SPI_CR1_BR = 0x38;
+    uint16_t last = *ptrSpiCR1;
+    uint16_t cr1 = *ptrSpiCR1 & ~(SPI_CR1_BR);
+    *ptrSpiCR1 = cr1 | (clockDivider & SPI_CR1_BR);
+
+    BIOS::KEY::EKey key;
+    // Wait for key press
+    while ((key = BIOS::KEY::GetKey()) == BIOS::KEY::None)
+    {
+        // display PB4_MISO
+        bool b = GetPB4();
+        BIOS::LCD::Bar(CRect(BIOS::LCD::Width-14, BIOS::LCD::Height-14-14,
+            BIOS::LCD::Width, BIOS::LCD::Height-14), 
+            b ? RGB565(ff0000) : RGB565(00ff00));
+
+        // test spi comm every second
+        EVERY(1000) 
+        {
+            uint8_t s = 0x30;
+            SetPB7(0);
+            int ret1 = SPI3Transfer(s);
+            int ret2 = SPI3Transfer(s);
+            int ret3 = SPI3Transfer(s);
+            int ret4 = SPI3Transfer(s);
+            SetPB7(1);
+            int ret5 = SPI3Transfer(s);
+            int ret6 = SPI3Transfer(s);
+
+            BIOS::LCD::Printf(0, BIOS::LCD::Height-14-14, RGB565(000000), RGB565(ffffff), 
+                " spi: %02x %02x %02x %02x (%02x %02x)", ret1, ret2, ret3, ret4, ret5, ret6);
+        }
+    }
+
+    *ptrSpiCR1 = last;
+}
+
+bool Verify(char* filename)
+{
+    if (BIOS::FAT::Open(filename, BIOS::FAT::EIoMode::IoRead) != BIOS::FAT::EResult::EOk)
+        return false;
+		
+    BIOS::FAT::Close();
+
+    CONSOLE::Print("Verification module found:");
+
+    uint32_t entry;
+    if (!BIOS::OS::LoadExecutable(filename, entry, true))
+    {
+        CONSOLE::Print("Load failure!");
+        return false;
+    }
+
+    bool (*verifyFunction)() = (bool (*)())entry;
+    if (verifyFunction())
+      CONSOLE::Print("Success!\n");
+    else
+      CONSOLE::Print("Test failed!\n");
+
+    return true;
+}
+
 CFileDialog mFile;
 CFileFilterSuffix filter(".FPG");
 
@@ -180,51 +253,13 @@ int _main(void)
                 CONSOLE::Color(RGB565(ffffff));
                 CONSOLE::Print("Flashing failed!\n");
             }
- 
-#define SPI_BaudRatePrescaler_16        ((uint16_t)0x0018)
-#define SPI_BaudRatePrescaler_32        ((uint16_t)0x0020)
-#define SPI_BaudRatePrescaler_64        ((uint16_t)0x0028)
-#define SPI_BaudRatePrescaler_128       ((uint16_t)0x0030)
-#define SPI_BaudRatePrescaler_256       ((uint16_t)0x0038)
-#define SPI_FirstBit_MSB                ((uint16_t)0x0000)
-#define SPI_FirstBit_LSB                ((uint16_t)0x0080)
 
-        volatile uint16_t* ptrSpiCR1 = (uint16_t*)0x40003C00; // SPI3 Status reg
-  	int clockDivider = SPI_BaudRatePrescaler_16;
-  	const uint32_t SPI_CR1_BR = 0x38;
-  	uint16_t last = *ptrSpiCR1;
-  	uint16_t cr1 = *ptrSpiCR1 & ~(SPI_CR1_BR);
-  	*ptrSpiCR1 = cr1 | (clockDivider & SPI_CR1_BR);
-  
-            // Wait for key press
-            while ((key = BIOS::KEY::GetKey()) == BIOS::KEY::None)
+            char* verify = mFile.GetFilename();
+            strcpy(verify + strlen(verify) - 4, ".VLF");
+            if (!Verify(verify))
             {
-                // display PB4_MISO
-                bool b = GetPB4();
-                BIOS::LCD::Bar(CRect(BIOS::LCD::Width-14, BIOS::LCD::Height-14-14,
-                    BIOS::LCD::Width, BIOS::LCD::Height-14), 
-                    b ? RGB565(ff0000) : RGB565(00ff00));
-
-                // test spi comm every second
-                EVERY(1000) 
-                {
-                    uint8_t s = 0x30;
-                    SetPB7(0);
-                    int ret1 = SPI3Transfer(s);
-                    int ret2 = SPI3Transfer(s);
-                    int ret3 = SPI3Transfer(s);
-                    int ret4 = SPI3Transfer(s);
-                    SetPB7(1);
-                    int ret5 = SPI3Transfer(s);
-                    int ret6 = SPI3Transfer(s);
-
-                    BIOS::LCD::Printf(0, BIOS::LCD::Height-14-14, RGB565(000000), RGB565(ffffff), 
-                        " spi: %02x %02x %02x %02x (%02x %02x)", ret1, ret2, ret3, ret4, ret5, ret6);
-                }
+              Probe();
             }
-
-  	*ptrSpiCR1 = last;
-
         } else
         {
             break;

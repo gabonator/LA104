@@ -21,9 +21,8 @@ namespace BIOS
       FlashReadRange, FlashWriteRange, FlashAlertRange,
       BatteryVoltage, Charging,
       GpioI2cSpeed,
-      SystemRamBegin, SystemRamEnd,
-      SystemRomBegin, SystemRomEnd,
-      EndStack};
+      SystemMemoryRanges,
+      PushUart};
 
     uintptr_t GetAttribute(EAttribute eInternal);
     uintptr_t GetProcAddress(char* proc);
@@ -194,6 +193,7 @@ namespace BIOS
     void SetInterruptVector(EInterruptVector, TInterruptHandler);
     uint32_t DisableInterrupts();
     void EnableInterrupts(uint32_t);
+    bool LoadExecutable(char* filename, uint32_t& entry, bool quiet);
   }
 
   namespace USB

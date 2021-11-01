@@ -8,11 +8,14 @@
 //enum {DISABLE=0, ENABLE=1};
 //extern "C" void USB_Connect(uint8_t Status);
 uint8_t gBuffer[256];
-
+bool gQuiet = false;
+     
 void Show(char* msg)
 {
   static int x = 0;
   static bool flush = true;
+  if (gQuiet)
+    return;
 
   while (*msg)
   {
@@ -217,27 +220,28 @@ void /*CWndUserManager::*/FlashBss( CBufferedReader& f, Elf32_Shdr& elfSection )
 #endif
 }
 
-//LINKERSECTION(".gbios")
-uint32_t ElfExecute( char* strName )
+bool BIOS::OS::LoadExecutable(char* filename, uint32_t& entry, bool quiet)
 {
 	/*
 		all variables used in this routine + (used by BIOS functions) must be placed 
 		at memory location not colliding with loaded image! Same limitation apply to the
 		code area in flash occupied by this function!
 	*/
-//	USB_Connect(DISABLE);
-        CInterruptGuard guard;
 
-//	BIOS::LCD::Clear(RGB565(0000b0));
+	// TODO: load sections as gabuino does
+
+        CInterruptGuard guard;
+        gQuiet = quiet;
+
         char message[64];
-        sprintf(message, "Executing ELF image '%s'\n", strName);
+        sprintf(message, "Executing ELF image '%s'\n", filename);
         Show(message);
 	CBufferedReader fw;
-	if ( !fw.Open( strName ) )
+	if (!fw.Open(filename))
         {
-		sprintf(message, "Image '%s' not found!\n", strName);
+		sprintf(message, "Image '%s' not found!\n", filename);
 		Show(message);
-		return 0;
+		return false;
         }
 
 	Elf32_Ehdr elfHeader;
@@ -353,7 +357,7 @@ uint32_t ElfExecute( char* strName )
 			sprintf(message, "%s> Unknown section name!", strSectionName);
 			Show(message);
 			_ASSERT( sectionType > 0 );
-			return 0;
+			return false;
 		}
 	}
 
@@ -452,7 +456,6 @@ uint32_t ElfExecute( char* strName )
 				{
 					uint32_t dwInitPtr;
 					fw >> dwInitPtr;
-///					BIOS::DBG::Print("0x%08x", dwInitPtr);
 #ifndef _WIN32
 					typedef void (*TInitFunc)();
 					TInitFunc InitFunc = (TInitFunc)dwInitPtr;
@@ -477,6 +480,6 @@ uint32_t ElfExecute( char* strName )
 
 	sprintf(message, "Image loaded at 0x%08x\n", elfHeader.entry);
 	Show(message);
-//	USB_Connect(ENABLE);
-	return elfHeader.entry;
+	entry = elfHeader.entry;
+	return true;
 }

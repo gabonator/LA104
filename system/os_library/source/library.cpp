@@ -127,6 +127,7 @@ namespace BIOS
     void SetInterruptVector(BIOS::OS::EInterruptVector, BIOS::OS::TInterruptHandler) {}
     uint32_t DisableInterrupts() { return 0; }
     void EnableInterrupts(uint32_t) {}
+    bool LoadExecutable(char* filename, uint32_t& entry, bool quiet) { return false; }
   }
 
 #if !defined(DISABLE_USB)

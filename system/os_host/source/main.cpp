@@ -87,7 +87,10 @@ int main()
       uint8_t gFatSharedBuffer[BIOS::FAT::SharedBufferSize]; 
       BIOS::FAT::SetSharedBuffer(gFatSharedBuffer);
 
-      address = ElfExecute(filename);
+
+      if (!BIOS::OS::LoadExecutable(filename, address, false))
+        address = 0;
+    
 
       BIOS::MEMORY::SetSharedBuffer(nullptr);
       BIOS::FAT::SetSharedBuffer(nullptr);
@@ -140,6 +143,7 @@ void NMIException(void)
   BIOS::DBG::Print("NMIException");    
   Halt();
 }
+
 /*
 void HardFaultException(void)
 {
@@ -147,11 +151,13 @@ void HardFaultException(void)
    while(1);
 }
 */
+
 void MemManageException(void)
 {
   BIOS::DBG::Print("MemManageException\n");    
   Halt();
 }
+
 void BusFaultException(void)
 {
   BIOS::DBG::Print("BusFaultException\n");    

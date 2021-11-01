@@ -7,7 +7,9 @@
 #ifdef DISABLE_USB
 void __USB_Istr(void) {}
 void __CTR_HP(void) {}
-#endif
+#endif                           
+
+extern void UartPushByte(uint8_t data);
 
 extern void (* g_pfnVectors[76])(void);
 extern uint32_t gGpioStatusCode;
@@ -18,6 +20,8 @@ extern unsigned long _addressRamBegin;
 extern unsigned long _addressRamEnd;
 extern unsigned long _addressRomBegin;
 extern unsigned long _addressRomEnd;
+uint32_t* _systemMemoryRanges[] = {&_addressRamBegin, &_addressRamEnd, 
+  &_addressRomBegin, &_addressRomEnd, &_estack};
 
 __attribute__ ((section(".biosfunc"), optimize("O0")))
 uint32_t __Bios(uint8_t Item, uint32_t Var) { return 0; }
@@ -300,13 +304,9 @@ uintptr_t GetAttribute(enum EAttribute attribute)
     case FlashReadRange: return (uintptr_t)gFlashReadRange;
     case FlashWriteRange: return (uintptr_t)gFlashWriteRange;
     case FlashAlertRange: return (uintptr_t)gFlashAlertRange;
-
-    case SystemRamBegin: return (uintptr_t)_addressRamBegin;
-    case SystemRamEnd: return (uintptr_t)_addressRamEnd;
-    case SystemRomBegin: return (uintptr_t)_addressRomBegin;
-    case SystemRomEnd: return (uintptr_t)_addressRamEnd;
-    case EndStack: return (uintptr_t)_estack;
-
+    // device memory range?
+    case SystemMemoryRanges: return (uintptr_t)_systemMemoryRanges;
+    case PushUart: return (uintptr_t)UartPushByte;
     default: return 0;
   }
 }

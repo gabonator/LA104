@@ -18,7 +18,7 @@ namespace BIOS
     {
       switch (attribute)
       {
-        case EAttribute::BiosVersion: return 0x0104;
+        case EAttribute::BiosVersion: return 0x0105;
 
         case EAttribute::CharRom: return (uintptr_t)ptrFont;
         case EAttribute::LastChar: return (uintptr_t)&lastChar;
@@ -48,6 +48,7 @@ namespace BIOS
         case EAttribute::FlashReadRange:
         case EAttribute::FlashWriteRange:
         case EAttribute::FlashAlertRange:
+        case EAttribute::SystemMemoryRanges:
           return (uintptr_t)::GetAttribute((::EAttribute)attribute);
 
         case EAttribute::DiskSectorSize: return BIOS::FAT::SectorSize;
