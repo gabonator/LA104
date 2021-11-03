@@ -4,6 +4,7 @@
 class CFpgaTestBench
 {
     uint16_t lastSpiCr;
+
 public:
     void SpiBegin()
     {
@@ -113,11 +114,15 @@ public:
 
     void SpiTransfer(const CArray<uint8_t>& arrIn, CArray<uint8_t>& arrOut)
     {
+        SpiBegin();
+
         arrOut.SetSize(arrIn.GetSize());
         SpiCs(true);
         for (int i=0; i<arrIn.GetSize(); i++)
           arrOut[i] = SpiTransfer(arrIn[i]);
         SpiCs(false);
+
+        SpiEnd();
     }
 };
 
@@ -201,11 +206,32 @@ public:
           arrOut[i] = SpiTransfer(arrIn[i]);
         SpiCs(false);
     }
+
+    void SpiBegin()
+    {
+    }
+
+    void SpiEnd()
+    {
+    }
 };
 
 void _HandleAssertion(const char* file, int line, const char* cond)
 {
     printf("Assertion failed in %s [%d]: %s\n", file, line, cond);
+}
+
+namespace BIOS {
+  namespace DBG {
+    int Print(const char *format, ...)
+    {
+      va_list args;
+      va_start(args, format);
+      vprintf(format, args);
+      va_end(args);
+      return 0;
+    }
+  }
 }
 
 #endif

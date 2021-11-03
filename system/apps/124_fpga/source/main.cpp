@@ -202,7 +202,7 @@ bool Verify(char* filename)
 		
     BIOS::FAT::Close();
 
-    CONSOLE::Print("Verification module found:");
+    CONSOLE::Print("Verification module found: ");
 
     uint32_t entry;
     if (!BIOS::OS::LoadExecutable(filename, entry, true))
@@ -210,6 +210,9 @@ bool Verify(char* filename)
         CONSOLE::Print("Load failure!");
         return false;
     }
+
+    _ASSERT(entry);
+    entry |= 1; // thumb instruction
 
     bool (*verifyFunction)() = (bool (*)())entry;
     if (verifyFunction())
@@ -259,6 +262,9 @@ int _main(void)
             if (!Verify(verify))
             {
               Probe();
+            } else
+            {
+              while (BIOS::KEY::GetKey() == BIOS::KEY::None);
             }
         } else
         {

@@ -25,7 +25,13 @@ bool verify()
         test.SpiTransfer(arrSend, arrReturn);
 
         if (!(arrReturn == arrVerify))
+        {
+          BIOS::DBG::Print("Pass %d failed: ", i);
+          for (int j=0; j<i; j++)
+             BIOS::DBG::Print("%02x, ", arrReturn[j]);
+          BIOS::DBG::Print("\n");
           return false;
+        }
     }
 
     return true;
