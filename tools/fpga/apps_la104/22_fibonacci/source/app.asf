@@ -1,5 +1,0 @@
-set_location_assignment PIN_19 -to clk
-set_location_assignment PIN_33 -to MISO
-set_location_assignment PIN_32 -to MOSI
-set_location_assignment PIN_31 -to SCK
-set_location_assignment PIN_29 -to SSEL

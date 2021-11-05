@@ -82,7 +82,7 @@ arm-none-eabi-g++ -Wall -Os -Werror -fno-common -mcpu=cortex-m3 -mthumb -msoft-f
   ../source/gui/Gui.cpp \
   ../source/framework/Serialize.cpp \
 
-arm-none-eabi-gcc -mcpu=cortex-m3 -mthumb -o output.elf -nostartfiles -T ../app.ld \
+arm-none-eabi-gcc -mcpu=cortex-m3 -mthumb -o output_la104.elf -nostartfiles -T ../app.ld \
   ./main.o \
   ./startup.o \
   ./interrupt.o \
@@ -130,18 +130,18 @@ arm-none-eabi-gcc -mcpu=cortex-m3 -mthumb -o output.elf -nostartfiles -T ../app.
   ./dac.o \
   ./private.o 
 
-arm-none-eabi-objcopy -O binary ./output.elf ./output.bin
-arm-none-eabi-objcopy -O ihex ./output.elf ./system_la104.hex
+arm-none-eabi-objcopy -O binary ./output_la104.elf ./output_la104.bin
+arm-none-eabi-objcopy -O ihex ./output_la104.elf ./system_la104.hex
 
-arm-none-eabi-readelf -all output.elf > output.txt
-arm-none-eabi-objdump -d -S output.elf > output.asm
+arm-none-eabi-readelf -all output_la104.elf > output_la104.txt
+arm-none-eabi-objdump -d -S output_la104.elf > output_la104.asm
 
 find . -type f -name '*.o' -delete
 find . -type f -name '*.d' -delete
 
-nm --print-size --size-sort -gC output.elf | grep " B " > symbols_ram.txt
-nm --print-size --size-sort -gC output.elf | grep " T " > symbols_rom.txt
-nm --print-size --size-sort -gC output.elf > symbols_all.txt
-nm output.elf > symbols_all2.txt
-cat symbols_all.txt | grep _addressR
+nm --print-size --size-sort -gC output_la104.elf | grep " B " > symbols_ram_la104.txt
+nm --print-size --size-sort -gC output_la104.elf | grep " T " > symbols_rom_la104.txt
+nm --print-size --size-sort -gC output_la104.elf > symbols_all_la104.txt
+nm output_la104.elf > symbols_all2_la104.txt
+cat symbols_all_la104.txt | grep _addressR
 

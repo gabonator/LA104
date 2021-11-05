@@ -1,2 +1,0 @@
-set_location_assignment PIN_9 -to clk
-set_location_assignment PIN_36 -to led

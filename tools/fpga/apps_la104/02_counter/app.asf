@@ -1,4 +1,0 @@
-set_location_assignment PIN_13 -to clk
-set_location_assignment PIN_36 -to led1
-set_location_assignment PIN_37 -to led2
-set_location_assignment PIN_27 -to rst_n

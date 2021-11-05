@@ -179,7 +179,9 @@ namespace MEMORY
     static uint32_t *SP;
     asm("mrs %0, msp" : "=r"(SP) : :);
     uint32_t* stack = SP+6;
-    uint32_t* endStack = (uint32_t*)(BIOS::SYS::GetAttribute(BIOS::SYS::EAttribute::EndStack));
+    uint32_t** memPtrs = (uint32_t**)(BIOS::SYS::GetAttribute(BIOS::SYS::EAttribute::SystemMemoryRanges));
+    uint32_t* endStack = (uint32_t*)*((uint32_t*)memPtrs[4]);
+    // TODO: not verified!
 
     int count = 0;
     for (count=0; count<COUNT(debugStackFramesData) && stack < endStack; count++)

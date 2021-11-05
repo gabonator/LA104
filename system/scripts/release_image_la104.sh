@@ -189,6 +189,7 @@ cp $FROM/22seqen.elf $TO/tools/sequence.elf
 cp $FROM/72uartm.elf $TO/tools/uartmon.elf
 cp $FROM/74invt.elf $TO/tools/vfd_invt.elf # rs485
 cp $FROM/33temper.elf $TO/tools/dstemper.elf
+cp $FROM/121pastr.elf $TO/tools/pasteur.elf
 cp $FROM/15charla.elf $TO/tools/charmap.elf
 cp $FROM/63ws_104.elf $TO/tools/ws2812.elf
 cp $FROM/49gpio.elf $TO/tools/gpio.elf
@@ -209,6 +210,7 @@ echo -n "{\"description\":{\"short\":\"MIDI\",\"long\":\"MIDI player\"},\"icon\"
 echo -n "{\"description\":{short:\"AvrFlash\",long:\"Atmel firmware flasher\"},\"icon\":\"avrflash.bmp\",\"execute\":\"avrflash.elf\",order:20, youtube:\"yC3a1zbonJ0\"}" > $TO/tools/avrflash.lnk
 echo -n "{\"description\":{short:\"Servo\",long:\"Servo controller PCA9685\"},\"icon\":\"servo.bmp\",\"execute\":\"servo.elf\",order:65,youtube:\"heYFrqVF1P4\"}" > $TO/tools/servo.lnk
 echo -n "{\"description\":{short:\"Hunter\",long:\"Hunter X-core controller\"},\"icon\":\"hunter.bmp\",\"execute\":\"hunter.elf\",order:66}" > $TO/tools/hunter.lnk
+echo -n "{\"description\":{short:\"Pasteur\",long:\"Pasteurisation calculator\"},\"icon\":\"pasteur.bmp\",\"execute\":\"pasteur.elf\",order:66}" > $TO/tools/pasteur.lnk
 
 cp $ICON/charmap.bmp $TO/tools/charmap.bmp
 cp $ICON/dcf77.bmp $TO/tools/dcf77.bmp
@@ -222,6 +224,7 @@ cp $ICON/music.bmp $TO/tools/midiplay.bmp
 cp $ICON/arduino.bmp $TO/tools/avrflash.bmp
 cp $ICON/servo.bmp $TO/tools/servo.bmp
 cp $ICON/hunter.bmp $TO/tools/hunter.bmp
+cp $ICON/pasteur.bmp $TO/tools/pasteur.bmp
 
 cp ../apps_featured/test21_midiplay/midi/laisla.mid $TO/tools/laisla.mid
 cp ../apps/105_avrprogrammer/arduino/blink.hex $TO/tools/blink.hex
@@ -405,16 +408,22 @@ echo -n "{\"description\":{\"short\":\"Devel\",\"long\":\"Development\"},\"icon\
 
 cp ../apps_featured/113_circuitpython/scripts/*.py $TO/devel/
 cp ../apps_featured/118_basic/examples/*.bas $TO/devel/
+cp ../apps/123_fpga/bin/*.fpg $TO/devel/
+cp ../apps/123_fpga/bin/*.vlf $TO/devel/
+
 cp $ICON/cpython.bmp $TO/devel/cpython.bmp
 cp $ICON/gabuino.bmp $TO/devel/gabuino.bmp
 cp $ICON/basic.bmp $TO/devel/basic.bmp
+cp $ICON/fpga.bmp $TO/devel/fpga.bmp
 cp $FROM/113cirpy.elf $TO/devel/cpython.elf
 cp $FROM/117rt.elf $TO/devel/gabuino.elf
 cp $FROM/118basic.elf $TO/devel/basic.elf
+cp $FROM/123fpga.elf $TO/devel/fpga.elf
 
 echo -n "{\"description\":{short:\"CiPython\",long:\"Circuit python\"},\"icon\":\"cpython.bmp\",\"execute\":\"cpython.elf\"}" > $TO/devel/cpython.lnk
 echo -n "{\"description\":{short:\"Basic\",long:\"Basic\"},\"icon\":\"basic.bmp\",\"execute\":\"basic.elf\"}" > $TO/devel/basic.lnk
 echo -n "{\"description\":{short:\"Gabuino\",long:\"Gabuino\"},\"icon\":\"gabuino.bmp\",\"execute\":\"gabuino.elf\"}" > $TO/devel/gabuino.lnk
+echo -n "{\"description\":{short:\"FPGA\",long:\"FPGA Loader\"},\"icon\":\"fpga.bmp\",\"execute\":\"fpga.elf\"}" > $TO/devel/fpga.lnk
 
 cp $ICON/games.bmp $TO/fun/app.bmp
 )

@@ -1,0 +1,2 @@
+set_location_assignment PIN_19 -to clk
+set_location_assignment PIN_33 -to MISO

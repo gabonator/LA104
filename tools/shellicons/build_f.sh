@@ -12,3 +12,5 @@ convert -composite compo1.png compo2.png fdevel.bmp
 convert gabuino.png -resize 64x64 -background transparent -gravity Center -extent 64x64 -alpha on gabuino.bmp
 convert basic.png -resize 64x64 -background transparent -gravity Center -extent 64x64 -alpha on basic.bmp
 convert ps2keyb.png -resize 64x64 -background transparent -gravity Center -extent 64x64 -alpha on ps2keyb.bmp
+convert fpga.png -resize 64x64 -background transparent -gravity Center -extent 64x64 -alpha on fpga.bmp
+convert pasteur.png -resize 64x64 -background transparent -gravity Center -extent 64x64 -alpha on pasteur.bmp

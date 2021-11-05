@@ -1,2 +1,0 @@
-set_location_assignment PIN_36 -to led 
-set_location_assignment PIN_31 -to in1
