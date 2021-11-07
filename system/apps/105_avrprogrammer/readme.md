@@ -24,7 +24,7 @@ ICSP:
 
 
 
- ATTiny45
+ ATTiny45 / ATTiny25
  PB5  1   8  VCC
  PB3  2   7  PB2
  PB4  3   6  PB1

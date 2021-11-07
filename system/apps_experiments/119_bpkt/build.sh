@@ -1,7 +1,7 @@
 # bez libm
 set -e
 
-#mkdir -p build
+mkdir -p build
 cd build
 
 arm-none-eabi-g++ -g -Os -Werror -fno-common -mcpu=cortex-m3 -mthumb -msoft-float -fno-exceptions -fno-rtti -fno-threadsafe-statics -Wno-psabi -D LA104 -D _ARM -D STM32F10X_HD -c \

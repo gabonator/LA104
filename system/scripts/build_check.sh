@@ -24,3 +24,11 @@ if [ ! -f elfstrip ]; then
   echo "[ERROR] Failed to build elfstrip utility"
   exit 1
 fi
+
+cd ../../tools/crc32/
+./build.sh
+
+if [ ! -f forcecrc32 ]; then
+  echo "[ERROR] Failed to build crc32 patcher utility"
+  exit 1
+fi

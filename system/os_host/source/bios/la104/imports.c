@@ -15,13 +15,16 @@ extern void (* g_pfnVectors[76])(void);
 extern uint32_t gGpioStatusCode;
 extern uint32_t gGpioI2cSpeed;
 
+const uint32_t firmwareCrc = 0x6ab02021;
+
 extern unsigned long _estack;
 extern unsigned long _addressRamBegin;
 extern unsigned long _addressRamEnd;
 extern unsigned long _addressRomBegin;
 extern unsigned long _addressRomEnd;
-uint32_t* _systemMemoryRanges[] = {&_addressRamBegin, &_addressRamEnd, 
-  &_addressRomBegin, &_addressRomEnd, &_estack};
+const uint32_t* _systemMemoryRanges[] = {&_addressRomBegin, &_addressRomEnd, 
+  &_addressRamBegin, &_addressRamEnd, &_estack, &firmwareCrc};
+
 
 __attribute__ ((section(".biosfunc"), optimize("O0")))
 uint32_t __Bios(uint8_t Item, uint32_t Var) { return 0; }

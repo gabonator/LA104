@@ -67,10 +67,10 @@ void _Trap()
     : : "m"(trappedAddress));
 }
 
-BIOS::OS::TInterruptHandler isrOld;
+BIOS::OS::TInterruptHandler isrDebugOld;
 void BeginDebugSession()
 {
-    isrOld = BIOS::OS::GetInterruptVector(BIOS::OS::IDebugMonitor);
+    isrDebugOld = BIOS::OS::GetInterruptVector(BIOS::OS::IDebugMonitor);
     
     CoreDebug->DEMCR |= CoreDebug_DEMCR_MON_EN_Msk;
     BIOS::OS::SetInterruptVector(BIOS::OS::IDebugMonitor, DebugMon_Handler);
@@ -79,7 +79,7 @@ void BeginDebugSession()
 void EndDebugSession()
 {
     CoreDebug->DEMCR &= ~CoreDebug_DEMCR_MON_EN_Msk;
-    BIOS::OS::SetInterruptVector(BIOS::OS::IDebugMonitor, isrOld);
+    BIOS::OS::SetInterruptVector(BIOS::OS::IDebugMonitor, isrDebugOld);
 }
 
 static uint32_t *SP;

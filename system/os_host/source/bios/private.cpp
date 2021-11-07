@@ -18,7 +18,7 @@ namespace BIOS
     {
       switch (attribute)
       {
-        case EAttribute::BiosVersion: return 0x0105;
+        case EAttribute::BiosVersion: return 0x0106;
 
         case EAttribute::CharRom: return (uintptr_t)ptrFont;
         case EAttribute::LastChar: return (uintptr_t)&lastChar;

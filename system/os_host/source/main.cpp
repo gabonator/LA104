@@ -37,6 +37,27 @@ public:
   }
 };
 
+#ifdef LA104
+// https://stackoverflow.com/questions/21001659/crc32-algorithm-implementation-in-c-without-a-look-up-table-and-with-a-public-li
+
+extern unsigned long _addressRomBegin;
+extern unsigned long _addressRomEnd;
+uint32_t crc32b(const uint8_t *message, int length) {
+   uint32_t crc, mask;
+
+   crc = 0xFFFFFFFF;
+   while (length--) {
+      crc = crc ^ *message++;
+      for (int j = 7; j >= 0; j--) 
+      {
+         mask = -(crc & 1);
+         crc = (crc >> 1) ^ (0xEDB88320 & mask);
+      }
+   }
+   return ~crc;
+}
+#endif
+
 int main()
 {                   
   // TODO: move to ds203 startup code
@@ -55,6 +76,14 @@ int main()
   char shell[64] = "shell.elf";
 
 #ifdef LA104
+  int len = (uint8_t*)&_addressRomEnd-(uint8_t*)&_addressRomBegin;
+  uint32_t check = crc32b((uint8_t*)&_addressRomBegin, len);
+  if (check != 0)
+  {
+      BIOS::DBG::Print("CRC error!");
+      while (BIOS::KEY::GetKey() != BIOS::KEY::F1);
+  }
+
   while (BIOS::KEY::GetKey() == BIOS::KEY::F3)
 #endif
 #ifdef DS213
@@ -89,8 +118,7 @@ int main()
 
 
       if (!BIOS::OS::LoadExecutable(filename, address, false))
-        address = 0;
-    
+        address = 0;    
 
       BIOS::MEMORY::SetSharedBuffer(nullptr);
       BIOS::FAT::SetSharedBuffer(nullptr);
