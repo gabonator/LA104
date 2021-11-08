@@ -63,6 +63,7 @@ Refer to this [tutorial](resources/tutorial_building)
 | ![29fileman_la104.elf](resources/appicons/fileman.png) |  | File manager | [apps_shell/test29_fileman](system/apps_shell/test29_fileman/) |
 | ![118basic.elf](resources/appicons/basic.png) | devel | Basic | [apps_featured/118_basic](system/apps_featured/118_basic/) |
 | ![113cirpy.elf](resources/appicons/cpython.png) | devel | Circuit python | [apps_featured/113_circuitpython](system/apps_featured/113_circuitpython/) |
+| ![123fpga.elf](resources/appicons/fpga.png) | devel | FPGA Loader | [apps/123_fpga](system/apps/123_fpga/) |
 | ![117rt.elf](resources/appicons/gabuino.png) | devel | Gabuino | [apps_featured/117_gabuino/examples](system/apps_featured/117_gabuino/examples/) |
 | ![14apds1.elf](resources/appicons/chip.png) | devices | APDS9960 color gesture sensor | [apps_experiments/test14_apds9960](system/apps_experiments/test14_apds9960/) |
 | ![11i2c.elf](resources/appicons/chip.png) | devices | BMP085 Barometric sensor | [apps_experiments/test11_i2c_api](system/apps_experiments/test11_i2c_api/) |
@@ -76,6 +77,7 @@ Refer to this [tutorial](resources/tutorial_building)
 | ![87mlx906.elf](resources/appicons/chip.png) | devices | MLX90614 non cotact thermo | [apps_experiments/87_mlx90614](system/apps_experiments/87_mlx90614/) |
 | ![106mpr12.elf](resources/appicons/chip.png) | devices | MPR121 12 channel toch sensor | [apps_experiments/106_mpr121](system/apps_experiments/106_mpr121/) |
 | ![34scope.elf](resources/appicons/chip.png) | devices | PCF8591t I2C ADC | [apps/test34_scope](system/apps/test34_scope/) |
+| ![120keyb.elf](resources/appicons/ps2keyb.png) | devices | PS2 Keyboard | [apps/120_ps2keyboard](system/apps/120_ps2keyboard/) |
 | ![109radse.elf](resources/appicons/radsens.png) | devices | Radsens dosimeter | [apps/109_radsense](system/apps/109_radsense/) |
 | ![95sht20.elf](resources/appicons/chip.png) | devices | SHT20 temperature humidity | [apps_experiments/95_sht20](system/apps_experiments/95_sht20/) |
 | ![45simcom.elf](resources/appicons/chip.png) | devices | SIMCOM gprs modem | [apps/test45_simcom](system/apps/test45_simcom/) |
@@ -100,6 +102,7 @@ Refer to this [tutorial](resources/tutorial_building)
 | ![49gpio.elf](resources/appicons/gpio.png) | tools | GPIO and PWM controller | [apps_featured/test49_gpio](system/apps_featured/test49_gpio/)<br>[https://youtu.be/8FxnDp6G_iQ?t=190](https://youtu.be/8FxnDp6G_iQ?t=190) |
 | ![115huntr.elf](resources/appicons/hunter.png) | tools | Hunter X-core controller | [apps/115_hunter](system/apps/115_hunter/) |
 | ![21mplayl.elf](resources/appicons/midiplay.png) | tools | MIDI player | [apps_featured/test21_midiplay](system/apps_featured/test21_midiplay/)<br>[https://youtu.be/f3DCqy-3lNo](https://youtu.be/f3DCqy-3lNo) |
+| ![121pastr.elf](resources/appicons/pasteur.png) | tools | Pasteurisation calculator | [apps_featured/121_pasteur](system/apps_featured/121_pasteur/) |
 | ![22seqen.elf](resources/appicons/sequence.png) | tools | Sequencer and analyser | [apps/test22_sequencer](system/apps/test22_sequencer/)<br>[https://youtu.be/D8OnXzE7OwU](https://youtu.be/D8OnXzE7OwU) |
 | ![103servo.elf](resources/appicons/servo.png) | tools | Servo controller PCA9685 | [apps_featured/103_servo](system/apps_featured/103_servo/)<br>[https://youtu.be/heYFrqVF1P4](https://youtu.be/heYFrqVF1P4) |
 | ![72uartm.elf](resources/appicons/uartmon.png) | tools | UART monitor | [apps_featured/72_uartmon](system/apps_featured/72_uartmon/) |
