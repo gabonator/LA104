@@ -1,11 +1,8 @@
-// https://www.fpga4fun.com/SPI2.html
-
 module app(clk, SCK, MOSI, MISO, SSEL);
 
 input clk;
 input SCK, SSEL, MOSI;
 output MISO;
-//output LED;
 
 // sync SCK to the FPGA clock using a 3-bits shift register
 reg [2:0] SCKr;  always @(posedge clk) SCKr <= {SCKr[1:0], SCK};
@@ -50,7 +47,7 @@ end
 always @(posedge clk) 
   if (byte_received)
   begin
-    $write("<reveived: 0x%02x>", byte_data_received);
+    $write("<received: 0x%02x>", byte_data_received);
   end
 
 // transmit

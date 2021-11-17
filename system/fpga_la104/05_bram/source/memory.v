@@ -1,5 +1,3 @@
-// https://thesharanmohanblog.wordpress.com/2018/09/12/intro-to-fpgas-fibonacci-sequence/
-
 module memory(clk, rst, fibout);
 input clk;
 input rst;

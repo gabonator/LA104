@@ -52,7 +52,7 @@ end
 always @(posedge clk) 
   if (byte_received)
   begin
-    $write("<reveived: 0x%02x>", byte_data_received);
+    $write("<received: 0x%02x>", byte_data_received);
   end
 
 // transmit
