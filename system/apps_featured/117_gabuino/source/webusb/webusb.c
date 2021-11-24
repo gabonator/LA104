@@ -232,9 +232,22 @@ static const char* origin_url = "l.valky.eu/gabuinov1";
 
 static char serial_number[USB_SERIAL_NUM_LENGTH+1];
 
+#define MSC_VENDOR_ID "Gabriel"  //  Max 8 chars
+#ifdef DS203
+#define MSC_PRODUCT_ID "DS203"  //  Max 16 chars
+#elif DS213
+#define MSC_PRODUCT_ID "DS213"  //  Max 16 chars
+#elif LA104
+#define MSC_PRODUCT_ID "LA104"  //  Max 16 chars
+#else
+#define MSC_PRODUCT_ID "Unknown"  //  Max 16 chars
+#endif
+#define MSC_PRODUCT_REVISION_LEVEL "1.3"  //  Max 4 chars
+#define USB_CLASS_MISCELLANEOUS 0xef  //  Copy from microbit.
+
 static const char *usb_strings[] = {
     "Gabriel",                 //  USB Manufacturer
-    "LA104 Gabuino",      //  USB Product
+    MSC_PRODUCT_ID " Gabuino",      //  USB Product
     serial_number,             //  Serial number
     //"Blue Pill DFU",         //  DFU
     "DAPBoot DFU",             //  DFU
@@ -243,11 +256,6 @@ static const char *usb_strings[] = {
     "Blue Pill COMM",          //  COMM
     "Blue Pill DATA",          //  DATA
 };
-
-#define MSC_VENDOR_ID "Gabriel"  //  Max 8 chars
-#define MSC_PRODUCT_ID "DS203"  //  Max 16 chars
-#define MSC_PRODUCT_REVISION_LEVEL "1.3"  //  Max 4 chars
-#define USB_CLASS_MISCELLANEOUS 0xef  //  Copy from microbit.
 
 enum usb_strings_index {  //  Index of USB strings.  Must sync with above, starts from 1.
     USB_STRINGS_MANUFACTURER = 1,

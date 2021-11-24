@@ -15,17 +15,40 @@ var LCD = {
   }
 };
 
+//var queue = [];
+function schedule(command, handler)
+{
+  if (COMM._onReceive != COMM._defReceive)
+  {
+    console.log("waiting to finish handler: " + COMM._onReceive);
+    // something is in progress
+    // drop request
+    return Promise.resolve();
+  }
+
+  return new Promise((resolve, reject) =>
+    {
+      COMM._onReceive = data => { COMM._onReceive = COMM._defReceive; resolve(handler(data));  };
+      COMM._send(command);
+    });
+}
+
 var BIOS =
 {
   safeeval: (json) => { if (json[0] == "{") return eval("("+json+")") },
   retval: (json) => { var j = BIOS.safeeval(json); if (j && typeof(j.ret) != "undefined") return j.ret },
   rpcCall: (command) =>
-  {                 
-    return new Promise((resolve, reject) =>
+  {                     
+//console.log("---- rpc:" +command);
+    return schedule(command, data => new TextDecoder().decode(data));
+//    return schedule(command, data => { COMM._onReceive = COMM._defReceive; resolve(new TextDecoder().decode(data));  });
+/*
+     new Promise((resolve, reject) =>
     {
       COMM._onReceive = data => { COMM._onReceive = COMM._defReceive; resolve(new TextDecoder().decode(data));  };
       COMM._send(command);
-    });
+    }));
+*/
   },
   rpcPeekRaw: () =>
   {                 
@@ -54,7 +77,8 @@ var BIOS =
   memWrite: (addr, buf) =>
   {
     return BIOS.rpcCall('MEM::Write(0x'+addr.toString(16)+','+buf.length+');')
-    .then( json => { if (typeof(BIOS.safeeval(json).ret) == "undefined") throw "problem"; 
+    .then( json => { 
+      if (typeof(BIOS.safeeval(json).ret) == "undefined") throw "problem"; 
       console.log("Sending " + buf.length);
       COMM._sendRaw(buf);
       return BIOS.rpcPeek();
@@ -70,7 +94,7 @@ var BIOS =
       COMM._defEval(ret);
   }),
   resume: () => BIOS.rpcCall('DBG::Resume()').then( BIOS.retval ),
-  stop: () => BIOS.rpcCall('DBG::Stop()').then( BIOS.retval ),
+  stop: () => { COMM._onReceive = COMM._defReceive; return BIOS.rpcCall('DBG::Stop()').then( BIOS.retval ) },
   frame: () => BIOS.rpcCall('DBG::Frame()')
     .then( json => { if (typeof(BIOS.safeeval(json).bulk) == "undefined") throw "problem"; return BIOS.rpcPeekRaw(); } )
     .then( rawdata => { BIOS._rawData = rawdata; /*console.log("raw:"+rawdata.byteLength); */return BIOS.rpcPeek(); })

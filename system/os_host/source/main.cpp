@@ -1,73 +1,25 @@
-//#include "../library/CMSIS/Device/STM32F10x/Include/STM32F10x.h"
 #include "source/bios/Bios.h"
 #include "source/main/Execute.h"
-
-void InvalidateFat();
-
-class CTokenizer
-{
-  char* mString;
-
-public:
-  CTokenizer(char* str)
-  {
-    mString = str;
-  }
-
-  void GetToken(char* out, int maxLength)
-  {
-    for (int i=0; i<maxLength; i++)
-    {
-      out[i] = mString[i];
-      if (mString[i] == 0)
-      {
-        mString += i;
-        return;
-      }
-      if (mString[i] == ' ')
-      {
-        out[i] = 0;
-        mString += i;
-        mString++;
-        return;
-      }
-    }
-    mString += maxLength;
-    out[maxLength] = 0;
-  }
-};
-
-#ifdef LA104
-// https://stackoverflow.com/questions/21001659/crc32-algorithm-implementation-in-c-without-a-look-up-table-and-with-a-public-li
-
-extern unsigned long _addressRomBegin;
-extern unsigned long _addressRomEnd;
-uint32_t crc32b(const uint8_t *message, int length) {
-   uint32_t crc, mask;
-
-   crc = 0xFFFFFFFF;
-   while (length--) {
-      crc = crc ^ *message++;
-      for (int j = 7; j >= 0; j--) 
-      {
-         mask = -(crc & 1);
-         crc = (crc >> 1) ^ (0xEDB88320 & mask);
-      }
-   }
-   return ~crc;
-}
-#endif
+#include "crc.h"
+#include "tokenizer.h"
 
 int main()
 {                   
-  // TODO: move to ds203 startup code
-  BIOS::SYS::Beep(0);
-
   BIOS::SYS::Init();
   BIOS::FAT::Init();
+
+#if defined(LA104) || defined(DS213)
+  int len = (uint8_t*)&_addressRomEnd-(uint8_t*)&_addressRomBegin;
+  uint32_t check = crc32b((uint8_t*)&_addressRomBegin, len);
+  if (check != 0)
+  {
+      BIOS::DBG::Print("CRC error!");
+      while (BIOS::KEY::GetKey() != BIOS::KEY::F1);
+  }
+#endif
+
 #ifndef DISABLE_USB
   BIOS::USB::Enable();
-//  BIOS::USB::InitializeSerial();
   BIOS::USB::InitializeMass();
 #endif
 
@@ -76,14 +28,6 @@ int main()
   char shell[64] = "shell.elf";
 
 #ifdef LA104
-  int len = (uint8_t*)&_addressRomEnd-(uint8_t*)&_addressRomBegin;
-  uint32_t check = crc32b((uint8_t*)&_addressRomBegin, len);
-  if (check != 0)
-  {
-      BIOS::DBG::Print("CRC error!");
-      while (BIOS::KEY::GetKey() != BIOS::KEY::F1);
-  }
-
   while (BIOS::KEY::GetKey() == BIOS::KEY::F3)
 #endif
 #ifdef DS213
@@ -105,8 +49,6 @@ int main()
     uint32_t address = 0;
     char filename[64];
     {
-      // TODO: Will fit in stack?
-
       CTokenizer tok(BIOS::OS::GetArgument());
       tok.GetToken(filename, 63);
 
@@ -132,11 +74,9 @@ int main()
     }
                            
     // keep argument - for file viewer
-    //BIOS::OS::SetArgument((char*)""); 
     BIOS::OS::HasArgument();
     BIOS::SYS::Execute(address);
 
-//    if (strlen(BIOS::OS::GetArgument()) > 0)
     if (BIOS::OS::HasArgument())
       strcpy(shell, filename);
     else
@@ -171,14 +111,6 @@ void NMIException(void)
   BIOS::DBG::Print("NMIException");    
   Halt();
 }
-
-/*
-void HardFaultException(void)
-{
-   BIOS::DBG::Print("HardFaultException");    
-   while(1);
-}
-*/
 
 void MemManageException(void)
 {

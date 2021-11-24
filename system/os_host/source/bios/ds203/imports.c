@@ -92,14 +92,9 @@ void EnableUsb(bool enable)
 
 void HardwareInit()
 {
-
-//  LCD_Init();
-//  __LCD_Initial();
-
   NVIC_SetVectorTable(NVIC_VectTab_FLASH, (uint32_t)g_pfnVectors - NVIC_VectTab_FLASH);
   __USB_Init();
-//  SysTick_Config(SystemCoreClock / 1000);
-
+  xBeep(false);
 }
 
 uint32_t GetKeys()

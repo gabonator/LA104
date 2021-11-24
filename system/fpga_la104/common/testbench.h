@@ -192,6 +192,31 @@ public:
         mTicks = 0;
     }
 
+    uint8_t& CLK()
+    {
+        return mTop->clk;
+    }
+    uint8_t& SCK()
+    {
+        return mTop->SCK;
+    }
+    uint8_t& SS()
+    {
+        return mTop->SSEL;
+    }
+    uint8_t& MOSI()
+    {
+        return mTop->MOSI;
+    }
+    uint8_t& MISO()
+    {
+        return mTop->MISO;
+    }
+    void eval()
+    {
+        mTop->eval();
+    }
+
     int SysTick()
     {
         struct timespec ts;
@@ -234,6 +259,10 @@ public:
         mTop->eval();
         mTop->clk = !mTop->clk;
         mTop->eval();
+        mTop->clk = !mTop->clk;
+        mTop->eval();
+        mTop->clk = !mTop->clk;
+        mTop->eval();
 
         mTop->SCK = 1;
 
@@ -241,9 +270,17 @@ public:
         mTop->eval();
         mTop->clk = !mTop->clk;
         mTop->eval();
+        mTop->clk = !mTop->clk;
+        mTop->eval();
+        mTop->clk = !mTop->clk;
+        mTop->eval();
 
         mTop->SCK = 0;
 
+        mTop->clk = !mTop->clk;
+        mTop->eval();
+        mTop->clk = !mTop->clk;
+        mTop->eval();
         mTop->clk = !mTop->clk;
         mTop->eval();
         mTop->clk = !mTop->clk;

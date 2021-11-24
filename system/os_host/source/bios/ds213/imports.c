@@ -11,6 +11,16 @@
        __typeof__ (b) _b = (b); \
      _a < _b ? _a : _b; })
 
+const uint32_t firmwareCrc = 0x6ab02021;
+
+extern unsigned long _estack;
+extern unsigned long _addressRamBegin;
+extern unsigned long _addressRamEnd;
+extern unsigned long _addressRomBegin;
+extern unsigned long _addressRomEnd;
+const uint32_t* _systemMemoryRanges[] = {&_addressRomBegin, &_addressRomEnd, 
+  &_addressRamBegin, &_addressRamEnd, &_estack, &firmwareCrc};
+
 volatile bool eepromAccessMutex = false;
 uint32_t gFlashReadRange[2] = {-1, 0};
 uint32_t gFlashWriteRange[2] = {-1, 0};

@@ -4,13 +4,13 @@ set -e
 mkdir -p build
 cd build
 
-arm-none-eabi-gcc -Os -Werror -fno-common -mcpu=cortex-m3 -mthumb -msoft-float -fno-exceptions -Wno-psabi -DLA104 -MD \
+arm-none-eabi-gcc -Os -Werror -fno-common -mcpu=cortex-m3 -mthumb -msoft-float -fno-exceptions -Wno-psabi -DDS213 -MD \
   -D _ARM -D STM32F10X_HD -D STM32F103xB -DSTM32F1 -c \
   ../source/webusb/webusb.c \
   ../source/webusb/opencm3.c \
   -I../../../os_library/include/ \
 
-arm-none-eabi-g++ -Os -Werror -fno-common -mcpu=cortex-m3 -mthumb -msoft-float -fno-exceptions -fno-rtti -fno-threadsafe-statics -Wno-psabi -DLA104 -MD -D _ARM -D STM32F10X_HD -D STM32F103xB -c \
+arm-none-eabi-g++ -Os -Werror -fno-common -mcpu=cortex-m3 -mthumb -msoft-float -fno-exceptions -fno-rtti -fno-threadsafe-statics -Wno-psabi -DDS213 -MD -D _ARM -D STM32F10X_HD -D STM32F103xB -c \
   ../source/main.cpp \
   -I ../../../os_library/include/ \
   -I ../../../os_host/lib/CMSIS/Device/STM32F10x/Include \
@@ -27,7 +27,7 @@ arm-none-eabi-readelf -all output.elf > output.txt
 find . -type f -name '*.o' -delete
 find . -type f -name '*.d' -delete
 
-../../../../tools/elfstrip/elfstrip output.elf 117rt104.elf
+../../../../tools/elfstrip/elfstrip output.elf 117rt213.elf
 
 nm --print-size --size-sort -gC output.elf | grep " B " > symbols_ram.txt
 nm --print-size --size-sort -gC output.elf | grep " T " > symbols_rom.txt
