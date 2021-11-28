@@ -15,6 +15,11 @@ var LCD = {
   }
 };
 
+function readyToSend()
+{
+  return COMM._onReceive == COMM._defReceive;
+}
+
 //var queue = [];
 function schedule(command, handler)
 {
@@ -28,27 +33,33 @@ function schedule(command, handler)
 
   return new Promise((resolve, reject) =>
     {
-      COMM._onReceive = data => { COMM._onReceive = COMM._defReceive; resolve(handler(data));  };
+      COMM._onReceive = data => { 
+        // skip debug prints during waiting for response
+        if (new TextDecoder().decode(data).substr(0, 9) == "_DBGPRINT")
+        {
+          COMM._defReceive(data);
+          return;
+        }
+        COMM._onReceive = COMM._defReceive; 
+        resolve(handler(data));  
+      };
       COMM._send(command);
     });
 }
 
 var BIOS =
 {
-  safeeval: (json) => { if (json[0] == "{") return eval("("+json+")") },
+  safeeval: (json) => { 
+    if (!json)
+    {
+      console.log("wrong response!");
+    }
+    if (json[0] == "{") return eval("("+json+")") 
+  },
   retval: (json) => { var j = BIOS.safeeval(json); if (j && typeof(j.ret) != "undefined") return j.ret },
   rpcCall: (command) =>
   {                     
-//console.log("---- rpc:" +command);
     return schedule(command, data => new TextDecoder().decode(data));
-//    return schedule(command, data => { COMM._onReceive = COMM._defReceive; resolve(new TextDecoder().decode(data));  });
-/*
-     new Promise((resolve, reject) =>
-    {
-      COMM._onReceive = data => { COMM._onReceive = COMM._defReceive; resolve(new TextDecoder().decode(data));  };
-      COMM._send(command);
-    }));
-*/
   },
   rpcPeekRaw: () =>
   {                 
@@ -61,7 +72,22 @@ var BIOS =
   {                 
     return new Promise((resolve, reject) =>
     {
-      COMM._onReceive = data => { COMM._onReceive = COMM._defReceive; resolve(new TextDecoder().decode(data)); }
+      COMM._onReceive = data => { 
+
+        // call to rpcpeek in memwrite cannot be interrupted by debug print, wtf?
+
+        // skip debug prints during waiting for response
+        if (data.byteLength < 200)
+        {
+          var text = new TextDecoder().decode(data);
+          if (text.substr(0, 9) == "_DBGPRINT" || text.substr(0, 9) == "_DBGEVENT")
+          {
+            COMM._defReceive(data);
+            return;
+          }
+        }
+
+        COMM._onReceive = COMM._defReceive; resolve(new TextDecoder().decode(data)); }
     });
   },
 
@@ -83,9 +109,19 @@ var BIOS =
       COMM._sendRaw(buf);
       return BIOS.rpcPeek();
        })
-    .then( json => { if (typeof(BIOS.safeeval(json).ret) == "undefined") throw "problem"; return BIOS.retval(json); })
+    .then( json => {
+      var q = BIOS.safeeval(json);
+      if (!q)
+      {
+        console.log("problem");
+      }
+      if (typeof(q.ret) == "undefined") throw "problem"; 
+      return BIOS.retval(json); 
+    })
   },
   getProcAddr: (name) => BIOS.rpcCall('SYS::GetProcAddress(\"'+name+'\");').then( BIOS.retval ),
+  // this call should not wait for return code!
+/*
   exec: (addr) => BIOS.rpcCall('DBG::Exec(0x'+addr.toString(16)+')').then( ret =>
   {
     if (BIOS.safeeval(ret))
@@ -93,6 +129,8 @@ var BIOS =
     else
       COMM._defEval(ret);
   }),
+*/
+  exec: (addr) => COMM._send('DBG::Exec(0x'+addr.toString(16)+')'),
   resume: () => BIOS.rpcCall('DBG::Resume()').then( BIOS.retval ),
   stop: () => { COMM._onReceive = COMM._defReceive; return BIOS.rpcCall('DBG::Stop()').then( BIOS.retval ) },
   frame: () => BIOS.rpcCall('DBG::Frame()')

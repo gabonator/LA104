@@ -5,33 +5,30 @@ uint8_t check = 0;
 
 int main(void)
 {
+    BIOS::DBG::Print(R"(<script>ptrCheck=0x%08x;</script>)", &check);
+    
     BIOS::DBG::Print(R"(
 <canvas id="canvas" width=320 height=240></script>
 <script>
-var ready = false;
 var can = document.getElementById('canvas');
 var ctx = can.getContext('2d');
 var img = new Image;
 var imgData;
+var promise = Promise.resolve();
 img.crossOrigin = "Anonymous";
 img.onload = function() {  
   var s = Math.max(can.width/img.width, can.height/img.height);
   var w = img.width*s;
   var h = img.height*s;
   ctx.drawImage(img, (320-w)/2, (240-h)/2, w, h);
-
   imgData = ctx.getImageData(0, 0, can.width, can.height);
-  ready = true;
+  promise = promise.then(()=>BIOS.memWrite(ptrCheck, [0])); // ready
 };
 img.src = "https://cataas.com/cat?"+Math.random();
 
 window.transfer = function(left, top, right, bottom, ptr, check) 
 {
-    if (!ready)
-        throw "not ready!";
-        
     var buf = [];
-
     for (var y=top; y<bottom; y++)
         for (var x=left; x<right; x++)
         {
@@ -43,13 +40,12 @@ window.transfer = function(left, top, right, bottom, ptr, check)
             buf.push(rgb565 >> 8);
         }
 
-    return BIOS.memWrite(ptr, buf)
-        .then( () => BIOS.memWrite(check, [1]));
+    promise = promise.then(() => BIOS.memWrite(ptr, buf))
+        .then(() => BIOS.memWrite(check, [1]));
 }
 </script>)");
     
-    BIOS::SYS::DelayMs(1000); // TODO: remove
-    check = 0;
+    check = 4;
     int line = 14;    
     CRect rect(0, 0, BIOS::LCD::Width, BIOS::LCD::Height);
     while (BIOS::KEY::GetKey() == BIOS::KEY::EKey::None)
@@ -63,20 +59,21 @@ window.transfer = function(left, top, right, bottom, ptr, check)
                 rect.left, rect.top, rect.right, rect.bottom, 
                 buffer, &check);
                 
-            if (line++ >= BIOS::LCD::Height-14)
-                break;
+            line++;
         }
         if (check == 1)
         {
-            //BIOS::SYS::DelayMs(100);
             BIOS::LCD::BufferBegin(rect);
             BIOS::LCD::BufferWrite(buffer, rect.Width()*rect.Height());
             BIOS::LCD::BufferEnd();
+
+            if (line >= BIOS::LCD::Height-14)
+                break;
+
             check = 0;
         }
     }
-    BIOS::SYS::DelayMs(1000); // TODO: remove
-    
+
     return 0;
 }
 
