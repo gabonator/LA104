@@ -65,7 +65,7 @@ class Debugger
         {
           var fl = this.findLine(addr);
           var ofs = (addr & ~1) - symbol.addr;
-          ret.push({module:i, name:symbol.name, offset:ofs, line:fl});
+          ret.push({module:i, name:symbol.name, offset:ofs, line:fl, addr:addr & ~1});
         }
       }
 
@@ -81,9 +81,20 @@ class Debugger
     if (addr < this.assembly[0].addr || addr > this.assembly[this.assembly.length-1].addr)
       return;
 
+    var lastLine = null;
     for (var i=0; i<this.assembly.length; i++)
-      if (this.assembly[i].addr >= addr && typeof(this.assembly[i].line) != "undefined")
-        return this.assembly[i].line;
+    {
+      if (typeof(this.assembly[i].line) != "undefined")
+        lastLine = this.assembly[i].line;
+
+      if (this.assembly[i].addr >= addr) 
+      {
+        // we should check the instr at this address and before it
+        // stack points to the next address after branch, so lets return one
+        // line above of this  
+        return lastLine-1;
+      }
+    }
   }
 
   // assembly
