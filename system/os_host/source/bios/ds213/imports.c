@@ -19,7 +19,7 @@ extern unsigned long _addressRamEnd;
 extern unsigned long _addressRomBegin;
 extern unsigned long _addressRomEnd;
 const uint32_t* _systemMemoryRanges[] = {&_addressRomBegin, &_addressRomEnd, 
-  &_addressRamBegin, &_addressRamEnd, &_estack, &firmwareCrc};
+  &_addressRamBegin, &_addressRamEnd, &_estack};
 
 volatile bool eepromAccessMutex = false;
 uint32_t gFlashReadRange[2] = {-1, 0};
@@ -234,6 +234,8 @@ uintptr_t GetAttribute(enum EAttribute attribute)
     case FlashReadRange: return (uintptr_t)gFlashReadRange;
     case FlashWriteRange: return (uintptr_t)gFlashWriteRange;
     case FlashAlertRange: return (uintptr_t)gFlashAlertRange;
+    case SystemMemoryRanges: return (uintptr_t)_systemMemoryRanges;
+    case FirmwareChecksum: return (uintptr_t)&firmwareCrc;
     default: return 0;
   }
 }

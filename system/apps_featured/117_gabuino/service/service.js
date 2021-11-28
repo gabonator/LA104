@@ -72,7 +72,34 @@ app.post('/compile', function(req, res)
   });
 });
 
-app.post('/debug', function(req, res) 
+app.post('/compileg', function(req, res) 
+{
+  if (!req.files)
+    return res.status(400).send('No files were uploaded.');
+
+  let sampleFile = req.files.file;
+  var fileName = sampleFile.name.replace(".xml", ".txt");
+  if (fileName.indexOf(".txt") == -1)
+    fileName += ".txt";
+  var buffer = sampleFile.data;
+  var textIn = _toString(buffer);
+
+  compile(textIn, '-g').then( out =>
+  {
+    if (out.code != 0)
+    {
+      res.end(JSON.stringify(out));
+      return;
+    }
+
+    optimize(out.files["app.elf"]).then( out =>
+    {
+      res.end(JSON.stringify(out));
+    });
+  });
+});
+
+app.post('/assembly', function(req, res) 
 {
   if (!req.files)
     return res.status(400).send('No files were uploaded.');
@@ -119,7 +146,7 @@ app.listen(8382, function() {
 
 const { spawn } = require("child_process");
 
-function compile(code)
+function compile(code, extra)
 {
   return new Promise((resolve) => {
     var args = [
@@ -135,6 +162,7 @@ function compile(code)
     "-fno-use-cxa-atexit",
     "-Wno-psabi",
     "-DLA104",
+    "-Wl,-emain",
     //"-MD",
     //"../source/main.cpp",
     //"../source/platform.cpp",
@@ -144,6 +172,8 @@ function compile(code)
     "-lbios_la104", "-L../../../os_library/build", "-nostartfiles", "-T", "../source/app.lds", "-o", "app.elf",
     "-x", "c++", "-"
     ]
+    if (extra)
+      args.push(extra)
 
     const ls = spawn("arm-none-eabi-g++", args, {
       cwd:_appbase + "/build",
@@ -232,7 +262,7 @@ function exec(command, args, o)
 
 
     var _args = args.split(" ");
-//console.log(command);
+console.log([command, ..._args].join(" "));
 //console.log(_args);
 
 var opt = {
@@ -256,7 +286,7 @@ if (o && o.cwd) opt.cwd = o.cwd;
     ls.stdout.on("data", data => {
         if (typeof(out.stdout) == "undefined") out.stdout = "";
         out.stdout += data;
-        console.log(`stdout: ${data}`);
+        //console.log(`stdout: ${data}`);
     });
 
     ls.stderr.on("data", data => {
@@ -285,6 +315,7 @@ function symbols(code)
 
   var cflags = "-O0 -Werror -fno-common -mcpu=cortex-m3 -mthumb -msoft-float -fno-exceptions -fno-rtti -fno-threadsafe-statics " +
     "-fno-use-cxa-atexit -Wno-psabi -DLA104 " +
+    "-Wl,-emain " +
     "-I../../../os_library/include/ -I../source/arduino/ -lbios_la104 -L../../../os_library/build";
 
   return Promise.resolve()
@@ -326,6 +357,7 @@ function debug(code)
 
   var cflags = "-O0 -Werror -fno-common -mcpu=cortex-m3 -mthumb -msoft-float -fno-exceptions -fno-rtti -fno-threadsafe-statics " +
     "-fno-use-cxa-atexit -Wno-psabi -DLA104 " +
+    "-Wl,-emain " +
     "-I../../../os_library/include/ -I../source/arduino/ -lbios_la104 -L../../../os_library/build";
 
   return Promise.resolve()
@@ -350,7 +382,7 @@ function debug(code)
     fs.writeFileSync(_appbase + "/build/objdump.asm", r.stdout);
   })
   .then( () => exec("node", "matchasm.js "+_appbase+"/build/test_gcc.asm "+_appbase+"/build/objdump.asm"))
-  .then( (r) => 
+  .then( (r) =>
   {
     console.log("done!!!");
     if (r.code != 0) 

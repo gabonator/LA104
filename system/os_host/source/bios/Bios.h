@@ -21,7 +21,7 @@ namespace BIOS
       FlashReadRange, FlashWriteRange, FlashAlertRange,
       BatteryVoltage, Charging,
       GpioI2cSpeed,
-      SystemMemoryRanges,
+      SystemMemoryRanges, FirmwareChecksum,
       PushUart};
 
     uintptr_t GetAttribute(EAttribute eInternal);

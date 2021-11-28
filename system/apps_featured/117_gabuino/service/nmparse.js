@@ -1,6 +1,6 @@
 var input = process.argv[2];
 var id = process.argv[3];
-var fs=require("fs");
+var fs = require("fs");
 var s = fs.readFileSync(input).toString().split("\n");
 
 // 200048a0 00000001 t std::piecewise_construct

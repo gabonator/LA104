@@ -53,8 +53,15 @@ for (var i=0; i<v.length; i++)
 
       if (fix(insn1[insn2.length-1]) != fix(insn2[insn2.length-1]))
       {
-console.log("====");
-console.log(l);
+//console.log("====");
+//console.log(l);
+
+        if (insn2[insn2.length-1] == "nop")
+        {
+          // padding nop between code and data
+          insn2.pop();
+          continue;
+        }
         console.log(i + ":" + insn1[insn2.length-1] + "-" + insn2[insn2.length-1]);
         throw "not matching instructions!";
       }

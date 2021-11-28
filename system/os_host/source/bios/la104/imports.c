@@ -23,7 +23,7 @@ extern unsigned long _addressRamEnd;
 extern unsigned long _addressRomBegin;
 extern unsigned long _addressRomEnd;
 const uint32_t* _systemMemoryRanges[] = {&_addressRomBegin, &_addressRomEnd, 
-  &_addressRamBegin, &_addressRamEnd, &_estack, &firmwareCrc};
+  &_addressRamBegin, &_addressRamEnd, &_estack};
 
 
 __attribute__ ((section(".biosfunc"), optimize("O0")))
@@ -309,6 +309,7 @@ uintptr_t GetAttribute(enum EAttribute attribute)
     case FlashAlertRange: return (uintptr_t)gFlashAlertRange;
     // device memory range?
     case SystemMemoryRanges: return (uintptr_t)_systemMemoryRanges;
+    case FirmwareChecksum: return (uintptr_t)&firmwareCrc;
     case PushUart: return (uintptr_t)UartPushByte;
     default: return 0;
   }

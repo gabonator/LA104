@@ -29,7 +29,7 @@ extern "C"
       FlashReadRange, FlashWriteRange, FlashAlertRange,
       BatteryVoltage, Charging,
       GpioI2cSpeed,
-      SystemMemoryRanges,
+      SystemMemoryRanges, FirmwareChecksum,
       PushUart};
 
   void Set_Posi(uint_fast16_t x, uint_fast16_t y);

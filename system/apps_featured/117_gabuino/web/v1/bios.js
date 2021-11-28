@@ -130,6 +130,7 @@ var BIOS =
       COMM._defEval(ret);
   }),
 */
+
   exec: (addr) => COMM._send('DBG::Exec(0x'+addr.toString(16)+')'),
   resume: () => BIOS.rpcCall('DBG::Resume()').then( BIOS.retval ),
   stop: () => { COMM._onReceive = COMM._defReceive; return BIOS.rpcCall('DBG::Stop()').then( BIOS.retval ) },

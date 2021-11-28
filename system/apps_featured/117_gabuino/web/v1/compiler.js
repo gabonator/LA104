@@ -4,7 +4,7 @@ function compile()
   return new Promise( (resolve, reject) =>
   {
     var code = html_editor.getValue();
-    code = code.split("int main(").join("int __attribute__((__section__(\".entry\"))) main(");
+//    code = code.split("int main(").join("int __attribute__((__section__(\".entry\"))) main(");
     var xhr = new XMLHttpRequest();
     var formData = new FormData();
     formData.append("file", new Blob([code], {type : 'text/plain'}), "moj.txt");

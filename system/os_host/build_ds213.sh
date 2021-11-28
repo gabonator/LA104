@@ -22,6 +22,7 @@ INCLUDES="\
   -I ../library"
 
 arm-none-eabi-gcc -Wall -Os -Werror -fno-common -mcpu=cortex-m3 -mthumb -msoft-float -MD \
+  -g \
   -D USE_STDPERIPH_DRIVER \
   -D STM32F10X_HD \
   -D $TARGET \
@@ -57,6 +58,7 @@ arm-none-eabi-gcc -Wall -Os -Werror -fno-common -mcpu=cortex-m3 -mthumb -msoft-f
   ../library/COMMON/commonusb_app.c \
 
 arm-none-eabi-g++ -Wall -Os -Werror -fno-common -mcpu=cortex-m3 -mthumb -msoft-float -MD -fno-exceptions -fno-rtti -fno-threadsafe-statics -Wno-psabi -c -Wall -Werror \
+  -g \
   -D __USER__=\"$USER\" \
   -D __OSTYPE__=\"$OSTYPE\" \
   -D __GITREVISION__=\"$GITREVISION\" \
@@ -83,6 +85,7 @@ arm-none-eabi-g++ -Wall -Os -Werror -fno-common -mcpu=cortex-m3 -mthumb -msoft-f
   ../source/framework/Serialize.cpp \
 
 arm-none-eabi-gcc -mcpu=cortex-m3 -mthumb -o output_ds213.elf -nostartfiles -T ../app.ld \
+  -g \
   ./main.o \
   ./startup.o \
   ./interrupt.o \
@@ -143,7 +146,8 @@ arm-none-eabi-objcopy -O binary ./output_ds213.elf ./output_ds213.bin
 # for now there is just a little hack to workaround it:
 dd if=output_ds213.bin of=output_ds213.rom bs=1 skip=0 count=$((0x$ROMEND-0x$ROMBEGIN)) 2> /dev/null
 
-node ../../../tools/crc32/force.js ./output_ds213.rom ./output_ds213.elf
+node ../../../tools/crc32/force.js ./output_ds213.rom ./output_ds213.elf 0x6ab02021 ./hash_ds213
+
 arm-none-eabi-objcopy -O ihex ./output_ds213.elf ./system_ds213.hex
 
 arm-none-eabi-readelf -all output_ds213.elf > output.txt
@@ -152,9 +156,11 @@ arm-none-eabi-objdump -d -S output_ds213.elf > output.asm
 find . -type f -name '*.o' -delete
 find . -type f -name '*.d' -delete
 
-nm --print-size --size-sort -gC output_ds213.elf | grep " B " > symbols_ram.txt
-nm --print-size --size-sort -gC output_ds213.elf | grep " T " > symbols_rom.txt
-nm --print-size --size-sort -gC output_ds213.elf > symbols_all.txt
-nm output_ds213.elf > symbols_all2.txt
+nm --print-size --size-sort -gC output_ds213.elf | grep " B " > symbols_ram_ds213.txt
+nm --print-size --size-sort -gC output_ds213.elf | grep " T " > symbols_rom_ds213.txt
+nm --print-size --size-sort -gC output_ds213.elf > symbols_all_ds213.txt
 
-cat symbols_all.txt | grep _address
+cat symbols_all_ds213.txt | grep _address
+
+node ../../apps_featured/117_gabuino/service/nmparse.js symbols_all_ds213.txt ds213_os_$(<hash_ds213) > symbols_ds213.js
+cp symbols_ds213.js ../../apps_featured/117_gabuino/symbols/ds213_os_$(<hash_ds213).js

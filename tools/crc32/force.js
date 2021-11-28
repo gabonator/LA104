@@ -1,30 +1,41 @@
-if (process.argv.length != 4)
+if (process.argv.length != 6)
   throw "No file specified"
 
 var input_bin = process.argv[2];
 var input_elf = process.argv[3];
+var input_magic = parseInt(process.argv[4])
+var output_hash = process.argv[5];
+
+//console.log([input_bin, input_elf, input_magic.toString(16)]);
                          
 var fs = require("fs");
 var exec = require('child_process').exec;
 var path = require("path");
 
-
 var offset_bin;
 var crc_bin;
 
 Promise.resolve()
-  .then(() => findMagic(input_bin))
+  .then(() => findMagic(input_bin, input_magic))
   .then((offset) => offset_bin = offset)
   .then(() => patchCrc(input_bin, offset_bin))
   .then(() => readDword(input_bin, offset_bin))
-  .then((crc) => crc_bin = crc)
-  .then(() => findMagic(input_elf))
-  .then((offset) => patchDword(input_elf, offset, crc_bin));
+  .then((crc) => {
+    var dword = [crc[3], crc[2], crc[1], crc[0]].
+      map(b=>("0"+b.toString(16)).substr(-2)).join("");
+    fs.writeFileSync(output_hash, dword);
+    crc_bin = crc;
+  })
+  .then(() => findMagic(input_elf, input_magic))
+  .then((offset) => patchDword(input_elf, offset, crc_bin))
+  .catch(exc => console.log("Exception: " + exc) );
 
-function findMagic(filename)
+function findMagic(filename, magic)
 {
+  if (!magic)
+    throw "No magic provided"
+
   var buf = fs.readFileSync(filename);
-  var magic = 0x6ab02021;
   var bytes = [magic & 0xff, (magic >> 8) & 0xff, (magic >> 16) & 0xff, (magic >> 24) & 0xff];
 
   var offsets = [];
@@ -39,7 +50,10 @@ function findMagic(filename)
   }
 
   if (offsets.length != 1)
+  {
+    console.log("Single instance of magic sequence was not found!");
     throw "Single instance of magic sequence was not found!"
+  }
   return offsets[0];
 }
 

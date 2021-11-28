@@ -96,6 +96,7 @@ void RedrawPage(const CRect& rcMain, int page)
     break;
     case 1:
       PrintLine("BIOS version:", "%04x", BIOS::SYS::GetAttribute(BIOS::SYS::EAttribute::BiosVersion));
+      PrintLine("BIOS checksum:", "%08x", *(uint32_t*)BIOS::SYS::GetAttribute(BIOS::SYS::EAttribute::FirmwareChecksum));
       PrintLine("Build rev:", "%s", BIOS::SYS::GetAttribute(BIOS::SYS::EAttribute::BuildRevision));
       PrintLine("Build date:", "%s", BIOS::SYS::GetAttribute(BIOS::SYS::EAttribute::BuildDate));
       PrintLine("Build user:", "%s", BIOS::SYS::GetAttribute(BIOS::SYS::EAttribute::BuildUser));
@@ -163,6 +164,7 @@ void DumpAll()
 
   PrintSection("Software");
   PrintLine("BIOS version:", "%04x", BIOS::SYS::GetAttribute(BIOS::SYS::EAttribute::BiosVersion));
+  PrintLine("BIOS checksum:", "%08x", *(uint32_t*)BIOS::SYS::GetAttribute(BIOS::SYS::EAttribute::FirmwareChecksum));
   PrintLine("Build rev:", "%s", BIOS::SYS::GetAttribute(BIOS::SYS::EAttribute::BuildRevision));
   PrintLine("Build date:", "%s", BIOS::SYS::GetAttribute(BIOS::SYS::EAttribute::BuildDate));
   PrintLine("Build user:", "%s", BIOS::SYS::GetAttribute(BIOS::SYS::EAttribute::BuildUser));
@@ -192,7 +194,7 @@ int _main(void)
     CRect rcMain(screenWidth/2 - Width/2, screenHeight/2 - Height/2, screenWidth/2 + Width/2, screenHeight/2 + Height/2);
     Window(rcMain, RGB565(0080d0));
 
-    if (BIOS::SYS::GetAttribute(BIOS::SYS::EAttribute::BiosVersion) < 0x0102)
+    if (BIOS::SYS::GetAttribute(BIOS::SYS::EAttribute::BiosVersion) < 0x0107)
     {
       BIOS::DBG::Print("Wrong bios version.\n");
       BIOS::SYS::DelayMs(1000);

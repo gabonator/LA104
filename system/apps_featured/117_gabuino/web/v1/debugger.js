@@ -1,11 +1,11 @@
 dsym = {};
-
+/*
 function debug()
 {
   return new Promise( (resolve, reject) =>
   {
     var code = html_editor.getValue();
-    code = code.split("int main(").join("int __attribute__((__section__(\".entry\"))) main(");
+//    code = code.split("int main(").join("int __attribute__((__section__(\".entry\"))) main(");
     var xhr = new XMLHttpRequest();
     var formData = new FormData();
     formData.append("file", new Blob([code], {type : 'text/plain'}), "moj.txt");
@@ -66,7 +66,7 @@ function frame()
     //console.log(f.map(x=>"0x"+x.toString(16)))
   });
 }
-
+*/
 function screenshot()
 {
   BIOS.screenshot().then(data => 
@@ -109,7 +109,7 @@ function assembly()
   return new Promise( (resolve, reject) =>
   {
     var code = html_editor.getValue();
-    code = code.split("int main(").join("int __attribute__((__section__(\".entry\"))) main(");
+//    code = code.split("int main(").join("int __attribute__((__section__(\".entry\"))) main(");
     var xhr = new XMLHttpRequest();
     var formData = new FormData();
     formData.append("file", new Blob([code], {type : 'text/plain'}), "moj.txt");
