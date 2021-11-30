@@ -4,7 +4,12 @@ void EventLoop();
 void _yield();
 void _PrepareRun();
 
-namespace MEMORY
+extern unsigned long _addressRamBegin;
+extern unsigned long _addressRamEnd;
+extern unsigned long _addressRomBegin;
+extern unsigned long _addressRomEnd;
+
+namespace GABUINO
 {
   uint8_t* writePtr = nullptr;
   int writeCount = 0;
@@ -166,11 +171,11 @@ namespace MEMORY
   uint32_t GetProcAddress2(char* name)
   {
     if (strcmp(name, "_ZN4BIOS3KEY6GetKeyEv") == 0)
-      return (uint32_t)MEMORY::GetKey2;
+      return (uint32_t)GABUINO::GetKey2;
     if (strcmp(name, "_ZN4BIOS3DBG5PrintEPKcz") == 0)
-      return (uint32_t)MEMORY::DbgPrint2;
+      return (uint32_t)GABUINO::DbgPrint2;
     if (strcmp(name, "_ZN4BIOS3SYS7DelayMsEi") == 0)
-      return (uint32_t)MEMORY::DelayMs2;
+      return (uint32_t)GABUINO::DelayMs2;
     return BIOS::SYS::GetProcAddress(name);
   }
 
@@ -226,6 +231,34 @@ namespace MEMORY
     trapped = false;
     return 0;
   }
+
+  uint32_t crc32b(const uint8_t *message, int length) {
+     uint32_t crc, mask;
+
+     crc = 0xFFFFFFFF;
+     while (length--) {
+        crc = crc ^ *message++;
+        for (int j = 7; j >= 0; j--) 
+        {
+           mask = -(crc & 1);
+           crc = (crc >> 1) ^ (0xEDB88320 & mask);
+        }
+     }
+     return ~crc;
+  }
+
+  int Identify()
+  {
+    int len = (uint8_t*)&_addressRomEnd-(uint8_t*)&_addressRomBegin;
+    uint32_t hostCrc = crc32b((uint8_t*)&_addressRomBegin, len);
+
+    uint32_t osCrc = *(uint32_t*)BIOS::SYS::GetAttribute(BIOS::SYS::EAttribute::FirmwareChecksum);
+    const char* device = (const char*)BIOS::SYS::GetAttribute(BIOS::SYS::EAttribute::DeviceType); 
+    // TODO: must fit 64 bytes!
+    TERMINAL::Print("{os:0x%08x,host:0x%08x,device:'%s'}", osCrc, hostCrc, device);
+    return 0;
+  }
+
 /*
   int Trace()
   {

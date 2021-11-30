@@ -8,7 +8,6 @@ fs.readdirSync(testFolder).forEach(file => {
     return;
   var cont = fs.readFileSync(file).toString();
   out[file] = cont;
-//  console.log(cont);
 });
 
 console.log("examples = ")

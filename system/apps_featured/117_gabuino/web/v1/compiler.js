@@ -81,7 +81,7 @@ function flash()
 
 function run()
 { 
-  console.log("globalInit");
+  console.log("globalInit: ", globalInit);
   var prepare = Promise.resolve();
   if (globalInit.length > 0)
   {
@@ -90,7 +90,10 @@ function run()
 //      BIOS.exec(globalInit[i]|1); // we should chain these!
   }
   running = true;
-  prepare.then( () => BIOS.exec(globalOffset|1) )//.then( () => resolve() )
+  prepare.then( () => {
+    console.log("globalInit done, executing main app");
+    BIOS.exec(globalEntry|1) 
+  })//.then( () => resolve() )
     // we do not know if the program keeps running or has ended with return code
   return Promise.resolve();
 }
@@ -149,6 +152,7 @@ function processElf(elf)
     globalOffset = begin;
     globalBlob = appblob;
     globalInit = init;
+    globalEntry = elfinfo.entry;
     resolve(elfinfo)
 //    continueResolve(resolve);
   });

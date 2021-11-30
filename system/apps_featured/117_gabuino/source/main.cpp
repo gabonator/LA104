@@ -1,6 +1,6 @@
 #include <library.h>
 #include "terminal.h"
-#include "memory.h"
+#include "gabuino.h"
 #include "rpc.h"
 #include "evaluator.h"
 #include "webusb/webusb.h"
@@ -41,9 +41,9 @@ void EventLoop()
 
     EVERY(1000)
     {
-      if (MEMORY::trapped)
+      if (GABUINO::trapped)
         BIOS::LCD::Printf(BIOS::LCD::Width-16, BIOS::LCD::Height-14, RGB565(b050ff), RGB565(404040), "%c", anim[animphase++&7]);
-      else if (MEMORY::running)
+      else if (GABUINO::running)
         BIOS::LCD::Printf(BIOS::LCD::Width-16, BIOS::LCD::Height-14, RGB565(ff5050), RGB565(404040), "%c", anim[animphase++&7]);
       else
         BIOS::LCD::Printf(BIOS::LCD::Width-16, BIOS::LCD::Height-14, RGB565(b0b0b0), RGB565(404040), "%c", anim[animphase++&7]);
@@ -52,11 +52,11 @@ void EventLoop()
 
 void Trap()
 {
-  MEMORY::trapped = true;
+  GABUINO::trapped = true;
   TERMINAL::Print("_DBGEVENT(2, 0x%02x)", trappedAddress);
   trappedAddress += 2;
   trappedAddress |= 1;
-  while (MEMORY::trapped)
+  while (GABUINO::trapped)
     EventLoop();
 }
 
@@ -78,7 +78,6 @@ int main(void)
   rcClient.bottom = BIOS::LCD::Height;
   rcClient.top = BIOS::LCD::Height-14;
   BIOS::LCD::Bar(rcClient, RGB565(404040));
-  BIOS::LCD::Print(8, rcClient.top, RGB565(ffffff), RGBTRANS, "Waiting for USB connection");
 
   BIOS::OS::SetInterruptVector(BIOS::OS::IHardFaultException, []() {
     for (int i=0; i<100; i++)
@@ -110,20 +109,20 @@ int main(void)
     }
  */
 //    if (/*MEMORY::running &&*/ memcmp(buf, "DBG::Stop()", 11) == 0)
-    if (MEMORY::writeCount > 0 && len > 0)
+    if (GABUINO::writeCount > 0 && len > 0)
     {
-      MEMORY::HandleWrite(buf, len);
-      if (MEMORY::writeCount == 0)
+      GABUINO::HandleWrite(buf, len);
+      if (GABUINO::writeCount == 0)
         strcpy(command, "MEM::Done();");
       return;
     }
 
     if (memcmp(buf, "DBG::Frame()", 12) == 0)
     {
-      MEMORY::_Frame();
+      GABUINO::_Frame();
     }
 
-    if (MEMORY::running)
+    if (GABUINO::running)
     {
         //save stack?
       if (memcmp(buf, "DBG::Stop()", 11) == 0)

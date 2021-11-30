@@ -5,33 +5,36 @@ namespace RPC
   uint32_t GetRpcAdress(char* command)
   {
     if (strcmp(command, "SYS::GetProcAddress")==0)
-      return (uint32_t)MEMORY::GetProcAddress2;
+      return (uint32_t)GABUINO::GetProcAddress2;
 
     if (strcmp(command, "MEM::Write")==0)
-      return (uint32_t)MEMORY::Write;
+      return (uint32_t)GABUINO::Write;
     if (strcmp(command, "MEM::Read")==0)
-      return (uint32_t)MEMORY::Read;
+      return (uint32_t)GABUINO::Read;
     if (strcmp(command, "MEM::Zero")==0)
-      return (uint32_t)MEMORY::Zero;
+      return (uint32_t)GABUINO::Zero;
     if (strcmp(command, "MEM::Done")==0)
-      return (uint32_t)MEMORY::Done;
+      return (uint32_t)GABUINO::Done;
 
     if (strcmp(command, "DBG::Exec")==0)
-      return (uint32_t)MEMORY::Exec;
+      return (uint32_t)GABUINO::Exec;
     if (strcmp(command, "DBG::Stop")==0)
-      return (uint32_t)MEMORY::Stop;
+      return (uint32_t)GABUINO::Stop;
     if (strcmp(command, "DBG::Frame")==0)
-      return (uint32_t)MEMORY::Frame;
+      return (uint32_t)GABUINO::Frame;
     if (strcmp(command, "DBG::Running")==0)
-      return (uint32_t)MEMORY::Running;
+      return (uint32_t)GABUINO::Running;
     if (strcmp(command, "DBG::ReturnValue")==0)
-      return (uint32_t)MEMORY::ReturnValue;
+      return (uint32_t)GABUINO::ReturnValue;
 
     if (strcmp(command, "DBG::Screenshot")==0)
-      return (uint32_t)MEMORY::Screenshot;
+      return (uint32_t)GABUINO::Screenshot;
 
     if (strcmp(command, "DBG::Resume")==0)
-      return (uint32_t)MEMORY::Resume;
+      return (uint32_t)GABUINO::Resume;
+
+    if (strcmp(command, "DBG::Identify")==0)
+      return (uint32_t)GABUINO::Identify;
 
 //    if (strcmp(command, "DBG::GetDebugBuffer")==0)
 //      return (uint32_t)MEMORY::GetDebugBuffer;
