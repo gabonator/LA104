@@ -18,7 +18,7 @@ void Print(const char* msg, ...)
   va_start( args, msg );
   vsprintf( bbuf, msg, args );
 
-  _ASSERT(strlen(buf) < sizeof(buf)-8);
+  _ASSERT(strlen(buf) < sizeof(buf)-2);
   Write((uint8_t*)buf, strlen(buf));
 }
 

@@ -254,8 +254,11 @@ namespace GABUINO
 
     uint32_t osCrc = *(uint32_t*)BIOS::SYS::GetAttribute(BIOS::SYS::EAttribute::FirmwareChecksum);
     const char* device = (const char*)BIOS::SYS::GetAttribute(BIOS::SYS::EAttribute::DeviceType); 
+    uint32_t deviceUid = BIOS::SYS::GetAttribute(BIOS::SYS::EAttribute::SerialNumber);
+
     // TODO: must fit 64 bytes!
-    TERMINAL::Print("{os:0x%08x,host:0x%08x,device:'%s'}", osCrc, hostCrc, device);
+    TERMINAL::Print("{os:0x%08x,host:0x%08x,device:'%s',id:0x%08x}", 
+      osCrc, hostCrc, device, deviceUid);
     return 0;
   }
 

@@ -1,14 +1,15 @@
 #include <library.h>
 
-uint16_t buffer[320*2];
+uint16_t buffer[BIOS::LCD::Width];
 uint8_t check = 0;
 
 int main(void)
 {
     BIOS::DBG::Print(R"(<script>ptrCheck=0x%08x;</script>)", &check);
-    
+    BIOS::DBG::Print(R"(<canvas id="canvas" width=%d height=%d>)", 
+        BIOS::LCD::Width, BIOS::LCD::Height);
+        
     BIOS::DBG::Print(R"(
-<canvas id="canvas" width=320 height=240></script>
 <script>
 var can = document.getElementById('canvas');
 var ctx = can.getContext('2d');
@@ -20,7 +21,7 @@ img.onload = function() {
   var s = Math.max(can.width/img.width, can.height/img.height);
   var w = img.width*s;
   var h = img.height*s;
-  ctx.drawImage(img, (320-w)/2, (240-h)/2, w, h);
+  ctx.drawImage(img, (can.width-w)/2, (can.height-h)/2, w, h);
   imgData = ctx.getImageData(0, 0, can.width, can.height);
   promise = promise.then(()=>BIOS.memWrite(ptrCheck, [0])); // ready
 };
@@ -32,12 +33,19 @@ window.transfer = function(left, top, right, bottom, ptr, check)
     for (var y=top; y<bottom; y++)
         for (var x=left; x<right; x++)
         {
-            var r = imgData.data[(y*320+x)*4]; 
-            var g = imgData.data[(y*320+x)*4+1]; 
-            var b = imgData.data[(y*320+x)*4+2]; 
-            var rgb565 = (r>>3) | ((g>>2)<<5) | ((b>>3)<<11);
-            buf.push(rgb565 & 255);
-            buf.push(rgb565 >> 8);
+            if (x > width)
+            {
+                buf.push(0);
+                buf.push(0);
+            } else
+            {
+                var r = imgData.data[(y*can.width+x)*4]; 
+                var g = imgData.data[(y*can.width+x)*4+1]; 
+                var b = imgData.data[(y*can.width+x)*4+2]; 
+                var rgb565 = (r>>3) | ((g>>2)<<5) | ((b>>3)<<11);
+                buf.push(rgb565 & 255);
+                buf.push(rgb565 >> 8);
+            }
         }
 
     promise = promise.then(() => BIOS.memWrite(ptr, buf))

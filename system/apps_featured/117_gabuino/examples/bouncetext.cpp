@@ -3,7 +3,7 @@
 int x = BIOS::LCD::Width/2, y = BIOS::LCD::Height/2;
 int dx = 1, dy = 1;
 char text[20] = "Hello";
-struct {uint8_t r, g, b; } color = {255, 0, 0};
+volatile struct {uint8_t r, g, b; } color = {255, 0, 0};
 
 int main(void)
 {

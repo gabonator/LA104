@@ -1,33 +1,37 @@
-
-function compile()
+identTimer = null;
+function identify()
 {
   return new Promise( (resolve, reject) =>
   {
-    var code = html_editor.getValue();
-//    code = code.split("int main(").join("int __attribute__((__section__(\".entry\"))) main(");
-    var xhr = new XMLHttpRequest();
-    var formData = new FormData();
-    formData.append("file", new Blob([code], {type : 'text/plain'}), "moj.txt");
+    identTimer = setTimeout(()=>
+    {
+      // TODO: first packet is always broken without response
+      // reset
+      COMM._onReceive = COMM._defReceive;
 
-//    xhr.open('post', "https://api.valky.eu/gabuino/compile.php", true);
-    xhr.open('post', "http://localhost:8382/compile", true);
-    xhr.send(formData);
-    xhr.onload  = function() {
-      var jsonResponse = JSON.parse(xhr.responseText);
-      if (jsonResponse.code == 0)
-      {
-        clearError();
-        resolve(Uint8Array.from(atob(jsonResponse.files["app.elf"]), c => c.charCodeAt(0)));
-      }
-      else
-      {
-        handleError(jsonResponse.stderr);
-        reject(jsonResponse.stderr);
-      }
-    };
+      BIOS.identify().then( resolve );
+    }, 200);
+    BIOS.identify().then( id => { clearTimeout(identTimer); resolve(id); });
   });
 }
-
+function compile()
+{
+  dbg.setCode(html_editor.getValue());
+  return identify()
+    .then( (id) => 
+    {
+      dbg.setDeviceInfo(id.device, id.os, id.host, id.id);
+    })
+    .then( () => dbg.compile(html_editor.getValue()))
+    .then(binary => { 
+      clearError();
+      return binary;
+    })
+    .catch(error => { 
+      handleError(error);
+      return Promise.reject(error);
+    })
+}
 
 function writeDword(ofs, val)
 {

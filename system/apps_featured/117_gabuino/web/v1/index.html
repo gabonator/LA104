@@ -58,7 +58,7 @@
     <script src="parseelf.js"></script>
     <script src="examples.js"></script>
     <script src="debugger.js"></script>
-    <script src="debugger2.js"></script>
+    <script src="breakpoint.js"></script>
 <!--    <script src="symbols/ds213_os_bb9698a0.js"></script>
     <script src="symbols/ds213_gabuino.js"></script>-->
 
@@ -134,7 +134,7 @@ Stop</button>
         <h4 class="card-title mb-4 mt-1">Console</h4>
         <div>
             <button type="button" class="btn btn-outline-success" onclick="screenshot()">Screenshot</button>
-            <button type="button" class="btn btn-outline-success" onclick="clear()">Clear</button>
+            <button type="button" class="btn btn-outline-success" onclick="clearConsole()">Clear</button>
 <!--            <button type="button" class="btn btn-outline-success">Pause</button>-->
         </div>
     </div>
@@ -151,7 +151,7 @@ Stop</button>
     <div>
 <!--      <button type="button" class="btn btn-outline-success" onclick="dbgui.demo()">Start debug</button> -->
       <button type="button" class="btn btn-outline-success" onclick="dbgui.frame()">Inspect</button>
-      <button type="button" class="btn btn-outline-success" onclick="a()">Resume break</button>
+      <button type="button" class="btn btn-outline-success" onclick="revertBreakpoint()">Resume break</button>
     </div>
   </div>
 
@@ -190,6 +190,7 @@ $('#_run').on('click', function(event) {
   store_code();
 
   var newCode = html_editor.getValue();
+  dbg.setCode(newCode);
 
   if (typeof(lastCode) != "undefined" && lastCode == newCode)
   {
@@ -198,7 +199,7 @@ $('#_run').on('click', function(event) {
     run();
     return;
   }
-  lastCode = newCode;
+  lastCode = newCode; // only on successfull build!
   lastAssembly = null;
 
   var tick0 = (new Date).getTime();
@@ -287,7 +288,7 @@ function _DBGEVENT(e, arg)
 //  $("#_debugText").append();
 }
 
-function clear()
+function clearConsole()
 {
   $("#_debugText").html("");
 }
@@ -371,13 +372,15 @@ class DebuggerUi
     // reset
     COMM._onReceive = COMM._defReceive;
 
-    return BIOS.frame().then(f => {
-      var arr = [];
-      for (var i=0; i<f.length; i++) arr.push(f[i]); //"0x"+ ("00000000"+f[i].toString(16)).substr(-8));
-      return arr;
-    })
-    .then((stack)=>this.decodeStack(stack))
-    .then(() => this.fetchAndDecodeVariables());
+    return dbg.initializeDebugger()
+      .then( () => BIOS.frame())
+      .then(f => {
+        var arr = [];
+        for (var i=0; i<f.length; i++) arr.push(f[i]); //"0x"+ ("00000000"+f[i].toString(16)).substr(-8));
+        return arr;
+      })
+      .then((stack)=>this.decodeStack(stack))
+      .then(() => this.fetchAndDecodeVariables());
   }
 
   setCode(code)
@@ -387,22 +390,18 @@ class DebuggerUi
 
   decodeStack(stack)
   {
-    return dbg.initialize(this.code)
-    .then(() =>
-      {
-        var html = stack.map(p => dbg.decodeAddr(p))
-          .filter(x => x)
-          .filter(x => x.name.indexOf("st_usbfs_poll") == -1)
-          .map(x => {
-            if (x.line)
-              return x.module + ": " + "<a href='#' onClick='"+this.instance+".jumpTo("+x.line+")'>" + x.name + " (" + x.line+")" /*+ " 0x"+x.addr.toString(16)*/ + "</a>"
-            else
-              return x.module + ": " + x.name + (x.offset ? " + " + x.offset : "");
-          })
-          .join("\n");
-
-        $("#callstack").html(html)
+    var html = stack.map(p => dbg.decodeAddr(p))
+      .filter(x => x)
+      .filter(x => x.name.indexOf("st_usbfs_poll") == -1)
+      .map(x => {
+        if (x.line)
+          return x.module + ": " + "<a href='#' onClick='"+this.instance+".jumpTo("+x.line+")'>" + x.name + " (" + x.line+")" /*+ " 0x"+x.addr.toString(16)*/ + "</a>"
+        else
+          return x.module + ": " + x.name + (x.offset ? " + " + x.offset : "");
       })
+      .join("\n");
+
+    $("#callstack").html(html)
   }
 
   fetchAndDecodeVariables()

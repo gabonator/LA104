@@ -155,4 +155,12 @@ var BIOS =
           }()
         )) 
     } ),
+  identify: () => {
+    BIOS._rawData = null;
+
+    return BIOS.rpcCall('DBG::Identify()')
+    .then( rawdata => { BIOS._rawData = rawdata; /*console.log("raw:"+rawdata.byteLength); */return BIOS.rpcPeek(); })
+    .then( json => { if (typeof(BIOS.safeeval(json).ret) == "undefined") throw "problem"; 
+      return Promise.resolve(BIOS.safeeval(BIOS._rawData)); })
+  }
 };

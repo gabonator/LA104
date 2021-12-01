@@ -2,14 +2,14 @@ var objdumpasm = process.argv[2];
 
 var fs = require("fs");
 var input = fs.readFileSync(objdumpasm).toString().split("\n")
-var regAddress = RegExp("^[0-9a-f]")
+var regAddress = RegExp("^[0-9a-f]{8}")
 var regHeading = RegExp("^[0-9a-f]{8} <(.*)>:$")
 var regAssembly = RegExp("^[0-9a-f]{8}:")
 var regMethod = RegExp("^(.*\\(.*\\).*):$")
-var regReference = RegExp(".*:[0-9]+( \\(discriminator 1\\))?$")
+var regReference = RegExp(".*:[0-9]+( \\(discriminator \\d+\\))?$")
 var regSkip = RegExp("^Disassembly of section")
 
-var regExtractReference = RegExp(".*/(.*?):([0-9]+)( \\(discriminator 1\\))?$")
+var regExtractReference = RegExp(".*/(.*?):([0-9]+)( \\(discriminator \\d+\\))?$")
 
 var codeReference = null;
 
@@ -58,8 +58,8 @@ for (var i=5; i<input.length; i++)
       continue;
     }
   }
-  console.log("line " + i + ":");
-  console.log(l);
+//  console.log("line " + i + ":");
+//  console.log(l);
   throw "Unmatched line"
 }
 

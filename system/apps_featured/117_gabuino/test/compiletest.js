@@ -2,16 +2,10 @@ var Debugger = require("../web/v1/debugger.js");
 
 var dbg = new Debugger();
 dbg.setCode(getCode());
-dbg.initializeDebugger()
-.then( () =>
+dbg.compile()
+.then( (data) =>
   {
-    var stack = ['0x00000000', '0x08041b77 (ds213_gabuino) st_usbfs_poll', '0x08041b03 (ds213_gabuino) st_usbfs_poll', '0x42228198', '0x60000000', '0xfffffff9', '0x00000123', '0x00000000', '0x0000018f', '0x000000ef', '0x0800028d', '0x08008649 (ds213_os_bb9698a0) BIOS::LCD::PutPixel(int, int, unsigned short)', '0x080002ae', '0x69000000', '0x0000462c', '0x00000079', '0x00000000', '0x00000123', '0x2000525b', '0x000000c8', '0x00007900', '0x00012301', '0x200084b8', '0x20008498', '0x592e8480', '0x00007900', '0x20004780 (ds213_gabuino) MEMORY::userRetVal', '0x20008490', '0x2000552f', '0x00007b00', '0x00013100', '0x00006d00', '0x0000c800', '0x00000e00', '0x00006900', '0x200084ac', '0x20001524 (ds213_os_bb9698a0) Hw', '0x200084b4', '0x00000000', '0x200084c7', '0x200084c4', '0x20008500', '0x0073cdbd', '0x00007b00', '0x00013100', '0x00006d00', '0x0000c800', '0x00000080', '0x00007b00', '0x00013100', '0x00000022', '0x00012301', '0x00007938', '0x00000000', '0x00007b00', '0x20008508', '0x2000509b', '0x00003ecc', '0x00000000', '0x00000061', '0x00003ecc', '0x0000007b', '0x00000131', '0x00000001', '0x00000000', '0x0000006d', '0x000000c8', '0xfdffbd7c', '0x20004834 (ds213_gabuino) MEMORY::writeSum', '0x20008538', '0x200050f9', '0x20008540', '0x20005105', '0x20008548', '0x20005111', '0x20008550', '0x2000511d', '0x20008558', '0x20005009', '0x00007fe5', '0x08040751 (ds213_gabuino) MEMORY::Exec(unsigned long)', '0x08040725 (ds213_gabuino) MEMORY::Exec(unsigned long)', '0x00000000', '0x20004b1d', '0x08040bb1', '0x08041b03 (ds213_gabuino) st_usbfs_poll', '0x20004834 (ds213_gabuino) MEMORY::writeSum', '0x200049e0 (ds213_gabuino) command', '0x200049e0 (ds213_gabuino) command', '0x00000000'];
-    stack = stack.map(f=>parseInt(f.substr(0,10)));
-    console.log(stack.map(p => dbg.decodeAddr(p)).filter(x => x).join("\n"))
-  })
-.then( () =>
-  {
-    console.log(dbg.getVariables());
+    console.log(data);
   });
 
 function getCode()

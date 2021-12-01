@@ -4,9 +4,9 @@ uint32_t color = RGB32(255, 0, 0);
 
 int main(void)
 {
-    BIOS::DBG::Print(R"-(<input type="color" value="#ff0000">)-");
-
-    BIOS::DBG::Print(R"(<script>
+    BIOS::DBG::Print(R"(
+    <input type="color" value="#ff0000">
+    <script>
       document
         .querySelector("input[type='color']")
         .addEventListener("input", updateColor, false);
@@ -18,8 +18,6 @@ int main(void)
         BIOS.memWrite(colorPtr, [color >> 16, color >> 8, color]);
       }
     </script>)");
-    
-    // string formatter length limitation
     BIOS::DBG::Print(R"(<script>colorPtr = 0x%08x;</script>)", &color);
 
     int padding = 8;

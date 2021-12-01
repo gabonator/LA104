@@ -4,7 +4,9 @@
 // npm install encoding
 
 process.title = "la104 gcc svc";
+optlevel = "-O3";
 
+//var optimize = "";
 // export PATH=$PATH:/Applications/ARM/bin/:/Users/gabrielvalky/Documents/git/LA104/tools/elfstrip/
 const _appbase = "/Users/gabrielvalky/Documents/git/LA104/system/apps/000_service";
 const _laroot = "/Users/gabrielvalky/Documents/git/LA104";
@@ -45,8 +47,11 @@ function _toString(buffer)
   return textIn;
 }
 
-app.post('/compile', function(req, res) 
+app.post('/compile/:device', function(req, res) 
 {
+  if (["la104", "ds213", "ds203"].indexOf(req.params.device) == -1)
+    return res.status(400).send('Unsupported device: ' + res.params.device);
+
   if (!req.files)
     return res.status(400).send('No files were uploaded.');
 
@@ -57,7 +62,7 @@ app.post('/compile', function(req, res)
   var buffer = sampleFile.data;
   var textIn = _toString(buffer);
 
-  compile(textIn).then( out =>
+  compile(textIn, req.params.device).then( out =>
   {
     if (out.code != 0)
     {
@@ -72,8 +77,11 @@ app.post('/compile', function(req, res)
   });
 });
 
-app.post('/compileg', function(req, res) 
+app.post('/assembly/:device', function(req, res) 
 {
+  if (["la104", "ds213", "ds203"].indexOf(req.params.device) == -1)
+    return res.status(400).send('Unsupported device');
+
   if (!req.files)
     return res.status(400).send('No files were uploaded.');
 
@@ -84,41 +92,17 @@ app.post('/compileg', function(req, res)
   var buffer = sampleFile.data;
   var textIn = _toString(buffer);
 
-  compile(textIn, '-g').then( out =>
-  {
-    if (out.code != 0)
-    {
-      res.end(JSON.stringify(out));
-      return;
-    }
-
-    optimize(out.files["app.elf"]).then( out =>
-    {
-      res.end(JSON.stringify(out));
-    });
-  });
-});
-
-app.post('/assembly', function(req, res) 
-{
-  if (!req.files)
-    return res.status(400).send('No files were uploaded.');
-
-  let sampleFile = req.files.file;
-  var fileName = sampleFile.name.replace(".xml", ".txt");
-  if (fileName.indexOf(".txt") == -1)
-    fileName += ".txt";
-  var buffer = sampleFile.data;
-  var textIn = _toString(buffer);
-
-  debug(textIn).then( out =>
+  debug(textIn, req.params.device).then( out =>
   {
     res.end(JSON.stringify(out));
   });
 });
 
-app.post('/symbols', function(req, res) 
+app.post('/symbols/:device', function(req, res) 
 {
+  if (["la104", "ds213", "ds203"].indexOf(req.params.device) == -1)
+    return res.status(400).send('Unsupported device');
+
   if (!req.files)
     return res.status(400).send('No files were uploaded.');
 
@@ -129,7 +113,7 @@ app.post('/symbols', function(req, res)
   var buffer = sampleFile.data;
   var textIn = _toString(buffer);
 
-  symbols(textIn).then( out =>
+  symbols(textIn, req.params.device).then( out =>
   {
     res.end(JSON.stringify(out));
   });
@@ -146,11 +130,11 @@ app.listen(8382, function() {
 
 const { spawn } = require("child_process");
 
-function compile(code, extra)
+function compile(code, device)
 {
   return new Promise((resolve) => {
     var args = [
-    "-O0",
+    optlevel,
     "-Werror",
     "-fno-common",
     "-mcpu=cortex-m3",
@@ -161,7 +145,7 @@ function compile(code, extra)
     "-fno-threadsafe-statics",
     "-fno-use-cxa-atexit",
     "-Wno-psabi",
-    "-DLA104",
+    "-D" + device.toUpperCase(),
     "-Wl,-emain",
     //"-MD",
     //"../source/main.cpp",
@@ -169,11 +153,11 @@ function compile(code, extra)
     //"../source/radsens/radSens1v2.cpp",
     "-I../../../os_library/include/", "-I../source/arduino/",
 //    "-S", // generate assembly
-    "-lbios_la104", "-L../../../os_library/build", "-nostartfiles", "-T", "../source/app.lds", "-o", "app.elf",
+    "-lbios_"+device, "-L../../../os_library/build", "-nostartfiles", "-T", "../source/app.lds", "-o", "app.elf",
     "-x", "c++", "-"
     ]
-    if (extra)
-      args.push(extra)
+//    if (extra)
+//      args.push(extra)
 
     const ls = spawn("arm-none-eabi-g++", args, {
       cwd:_appbase + "/build",
@@ -309,14 +293,14 @@ if (o && o.cwd) opt.cwd = o.cwd;
 }
 
 
-function symbols(code)
+function symbols(code, device)
 {
   fs.writeFileSync(_appbase + "/source/test.cpp", code);
 
-  var cflags = "-O0 -Werror -fno-common -mcpu=cortex-m3 -mthumb -msoft-float -fno-exceptions -fno-rtti -fno-threadsafe-statics " +
-    "-fno-use-cxa-atexit -Wno-psabi -DLA104 " +
+  var cflags = optlevel + " -Werror -fno-common -mcpu=cortex-m3 -mthumb -msoft-float -fno-exceptions -fno-rtti -fno-threadsafe-statics " +
+    "-fno-use-cxa-atexit -Wno-psabi -D" + device.toUpperCase() + " " +
     "-Wl,-emain " +
-    "-I../../../os_library/include/ -I../source/arduino/ -lbios_la104 -L../../../os_library/build";
+    "-I../../../os_library/include/ -I../source/arduino/ -lbios_" + device + " -L../../../os_library/build";
 
   return Promise.resolve()
   .then( () => exec("arm-none-eabi-g++", cflags + 
@@ -351,14 +335,14 @@ function symbols(code)
   })
 }
 
-function debug(code)
+function debug(code, device)
 {
   fs.writeFileSync(_appbase + "/source/test.cpp", code);
 
-  var cflags = "-O0 -Werror -fno-common -mcpu=cortex-m3 -mthumb -msoft-float -fno-exceptions -fno-rtti -fno-threadsafe-statics " +
-    "-fno-use-cxa-atexit -Wno-psabi -DLA104 " +
+  var cflags = optlevel + " -Werror -fno-common -mcpu=cortex-m3 -mthumb -msoft-float -fno-exceptions -fno-rtti -fno-threadsafe-statics " +
+    "-fno-use-cxa-atexit -Wno-psabi -D" + device.toUpperCase() + " " +
     "-Wl,-emain " + "-g " +
-    "-I../../../os_library/include/ -I../source/arduino/ -lbios_la104 -L../../../os_library/build";
+    "-I../../../os_library/include/ -I../source/arduino/ -lbios_" + device + " -L../../../os_library/build";
 
   return Promise.resolve()
 /*
