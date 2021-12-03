@@ -26,6 +26,7 @@ class Debugger
     this.osHash = ("00000000"+osHash.toString(16)).substr(-8);
     this.hostHash = ("00000000"+hostHash.toString(16)).substr(-8);
     this.deviceUid = ("00000000"+deviceUid.toString(16)).substr(-8);
+    this.hostHash = "ddd4b9f3";
     console.log({deviceType:this.deviceType, osHash:this.osHash, hostHash:this.hostHash, uid:this.deviceUid});
   }
 
@@ -138,10 +139,14 @@ class Debugger
 
   findNearestLine(line)
   {
+    var nearesti = -1, nearestd = 10;
     for (var i=0; i<this.assembly.length; i++)
-      if (this.assembly[i].line >= line)
-        return i;
-    return -1;
+      if (this.assembly[i].line && Math.abs(this.assembly[i].line-line) < nearestd)
+      {
+        nearesti = i;
+        nearestd = Math.abs(this.assembly[i].line-line);
+      }
+    return nearesti;
   }
 
   findInstruction(addr)

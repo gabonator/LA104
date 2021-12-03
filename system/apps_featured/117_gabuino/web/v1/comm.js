@@ -11,6 +11,11 @@ var COMM = {
   _defEval: (msg) => 
   {
     var _msg = msg.split("\n").join("\\\\n");
+    var _match = _msg.match("_DBGEVENT\\((.*)\\)")
+    if (_match)
+    {
+       eval(_msg);
+    }
     var _match = _msg.match("_DBGPRINT\\((.*)\\)")
     if (_match)
     {

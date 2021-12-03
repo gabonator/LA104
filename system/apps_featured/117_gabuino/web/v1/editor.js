@@ -43,6 +43,14 @@ function handleError(stderr)
   html_editor.getSession().setAnnotations(annotations);
 }
 
+function higlightLine(l)
+{
+  clearError ();
+  annotations = [];
+  if (l)
+    addError(l, 0, "bla");
+  html_editor.getSession().setAnnotations(annotations);
+}
 
 
 var html_editor;
@@ -90,10 +98,11 @@ console.log(prefix);
 
       var row = e.getDocumentPosition().row;
       e.stop();
+      uisync( ()=>
 
       debuggerTryBreakpoint(row).then( (row) =>
       {
-console.log("set row " + row);
+        console.log("set break at row " + row);
         if (row == -1)
           return;
                                                            
@@ -104,30 +113,41 @@ console.log("set row " + row);
             e.editor.session.setBreakpoint(row);
         else
             e.editor.session.clearBreakpoint(row);
-      });
+      })
+
+      );
 
   });
 }
 
-// the function is called at the end of a function that
-// includes a getJSON() request to a Python script which
-// queries a MongoDB database and json dumps the results.  
-// eg loadMyContent() {
-// getJSON() and return content
-
 document.addEventListener("DOMContentLoaded", function(){
   initAceEditor()
 });
-// }
 
-// Problems when using div instead of xmp:  
 
-// In Firebug I can *see* the required HTML in the 'response'
-// and 'json' tabs ie:
-// <div id="acey_html_hidden"><html>test</html></div>
-// but the Ace edior is just showing:
-// test
+function store_code()
+{
+  var code = html_editor.getValue();
+  window.localStorage.setItem("lastCode", code);
+}
 
-// In Firebug's HTML view of the hidden div, when using <div> tags, the <html> tags have been stripped out.  
-//
-//When using <xmp> tags the <html> tags have not been stripped out.  
+function load_code()
+{
+  var last = window.localStorage.getItem("lastCode");
+  if (last)
+    html_editor.setValue(last, -1);
+  else
+    html_editor.setValue(`#include <library.h>
+
+int main(void)
+{
+    while (!BIOS::KEY::GetKey())
+    {
+        BIOS::DBG::Print("Hello! ");
+        BIOS::SYS::DelayMs(250);
+    }
+    
+    return 0;
+}`, -1);
+   
+}

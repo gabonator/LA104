@@ -93,18 +93,10 @@ function run()
 //    for (var i=0; i<globalInit.length; i++)
 //      BIOS.exec(globalInit[i]|1); // we should chain these!
   }
-  running = true;
-  prepare.then( () => {
+  return prepare.then( () => {
     console.log("globalInit done, executing main app");
-    BIOS.exec(globalEntry|1) 
-  })//.then( () => resolve() )
-    // we do not know if the program keeps running or has ended with return code
-  return Promise.resolve();
-}
-
-function stop()
-{
-  BIOS.stop()
+    return BIOS.exec(globalEntry|1) 
+  })
 }
 
 var globalOffset;

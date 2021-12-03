@@ -5,7 +5,6 @@
 #include "evaluator.h"
 #include "webusb/webusb.h"
 #include "debug.h"
-
 //uint8_t appblob[4096*2] __attribute__((section(".usersection")));
 
 bool continuous = 0;
@@ -54,17 +53,16 @@ void Trap()
 {
   GABUINO::trapped = true;
   TERMINAL::Print("_DBGEVENT(2, 0x%02x)", trappedAddress);
-  trappedAddress += 2;
-  trappedAddress |= 1;
   while (GABUINO::trapped)
     EventLoop();
 }
 
 void _yield()
 {
-	EventLoop();
+  EventLoop();
 }
 
+//extern "C" void myinit();
 __attribute__((__section__(".entry")))
 int main(void) 
 {
@@ -78,6 +76,11 @@ int main(void)
   rcClient.bottom = BIOS::LCD::Height;
   rcClient.top = BIOS::LCD::Height-14;
   BIOS::LCD::Bar(rcClient, RGB565(404040));
+
+//  myinit();
+  NVIC_SetPriorityGrouping(0);
+  NVIC_SetPriority(SysTick_IRQn, 0);
+  NVIC_SetPriority(DebugMonitor_IRQn, 10);  // we need timer & usb isrs working
 
   BIOS::OS::SetInterruptVector(BIOS::OS::IHardFaultException, []() {
     for (int i=0; i<100; i++)
