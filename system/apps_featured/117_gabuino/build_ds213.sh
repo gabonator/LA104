@@ -38,7 +38,9 @@ node ../service/nmparse.js symbols_all.txt ds213_gabuino > ../symbols/ds213_gabu
 ROMBEGIN=`nm --print-size -gC output.elf | grep "T _addressRomBegin" | head -c 8`
 ROMEND=`nm --print-size -gC output.elf | grep "T _addressRomEnd" | head -c 8`
 ROMSIZE=$((0x$ROMEND-0x$ROMBEGIN))
-arm-none-eabi-objcopy -O binary ./output.elf ./output.bin
-dd if=output.bin of=output.rom bs=1 skip=0 count=$((0x$ROMEND-0x$ROMBEGIN)) 2> /dev/null
-CRC=`crc32 output.rom`
+# todo: not working!
+#arm-none-eabi-objcopy -O binary ./output.elf ./output.bin
+#dd if=output.bin of=output.rom bs=1 skip=0 count=$((0x$ROMEND-0x$ROMBEGIN)) 2> /dev/null
+#CRC=`crc32 output.rom`
+CRC=00000000
 node ../service/nmparse.js symbols_all.txt la104_gabuino > ../symbols/ds213_gabuino_${CRC}.js

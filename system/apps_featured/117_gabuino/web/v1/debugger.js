@@ -6,6 +6,7 @@ class Debugger
     this.symbols = {};
     this.localSymbols = false;
     this.code = null;
+    this.rawAssembly = null;
     this.assembly = null;
 
     this.compiledBinary = null;
@@ -17,7 +18,7 @@ class Debugger
     this.deviceType = "ds213"; // lower case!
     this.osHash = "bb9698a0";
     this.hostHash = "00000000";
-    this.deviceUid = "12345678";
+    this.deviceUid = "00000000";
   }
 
   setDeviceInfo(deviceType, osHash, hostHash, deviceUid)
@@ -26,8 +27,13 @@ class Debugger
     this.osHash = ("00000000"+osHash.toString(16)).substr(-8);
     this.hostHash = ("00000000"+hostHash.toString(16)).substr(-8);
     this.deviceUid = ("00000000"+deviceUid.toString(16)).substr(-8);
-    this.hostHash = "ddd4b9f3";
+//    this.hostHash = "ddd4b9f3";
     console.log({deviceType:this.deviceType, osHash:this.osHash, hostHash:this.hostHash, uid:this.deviceUid});
+  }
+
+  hasDeviceInfo()
+  {
+    return this.deviceUid != "00000000"; 
   }
 
   setCode(code)
@@ -41,8 +47,6 @@ class Debugger
 
   initializeDebugger()
   {
-    // request device type - TODO: not exported by gabuino
-    // request device hash - TODO: not exported by gabuino
     if (this.debuggerResources)
       return Promise.resolve();
 
@@ -61,6 +65,7 @@ class Debugger
       .then(this.requestSymbols.bind(this))
       .then(symbols => this.symbols["app"] = symbols)
       .then(this.requestAssembly.bind(this))
+      .then(rawAssembly => this.rawAssembly = rawAssembly.stdout)
       .then(this.parseAssembly.bind(this))
       .then(assembly => this.assembly = assembly)
       .then( () =>
@@ -81,7 +86,7 @@ class Debugger
   }
 
   // symbols
-  decodeAddr(addr)
+  decodeAddr(addr, stackRa)
   {
     var ret = [];
     for (var i in this.symbols)
@@ -90,7 +95,7 @@ class Debugger
         var symbol = this.symbols[i][j];
         if (symbol.type == "code" && addr >= symbol.addr && addr < symbol.addr + symbol.len)
         {
-          var fl = this.findLine(addr);
+          var fl = this.findLine(addr & ~1, stackRa); // remove thumb flag
           var ofs = (addr & ~1) - symbol.addr;
           ret.push({module:i, name:symbol.name, offset:ofs, line:fl, addr:addr & ~1});
         }
@@ -103,7 +108,7 @@ class Debugger
     return ret[0];
   }
 
-  findLine(addr)
+  findLine(addr, stack)
   {
     if (addr < this.assembly[0].addr || addr > this.assembly[this.assembly.length-1].addr)
       return;
@@ -111,23 +116,27 @@ class Debugger
     var lastLine = null;
     for (var i=0; i<this.assembly.length; i++)
     {
+      if (stack && this.assembly[i].addr == addr) 
+      {
+        // when decoding stack, the return address points to next instruction
+
+        // check if previous instr is "bl"
+        //if (["bl", "ble.n", "bge.n", "b.n"].indexOf(this.assembly[i-1]).instruction != -1)
+          // return previous line, because stack points to return address before branching
+        return lastLine;
+      }
+
       if (typeof(this.assembly[i].line) != "undefined")
         lastLine = this.assembly[i].line;
 
       if (this.assembly[i].addr >= addr) 
-      {
-        // we should check the instr at this address and before it
-        // stack points to the next address after branch, so lets return one
-        // line above of this  
-        return lastLine-1;
-      }
+        return lastLine;
     }
   }
 
   // assembly
-  parseAssembly(json)
+  parseAssembly(asm)
   {
-    var asm = json.stdout;
     var lines = asm.split("\n");
     lines = lines.map(l => l.match("([0-9a-fA-f]+):\x09([0-9a-fA-f ]+)\x09(\\S+)\x09?([^;]*)(; .+:(.+))?"))
       .filter(r=>r)

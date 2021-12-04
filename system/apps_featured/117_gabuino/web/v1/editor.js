@@ -96,28 +96,42 @@ console.log(prefix);
       if (e.clientX > 50 + target.getBoundingClientRect().left) 
           return; 
 
-      var row = e.getDocumentPosition().row;
       e.stop();
-      uisync( ()=>
 
-      debuggerTryBreakpoint(row).then( (row) =>
+      var breakpoints = e.editor.session.getBreakpoints(/*newRow, 0*/);
+      if(typeof breakpoints[e.getDocumentPosition().row] !== typeof undefined)
       {
-        console.log("set break at row " + row);
-        if (row == -1)
-          return;
-                                                           
-        var breakpoints = e.editor.session.getBreakpoints(/*newRow, 0*/);
+         // TODO! clear breakpoint
+         e.editor.session.clearBreakpoint(row);
+      } else 
+      {
 
-  //      var row = e.getDocumentPosition().row;
-        if(typeof breakpoints[row] === typeof undefined)
-            e.editor.session.setBreakpoint(row);
-        else
-            e.editor.session.clearBreakpoint(row);
-      })
+        var row = e.getDocumentPosition().row + 1; // returns zero based line number
+  //      uisync( ()=>
 
-      );
+
+        debuggerTryBreakpoint(row).then( (row) =>
+        {
+          console.log("set break at row " + row);
+          if (row == -1)
+            return;
+                       
+          row--; // zero based line                              
+
+    //      var row = e.getDocumentPosition().row;
+  //        if(typeof breakpoints[row] === typeof undefined)
+              e.editor.session.setBreakpoint(row);
+  //        else
+  //            e.editor.session.clearBreakpoint(row);
+        })
+      }
 
   });
+}
+
+function editorClearBreakpoint(row)
+{
+  html_editor.session.clearBreakpoint(row-1);
 }
 
 document.addEventListener("DOMContentLoaded", function(){

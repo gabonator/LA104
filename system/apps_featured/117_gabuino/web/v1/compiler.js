@@ -14,14 +14,21 @@ function identify()
     BIOS.identify().then( id => { clearTimeout(identTimer); resolve(id); });
   });
 }
+
 function compile()
 {
   dbg.setCode(html_editor.getValue());
-  return identify()
-    .then( (id) => 
+  var ident = Promise.resolve();
+
+  if (!dbg.hasDeviceInfo())
+  {
+    ident = identify().then( (id) => 
     {
       dbg.setDeviceInfo(id.device, id.os, id.host, id.id);
-    })
+    });
+  }
+
+  return ident
     .then( () => dbg.compile(html_editor.getValue()))
     .then(binary => { 
       clearError();

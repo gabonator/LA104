@@ -7,7 +7,8 @@ class DebuggerUi
     this.code = null;
     this.variables = [];
     this.instance = instance;
-    this.offline = true;
+    this.offline = false;
+    this.trapped = 0;
   }
 
   demo()
@@ -43,14 +44,20 @@ class DebuggerUi
     this.code = code;
   }
 
+  setTrapAddress(trap)
+  {
+    this.trapped = trap;
+  }
+
   decodeStack(stack)
   {
-    var html = stack.map(p => dbg.decodeAddr(p))
+    // when decoding the addr at breakpoint, do not do the RA correction
+    var html = stack.map(p => dbg.decodeAddr(p, this.trapped != p))
       .filter(x => x)
       .filter(x => x.name.indexOf("st_usbfs_poll") == -1)
       .map(x => {
         if (x.line)
-          return x.module + ": " + "<a href='#' onClick='"+this.instance+".jumpTo("+x.line+")'>" + x.name + " (" + x.line+")" /*+ " 0x"+x.addr.toString(16)*/ + "</a>"
+          return x.module + ": " + "<a href='#' onClick='"+this.instance+".jumpTo("+x.line+")'>" + x.name + " (" + x.line+")" + /* " 0x"+x.addr.toString(16) +*/ "</a>"
         else
           return x.module + ": " + x.name + (x.offset ? " + " + x.offset : "");
       })

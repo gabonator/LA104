@@ -17,7 +17,7 @@ int main(void)
     birdY = pipeGap = 200;
     canvasSize = pipeX = 400;
     c.onclick = () => (birdDY = 9);
-    setInterval(() => {
+    game = setInterval(() => {
       context.fillStyle = "skyblue";
       context.fillRect(0,0,canvasSize,canvasSize); // Draw sky
       birdY -= birdDY -= 0.5; // Gravity
@@ -44,5 +44,6 @@ int main(void)
         if (key == BIOS::KEY::EKey::Enter)
             BIOS::DBG::Print(R"(<script>birdDY=9</script>)");
     }
+    BIOS::DBG::Print(R"(<script>clearInterval(game)</script>)");
     return 0;
 }

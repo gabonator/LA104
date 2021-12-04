@@ -20,8 +20,8 @@ function debuggerTryBreakpoint(line)
     }
 
     var nearest = dbg.assembly[nline];
-    applyBreakpoint(nearest);
-    return nearest.line/* -1*/;
+    return applyBreakpoint(nearest).then( () => nearest.line )
+//    return nearest.line/* -1*/;
   })
 }
 
@@ -35,7 +35,7 @@ function dumpBuf(buf)
 
 function applyBreakpoint(l)
 {
-  BIOS.memRead(l.addr, 2).then(buf => {
+  return BIOS.memRead(l.addr, 2).then(buf => {
     console.log("Setting breakpoint at 0x" + l.addr.toString(16));
     console.log("Memory read: " + dumpBuf(buf));
     console.log("Should equal to: " + l.opcode[0]);

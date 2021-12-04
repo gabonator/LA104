@@ -33,7 +33,7 @@ window.transfer = function(left, top, right, bottom, ptr, check)
     for (var y=top; y<bottom; y++)
         for (var x=left; x<right; x++)
         {
-            if (x > width)
+            if (x > can.width)
             {
                 buf.push(0);
                 buf.push(0);

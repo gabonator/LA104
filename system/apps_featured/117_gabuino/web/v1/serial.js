@@ -27,9 +27,9 @@ var serial = {};
     let readLoop = () => {
       this.device_.transferIn(this.endpointIn_, 1024*64).then(result => {
         this.onReceive(result.data);
-        if (this.ilovebill)
-          setTimeout(readLoop, 0); 
-        else
+//        if (this.ilovebill)
+//          setTimeout(readLoop, 0); 
+//        else
           readLoop();
       }, error => {
         this.onReceiveError(error);

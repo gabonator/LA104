@@ -12,6 +12,8 @@ class ResponseUi {
     $('#_resume').on('click', this.onResume.bind(this.self));
     $('#_screenshot').on('click', this.onScreenshot.bind(this.self));
     $('#_clear').on('click', this.onClear.bind(this.self));
+    $('#_downloadElf').on('click', this.onDownloadElf.bind(this.self));
+    $('#_downloadAsm').on('click', this.onDownloadAsm.bind(this.self));
   }
 
   default()
@@ -70,6 +72,7 @@ class ResponseUi {
 
     var newCode = html_editor.getValue();
     dbg.setCode(newCode);
+    dbgui.setTrapAddress(0);
 
     if (typeof(this.lastCode) != "undefined" && this.lastCode == newCode)
     {
@@ -142,7 +145,11 @@ class ResponseUi {
   onResume()
   {
     higlightLine(-1);
-    uisync(()=>revertBreakpoint(trapped).then(()=>this.breakpointResumed()))
+    if (trapped && trappedLine)
+    {
+      editorClearBreakpoint(trappedLine);
+      uisync(()=>revertBreakpoint(trapped).then(()=>this.breakpointResumed()))
+    }
   }
 
   onScreenshot()
@@ -160,6 +167,31 @@ class ResponseUi {
     this.running = false;
     this.default();
   }
+
+  saveByteArray(data, name, mime) 
+  {
+    var a = document.createElement("a");
+    document.body.appendChild(a);
+    a.style = "display: none";
+    var blob = new Blob(data, {type: mime}),
+        url = window.URL.createObjectURL(blob);
+    a.href = url;
+    a.download = name;
+    a.click();
+    window.URL.revokeObjectURL(url);
+  }
+
+  onDownloadElf()
+  {
+    this.saveByteArray([dbg.compiledBinary], 'app.elf', "octet/stream");
+  }
+
+  onDownloadAsm()
+  {
+    dbg.initializeDebugger()
+      .then( () => this.saveByteArray([dbg.rawAssembly], 'app.asm', "text") );
+  }
+
 };
 
 var responseUi = new ResponseUi();
@@ -170,20 +202,31 @@ function screenshot()
   {
     var offscreenCanvas = document.createElement('canvas');
     offscreenCanvas.style = "border:3px solid #000000; width:300px; height:300px"
-    offscreenCanvas.width = 320;
-    offscreenCanvas.height = 240;
+    var width = 0, height = 0;
+    if (dbg.deviceType == "ds213" || dbg.deviceType == "ds203") 
+    {
+      width = 400;
+      height = 240;
+    } else
+    {
+      width = 320;
+      height = 240;
+    }
+
+    offscreenCanvas.width = width;
+    offscreenCanvas.height = height;
     var context = offscreenCanvas.getContext('2d');
     context.fillStyle = "red";
     context.fillRect(10,10,100,100);
 
-    var imagedata = context.createImageData(320, 240);
+    var imagedata = context.createImageData(width, height);
     var  j=0;
-      for (var x=0; x<320; x++)
-    for (var y=0; y<240; y++)
+    for (var x=0; x<width; x++)
+    for (var y=0; y<height; y++)
       {
         var rgb = data[j++];
         rgb = ((rgb << 8) | (rgb >> 8)) & 0xffff;
-        var i = ((239-y)*320+x)*4;
+        var i = ((height-1-y)*width+x)*4;
         imagedata.data[i++] = (((rgb)&0x1f)<<3);
         imagedata.data[i++] = ((((rgb)>>5)&0x3f)<<2);
         imagedata.data[i++] = ((((rgb)>>11)&0x1f)<<3);
@@ -243,6 +286,7 @@ function _DBGPRINT(msg)
 }
 
 var trapped = null;
+var trappedLine = 0;
 function _DBGEVENT(e, arg)
 {
   switch (e)
@@ -255,7 +299,9 @@ function _DBGEVENT(e, arg)
     case 2: 
       trapped = arg; 
       console.log("Program trapped at 0x" + arg.toString(16)); 
-      higlightLine(dbg.findLine(arg));
+      dbgui.setTrapAddress(arg);
+      trappedLine = dbg.findLine(arg, false);
+      higlightLine(trappedLine);
       responseUi.breakpointHit();
     break;
     default: console.log("Unrecognized event " + e);

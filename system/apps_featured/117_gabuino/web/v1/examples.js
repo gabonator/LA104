@@ -1,187 +1,6 @@
 examples = 
 {
-  'aalines.cpp': '#include <library.h>\n' +
-    '\n' +
-    'using namespace BIOS;\n' +
-    '\n' +
-    'typedef int fix16_t;\n' +
-    'void drawline_aa(fix16_t fx1, fix16_t fy1, fix16_t fx2, fix16_t fy2, int color);\n' +
-    '\n' +
-    'int main(void)\n' +
-    '{\n' +
-    '    int x = 0, y = 0;\n' +
-    '    BIOS::KEY::EKey key;\n' +
-    '    while ((key = KEY::GetKey()) != BIOS::KEY::EKey::Escape)\n' +
-    '    {\n' +
-    '        int x1 = rand() % BIOS::LCD::Width;\n' +
-    '        int y1 = rand() % BIOS::LCD::Height;\n' +
-    '        int c = rand() & 0xffff;\n' +
-    '        drawline_aa(x*256, y*256, x1*256, y1*256, c);\n' +
-    '        x = x1;\n' +
-    '        y = y1;\n' +
-    '    }\n' +
-    '    \n' +
-    '    return 0;\n' +
-    '}\n' +
-    '\n' +
-    '\n' +
-    '// https://github.com/PetteriAimonen/QuadPawn/blob/master/Runtime/drawing.c\n' +
-    '\n' +
-    '/* Antialiased line drawing */\n' +
-    '\n' +
-    '// Alpha-blend two colors together. Alpha is 0 to 255.\n' +
-    '// The ratios have been biased a bit to make the result look\n' +
-    '// better on a cheap TFT.\n' +
-    'int blend(int fg, int bg, int alpha)\n' +
-    '{\n' +
-    '    int fg_per_2 = (fg & 0xF7DE) >> 1;\n' +
-    '    int fg_per_4 = (fg & 0xE79C) >> 2;\n' +
-    '    int fg_per_8 = (fg & 0xC718) >> 3;\n' +
-    '    \n' +
-    '    int bg_per_2 = (bg & 0xF7DE) >> 1;\n' +
-    '    int bg_per_4 = (bg & 0xE79C) >> 2;\n' +
-    '    int bg_per_8 = (bg & 0xC718) >> 3;\n' +
-    '    \n' +
-    '    if (alpha > 224)\n' +
-    '        return fg; // 100% blend\n' +
-    '    else if (alpha > 192)\n' +
-    '        return (fg - fg_per_8 + bg_per_8); // 88% blend\n' +
-    '    else if (alpha > 128)\n' +
-    '        return (fg - fg_per_4 + bg_per_4); // 75% blend\n' +
-    '    else if (alpha > 64)\n' +
-    '        return (fg_per_2 + bg_per_2); // 50% blend\n' +
-    '    else if (alpha > 32)\n' +
-    '        return (fg_per_4 + bg - bg_per_4); // 25% blend\n' +
-    '    else\n' +
-    '        return bg; // 0% blend\n' +
-    '}\n' +
-    '\n' +
-    '\n' +
-    '// Draws antialiased lines\n' +
-    "// Xiaolin Wu's algorithm, using x/256 fixed point values\n" +
-    'void drawline_aa(fix16_t x1, fix16_t y1, fix16_t x2, fix16_t y2, int color)\n' +
-    '{\n' +
-    '    bool reverse_xy = false;\n' +
-    '    \n' +
-    '    auto swap = [](int *x, int *y) {\n' +
-    '        int temp = *x;\n' +
-    '        *x = *y;\n' +
-    '        *y = temp;\n' +
-    '    };\n' +
-    '    \n' +
-    '    // plot the pixel at (x, y) with brightness c\n' +
-    '    auto plot = [&](int x, int y, int c) {\n' +
-    '        if (reverse_xy)\n' +
-    '            swap(&x, &y);\n' +
-    '        \n' +
-    '        uint16_t oldcolor = BIOS::LCD::GetPixel(x >> 8, y >> 8);\n' +
-    '        BIOS::LCD::PutPixel(x >> 8, y >> 8, blend(color, oldcolor, c));\n' +
-    '    };\n' +
-    '    \n' +
-    '    // Integer part of x\n' +
-    '    auto ipart = [](int x) -> int {\n' +
-    '        return x & (~0xFF);\n' +
-    '    };\n' +
-    '    \n' +
-    '    auto round = [&](int x) -> int {\n' +
-    '        return ipart(x + 128);\n' +
-    '    };\n' +
-    '    \n' +
-    '    // Fractional part of x\n' +
-    '    auto fpart = [](int x) -> int {\n' +
-    '        return x & 0xFF;\n' +
-    '    };\n' +
-    '    \n' +
-    '    // Remaining fractional part of x\n' +
-    '    auto rfpart = [&](int x) -> int {\n' +
-    '        return 256 - fpart(x);\n' +
-    '    };\n' +
-    '\n' +
-    '    int dx = x2 - x1;\n' +
-    '    int dy = y2 - y1;\n' +
-    '    if (abs(dx) < abs(dy))\n' +
-    '    {\n' +
-    '        swap(&x1, &y1);\n' +
-    '        swap(&x2, &y2);\n' +
-    '        swap(&dx, &dy);\n' +
-    '        reverse_xy = true;\n' +
-    '    }\n' +
-    '    \n' +
-    '    if (x2 < x1)\n' +
-    '    {\n' +
-    '        swap(&x1, &x2);\n' +
-    '        swap(&y1, &y2);\n' +
-    '    }\n' +
-    '    \n' +
-    '    int gradient = dy * 256 / dx;\n' +
-    '    \n' +
-    '    // handle first endpoint\n' +
-    '    int xend = round(x1);\n' +
-    '    int yend = y1 + gradient * (xend - x1) / 256;\n' +
-    '    int xgap = rfpart(x1 + 128);\n' +
-    '    int xpxl1 = xend;  // this will be used in the main loop\n' +
-    '    int ypxl1 = ipart(yend);\n' +
-    '    plot(xpxl1, ypxl1, rfpart(yend) * xgap / 256);\n' +
-    '    plot(xpxl1, ypxl1 + 256, fpart(yend) * xgap / 256);\n' +
-    '    int intery = yend + gradient; // first y-intersection for the main loop\n' +
-    '    \n' +
-    '    // handle second endpoint\n' +
-    '    xend = round(x2);\n' +
-    '    yend = y2 + gradient * (xend - x2) / 256;\n' +
-    '    xgap = fpart(x2 + 128);\n' +
-    '    int xpxl2 = xend;  // this will be used in the main loop\n' +
-    '    int ypxl2 = ipart(yend);\n' +
-    '    plot(xpxl2, ypxl2, rfpart(yend) * xgap / 256);\n' +
-    '    plot(xpxl2, ypxl2 + 256, fpart(yend) * xgap / 256);\n' +
-    '    \n' +
-    '    // main loop\n' +
-    '    for (int x = xpxl1 + 1; x <= xpxl2 - 1; x += 256)\n' +
-    '    {\n' +
-    '        plot(x, ipart(intery), rfpart(intery));\n' +
-    '        plot(x, ipart(intery) + 256, fpart(intery));\n' +
-    '        intery = intery + gradient;\n' +
-    '    }\n' +
-    '}\n' +
-    '\n' +
-    '/* Non-antialiased line drawing */\n' +
-    '\n' +
-    'void drawline(int x1, int y1, int x2, int y2, int color, int dots)\n' +
-    '{\n' +
-    '    // Algorithm from here: http://en.wikipedia.org/wiki/Bresenham%27s_line_algorithm#Simplification\n' +
-    '    int dx = abs(x2 - x1);\n' +
-    '    int dy = abs(y2 - y1);\n' +
-    '    \n' +
-    '    int sx = (x1 < x2) ? 1 : -1;\n' +
-    '    int sy = (y1 < y2) ? 1 : -1;\n' +
-    '    \n' +
-    '    int err = dx - dy;\n' +
-    '    int count = 0;\n' +
-    '    for(;; count++)\n' +
-    '    {\n' +
-    '        if (!dots || (count >> (dots - 1)) & 1)\n' +
-    '        {\n' +
-    '            //__Point_SCR(x1, y1);\n' +
-    '            //__LCD_SetPixl(color);\n' +
-    '        }\n' +
-    '        \n' +
-    '        if (x1 == x2 && y1 == y2) break;\n' +
-    '        \n' +
-    '        int e2 = 2 * err;\n' +
-    '        if (e2 > -dy)\n' +
-    '        {\n' +
-    '            err -= dy;\n' +
-    '            x1 += sx;\n' +
-    '        }\n' +
-    '        else if (e2 < dx)\n' +
-    '        {\n' +
-    '            err += dx;\n' +
-    '            y1 += sy;\n' +
-    '        }\n' +
-    '    }\n' +
-    '}\n' +
-    '\n' +
-    '\n',
-  'bars.cpp': '#include <library.h>\n' +
+  '00_bars.cpp': '#include <library.h>\n' +
     '\n' +
     'using namespace BIOS;\n' +
     '\n' +
@@ -191,9 +10,9 @@ examples =
     '    while ((key = KEY::GetKey()) != BIOS::KEY::EKey::Escape)\n' +
     '    {\n' +
     '        int x1 = rand() % BIOS::LCD::Width;\n' +
-    '        int y1 = rand() % BIOS::LCD::Height;\n' +
+    '        int y1 = (rand() % (BIOS::LCD::Height-28)) + 14;\n' +
     '        int x2 = rand() % BIOS::LCD::Width;\n' +
-    '        int y2 = rand() % BIOS::LCD::Height;\n' +
+    '        int y2 = (rand() % (BIOS::LCD::Height-28)) + 14;\n' +
     '        int c = rand() & 0xffff;\n' +
     '        if (x2 > x1 && y2 > y1)\n' +
     '            BIOS::LCD::Bar(x1, y1, x2, y2, c);\n' +
@@ -201,16 +20,37 @@ examples =
     '    \n' +
     '    return 0;\n' +
     '}\n',
-  'chart.cpp': '// Not working\n' +
-    '#include <library.h>\n' +
+  '01_hello.cpp': '#include <library.h>\n' +
     '\n' +
     'int main(void)\n' +
     '{\n' +
-    '    BIOS::DBG::Print(R"(\n' +
-    '        <script src="https://code.highcharts.com/highcharts.js"></script>\n' +
-    '        <div id="container" style="width:300px; background:#808080;"></div>)");\n' +
+    '    BIOS::DBG::Print("Hello world!");\n' +
+    '    return 724;\n' +
+    '}\n',
+  '02_counter.cpp': '#include <library.h>\n' +
     '\n' +
-    '    BIOS::DBG::Print(R"(<script>\n' +
+    'using namespace BIOS;\n' +
+    '\n' +
+    'int counter = 0;\n' +
+    '\n' +
+    'int main(void)\n' +
+    '{\n' +
+    '    BIOS::KEY::EKey key;\n' +
+    '    while ((key = KEY::GetKey()) != BIOS::KEY::EKey::Escape)\n' +
+    '    {\n' +
+    '        BIOS::DBG::Print("Test %d, ", counter++);\n' +
+    '        BIOS::SYS::DelayMs(200);\n' +
+    '    }\n' +
+    '    \n' +
+    '    return 0;\n' +
+    '}',
+  '03_chart.cpp': '#include <library.h>\n' +
+    '\n' +
+    'int main(void)\n' +
+    '{\n' +
+    '    BIOS::DBG::Print(R"(<script src="https://code.highcharts.com/highcharts.js"></script>\n' +
+    '    <div id="container" style="width:500px; height:300px; background:#808080;"></div>\n' +
+    '    <script>\n' +
     "        Highcharts.chart('container', {\n" +
     '            chart: {\n' +
     '                type: "spline",\n' +
@@ -230,244 +70,49 @@ examples =
     '            }]\n' +
     '        });\n' +
     '    </script>)");\n' +
-    '    \n' +
     '\n' +
     '    while (BIOS::KEY::GetKey() == BIOS::KEY::EKey::None)\n' +
     '    {\n' +
-    '        BIOS::SYS::DelayMs(1000);\n' +
-    '        //BIOS::DBG::Print(R"(<script>addPoint(Math.random())</script>)");\n' +
+    '        BIOS::SYS::DelayMs(3000);\n' +
+    '        BIOS::DBG::Print(R"(<script>addPoint(Math.random())</script>)");\n' +
     '    }\n' +
     '    return 0;\n' +
     '}\n',
-  'colorpicker.cpp': '#include <library.h>\n' +
+  '04_colorpicker.cpp': '#include <library.h>\n' +
     '\n' +
     'uint32_t color = RGB32(255, 0, 0);\n' +
     '\n' +
     'int main(void)\n' +
     '{\n' +
-    '    BIOS::DBG::Print(R"-(<input type="color" onChange="updateColor(this.value)" value="#ff0000">)-");\n' +
-    '\n' +
-    '    BIOS::DBG::Print(R"(<script>\n' +
-    '      function updateColor(html)\n' +
+    '    BIOS::DBG::Print(R"(\n' +
+    '    <input type="color" value="#ff0000">\n' +
+    '    <script>\n' +
+    '      document\n' +
+    `        .querySelector("input[type='color']")\n` +
+    '        .addEventListener("input", updateColor, false);\n' +
+    '        \n' +
+    '      function updateColor()\n' +
     '      {\n' +
+    '        var html = event.target.value;\n' +
     '        var color = parseInt("0x"+html.substr(1));\n' +
     '        BIOS.memWrite(colorPtr, [color >> 16, color >> 8, color]);\n' +
     '      }\n' +
     '    </script>)");\n' +
     '    BIOS::DBG::Print(R"(<script>colorPtr = 0x%08x;</script>)", &color);\n' +
     '\n' +
+    '    int padding = 8;\n' +
+    '    CRect rect(padding, 14 + padding, \n' +
+    '        BIOS::LCD::Width - padding, BIOS::LCD::Height - 14 - padding);\n' +
+    '        \n' +
     '    while (BIOS::KEY::GetKey() == BIOS::KEY::EKey::None)\n' +
     '    {\n' +
-    '        BIOS::LCD::Bar(40, 40, BIOS::LCD::Width-40, BIOS::LCD::Height-40, \n' +
-    '            RGB32TO565(color));\n' +
+    '        BIOS::LCD::Bar(rect, RGB32TO565(color));\n' +
     '        BIOS::SYS::DelayMs(20);\n' +
     '    }\n' +
     '    return 0;\n' +
-    '}\n',
-  'counter.cpp': '#include <library.h>\n' +
-    '\n' +
-    'using namespace BIOS;\n' +
-    '\n' +
-    'int counter = 0;\n' +
-    '\n' +
-    'int main(void)\n' +
-    '{\n' +
-    '    BIOS::KEY::EKey key;\n' +
-    '    while ((key = KEY::GetKey()) != BIOS::KEY::EKey::Escape)\n' +
-    '    {\n' +
-    '        BIOS::DBG::Print("Test %d, ", counter++);\n' +
-    '        BIOS::SYS::DelayMs(200);\n' +
-    '    }\n' +
-    '    \n' +
-    '    return 0;\n' +
-    '}',
-  'demo.cpp': '#include <library.h>\n' +
-    '\n' +
-    'using namespace BIOS;\n' +
-    '\n' +
-    'typedef int fix16_t;\n' +
-    'void drawline_aa(fix16_t fx1, fix16_t fy1, fix16_t fx2, fix16_t fy2, int color);\n' +
-    '\n' +
-    'int main(void)\n' +
-    '{\n' +
-    '    int x = 100, y = 100, c = 0;\n' +
-    '    KEY::EKey key;\n' +
-    '    while ((key = KEY::GetKey()) != KEY::EKey::Escape)\n' +
-    '    {\n' +
-    '        int x1 = rand() % LCD::Width;\n' +
-    '        int y1 = 16+(rand() % (LCD::Height-32));\n' +
-    '        int c = rand() & 0xffff;\n' +
-    '        drawline_aa(x*256, y*256, x1*256, y1*256, c);\n' +
-    '        x = x1;\n' +
-    '        y = y1;\n' +
-    '\n' +
-    '        if ((c++ % 1000) == 0)\n' +
-    '            DBG::Print("<b>%d</b> lines, ", c);\n' +
-    '    }\n' +
-    '    \n' +
-    '    return 0;\n' +
     '}\n' +
-    '\n' +
-    '\n' +
-    '\n' +
-    '\n' +
-    '// https://github.com/PetteriAimonen/QuadPawn/blob/master/Runtime/drawing.c\n' +
-    '\n' +
-    '/* Antialiased line drawing */\n' +
-    '\n' +
-    '// Alpha-blend two colors together. Alpha is 0 to 255.\n' +
-    '// The ratios have been biased a bit to make the result look\n' +
-    '// better on a cheap TFT.\n' +
-    'int blend(int fg, int bg, int alpha)\n' +
-    '{\n' +
-    '    int fg_per_2 = (fg & 0xF7DE) >> 1;\n' +
-    '    int fg_per_4 = (fg & 0xE79C) >> 2;\n' +
-    '    int fg_per_8 = (fg & 0xC718) >> 3;\n' +
-    '    \n' +
-    '    int bg_per_2 = (bg & 0xF7DE) >> 1;\n' +
-    '    int bg_per_4 = (bg & 0xE79C) >> 2;\n' +
-    '    int bg_per_8 = (bg & 0xC718) >> 3;\n' +
-    '    \n' +
-    '    if (alpha > 224)\n' +
-    '        return fg; // 100% blend\n' +
-    '    else if (alpha > 192)\n' +
-    '        return (fg - fg_per_8 + bg_per_8); // 88% blend\n' +
-    '    else if (alpha > 128)\n' +
-    '        return (fg - fg_per_4 + bg_per_4); // 75% blend\n' +
-    '    else if (alpha > 64)\n' +
-    '        return (fg_per_2 + bg_per_2); // 50% blend\n' +
-    '    else if (alpha > 32)\n' +
-    '        return (fg_per_4 + bg - bg_per_4); // 25% blend\n' +
-    '    else\n' +
-    '        return bg; // 0% blend\n' +
-    '}\n' +
-    '\n' +
-    '\n' +
-    '// Draws antialiased lines\n' +
-    "// Xiaolin Wu's algorithm, using x/256 fixed point values\n" +
-    'void drawline_aa(fix16_t x1, fix16_t y1, fix16_t x2, fix16_t y2, int color)\n' +
-    '{\n' +
-    '    bool reverse_xy = false;\n' +
-    '    \n' +
-    '    auto swap = [](int *x, int *y) {\n' +
-    '        int temp = *x;\n' +
-    '        *x = *y;\n' +
-    '        *y = temp;\n' +
-    '    };\n' +
-    '    \n' +
-    '    // plot the pixel at (x, y) with brightness c\n' +
-    '    auto plot = [&](int x, int y, int c) {\n' +
-    '        if (reverse_xy)\n' +
-    '            swap(&x, &y);\n' +
-    '        \n' +
-    '        uint16_t oldcolor = BIOS::LCD::GetPixel(x >> 8, y >> 8);\n' +
-    '        BIOS::LCD::PutPixel(x >> 8, y >> 8, blend(color, oldcolor, c));\n' +
-    '    };\n' +
-    '    \n' +
-    '    // Integer part of x\n' +
-    '    auto ipart = [](int x) -> int {\n' +
-    '        return x & (~0xFF);\n' +
-    '    };\n' +
-    '    \n' +
-    '    auto round = [&](int x) -> int {\n' +
-    '        return ipart(x + 128);\n' +
-    '    };\n' +
-    '    \n' +
-    '    // Fractional part of x\n' +
-    '    auto fpart = [](int x) -> int {\n' +
-    '        return x & 0xFF;\n' +
-    '    };\n' +
-    '    \n' +
-    '    // Remaining fractional part of x\n' +
-    '    auto rfpart = [&](int x) -> int {\n' +
-    '        return 256 - fpart(x);\n' +
-    '    };\n' +
-    '\n' +
-    '    int dx = x2 - x1;\n' +
-    '    int dy = y2 - y1;\n' +
-    '    if (abs(dx) < abs(dy))\n' +
-    '    {\n' +
-    '        swap(&x1, &y1);\n' +
-    '        swap(&x2, &y2);\n' +
-    '        swap(&dx, &dy);\n' +
-    '        reverse_xy = true;\n' +
-    '    }\n' +
-    '    \n' +
-    '    if (x2 < x1)\n' +
-    '    {\n' +
-    '        swap(&x1, &x2);\n' +
-    '        swap(&y1, &y2);\n' +
-    '    }\n' +
-    '    \n' +
-    '    int gradient = dy * 256 / dx;\n' +
-    '    \n' +
-    '    // handle first endpoint\n' +
-    '    int xend = round(x1);\n' +
-    '    int yend = y1 + gradient * (xend - x1) / 256;\n' +
-    '    int xgap = rfpart(x1 + 128);\n' +
-    '    int xpxl1 = xend;  // this will be used in the main loop\n' +
-    '    int ypxl1 = ipart(yend);\n' +
-    '    plot(xpxl1, ypxl1, rfpart(yend) * xgap / 256);\n' +
-    '    plot(xpxl1, ypxl1 + 256, fpart(yend) * xgap / 256);\n' +
-    '    int intery = yend + gradient; // first y-intersection for the main loop\n' +
-    '    \n' +
-    '    // handle second endpoint\n' +
-    '    xend = round(x2);\n' +
-    '    yend = y2 + gradient * (xend - x2) / 256;\n' +
-    '    xgap = fpart(x2 + 128);\n' +
-    '    int xpxl2 = xend;  // this will be used in the main loop\n' +
-    '    int ypxl2 = ipart(yend);\n' +
-    '    plot(xpxl2, ypxl2, rfpart(yend) * xgap / 256);\n' +
-    '    plot(xpxl2, ypxl2 + 256, fpart(yend) * xgap / 256);\n' +
-    '    \n' +
-    '    // main loop\n' +
-    '    for (int x = xpxl1 + 1; x <= xpxl2 - 1; x += 256)\n' +
-    '    {\n' +
-    '        plot(x, ipart(intery), rfpart(intery));\n' +
-    '        plot(x, ipart(intery) + 256, fpart(intery));\n' +
-    '        intery = intery + gradient;\n' +
-    '    }\n' +
-    '}\n' +
-    '\n' +
-    '/* Non-antialiased line drawing */\n' +
-    '\n' +
-    'void drawline(int x1, int y1, int x2, int y2, int color, int dots)\n' +
-    '{\n' +
-    '    // Algorithm from here: http://en.wikipedia.org/wiki/Bresenham%27s_line_algorithm#Simplification\n' +
-    '    int dx = abs(x2 - x1);\n' +
-    '    int dy = abs(y2 - y1);\n' +
-    '    \n' +
-    '    int sx = (x1 < x2) ? 1 : -1;\n' +
-    '    int sy = (y1 < y2) ? 1 : -1;\n' +
-    '    \n' +
-    '    int err = dx - dy;\n' +
-    '    int count = 0;\n' +
-    '    for(;; count++)\n' +
-    '    {\n' +
-    '        if (!dots || (count >> (dots - 1)) & 1)\n' +
-    '        {\n' +
-    '            //__Point_SCR(x1, y1);\n' +
-    '            //__LCD_SetPixl(color);\n' +
-    '        }\n' +
-    '        \n' +
-    '        if (x1 == x2 && y1 == y2) break;\n' +
-    '        \n' +
-    '        int e2 = 2 * err;\n' +
-    '        if (e2 > -dy)\n' +
-    '        {\n' +
-    '            err -= dy;\n' +
-    '            x1 += sx;\n' +
-    '        }\n' +
-    '        else if (e2 < dx)\n' +
-    '        {\n' +
-    '            err += dx;\n' +
-    '            y1 += sy;\n' +
-    '        }\n' +
-    '    }\n' +
-    '}\n' +
-    '\n' +
     '\n',
-  'flappybird.cpp': '// Play flappy bird in browser, press F1 on LA104 to jump\n' +
+  '05_flappybird.cpp': '// Play flappy bird in browser, press F1 on LA104 to jump\n' +
     '// Based on Tiny flappy bird by Daniel Bark:\n' +
     '//   https://github.com/danba340/tiny-flappy-bird\n' +
     '\n' +
@@ -486,7 +131,7 @@ examples =
     '    birdY = pipeGap = 200;\n' +
     '    canvasSize = pipeX = 400;\n' +
     '    c.onclick = () => (birdDY = 9);\n' +
-    '    setInterval(() => {\n' +
+    '    game = setInterval(() => {\n' +
     '      context.fillStyle = "skyblue";\n' +
     '      context.fillRect(0,0,canvasSize,canvasSize); // Draw sky\n' +
     '      birdY -= birdDY -= 0.5; // Gravity\n' +
@@ -512,6 +157,721 @@ examples =
     '    {\n' +
     '        if (key == BIOS::KEY::EKey::Enter)\n' +
     '            BIOS::DBG::Print(R"(<script>birdDY=9</script>)");\n' +
+    '    }\n' +
+    '    BIOS::DBG::Print(R"(<script>clearInterval(game)</script>)");\n' +
+    '    return 0;\n' +
+    '}\n',
+  '06_drawing.cpp': '#include <library.h>\n' +
+    '\n' +
+    'void drawline(int x1, int y1, int x2, int y2, int color);\n' +
+    '\n' +
+    'int main(void)\n' +
+    '{\n' +
+    '    BIOS::DBG::Print(R"(\n' +
+    '<canvas id="my_canvas_id" width=320 height=240></script>\n' +
+    '<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>\n' +
+    '<script>\n' +
+    "var can = document.getElementById('my_canvas_id');\n" +
+    "var ctx = can.getContext('2d');\n" +
+    'imgData = ctx.getImageData(0, 0, can.width, can.height);\n' +
+    '\n' +
+    'for (var y=0; y<240; y++)\n' +
+    '  for (var x=0; x<320; x++)\n' +
+    '  {\n' +
+    '    var i = ((Math.floor(x/16)+Math.floor(y/16))&1) ? 10 : 20; \n' +
+    '    imgData.data[(y*320+x)*4] = 0; \n' +
+    '    imgData.data[(y*320+x)*4+1] = 0;\n' +
+    '    imgData.data[(y*320+x)*4+2] = 0; \n' +
+    '    imgData.data[(y*320+x)*4+3] = i; \n' +
+    '  }\n' +
+    '\n' +
+    'ctx.putImageData(imgData, 0, 0);\n' +
+    'mousePressed = false;\n' +
+    '\n' +
+    "$('#my_canvas_id').mousedown(function (e) {\n" +
+    '  mousePressed = true;\n' +
+    '  Draw(e.pageX - $(this).offset().left, e.pageY - $(this).offset().top, false);\n' +
+    '})\n' +
+    '.mousemove(function (e) {\n' +
+    '  if (mousePressed) {\n' +
+    '      Draw(e.pageX - $(this).offset().left, e.pageY - $(this).offset().top, true);\n' +
+    '  }\n' +
+    '})\n' +
+    '.mouseup(function (e) {\n' +
+    '  mousePressed = false;\n' +
+    '  promise = promise.then( () => BIOS.memWrite(ptrTo, [0xff, 0xff, 0xff, 0xff]) );\n' +
+    '})\n' +
+    '.mouseleave(function (e) {\n' +
+    '  mousePressed = false;\n' +
+    '  promise = promise.then( () => BIOS.memWrite(ptrTo, [0xff, 0xff, 0xff, 0xff]) );\n' +
+    '});\n' +
+    '\n' +
+    'promise = Promise.resolve();\n' +
+    'function Draw(x, y, isDown) \n' +
+    '{\n' +
+    '  if (isDown) \n' +
+    '  {\n' +
+    '    ctx.beginPath();\n' +
+    '    ctx.strokeStyle = "#000000";\n' +
+    '    ctx.lineWidth = 2;\n' +
+    '    ctx.lineJoin = "round";\n' +
+    '    ctx.moveTo(window.lastX, window.lastY);\n' +
+    '    ctx.lineTo(x, y);\n' +
+    '    ctx.closePath();\n' +
+    '    ctx.stroke();\n' +
+    '    promise = promise.then( () => BIOS.memWrite(ptrTo, [x&255, x>>8, 0, 0, y&255, y>>8, 0, 0]) );\n' +
+    '  }\n' +
+    '  lastX = x; \n' +
+    '  lastY = y;\n' +
+    '}\n' +
+    '</script>\n' +
+    ')");\n' +
+    '\n' +
+    '    CPoint from(-1, -1), to(-1, -1);\n' +
+    '    BIOS::DBG::Print(R"(<script>ptrTo = 0x%08x;</script>)", &to);\n' +
+    '\n' +
+    '    while (BIOS::KEY::GetKey() == BIOS::KEY::EKey::None)\n' +
+    '    {\n' +
+    '        if (from != to)\n' +
+    '        {\n' +
+    '            if (from.x != -1 && to.x != -1)\n' +
+    '                drawline(from.x, from.y, to.x, to.y, RGB565(ffffff));\n' +
+    '\n' +
+    '            from = to;\n' +
+    '        }\n' +
+    '    }\n' +
+    '    return 0;\n' +
+    '}\n' +
+    '\n' +
+    'void drawline(int x1, int y1, int x2, int y2, int color)\n' +
+    '{\n' +
+    '    // http://en.wikipedia.org/wiki/Bresenham%27s_line_algorithm#Simplification\n' +
+    '    int dx = abs(x2 - x1);\n' +
+    '    int dy = abs(y2 - y1);\n' +
+    '    \n' +
+    '    int sx = (x1 < x2) ? 1 : -1;\n' +
+    '    int sy = (y1 < y2) ? 1 : -1;\n' +
+    '    \n' +
+    '    int err = dx - dy;\n' +
+    '    int count = 0;\n' +
+    '    for(;; count++)\n' +
+    '    {\n' +
+    '        BIOS::LCD::PutPixel(x1, y1, color);\n' +
+    '\n' +
+    '        if (x1 == x2 && y1 == y2) break;\n' +
+    '        \n' +
+    '        int e2 = 2 * err;\n' +
+    '        if (e2 > -dy)\n' +
+    '        {\n' +
+    '            err -= dy;\n' +
+    '            x1 += sx;\n' +
+    '        }\n' +
+    '        else if (e2 < dx)\n' +
+    '        {\n' +
+    '            err += dx;\n' +
+    '            y1 += sy;\n' +
+    '        }\n' +
+    '    }\n' +
+    '}\n' +
+    '\n',
+  '07_3d.cpp': '#include <library.h>\n' +
+    '\n' +
+    'int main(void)\n' +
+    '{\n' +
+    '    BIOS::DBG::Print(R"(<canvas id="c" style="width:400px; height:400px;"></canvas>\n' +
+    '\n' +
+    '<script type="module">\n' +
+    "import * as THREE from 'https://threejsfundamentals.org/threejs/resources/threejs/r132/build/three.module.js';\n" +
+    'rot = {x:0, y:0, z:0};\n' +
+    '\n' +
+    'function main() {\n' +
+    '  const k = 0.05;\n' +
+    '\n' +
+    "  const canvas = document.querySelector('#c');\n" +
+    '  const renderer = new THREE.WebGLRenderer({canvas});\n' +
+    '  const camera = new THREE.PerspectiveCamera(75, 3, 0.1, 5);\n' +
+    '  camera.position.z = 1.5;\n' +
+    '  const scene = new THREE.Scene();\n' +
+    '  const geometry = new THREE.BoxGeometry(1, 0.3, 1);\n' +
+    '\n' +
+    '  const cubes = [];\n' +
+    '  const loader = new THREE.TextureLoader();\n' +
+    '  const materials = [\n' +
+    "    new THREE.MeshBasicMaterial({map: loader.load('https://threejsfundamentals.org/threejs/resources/images/flower-1.jpg')}),\n" +
+    "    new THREE.MeshBasicMaterial({map: loader.load('https://threejsfundamentals.org/threejs/resources/images/flower-2.jpg')}),\n" +
+    "    new THREE.MeshBasicMaterial({map: loader.load('https://threejsfundamentals.org/threejs/resources/images/flower-3.jpg')}),\n" +
+    "    new THREE.MeshBasicMaterial({map: loader.load('https://threejsfundamentals.org/threejs/resources/images/flower-4.jpg')}),\n" +
+    "    new THREE.MeshBasicMaterial({map: loader.load('https://threejsfundamentals.org/threejs/resources/images/flower-5.jpg')}),\n" +
+    "    new THREE.MeshBasicMaterial({map: loader.load('https://threejsfundamentals.org/threejs/resources/images/flower-6.jpg')}),\n" +
+    '  ];\n' +
+    '  \n' +
+    '  const cube = new THREE.Mesh(geometry, materials);\n' +
+    '  scene.add(cube);\n' +
+    '  cubes.push(cube);\n' +
+    '\n' +
+    '  function resizeRendererToDisplaySize(renderer) {\n' +
+    '    const canvas = renderer.domElement;\n' +
+    '    const width = canvas.clientWidth;\n' +
+    '    const height = canvas.clientHeight;\n' +
+    '    const needResize = canvas.width !== width || canvas.height !== height;\n' +
+    '    if (needResize) {\n' +
+    '      renderer.setSize(width, height, false);\n' +
+    '    }\n' +
+    '    return needResize;\n' +
+    '  }\n' +
+    '\n' +
+    '  function render(time) {\n' +
+    '    if (resizeRendererToDisplaySize(renderer)) {\n' +
+    '      const canvas = renderer.domElement;\n' +
+    '      camera.aspect = canvas.clientWidth / canvas.clientHeight;\n' +
+    '      camera.updateProjectionMatrix();\n' +
+    '    }\n' +
+    '\n' +
+    '    cubes.forEach((cube, ndx) => {\n' +
+    '      cube.rotation.x = cube.rotation.x * (1-k) + rot.x * k;\n' +
+    '      cube.rotation.y = cube.rotation.y * (1-k) + rot.y * k;\n' +
+    '      cube.rotation.z = cube.rotation.z * (1-k) + rot.z * k;\n' +
+    '    });\n' +
+    '\n' +
+    '    renderer.render(scene, camera);\n' +
+    '    requestAnimationFrame(render);\n' +
+    '  }\n' +
+    '\n' +
+    '  requestAnimationFrame(render);\n' +
+    '}\n' +
+    '\n' +
+    'main();\n' +
+    '</script>\n' +
+    ')");\n' +
+    '\n' +
+    '    int x = 1, z = 0;\n' +
+    '    BIOS::KEY::EKey key;\n' +
+    '    while ((key = BIOS::KEY::GetKey()) != BIOS::KEY::EKey::Escape)\n' +
+    '    {\n' +
+    '        switch (key)\n' +
+    '        {\n' +
+    '            case BIOS::KEY::F1: x=0; z=0; break;\n' +
+    '            case BIOS::KEY::Left: z--; break;\n' +
+    '            case BIOS::KEY::Right: z++; break;\n' +
+    '            case BIOS::KEY::Up: x--; break;\n' +
+    '            case BIOS::KEY::Down: x++; break;\n' +
+    '        }\n' +
+    '        BIOS::SYS::DelayMs(100);\n' +
+    '        BIOS::DBG::Print(R"(<script>rot = {y:Math.sin(%d/1000), x:%d/2, z:%d/2}</script>)", \n' +
+    '            BIOS::SYS::GetTick(), x, z);\n' +
+    '    }\n' +
+    '    return 0;\n' +
+    '}\n',
+  '08_cat.cpp': '#include <library.h>\n' +
+    '\n' +
+    'uint16_t buffer[BIOS::LCD::Width];\n' +
+    'uint8_t check = 0;\n' +
+    '\n' +
+    'int main(void)\n' +
+    '{\n' +
+    '    BIOS::DBG::Print(R"(<script>ptrCheck=0x%08x;</script>)", &check);\n' +
+    '    BIOS::DBG::Print(R"(<canvas id="canvas" width=%d height=%d>)", \n' +
+    '        BIOS::LCD::Width, BIOS::LCD::Height);\n' +
+    '        \n' +
+    '    BIOS::DBG::Print(R"(\n' +
+    '<script>\n' +
+    "var can = document.getElementById('canvas');\n" +
+    "var ctx = can.getContext('2d');\n" +
+    'var img = new Image;\n' +
+    'var imgData;\n' +
+    'var promise = Promise.resolve();\n' +
+    'img.crossOrigin = "Anonymous";\n' +
+    'img.onload = function() {  \n' +
+    '  var s = Math.max(can.width/img.width, can.height/img.height);\n' +
+    '  var w = img.width*s;\n' +
+    '  var h = img.height*s;\n' +
+    '  ctx.drawImage(img, (can.width-w)/2, (can.height-h)/2, w, h);\n' +
+    '  imgData = ctx.getImageData(0, 0, can.width, can.height);\n' +
+    '  promise = promise.then(()=>BIOS.memWrite(ptrCheck, [0])); // ready\n' +
+    '};\n' +
+    'img.src = "https://cataas.com/cat?"+Math.random();\n' +
+    '\n' +
+    'window.transfer = function(left, top, right, bottom, ptr, check) \n' +
+    '{\n' +
+    '    var buf = [];\n' +
+    '    for (var y=top; y<bottom; y++)\n' +
+    '        for (var x=left; x<right; x++)\n' +
+    '        {\n' +
+    '            if (x > can.width)\n' +
+    '            {\n' +
+    '                buf.push(0);\n' +
+    '                buf.push(0);\n' +
+    '            } else\n' +
+    '            {\n' +
+    '                var r = imgData.data[(y*can.width+x)*4]; \n' +
+    '                var g = imgData.data[(y*can.width+x)*4+1]; \n' +
+    '                var b = imgData.data[(y*can.width+x)*4+2]; \n' +
+    '                var rgb565 = (r>>3) | ((g>>2)<<5) | ((b>>3)<<11);\n' +
+    '                buf.push(rgb565 & 255);\n' +
+    '                buf.push(rgb565 >> 8);\n' +
+    '            }\n' +
+    '        }\n' +
+    '\n' +
+    '    promise = promise.then(() => BIOS.memWrite(ptr, buf))\n' +
+    '        .then(() => BIOS.memWrite(check, [1]));\n' +
+    '}\n' +
+    '</script>)");\n' +
+    '    \n' +
+    '    check = 4;\n' +
+    '    int line = 14;    \n' +
+    '    CRect rect(0, 0, BIOS::LCD::Width, BIOS::LCD::Height);\n' +
+    '    while (BIOS::KEY::GetKey() == BIOS::KEY::EKey::None)\n' +
+    '    {\n' +
+    '        if (check == 0)\n' +
+    '        {\n' +
+    '            check = 3;\n' +
+    '            rect.top = line;\n' +
+    '            rect.bottom = line+1;\n' +
+    '            BIOS::DBG::Print(R"(<script>transfer(%d, %d, %d, %d, 0x%08x, 0x%08x)</script>)", \n' +
+    '                rect.left, rect.top, rect.right, rect.bottom, \n' +
+    '                buffer, &check);\n' +
+    '                \n' +
+    '            line++;\n' +
+    '        }\n' +
+    '        if (check == 1)\n' +
+    '        {\n' +
+    '            BIOS::LCD::BufferBegin(rect);\n' +
+    '            BIOS::LCD::BufferWrite(buffer, rect.Width()*rect.Height());\n' +
+    '            BIOS::LCD::BufferEnd();\n' +
+    '\n' +
+    '            if (line >= BIOS::LCD::Height-14)\n' +
+    '                break;\n' +
+    '\n' +
+    '            check = 0;\n' +
+    '        }\n' +
+    '    }\n' +
+    '\n' +
+    '    return 0;\n' +
+    '}\n' +
+    '\n',
+  '09_bouncetext.cpp': '#include <library.h>\n' +
+    '\n' +
+    'int x = BIOS::LCD::Width/2, y = BIOS::LCD::Height/2;\n' +
+    'int dx = 1, dy = 1;\n' +
+    'char text[20] = "Hello";\n' +
+    'volatile struct {uint8_t r, g, b; } color = {255, 0, 0};\n' +
+    '\n' +
+    'int main(void)\n' +
+    '{\n' +
+    '    CRect inner(8, 14+8, BIOS::LCD::Width-8, BIOS::LCD::Height-14-8);\n' +
+    '    BIOS::LCD::Bar(inner, RGB565(404040));\n' +
+    '    BIOS::LCD::Rectangle(inner, RGB565(b0b0b0));\n' +
+    '    while (!BIOS::KEY::GetKey())\n' +
+    '    {\n' +
+    '        x += dx;\n' +
+    '        y += dy;\n' +
+    '        \n' +
+    '        CRect draw(x, y, x+strlen(text)*8, y+14);\n' +
+    '        BIOS::LCD::Print(x, y, RGB565RGB(color.r, color.g, color.b), \n' +
+    '            RGB565(404040), text);\n' +
+    '\n' +
+    '        if (draw.right+dx >= inner.right)       dx = -abs(dx);\n' +
+    '        if (draw.left+dx <= inner.left)         dx = +abs(dx);\n' +
+    '        if (draw.bottom+dy >= inner.bottom)     dy = -abs(dy);\n' +
+    '        if (draw.top+dy <= inner.top)           dy = +abs(dy);\n' +
+    '            \n' +
+    '        BIOS::SYS::DelayMs(5);\n' +
+    '        BIOS::LCD::Bar(draw, RGB565(404040));\n' +
+    '    }\n' +
+    '    return 0;\n' +
+    '}',
+  '10_breakpoint.cpp': '#include <library.h>\n' +
+    '\n' +
+    'int x = BIOS::LCD::Width/2, y = BIOS::LCD::Height/2;\n' +
+    'int dx = 1, dy = 1;\n' +
+    'char text[20] = "Hello";\n' +
+    'volatile struct {uint8_t r, g, b; } color = {255, 0, 0};\n' +
+    '\n' +
+    'int main(void)\n' +
+    '{\n' +
+    '    CRect inner(8, 14+8, BIOS::LCD::Width-8, BIOS::LCD::Height-14-8);\n' +
+    '    BIOS::LCD::Bar(inner, RGB565(404040));\n' +
+    '    BIOS::LCD::Rectangle(inner, RGB565(b0b0b0));\n' +
+    '    while (!BIOS::KEY::GetKey())\n' +
+    '    {\n' +
+    '        x += dx;\n' +
+    '        y += dy;\n' +
+    '        \n' +
+    '        CRect draw(x, y, x+strlen(text)*8, y+14);\n' +
+    '        BIOS::LCD::Print(x, y, RGB565RGB(color.r, color.g, color.b), \n' +
+    '            RGB565(404040), text);\n' +
+    '\n' +
+    '        if (draw.right+dx >= inner.right)       \n' +
+    '        {\n' +
+    '            BIOS::SYS::Beep(10);\n' +
+    '            dx = -abs(dx);\n' +
+    '        }\n' +
+    '        if (draw.left+dx <= inner.left)\n' +
+    '        {\n' +
+    '            BIOS::SYS::Beep(10);\n' +
+    '            dx = +abs(dx);\n' +
+    '        }\n' +
+    '        if (draw.bottom+dy >= inner.bottom)\n' +
+    '        {\n' +
+    '            BIOS::SYS::Beep(10);\n' +
+    '            dy = -abs(dy);\n' +
+    '        }\n' +
+    '        if (draw.top+dy <= inner.top)  \n' +
+    '        {\n' +
+    '            BIOS::SYS::Beep(10);\n' +
+    '            dy = +abs(dy);\n' +
+    '        }\n' +
+    '            \n' +
+    '        BIOS::SYS::DelayMs(5);\n' +
+    '        BIOS::LCD::Bar(draw, RGB565(404040));\n' +
+    '    }\n' +
+    '    return 0;\n' +
+    '}',
+  'bounceballs.cpp': '#include <library.h>\n' +
+    '\n' +
+    'class Ball \n' +
+    '{\n' +
+    '    int x;\n' +
+    '    int y;\n' +
+    '    int vx;\n' +
+    '    int vy;\n' +
+    '    uint16_t gradient[25];\n' +
+    '    CRect backRect;\n' +
+    '\n' +
+    'public:\n' +
+    '    Ball()\n' +
+    '    {\n' +
+    '        x = (random()%(BIOS::LCD::Width-40))+20;\n' +
+    '        y = (random()%(BIOS::LCD::Height-40))+20;\n' +
+    '        vx = (random() & 3)+1;\n' +
+    '        vy = (random() & 3)+1;\n' +
+    '        \n' +
+    '        for (int i=0; i<COUNT(gradient); i++)\n' +
+    '        {\n' +
+    '            switch (x%3)\n' +
+    '            {\n' +
+    '                case 0: \n' +
+    '                    gradient[i] = RGB565RGB(50-i*2, 120-i*5, 255);\n' +
+    '                    break;\n' +
+    '                case 1: \n' +
+    '                    gradient[i] = RGB565RGB(50-i*2, 255, 120-i*5);\n' +
+    '                    break;\n' +
+    '                case 2: \n' +
+    '                    gradient[i] = RGB565RGB(255, 50-i*2, 120-i*5);\n' +
+    '                    break;\n' +
+    '            }\n' +
+    '        }\n' +
+    '    }\n' +
+    '    \n' +
+    '    void Draw()\n' +
+    '    {\n' +
+    '        static constexpr int curve[11] = {10, 10, 10, 9, 9, 8, 8, 7, 6, 4, 0};\n' +
+    '        \n' +
+    '        backRect = CRect(x-10, y-10, x+11, y+11);\n' +
+    '        const int r = 10;\n' +
+    '        for (int _y=-10; _y<=10; _y++)\n' +
+    '        {\n' +
+    '            int px = curve[abs(_y)];\n' +
+    '            int ofsx = 10-px;\n' +
+    '            BIOS::LCD::BufferBegin(CRect(x-10+ofsx, y+_y, x+21, y+_y+1));\n' +
+    '            BIOS::LCD::BufferWrite(gradient+(_y+10)/2, px*2);\n' +
+    '            BIOS::LCD::BufferEnd();\n' +
+    '        }\n' +
+    '    }\n' +
+    '    \n' +
+    '    void Hide()\n' +
+    '    {\n' +
+    '        BIOS::LCD::Bar(backRect, RGB565(404040));\n' +
+    '    }\n' +
+    '    \n' +
+    '    void Move()\n' +
+    '    {\n' +
+    '        x += vx;\n' +
+    '        y += vy;\n' +
+    '        if (x + vx + 10 >= BIOS::LCD::Width-1 || x + vx <= 10)\n' +
+    '        {\n' +
+    '            vx = -vx;\n' +
+    '            BIOS::SYS::Beep(5);\n' +
+    '        }\n' +
+    '        if (y + vy + 10 > BIOS::LCD::Height-16 || y + vy <= 10+16)\n' +
+    '        {\n' +
+    '            vy = -vy;\n' +
+    '            BIOS::SYS::Beep(5);\n' +
+    '        }\n' +
+    '    }\n' +
+    '};\n' +
+    '\n' +
+    'Ball ballsData[16];\n' +
+    'CArray<Ball> balls(ballsData, COUNT(ballsData));\n' +
+    '\n' +
+    'int main(void)\n' +
+    '{\n' +
+    '    balls.SetSize(balls.GetMaxSize());\n' +
+    '    while (!BIOS::KEY::GetKey())\n' +
+    '    {\n' +
+    '        for (int i=0; i<balls.GetSize(); i++)\n' +
+    '            balls[i].Draw();\n' +
+    '            \n' +
+    '        BIOS::SYS::DelayMs(10);\n' +
+    '        \n' +
+    '        for (int i=0; i<balls.GetSize(); i++)\n' +
+    '            balls[i].Move();\n' +
+    '            \n' +
+    '        for (int i=0; i<balls.GetSize(); i++)\n' +
+    '            balls[i].Hide();\n' +
+    '    }\n' +
+    '    return 72;\n' +
+    '}\n' +
+    '\n' +
+    'void _HandleAssertion(const char* file, int line, const char* cond)\n' +
+    '{\n' +
+    '    BIOS::DBG::Print("Assertion failed in %s [%d]: %s\\n", file, line, cond);\n' +
+    '}\n',
+  'caliperfun.cpp': '#include <library.h>\n' +
+    '\n' +
+    'using namespace BIOS;\n' +
+    'using namespace BIOS::GPIO;\n' +
+    '\n' +
+    'int ReceiveWord(uint32_t& data)\n' +
+    '{\n' +
+    '    int counter;\n' +
+    '    data = 0;\n' +
+    '    for (int i=0; i<23; i++)\n' +
+    '    {\n' +
+    '        // low: 6us\n' +
+    '        counter = 0;\n' +
+    '        while (!GPIO::DigitalRead(P2) && counter < 10)\n' +
+    '           counter ++; \n' +
+    '        if (2 > counter || counter > 5)\n' +
+    '            return i*1000 + 100 + counter;\n' +
+    '    \n' +
+    '        // high: 6us (sample in middle)\n' +
+    '        counter = 2;\n' +
+    '        GPIO::DigitalRead(P2);\n' +
+    '        GPIO::DigitalRead(P2);\n' +
+    '        \n' +
+    '        data >>= 1;\n' +
+    '        data |= GPIO::DigitalRead(P1) ? 0 : 1 << 22;\n' +
+    '    \n' +
+    '        while (GPIO::DigitalRead(P2) && counter < 10)\n' +
+    '            counter ++;\n' +
+    '        if (2 > counter || counter > 5)\n' +
+    '            return i*1000 + 500 + counter;\n' +
+    '    }\n' +
+    '    \n' +
+    '    if (data & (1<<21))\n' +
+    '        data |= ~((1<<22)-1);\n' +
+    '\n' +
+    '    counter = 0;\n' +
+    '    while (!GPIO::DigitalRead(P2) && counter < 10)\n' +
+    '       counter ++; \n' +
+    '    if (2 > counter || counter > 5)\n' +
+    '        return 40000 + counter;\n' +
+    '    \n' +
+    '    return 0;\n' +
+    '}\n' +
+    '\n' +
+    'int ReceivePacket(uint32_t& data1, uint32_t& data2)\n' +
+    '{\n' +
+    '    // 50us\n' +
+    '    int counter = 0;\n' +
+    '    while (GPIO::DigitalRead(P2) && counter < 100)\n' +
+    '       counter ++; \n' +
+    '    if (34-10 > counter || counter > 34+10)\n' +
+    '        return false;\n' +
+    '        \n' +
+    '    if (ReceiveWord(data1) != 0)\n' +
+    '        return false;\n' +
+    '        \n' +
+    '    // 100us\n' +
+    '    counter = 0;\n' +
+    '    while (GPIO::DigitalRead(P2) && counter < 600)\n' +
+    '        counter ++; \n' +
+    '    if (76-10 > counter || counter > 76+10)\n' +
+    '        return false;\n' +
+    '        \n' +
+    '    if (ReceiveWord(data2) != 0)\n' +
+    '        return false;\n' +
+    '\n' +
+    '    // 60us\n' +
+    '    counter = 0;\n' +
+    '    while (GPIO::DigitalRead(P2) && counter < 600)\n' +
+    '        counter ++; \n' +
+    '    if (41-10 > counter || counter > 41+10)\n' +
+    '        return false;\n' +
+    '\n' +
+    '    return true;\n' +
+    '}\n' +
+    '\n' +
+    'int main(void)\n' +
+    '{\n' +
+    '    BIOS::DBG::Print(R"(\n' +
+    "<div id='measurement' style='font-size:20px;'></div>\n" +
+    "<br><div id='bar' style='background:gray; width:200px; height:16px;'></div>\n" +
+    '<script>\n' +
+    'ticksGood = 0;\n' +
+    'metric = [{t:"M4",d:6.9,c:0}, {t:"M5",d:7.8,c:0}, {t:"M6",d:9.9,c:0},\n' +
+    '  {t:"M8",d:12.8,c:0}];\n' +
+    '\n' +
+    'window.onMeas = (len, beep) =>\n' +
+    '{\n' +
+    '    var mm = len/1024*2.54;\n' +
+    '    var found = metric.find(m=>(mm >= m.d-0.2 && mm <= m.d+0.2));\n' +
+    '    var table = "<table border=1 width=200>";\n' +
+    '    table += "<thead><tr><th>Size</th><th>Count</th></tr></thead>"\n' +
+    '    for (var i in metric)\n' +
+    '        table += "<tr><td>"+metric[i].t+"</td><td>"+metric[i].c+"</td></tr>";\n' +
+    '    table += "</table>";\n' +
+    '\n' +
+    `    $('#measurement').html(mm.toFixed(1) + "mm " +\n` +
+    '        (found ? found.t : "") + "<br>" +\n' +
+    '        table);\n' +
+    '    \n' +
+    "    $('#bar').width(len/100);\n" +
+    `    $('#bar').css("background", found ? "green" : "gray");\n` +
+    '    if (found)\n' +
+    '    {\n' +
+    '        if (ticksGood++ == 5)\n' +
+    '        {\n' +
+    '            BIOS.memWrite(beep, [1]);\n' +
+    '            found.c++;\n' +
+    '        }\n' +
+    '    }\n' +
+    '    else\n' +
+    '        ticksGood = 0;\n' +
+    '    \n' +
+    '}\n' +
+    '</script>)");\n' +
+    '\n' +
+    '    PinMode(EPin::P1, EMode::Input);\n' +
+    '    PinMode(EPin::P2, EMode::Input);\n' +
+    '    PinMode(EPin::P3, EMode::Output);\n' +
+    '    DigitalWrite(EPin::P3, 1);\n' +
+    '    bool beep = false;\n' +
+    '    BIOS::KEY::EKey key;\n' +
+    '    while ((key = BIOS::KEY::GetKey()) != BIOS::KEY::EKey::Escape)\n' +
+    '    {\n' +
+    '        if (beep)\n' +
+    '        {\n' +
+    '            BIOS::SYS::Beep(200);\n' +
+    '            beep = false;\n' +
+    '        }\n' +
+    '        if (GPIO::DigitalRead(P2))\n' +
+    '        {\n' +
+    '            OS::DisableInterrupts();\n' +
+    '            uint32_t data1, data2;\n' +
+    '            int valid = ReceivePacket(data1, data2);\n' +
+    '            OS::EnableInterrupts(0);\n' +
+    '            \n' +
+    '            if (valid)\n' +
+    '                BIOS::DBG::Print("<script>window.onMeas(%d, 0x%08x);</script>", data2, &beep); \n' +
+    '        }\n' +
+    '    }\n' +
+    '    return 0;\n' +
+    '}\n',
+  'calipershort.cpp': '#include <library.h>\n' +
+    '\n' +
+    'using namespace BIOS;\n' +
+    'using namespace BIOS::GPIO;\n' +
+    '\n' +
+    'void ReceiveWord(uint32_t& data)\n' +
+    '{\n' +
+    '    data = 0;\n' +
+    '    for (int i=0; i<23; i++)\n' +
+    '    {\n' +
+    '        while (!GPIO::DigitalRead(P2));\n' +
+    '        GPIO::DigitalRead(P2);\n' +
+    '        GPIO::DigitalRead(P2);\n' +
+    '        data >>= 1;\n' +
+    '        data |= GPIO::DigitalRead(P1) ? 0 : 1 << 22;\n' +
+    '        while (GPIO::DigitalRead(P2));\n' +
+    '    }\n' +
+    '    \n' +
+    '    if (data & (1<<21))\n' +
+    '        data |= ~((1<<22)-1);\n' +
+    '\n' +
+    '    while (!GPIO::DigitalRead(P2));\n' +
+    '}\n' +
+    '\n' +
+    'int ReceivePacket(uint32_t& data1, uint32_t& data2)\n' +
+    '{\n' +
+    '    int counter = 0;\n' +
+    '    while (GPIO::DigitalRead(P2) && counter < 100)\n' +
+    '       counter ++; \n' +
+    '    if (34-10 > counter || counter > 34+10)\n' +
+    '        return false;\n' +
+    '\n' +
+    '    ReceiveWord(data1);\n' +
+    '    while (GPIO::DigitalRead(P2));\n' +
+    '    ReceiveWord(data2);\n' +
+    '    while (GPIO::DigitalRead(P2));\n' +
+    '\n' +
+    '    return true;\n' +
+    '}\n' +
+    '\n' +
+    'int main(void)\n' +
+    '{\n' +
+    '    BIOS::DBG::Print(R"(\n' +
+    "<div id='measurement' style='font-size:20px;'></div>\n" +
+    "<br><div id='bar' style='background:gray; width:200px; height:16px;'></div>\n" +
+    '<script>\n' +
+    'ticksGood = 0;\n' +
+    'metric = [{t:"M4",d:6.9,c:0}, {t:"M5",d:7.8,c:0}, {t:"M6",d:9.9,c:0},\n' +
+    '  {t:"M8",d:12.8,c:0}];\n' +
+    '\n' +
+    'onMeas = (len, beep) =>\n' +
+    '{\n' +
+    '    var mm = len/1024*2.54;\n' +
+    '    var found = metric.find(m=>(mm >= m.d-0.2 && mm <= m.d+0.2));\n' +
+    '    var table = "<table border=1 width=200>";\n' +
+    '    table += "<thead><tr><th>Size</th><th>Count</th></tr></thead>"\n' +
+    '    for (var i in metric)\n' +
+    '        table += "<tr><td>"+metric[i].t+"</td><td>"+metric[i].c+"</td></tr>";\n' +
+    '    table += "</table>";\n' +
+    '\n' +
+    `    $('#measurement').html(mm.toFixed(1) + "mm " +\n` +
+    '        (found ? found.t : "") + "<br>" +\n' +
+    '        table);\n' +
+    '    \n' +
+    "    $('#bar').width(len/100);\n" +
+    `    $('#bar').css("background", found ? "green" : "gray");\n` +
+    '    if (found)\n' +
+    '    {\n' +
+    '        if (ticksGood++ == 5)\n' +
+    '        {\n' +
+    '            BIOS.memWrite(beep, [1]);\n' +
+    '            found.c++;\n' +
+    '        }\n' +
+    '    }\n' +
+    '    else\n' +
+    '        ticksGood = 0;\n' +
+    '    \n' +
+    '}\n' +
+    '</script>)");\n' +
+    '\n' +
+    '    PinMode(EPin::P1, EMode::Input);\n' +
+    '    PinMode(EPin::P2, EMode::Input);\n' +
+    '    PinMode(EPin::P3, EMode::Output);\n' +
+    '    DigitalWrite(EPin::P3, 1);\n' +
+    '    bool beep = false;\n' +
+    '    BIOS::KEY::EKey key;\n' +
+    '    while ((key = BIOS::KEY::GetKey()) != BIOS::KEY::EKey::Escape)\n' +
+    '    {\n' +
+    '        if (beep)\n' +
+    '        {\n' +
+    '            BIOS::SYS::Beep(200);\n' +
+    '            beep = false;\n' +
+    '        }\n' +
+    '        if (GPIO::DigitalRead(P2))\n' +
+    '        {\n' +
+    '            OS::DisableInterrupts();\n' +
+    '            uint32_t data1, data2;\n' +
+    '            int valid = ReceivePacket(data1, data2);\n' +
+    '            OS::EnableInterrupts(0);\n' +
+    '            \n' +
+    '            if (valid)\n' +
+    '                BIOS::DBG::Print("<script>onMeas(%d, 0x%08x);</script>", data2, &beep); \n' +
+    '        }\n' +
     '    }\n' +
     '    return 0;\n' +
     '}\n',
@@ -683,33 +1043,6 @@ examples =
     '    \n' +
     '    return 0;\n' +
     '}\n',
-  'hello.cpp': '#include <library.h>\n' +
-    '\n' +
-    'int main(void)\n' +
-    '{\n' +
-    '    BIOS::DBG::Print("Hello world!");\n' +
-    '    return 724;\n' +
-    '}\n',
-  'label.cpp': '#include <library.h>\n' +
-    '\n' +
-    'using namespace BIOS;\n' +
-    '\n' +
-    'int main(void)\n' +
-    '{\n' +
-    '    BIOS::KEY::EKey key;\n' +
-    '    while ((key = KEY::GetKey()) != BIOS::KEY::EKey::Escape)\n' +
-    '    {\n' +
-    '        int x1 = rand() % BIOS::LCD::Width;\n' +
-    '        int y1 = rand() % BIOS::LCD::Height;\n' +
-    '        int x2 = rand() % BIOS::LCD::Width;\n' +
-    '        int y2 = rand() % BIOS::LCD::Height;\n' +
-    '        int c = rand() & 0xffff;\n' +
-    '        if (x2 > x1 && y2 > y1)\n' +
-    '        BIOS::LCD::Print(x1, y1, c, RGBTRANS, "Hello!");\n' +
-    '    }\n' +
-    '    \n' +
-    '    return 0;\n' +
-    '}',
   'melody.cpp': '// plays Axel F on internal piezo speaker of LA104\n' +
     '#include <library.h>\n' +
     '#include <math.h>\n' +
@@ -807,197 +1140,5 @@ examples =
     '    Play(G, 2, Half);\n' +
     '\n' +
     '    return 0;\n' +
-    '}\n',
-  'stack.cpp': '#pragma GCC optimize ("-O0")\n' +
-    '#include <library.h>\n' +
-    '\n' +
-    'using namespace BIOS;\n' +
-    '\n' +
-    'typedef int fix16_t;\n' +
-    'void drawline_aa(fix16_t fx1, fix16_t fy1, fix16_t fx2, fix16_t fy2, int color);\n' +
-    '\n' +
-    'void main5(void)\n' +
-    '{\n' +
-    '    int x = 100, y = 100, c = 0;\n' +
-    '    KEY::EKey key;\n' +
-    '    while ((key = KEY::GetKey()) != KEY::EKey::Escape)\n' +
-    '    {\n' +
-    '        int x1 = rand() % LCD::Width;\n' +
-    '        int y1 = 16+(rand() % (LCD::Height-32));\n' +
-    '        int c = rand() & 0xffff;\n' +
-    '        drawline_aa(x*256, y*256, x1*256, y1*256, c);\n' +
-    '        x = x1;\n' +
-    '        y = y1;\n' +
-    '\n' +
-    '        if ((c++ % 1000) == 0)\n' +
-    '            DBG::Print("<b>%d</b> lines, ", c);\n' +
-    '    }\n' +
-    '}\n' +
-    '\n' +
-    'void main4(void) { main5(); }\n' +
-    'void main3(void) { main4(); }\n' +
-    'void main2(void) { main3(); }\n' +
-    'void main1(void) { main2(); }\n' +
-    '\n' +
-    'int main(void)\n' +
-    '{\n' +
-    '    main1();\n' +
-    '    return 0;\n' +
-    '}\n' +
-    '\n' +
-    '\n' +
-    '// https://github.com/PetteriAimonen/QuadPawn/blob/master/Runtime/drawing.c\n' +
-    '\n' +
-    '/* Antialiased line drawing */\n' +
-    '\n' +
-    '// Alpha-blend two colors together. Alpha is 0 to 255.\n' +
-    '// The ratios have been biased a bit to make the result look\n' +
-    '// better on a cheap TFT.\n' +
-    'int blend(int fg, int bg, int alpha)\n' +
-    '{\n' +
-    '    int fg_per_2 = (fg & 0xF7DE) >> 1;\n' +
-    '    int fg_per_4 = (fg & 0xE79C) >> 2;\n' +
-    '    int fg_per_8 = (fg & 0xC718) >> 3;\n' +
-    '    \n' +
-    '    int bg_per_2 = (bg & 0xF7DE) >> 1;\n' +
-    '    int bg_per_4 = (bg & 0xE79C) >> 2;\n' +
-    '    int bg_per_8 = (bg & 0xC718) >> 3;\n' +
-    '    \n' +
-    '    if (alpha > 224)\n' +
-    '        return fg; // 100% blend\n' +
-    '    else if (alpha > 192)\n' +
-    '        return (fg - fg_per_8 + bg_per_8); // 88% blend\n' +
-    '    else if (alpha > 128)\n' +
-    '        return (fg - fg_per_4 + bg_per_4); // 75% blend\n' +
-    '    else if (alpha > 64)\n' +
-    '        return (fg_per_2 + bg_per_2); // 50% blend\n' +
-    '    else if (alpha > 32)\n' +
-    '        return (fg_per_4 + bg - bg_per_4); // 25% blend\n' +
-    '    else\n' +
-    '        return bg; // 0% blend\n' +
-    '}\n' +
-    '\n' +
-    '\n' +
-    '// Draws antialiased lines\n' +
-    "// Xiaolin Wu's algorithm, using x/256 fixed point values\n" +
-    'void drawline_aa(fix16_t x1, fix16_t y1, fix16_t x2, fix16_t y2, int color)\n' +
-    '{\n' +
-    '    bool reverse_xy = false;\n' +
-    '    \n' +
-    '    auto swap = [](int *x, int *y) {\n' +
-    '        int temp = *x;\n' +
-    '        *x = *y;\n' +
-    '        *y = temp;\n' +
-    '    };\n' +
-    '    \n' +
-    '    // plot the pixel at (x, y) with brightness c\n' +
-    '    auto plot = [&](int x, int y, int c) {\n' +
-    '        if (reverse_xy)\n' +
-    '            swap(&x, &y);\n' +
-    '        \n' +
-    '        uint16_t oldcolor = BIOS::LCD::GetPixel(x >> 8, y >> 8);\n' +
-    '        BIOS::LCD::PutPixel(x >> 8, y >> 8, blend(color, oldcolor, c));\n' +
-    '    };\n' +
-    '    \n' +
-    '    // Integer part of x\n' +
-    '    auto ipart = [](int x) -> int {\n' +
-    '        return x & (~0xFF);\n' +
-    '    };\n' +
-    '    \n' +
-    '    auto round = [&](int x) -> int {\n' +
-    '        return ipart(x + 128);\n' +
-    '    };\n' +
-    '    \n' +
-    '    // Fractional part of x\n' +
-    '    auto fpart = [](int x) -> int {\n' +
-    '        return x & 0xFF;\n' +
-    '    };\n' +
-    '    \n' +
-    '    // Remaining fractional part of x\n' +
-    '    auto rfpart = [&](int x) -> int {\n' +
-    '        return 256 - fpart(x);\n' +
-    '    };\n' +
-    '\n' +
-    '    int dx = x2 - x1;\n' +
-    '    int dy = y2 - y1;\n' +
-    '    if (abs(dx) < abs(dy))\n' +
-    '    {\n' +
-    '        swap(&x1, &y1);\n' +
-    '        swap(&x2, &y2);\n' +
-    '        swap(&dx, &dy);\n' +
-    '        reverse_xy = true;\n' +
-    '    }\n' +
-    '    \n' +
-    '    if (x2 < x1)\n' +
-    '    {\n' +
-    '        swap(&x1, &x2);\n' +
-    '        swap(&y1, &y2);\n' +
-    '    }\n' +
-    '    \n' +
-    '    int gradient = dy * 256 / dx;\n' +
-    '    \n' +
-    '    // handle first endpoint\n' +
-    '    int xend = round(x1);\n' +
-    '    int yend = y1 + gradient * (xend - x1) / 256;\n' +
-    '    int xgap = rfpart(x1 + 128);\n' +
-    '    int xpxl1 = xend;  // this will be used in the main loop\n' +
-    '    int ypxl1 = ipart(yend);\n' +
-    '    plot(xpxl1, ypxl1, rfpart(yend) * xgap / 256);\n' +
-    '    plot(xpxl1, ypxl1 + 256, fpart(yend) * xgap / 256);\n' +
-    '    int intery = yend + gradient; // first y-intersection for the main loop\n' +
-    '    \n' +
-    '    // handle second endpoint\n' +
-    '    xend = round(x2);\n' +
-    '    yend = y2 + gradient * (xend - x2) / 256;\n' +
-    '    xgap = fpart(x2 + 128);\n' +
-    '    int xpxl2 = xend;  // this will be used in the main loop\n' +
-    '    int ypxl2 = ipart(yend);\n' +
-    '    plot(xpxl2, ypxl2, rfpart(yend) * xgap / 256);\n' +
-    '    plot(xpxl2, ypxl2 + 256, fpart(yend) * xgap / 256);\n' +
-    '    \n' +
-    '    // main loop\n' +
-    '    for (int x = xpxl1 + 1; x <= xpxl2 - 1; x += 256)\n' +
-    '    {\n' +
-    '        plot(x, ipart(intery), rfpart(intery));\n' +
-    '        plot(x, ipart(intery) + 256, fpart(intery));\n' +
-    '        intery = intery + gradient;\n' +
-    '    }\n' +
-    '}\n' +
-    '\n' +
-    '/* Non-antialiased line drawing */\n' +
-    '\n' +
-    'void drawline(int x1, int y1, int x2, int y2, int color, int dots)\n' +
-    '{\n' +
-    '    // Algorithm from here: http://en.wikipedia.org/wiki/Bresenham%27s_line_algorithm#Simplification\n' +
-    '    int dx = abs(x2 - x1);\n' +
-    '    int dy = abs(y2 - y1);\n' +
-    '    \n' +
-    '    int sx = (x1 < x2) ? 1 : -1;\n' +
-    '    int sy = (y1 < y2) ? 1 : -1;\n' +
-    '    \n' +
-    '    int err = dx - dy;\n' +
-    '    int count = 0;\n' +
-    '    for(;; count++)\n' +
-    '    {\n' +
-    '        if (!dots || (count >> (dots - 1)) & 1)\n' +
-    '        {\n' +
-    '            //__Point_SCR(x1, y1);\n' +
-    '            //__LCD_SetPixl(color);\n' +
-    '        }\n' +
-    '        \n' +
-    '        if (x1 == x2 && y1 == y2) break;\n' +
-    '        \n' +
-    '        int e2 = 2 * err;\n' +
-    '        if (e2 > -dy)\n' +
-    '        {\n' +
-    '            err -= dy;\n' +
-    '            x1 += sx;\n' +
-    '        }\n' +
-    '        else if (e2 < dx)\n' +
-    '        {\n' +
-    '            err += dx;\n' +
-    '            y1 += sy;\n' +
-    '        }\n' +
-    '    }\n' +
     '}\n'
 }

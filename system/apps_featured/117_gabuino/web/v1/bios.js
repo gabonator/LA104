@@ -77,13 +77,18 @@ var BIOS =
         // call to rpcpeek in memwrite cannot be interrupted by debug print, wtf?
 
         // skip debug prints during waiting for response
+
         if (data.byteLength < 200)
         {
-          var text = new TextDecoder().decode(data);
-          if (text.substr(0, 9) == "_DBGPRINT" || text.substr(0, 9) == "_DBGEVENT")
+          var bytes = new Uint8Array(data.buffer);
+          if (bytes[0] == "_".charCodeAt(0) && bytes[1] == "D".charCodeAt(0))
           {
-            COMM._defReceive(data);
-            return;
+            var text = new TextDecoder().decode(data);
+            if (text.substr(0, 9) == "_DBGPRINT" || text.substr(0, 9) == "_DBGEVENT")
+            {
+              COMM._defReceive(data);
+              return;
+            }
           }
         }
 
@@ -140,10 +145,10 @@ var BIOS =
     .then( json => { if (typeof(BIOS.safeeval(json).ret) == "undefined") throw "problem"; 
       return Promise.resolve(new Uint32Array(BIOS._rawData.buffer)); }),
   screenshot: () => BIOS.rpcCall('DBG::Screenshot()')
-    .then( json => { if (typeof(BIOS.safeeval(json).bulk) == "undefined") throw "problem"; COMM.debug--; return BIOS.rpcPeekRaw(); } )
+    .then( json => { if (typeof(BIOS.safeeval(json).bulk) == "undefined") throw "problem"; /*COMM.debug--;*/ return BIOS.rpcPeekRaw(); } )
     .then( rawdata => { BIOS._rawData = [rawdata]; return BIOS.rpcPeekRaw(); })
     .then( rawdata => { BIOS._rawData.push(rawdata); return BIOS.rpcPeekRaw(); })
-    .then( rawdata => { BIOS._rawData.push(rawdata); COMM.debug++; return BIOS.rpcPeek(); })
+    .then( rawdata => { BIOS._rawData.push(rawdata); return BIOS.rpcPeek(); })
     .then( json => { 
       // workaround for 64kb transfer limitation
       if (typeof(BIOS.safeeval(json).ret) == "undefined") throw "problem"; 

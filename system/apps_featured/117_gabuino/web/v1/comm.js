@@ -1,7 +1,7 @@
 _defEvalBuf = [];
 
 var COMM = {
-  debug: true, //true,
+  debug: false, //true, //true,
   _open: false,
   _send: () => 0,
   _defReceive: (data) => {
