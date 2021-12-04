@@ -187,9 +187,9 @@ class DebuggerUi
     else if (variable.len == 1)
       value = new Parser().uint8().parse(variable.buffer);
     else if (variable.len == 2)
-      value = new Parser().int16().parse(variable.buffer);
+      value = new Parser().int16le().parse(variable.buffer);
     else if (variable.len == 4)
-      value = new Parser().int32().parse(variable.buffer);
+      value = new Parser().int32le().parse(variable.buffer);
     else
       value = variable.buffer.toString(); 
 
@@ -221,7 +221,8 @@ class DebuggerUi
     var help = `Formatting help:
 Structures: buf => JSON.stringify(new Parser().uint32("x").uint32("y").parse(buf))
 Strings: buf => "\\\"" + new Parser().string(null, {zeroTerminated:true}).parse(buf) + "\\\""
-Integers: buf => "0x" + new Parser().uint32().parse(buf).toString(16)
+Integers (hex): buf => "0x" + new Parser().uint32le().parse(buf).toString(16)
+Integers: buf => new Parser().int32le().parse(buf)
 `;
     console.log(help);
     var variable = this.variables.find(v => v.addr == varptr);

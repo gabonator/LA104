@@ -74,7 +74,7 @@ examples =
     '    while (BIOS::KEY::GetKey() == BIOS::KEY::EKey::None)\n' +
     '    {\n' +
     '        BIOS::SYS::DelayMs(3000);\n' +
-    '        BIOS::DBG::Print(R"(<script>addPoint(Math.random())</script>)");\n' +
+    '        BIOS::DBG::Print(R"(<script>addPoint(%d)</script>)", rand() % 100);\n' +
     '    }\n' +
     '    return 0;\n' +
     '}\n',
