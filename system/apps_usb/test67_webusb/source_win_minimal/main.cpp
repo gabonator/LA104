@@ -16,17 +16,24 @@
  * CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include <library.h>
+
 
 extern "C" 
 {
-#include "target.h"
 #include "usb_conf.h"
 #include "webusb.h"
 #include "winusb.h"
 #include "cdc.h"
 #include <libopencm3/stm32/desig.h>
 #include "usb21_standard.h"
+}
+
+#include <library.h>
+
+
+extern void AssertionFailedHandler(char* cond, char* file, int line)
+{
+  BIOS::DBG::Print("Assertion failed in WebUSB driver\n");
 }
 
 extern "C"
@@ -56,6 +63,7 @@ int main(void)
     usb_set_serial_number(serial);
   }
   
+  bool sendMessage = false;
   static char message[65] = {0};
   cdc_set_receive_callback([](uint8_t* buf, int len)
   {
@@ -78,12 +86,15 @@ int main(void)
       memcpy(temp, message, sizeof(temp));
       message[0] = 0;
       BIOS::DBG::Print(temp);
+      sendMessage = temp[0] == '1';
     }
 
     EVERY(1000)
     {
       BIOS::DBG::Print(".");
-    }
+      if (sendMessage)
+        cdc_transmit((const uint8_t*)"Hello", 5);
+    }                    
   }
 
   BIOS::DBG::Print("USB end\n");
