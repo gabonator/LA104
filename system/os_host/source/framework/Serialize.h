@@ -73,7 +73,7 @@ public:
 		stream >> *this;
 		return *this;
 	}
-	const int& GetLength()
+	const int& GetLength() const
 	{
 		return m_nLength;
 	}
@@ -86,7 +86,7 @@ public:
 			nAux ^= (*pBuffer) << ((i&3)<<3);
 		return nAux;
 	}
-	ui8& operator[](int nIndex)
+	ui8& operator[](int nIndex) const
 	{
 		_ASSERT( nIndex >= 0 && nIndex < GetLength() );
 		return ((ui8*)m_pBuffer)[nIndex];

@@ -46,7 +46,6 @@ SECTIONS
     . = ALIGN(4);
     _etext = .;
     _sidata = _etext;
-    _addressRomEnd = .; /* WARNING: there is a ram segment behind this addr in memory snapshot processed by init code!!! */
   } >rom
 
   .  = 0x20000000;   /* From 0x20000000 */      
@@ -65,5 +64,9 @@ SECTIONS
     _ebss = .;
     _addressRamEnd = .;
   } >ram AT >rom
+ 
+  .addressRomEnd (NOLOAD) : {
+    _addressRomEnd = .;  /* Includes pre initialized ram data stored at end of rom */
+  } > rom
 }  
 /*========== end of file ==========*/

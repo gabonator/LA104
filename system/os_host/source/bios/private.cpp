@@ -10,9 +10,6 @@ extern const void* ptrFont;
 extern "C" uint32_t gKeyMask;
 extern "C" volatile char lastChar;
 
-// move build date outside ROM section, so it will not affect crc
-char buildDateTime[] = __DATE__ " " __TIME__;
-
 namespace BIOS
 {
   namespace SYS
@@ -31,8 +28,7 @@ namespace BIOS
         case EAttribute::DeviceType: return (uintptr_t)::GetAttribute((::EAttribute)attribute);
 
         case EAttribute::BuildRevision: return (uintptr_t)__GITREVISION__;
-//        case EAttribute::BuildDate: return (uintptr_t)(__DATE__ " " __TIME__); 
-        case EAttribute::BuildDate: return (uintptr_t)buildDateTime; 
+        case EAttribute::BuildDate: return (uintptr_t)(__DATE__ " " __TIME__); 
         case EAttribute::BuildUser: return (uintptr_t)__USER__;
         case EAttribute::BuildSystem: return (uintptr_t)__OSTYPE__;
 

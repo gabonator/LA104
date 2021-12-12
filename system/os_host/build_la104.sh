@@ -130,21 +130,8 @@ arm-none-eabi-gcc -mcpu=cortex-m3 -mthumb -o output_la104.elf -nostartfiles -T .
   ./dac.o \
   ./private.o 
 
-
-ROMBEGIN=`nm --print-size -gC output_la104.elf | grep "T _addressRomBegin" | head -c 8`
-ROMEND=`nm --print-size -gC output_la104.elf | grep "T _addressRomEnd" | head -c 8`
-ROMSIZE=$((0x$ROMEND-0x$ROMBEGIN))
-
-# TODO: there is extra binary blob after ROM part (data which should be loaded into RAM)
-# and this part is not included in the checksum calculation nor in the memory range statistics!
-# One must count with extra 600 bytes behind the rom range reported by this compilation script
-# Writing to these addressess by user apps will corrupt the FS!
-
 arm-none-eabi-objcopy -O binary ./output_la104.elf ./output_la104.bin
-# for now there is just a little hack to workaround it:
-dd if=output_la104.bin of=output_la104.rom bs=1 skip=0 count=$((0x$ROMEND-0x$ROMBEGIN)) 2> /dev/null
-
-node ../../../tools/crc32/force.js ./output_la104.rom ./output_la104.elf 0x6ab02021 ./hash_la104
+node ../../../tools/crc32/force.js ./output_la104.bin ./output_la104.elf 0x6ab02021 ./hash_la104
 arm-none-eabi-objcopy -O ihex ./output_la104.elf ./system_la104.hex
 
 arm-none-eabi-readelf -all output_la104.elf > output_la104.txt

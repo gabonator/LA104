@@ -31,6 +31,7 @@
   #define SERIAL_USB_INTERFACE              //  Enable only serial USB interface.  No DFU and storage.
 
 //  Index of each USB interface.  Must be consecutive and must sync with interfaces[].
+/*
 #ifdef ALL_USB_INTERFACES
 #define INTF_DFU                0
 #define INTF_MSC                1
@@ -48,6 +49,10 @@
 #define INTF_COMM               0  //  COMM must be immediately before DATA because of Associated Interface Descriptor.
 #define INTF_DATA               1
 #endif  //  SERIAL_USB_INTERFACE
+*/
+
+#define INTF_COMM               0  //  COMM must be immediately before DATA because of Associated Interface Descriptor.
+#define INTF_DATA               1
 
 //  USB Endpoints.
 #define MSC_OUT                 0x01

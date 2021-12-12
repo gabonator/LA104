@@ -170,7 +170,7 @@ bool cdc_waitSync()
   return false;
 }
 
-bool cdc_transmit(uint8_t* buffer, int len)
+bool cdc_transmit(const uint8_t* buffer, int len)
 {
   if (!cdc_waitSync())
   {

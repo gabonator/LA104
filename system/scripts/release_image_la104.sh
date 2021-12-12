@@ -416,7 +416,7 @@ cp $ICON/gabuino.bmp $TO/devel/gabuino.bmp
 cp $ICON/basic.bmp $TO/devel/basic.bmp
 cp $ICON/fpga.bmp $TO/devel/fpga.bmp
 cp $FROM/113cirpy.elf $TO/devel/cpython.elf
-cp $FROM/117rt.elf $TO/devel/gabuino.elf
+cp $FROM/117rt104.elf $TO/devel/gabuino.elf
 cp $FROM/118basic.elf $TO/devel/basic.elf
 cp $FROM/123fpga.elf $TO/devel/fpga.elf
 

@@ -252,9 +252,11 @@ class Debugger
           if (err) {
             throw "Request failed"
           } else {      
-            var jsonResponse = JSON.parse(body);
+            var jsonResponse = body ? JSON.parse(body) : null;
             if (!jsonResponse || jsonResponse.code !== 0)
             {
+              if (!jsonResponse)
+                throw "Service not running!";
               if (jsonResponse.code == -2)
                 throw "Paths not correctly set!";
               reject(jsonResponse);

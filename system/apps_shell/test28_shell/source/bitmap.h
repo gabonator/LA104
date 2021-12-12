@@ -39,16 +39,16 @@ uint_fast16_t InterpolateColor( uint_fast16_t clrA, uint_fast16_t clrB, uint_fas
 }
 
 
-void DrawImage(char* path, int bx, int by)
+bool DrawImage(char* path, int bx, int by)
 {
     CBufferedReader reader;
     if (!reader.Open(path))
-        return;
+        return false;
     
     BmpHdr header;
     reader >> CStream(&header, sizeof(header));
     if (!reader.Seek(header.dwBfOffset))
-        return;
+        return false;
     
     for (int y=0; y<(int)header.dwBiHeight; y++)
         for (int x=0; x<(int)header.dwBiWidth; x++)
@@ -67,6 +67,7 @@ void DrawImage(char* path, int bx, int by)
             int c1 = InterpolateColor(c0, c, color[3]);
             LCD::PutPixel(bx+x, by+header.dwBiHeight-1-y, c1);
         }
+    return true;
 }
 
 void SaveImage(char* path, CRect rc)

@@ -8,5 +8,5 @@ typedef void (*cdc_receive_callback)(uint8_t* buf, int len);
 
 void cdc_setup(usbd_device* usbd_dev);
 void cdc_set_receive_callback(cdc_receive_callback callback);
-bool cdc_transmit(uint8_t* buffer, int len);
+bool cdc_transmit(const uint8_t* buffer, int len);
 #endif  //  CDC_H_INCLUDED
