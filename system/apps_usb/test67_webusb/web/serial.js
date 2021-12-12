@@ -60,14 +60,18 @@ var serial = {};
         })
         .then(() => this.device_.claimInterface(this.interfaceNumber_))
         .then(() => this.device_.selectAlternateInterface(this.interfaceNumber_, 0))
+        .then(() => {
+          // Windows workaround "Uncaught (in promise) DOMException: A transfer error has occurred."
+          if (window.navigator.userAgent.indexOf("Windows") != -1)
+            return Promise.resolve();
 
-        .then(() => this.device_.controlTransferOut({
+          return this.device_.controlTransferOut({
             'requestType': 'class',
             'recipient': 'interface',
             'request': 0x22,
             'value': 0x01,
-            'index': this.interfaceNumber_}))
-
+            'index': this.interfaceNumber_})
+        })
         .then(() => {
           readLoop();
         });
