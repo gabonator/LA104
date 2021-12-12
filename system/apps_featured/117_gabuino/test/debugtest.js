@@ -1,6 +1,9 @@
 var Debugger = require("../web/v1/debugger.js");
 
+const info = {deviceType: 'ds213', osHash: 0x8be066a1, hostHash: 0xee961e64, uid: 0x791caa9b};
+
 var dbg = new Debugger();
+dbg.setDeviceInfo(info.deviceType, info.osHash, info.hostHash, info.uid);
 dbg.setCode(getCode());
 dbg.initializeDebugger()
 .then( () =>

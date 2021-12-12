@@ -1,7 +1,7 @@
 MEMORY
 {
   rom (rx)  : ORIGIN = 0x0801ed00, LENGTH = 60K
-  ram (rwx) : ORIGIN = 0x20004800, LENGTH = 16K
+  ram (rwx) : ORIGIN = 0x20005000, LENGTH = 16K
   null (rwx): ORIGIN = 0x00001000, LENGTH = 4K
 }
 
@@ -11,7 +11,8 @@ SECTIONS
   {
     .text : {
       *(.entry)
-      *(.text*)        /* Program code */
+      *(.text)
+      *(.text.*)        /* Program code */
       *(.rodata*)      /* Read only data */
     } >ram
 
@@ -31,6 +32,4 @@ SECTIONS
   .dynamic : { *(.dynstr) } > null
   .interp : { *(.dynstr) } > null
   .hash : { *(.dynstr) } > null
-
   }  
-

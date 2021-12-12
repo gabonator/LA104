@@ -35,8 +35,8 @@ SECTIONS
 
   .rel.plt : { *(.rel.plt)  } > rom
   .plt : { *(.plt) 
-      _addressRomEnd = .;
 } > rom
+
   .got : { *(.got.plt) *(.got) 
       _addressRamEnd = .;
 } > ram /* relocation fixed by memory write! */

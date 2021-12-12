@@ -28,7 +28,7 @@ int main(void)
     while (BIOS::KEY::GetKey() == BIOS::KEY::EKey::None)
     {
         BIOS::SYS::DelayMs(3000);
-        BIOS::DBG::Print(R"(<script>addPoint(Math.random())</script>)");
+        BIOS::DBG::Print(R"(<script>addPoint(%d)</script>)", rand() % 100);
     }
     return 0;
 }

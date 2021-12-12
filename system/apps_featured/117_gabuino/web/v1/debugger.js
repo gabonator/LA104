@@ -2,7 +2,9 @@ class Debugger
 {
   constructor()
   {
-    this.server = "http://localhost:8382"
+//    this.server = "http://localhost:8382"
+//    this.server = "http://cloud.valky.eu:8382"; // I do not have ssl enabled server :(
+    this.server = "https://api.valky.eu/gabuino"; // php trampoline for http cloud server
     this.symbols = {};
     this.localSymbols = false;
     this.code = null;
@@ -21,13 +23,20 @@ class Debugger
     this.deviceUid = "00000000";
   }
 
+  buildUrl(api)
+  {
+    if (this.server.indexOf("api.valky.eu") != -1)
+      return this.server + "/" + api + "_" + this.deviceType + ".php";
+    else
+      return this.server + "/" + api + "/" + this.deviceType;
+  }
+
   setDeviceInfo(deviceType, osHash, hostHash, deviceUid)
   {
     this.deviceType = deviceType.toLowerCase();
     this.osHash = ("00000000"+osHash.toString(16)).substr(-8);
     this.hostHash = ("00000000"+hostHash.toString(16)).substr(-8);
     this.deviceUid = ("00000000"+deviceUid.toString(16)).substr(-8);
-//    this.hostHash = "ddd4b9f3";
     console.log({deviceType:this.deviceType, osHash:this.osHash, hostHash:this.hostHash, uid:this.deviceUid});
   }
 
@@ -57,8 +66,10 @@ class Debugger
       promise = promise
         .then(() => this.requestLocalSymbols.bind(this)(this.deviceType+"_os_"+this.osHash) )
         .then((symbols) => this.symbols["os"] = symbols)
+        .catch(() => console.log("Unable to collect os symbols"))
         .then(() => this.requestLocalSymbols.bind(this)(this.deviceType+"_gabuino_"+this.hostHash) )
-        .then((symbols) => this.symbols["gabuino"] = symbols);
+        .then((symbols) => this.symbols["gabuino"] = symbols)
+        .catch(() => console.log("Unable to collect gabuino symbols"))
 
     // get application resources
     return promise
@@ -82,7 +93,7 @@ class Debugger
   {
     return this.symbols["app"]
       .filter(s => s.type == "data")
-      .filter(s => s.name != "_impure_ptr")
+      .filter(s => s.name != "_impure_ptr" && s.name != "impure_data")
   }
 
   // symbols
@@ -198,7 +209,11 @@ class Debugger
         xhr.send();
         xhr.onload  = function() {
           if (!xhr.responseText)
-            throw "Service failed";
+          {
+//            throw "Service failed";
+            reject();
+            return;
+          }
           resolve(xhr.responseText);
         }
       }
@@ -233,14 +248,17 @@ class Debugger
         // nodejs
         if (!this.request)
           this.request = require("request");
-
-        var req = this.request.post(this.server + "/" + api + "/" + this.deviceType, function (err, resp, body) {
+        var req = this.request.post(this.buildUrl(api), function (err, resp, body) {
           if (err) {
             throw "Request failed"
           } else {      
             var jsonResponse = JSON.parse(body);
             if (!jsonResponse || jsonResponse.code !== 0)
+            {
+              if (jsonResponse.code == -2)
+                throw "Paths not correctly set!";
               reject(jsonResponse);
+            }
             else
               resolve(jsonResponse);
           }
@@ -257,7 +275,7 @@ class Debugger
         var xhr = new XMLHttpRequest();
         var formData = new FormData();
         formData.append("file", new Blob([this.code], {type : 'text/plain'}), "app.cpp");
-        xhr.open('post', this.server + "/" + api + "/" + this.deviceType, true);
+        xhr.open('post', this.buildUrl(api), true);
         xhr.send(formData);
         xhr.onload  = function() {
           var jsonResponse = JSON.parse(xhr.responseText);

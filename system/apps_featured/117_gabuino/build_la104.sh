@@ -33,10 +33,7 @@ nm --print-size --size-sort -gC output.elf | grep " B " > symbols_ram.txt
 nm --print-size --size-sort -gC output.elf | grep " T " > symbols_rom.txt
 nm --print-size -gC output.elf > symbols_all.txt
 
-ROMBEGIN=`nm --print-size -gC output.elf | grep "T _addressRomBegin" | head -c 8`
-ROMEND=`nm --print-size -gC output.elf | grep "T _addressRomEnd" | head -c 8`
-ROMSIZE=$((0x$ROMEND-0x$ROMBEGIN))
-arm-none-eabi-objcopy -O binary ./output.elf ./output.bin
-dd if=output.bin of=output.rom bs=1 skip=0 count=$((0x$ROMEND-0x$ROMBEGIN)) 2> /dev/null
-CRC=`crc32 output.rom`
+# calculate crc from .text section raw data
+arm-none-eabi-objcopy -O binary --only-section=.text output.elf output.text
+CRC=`crc32 output.text`
 node ../service/nmparse.js symbols_all.txt la104_gabuino > ../symbols/la104_gabuino_${CRC}.js

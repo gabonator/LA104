@@ -1,4 +1,4 @@
-dsym['la104_gabuino'] = [
+dsym['ds213_gabuino'] = [
 {addr:0x20004841,len:1,type:'data',name:'GABUINO::shouldStop'},
 {addr:0x20004840,len:1,type:'data',name:'GABUINO::running'},
 {addr:0x20004842,len:1,type:'data',name:'GABUINO::trapped'},
