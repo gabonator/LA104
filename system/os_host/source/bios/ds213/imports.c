@@ -49,6 +49,8 @@ int lastBlockX1, lastBlockY1, lastBlockX2, lastBlockY2;
 void ReadStart(void)
 {
   Hw.pLCD_R_Block(lastBlockX1, lastBlockY1, lastBlockX2, lastBlockY2);
+  // workaround!
+  ReadPixel();
 }
 
 void ReadFinish(void)
