@@ -22,18 +22,18 @@ P3 <-    /CS    7  8    GDO0 -> P4
 
 LA104 cable
 
-| Color  | LA104 | CC1101   |
-|--------|-------|----------|
-| brown  | CH1   |          |
-| red    | CH2   |          |
-| orange | CH3   |          |
-| yellow | CH4   | 5 - SO   |
-| green  | GND   | 10 - GND |
-| blue   | P1    | 3 - SI   |
-| purple | P2    | 4 - SCK  |
-| gray   | P3    | 7 - /CS  |
-| white  | P4    | 8 - GDO0 |
-| black  | 3V+   | 2 - VDD  |
+| Color  | LA104 | CC1101   | E07-M1101D |
+|--------|-------|----------|------------|
+| brown  | CH1   |          |            |
+| red    | CH2   |          |            |
+| orange | CH3   |          |            |
+| yellow | CH4   | 5 - SO   | 7 - MISO   |
+| green  | GND   | 10 - GND | 1 - GND    |
+| blue   | P1    | 3 - SI   | 6 - MOSI   |
+| purple | P2    | 4 - SCK  | 5 - SCK    |
+| gray   | P3    | 7 - /CS  | 4 - CSN    |
+| white  | P4    | 8 - GDO0 | 3 - GDO0   |
+| black  | 3V+   | 2 - VDD  | 2 - VCC    |
 
 brown - CH1
 
