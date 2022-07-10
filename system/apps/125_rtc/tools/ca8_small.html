@@ -1,0 +1,142 @@
+<html>
+<head>
+<title>HTML5 Canvas - Text</title>
+</head>
+<body>
+<canvas id="DemoCanvas" width="500" height="150" style="border:1px solid #000"></canvas> 
+<script>
+var canvas = document.getElementById("DemoCanvas");
+ var ctx = canvas.getContext('2d');
+// ctx.font = 'italic 32px sans-serif';
+ ctx.font = '28px arial';
+ var str = "0123456789.:/";
+   ctx.fillStyle = "#b0b0b0";
+   ctx.fillRect(0, 0, canvas.width, canvas.height);
+  var charw = 16, charh = 22;
+  var ofsx = 1, ofsy = 5;
+
+ for (var i=0; i<str.length; i++)
+ {
+   ctx.fillStyle = "#ffffff";
+   ctx.fillRect(10+i*30-1+ofsx,50-26+ofsy, 20, 28);
+   ctx.fillStyle = "black";
+   ctx.fillText(str[i], 10+i*30, 50); 
+ }
+  var imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+//  console.log(imgData.data);
+ var code = "";
+ var total = 0;
+ for (var i=0; i<str.length; i++)
+ {
+   var bx = 10+i*30-1+ofsx;
+   var by = 50-26+ofsy;
+   var w = charw;
+   var h = charh;
+   var pix = []
+   for (var x=0; x<w; x++)
+     for (var y=0; y<h; y++)
+     {
+       pix.push(255-imgData.data[((h-1-y+by)*canvas.width+x+bx)*4]);
+     }
+   pix = pix.map(p => p*8/256|0).join("")
+//   console.log(pix);
+   var enc = encode(pix);
+//   console.log(enc);
+   var dec = decode(enc);
+   dec = dec.substr(0, pix.length);
+//   console.log(dec);
+   if (dec != pix)
+     throw "err"
+
+if (i==0)
+  console.log(dec);
+
+  var q = 0;
+  for (var x=0; x<charw; x++)
+    for (var y=0; y<charh; y++)
+    {
+      var b = dec[q++];
+      var c = b*256/8;
+      ctx.fillStyle = `rgba(${c}, ${c}, ${c}, 1)`;
+      ctx.fillRect(10+i*50 + x*2, by + 40 + 60 - y*2, 2, 2);
+    }
+  total += enc.length;
+  code += "uint8_t char_" + str[i] + "[] = {" + enc.join(", ") + "};\n"; 
+//break;
+}
+//console.log(total, 20*28*str.length);
+console.log(code);
+
+function runLengthRepeat(str)
+{
+  var i;
+  for (i=1; i<str.length; i++)
+    if (str[i] != str[0])
+      break;
+  return i;
+}
+
+function runLengthChanging(str)
+{
+  var i;
+  for (i=2; i<str.length; i++)
+    if (str[i] == str[i+1] && str[i+1] == str[i+2])
+      break;
+  return i;
+}
+
+function encode(s)
+{
+  var encoded = [];
+  var i = 0;
+  while (i<s.length)
+  {
+    var len1 = runLengthRepeat(s.substr(i));
+    var len11 = len1;
+    len1 = Math.min(31, len1);
+    encoded.push((s[i]<<5) | len1);
+//    encoded.push({replen:len1, wanted:len11, ch:s[i], data:(s[i]<<6) | len1});
+//    encoded.push({ch:s[i], l:len1});
+    i += len1;
+    if (i>=s.length) break;
+    encoded.push((s[i]<<0) | (s[i+1]<<3));
+    i += 2;
+//    var len2 = runLengthChanging(s.substr(i));
+//    encoded.push({seq:s.substr(i, len2)});
+//    i += len2;
+  }
+  return encoded;
+}
+
+function decode(d)
+{
+  var s = "";
+  for (var i=0; i<d.length;)
+  {
+//    s += JSON.stringify(d[i]);
+    var b = d[i];
+    for (var j=0; j<(b&31); j++)
+      s += b>>5;
+    i++;
+    if (i>=d.length)
+      break;
+//    s += JSON.stringify(d[i]);
+    b = d[i];
+    s += b&7;
+    b >>= 3;
+    s += b&7;
+    i++;
+  }
+  return s;
+}
+
+// repeat:   len 6 bit, value 2 bit
+// changing: 4x 2bit
+
+// prefix 51
+// changing 2-5 (1+ 2bit)
+// repeat 16
+// suffix 302
+</script>
+</body> 
+</html>
