@@ -92,6 +92,23 @@ public:
                     return "?";
             }
         }
+        void FormatSize(char* str)
+        {
+            uint64_t size = NumSectors * 512;
+            if (size >= 1000*1024*1024)
+            {
+                int sizeGib10 = size/1000/1000/100;
+                sprintf(str, "%d.%d GB", sizeGib10/10, sizeGib10%10);
+            } else if (size > 1024*1024)
+            {
+                int sizeMB10 = size*10/1024/1024;
+                sprintf(str, "%d.%d MB", sizeMB10/10, sizeMB10%10);
+            } else
+            {
+                int sizeKB10 = size/10*1024;
+                sprintf(str, "%d.%d MB", sizeKB10/10, sizeKB10%10);
+            }
+        }
     };
 
 public:
@@ -194,7 +211,11 @@ public:
         }
         bool IsFile()
         {
-            return (Name[0] != (char)0xe5) && (Attr & 0x20);
+            return (Name[0] != (char)0xe5) && (Attr & 0x20) && !IsVolumeLabel();
+        }
+        bool IsVolumeLabel()
+        {
+            return Attr == 0x28;
         }
         bool IsLfn()
         {
@@ -268,6 +289,7 @@ public:
     int mPartitionLength;
     bool mFat32;
     bpb_t mBpb;
+    int mCluster{2};
 
     CFat32(CSd& sd, uint8_t* sector) : mSd(sd), mData(sector)
     {
@@ -284,7 +306,7 @@ public:
         mSd.readSector(mData, mPartitionBegin);
         if (!mBpb.Load(mData))
             return false;
-        
+        //TODO
         uint32_t rootDirSectors = ((mBpb.RootEntCnt * 32) + (mBpb.BytesPerSector - 1)) / mBpb.BytesPerSector;
         mFat32 = mBpb.FATSz16 == 0;
         uint32_t FATSz = mFat32 ? mBpb.FATSz32 : mBpb.FATSz16;
@@ -309,10 +331,24 @@ public:
         return cluster;
     }
 
-    void ListFiles(void (*process)(direntry_t&))
+    void ChangeDir(uint32_t sector)
+    {
+////        if (sector == -1)
+////        {
+//            uint32_t rootDirSectors = ((mBpb.RootEntCnt * 32) + (mBpb.BytesPerSector - 1)) / mBpb.BytesPerSector;
+//            uint32_t FATSz = mFat32 ? mBpb.FATSz32 : mBpb.FATSz16;
+//            mFirstDataSector = mBpb.ReservedSectorCount + mBpb.NumberOfFats * FATSz + rootDirSectors;
+////        }
+//        mFirstDataSector += sector * mBpb.SectorPerCluster;
+        mCluster = sector;
+    }
+    //(1606+63)*512 = 0xd0a00
+    //0xd1600
+    void ListFiles(bool (*process)(direntry_t&))
     {
         uint32_t sector = mFirstDataSector;
-        uint32_t cluster = 2;
+        uint32_t cluster = mCluster;//???
+        sector = (cluster-2) * mBpb.SectorPerCluster + mFirstDataSector;
         while (true)
         {
             for (int j = 0; j < mBpb.SectorPerCluster; j++)
@@ -322,7 +358,8 @@ public:
                 {
                     direntry_t dirEntry;
                     dirEntry.Load(mData + i*32);
-                    process(dirEntry);
+                    if (!process(dirEntry))
+                        return;
                 }
             }
             
@@ -334,7 +371,7 @@ public:
                 Platform::log_e("Wrong cluster");
                 return;
             }
-            sector = (cluster - 2) * mBpb.SectorPerCluster + mFirstDataSector;
+            sector = (cluster-2) * mBpb.SectorPerCluster + mFirstDataSector;
         }
     }
 

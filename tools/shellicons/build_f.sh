@@ -14,3 +14,4 @@ convert basic.png -resize 64x64 -background transparent -gravity Center -extent 
 convert ps2keyb.png -resize 64x64 -background transparent -gravity Center -extent 64x64 -alpha on ps2keyb.bmp
 convert fpga.png -resize 64x64 -background transparent -gravity Center -extent 64x64 -alpha on fpga.bmp
 convert pasteur.png -resize 64x64 -background transparent -gravity Center -extent 64x64 -alpha on pasteur.bmp
+convert sdcard.png -resize 64x64 -background transparent -gravity Center -extent 64x64 -alpha on sdcard.bmp

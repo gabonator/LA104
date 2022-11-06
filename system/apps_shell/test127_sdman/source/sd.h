@@ -424,6 +424,10 @@ public:
                 return "?";
         }
     }
+    int GetSectors()
+    {
+        return mSectors;
+    }
 private:
     static uint8_t m_CRC7Table[];
     static uint16_t m_CRC16Table[256];

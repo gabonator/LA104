@@ -37,6 +37,9 @@ public:
     virtual bool HasDetails() = 0;
     virtual const CArray<CString>& GetDetails(int row) = 0;
     virtual CLayout& Enter(int row) = 0;
+    virtual CLayout& Leave(int& row) = 0;
+    virtual void DrawHeading(const CRect& rc) = 0;
+    virtual void DrawElement(const CRect& rc, int index, bool focus) = 0;
 };
 
 
@@ -65,7 +68,7 @@ struct Position
 
 class CWndManager : public CWnd
 {
-    enum { MaxLines = (BIOS::LCD::Height-16*2)/14 };
+    enum { MaxLines = (BIOS::LCD::Height-16*2)/14+1 };
     CLayout* mpLayout{nullptr};
     const CArray<CString>* mpItems{nullptr};
     Position mPositionData[8];
@@ -79,9 +82,8 @@ public:
 	virtual void OnMessage(CWnd* pSender, int code, uintptr_t data) override;
 	virtual void OnKey(int nKey) override;
 private:
-    void DrawDelimLines(int y, uint16_t clr, bool full);
     void DrawProgress();
-    void DrawLine(int i, bool bSelected);
+    void DrawLine(int i, bool bSelected, bool empty = false);
     void DrawLineShort(int i, bool bSelected);
     void DrawDetails();
     void Select(CLayout& layout);

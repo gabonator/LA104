@@ -247,7 +247,15 @@ template <> int PrintBig<2>(int x, int y, uint16_t c1, uint16_t c0, char* text)
         uint8_t* buf = nullptr;
         if (ch == ' ')
         {
+            BIOS::LCD::BufferEnd();
             x += 9*2-3;
+            continue;
+        }
+        if (ch == 'x')
+        {
+            for (int i=0; i<16*22; i++)
+              BIOS::LCD::BufferWrite(pal[0]);
+            BIOS::LCD::BufferEnd();
             continue;
         }
         if (ch >= '0' && ch <= '9')
@@ -641,13 +649,13 @@ public:
             case 0: rangeFrom = 0; rangeLen = 4; break;
             case 1: rangeFrom = 5; rangeLen = 2; break;
             case 2: rangeFrom = 8; rangeLen = 2; break;
-            case 3: rangeFrom = 12; rangeLen = 2; break;
-            case 4: rangeFrom = 15; rangeLen = 2; break;
-            case 5: rangeFrom = 18; rangeLen = 2; break;
+            case 3: rangeFrom = 12-1; rangeLen = 2; break;
+            case 4: rangeFrom = 15-1; rangeLen = 2; break;
+            case 5: rangeFrom = 18-1; rangeLen = 2; break;
             default: rangeFrom = 0; rangeLen = 0; break;
         }
 
-        sprintf(format, "%04d/%02d/%02d  %02d:%02d:%02d", year, month, day, hour, minute, second);
+        sprintf(format, "%04d/%02d/%02d %02d:%02d:%02d", year, month, day, hour, minute, second);
         SetRange(format, rangeFrom, rangeLen);
         FindDifference(format, mTopTime);
         Filter(temp, format, true);
@@ -659,13 +667,31 @@ public:
 //        sprintf(format, "(\x18 device to system)   (\x19 system to device)");
 
 // 
+     static bool wasgood = false;
      if (!RTC.begin())
      {
 //       BIOS::DBG::Print("rtc error\n");
-       sprintf(format, "..../../..  ..:..:..");
+       sprintf(format, "..../../.. ..:..:..x");
+       if (wasgood)
+         BIOS::SYS::DelayMs(500);
+       wasgood = false;
      } else {
-        sprintf(format, "%04d/%02d/%02d  %02d:%02d:%02d", 
-          RTC.getYear(), RTC.getMonth(), RTC.getDay(), RTC.getHours(), RTC.getMinutes(), RTC.getSeconds());
+        int rtcy = RTC.getYear(), rtcm = RTC.getMonth(), rtcd = RTC.getDay();
+        int rtch = RTC.getHours(), rtcmin = RTC.getMinutes(), rtcsec = RTC.getSeconds();
+//        if (rtcy >= 1000 && rtcy <= 5000 && rtcm >= 0 && rtcm <= 60 
+        if (rtcy < 1000 || rtcy > 5000 || rtcm < 0 || rtcm > 30 || rtcd < 0 || rtcd > 50 || rtcmin > 90 || rtch > 90)
+        {
+          sprintf(format, ".......... ........x");
+        } else
+        {
+          wasgood = true;
+          if (rtcsec < 100)
+            sprintf(format, "%04d/%02d/%02d %02d:%02d:%02dx", 
+              rtcy, rtcm, rtcd, rtch, rtcmin, rtcsec);
+          else
+            sprintf(format, "%04d/%02d/%02d %02d:%02d:%02d", 
+              rtcy, rtcm, rtcd, rtch, rtcmin, rtcsec);
+        }
      }
         
         switch (mPos)
@@ -673,9 +699,9 @@ public:
             case 8: rangeFrom = 0; rangeLen = 4; break;
             case 9: rangeFrom = 5; rangeLen = 2; break;
             case 10: rangeFrom = 8; rangeLen = 2; break;
-            case 11: rangeFrom = 12; rangeLen = 2; break;
-            case 12: rangeFrom = 15; rangeLen = 2; break;
-            case 13: rangeFrom = 18; rangeLen = 2; break;
+            case 11: rangeFrom = 12-1; rangeLen = 2; break;
+            case 12: rangeFrom = 15-1; rangeLen = 2; break;
+            case 13: rangeFrom = 18-1; rangeLen = 2; break;
             default: rangeFrom = 0; rangeLen = 0; break;
         }
         SetRange(format, rangeFrom, rangeLen);
@@ -703,8 +729,10 @@ public:
         RedrawTimes();
         RedrawButtons();
         
-        BIOS::LCD::Printf(8, 40, RGB565(b0b0b0), RGB565(404040), "System Date            System Time");
-        BIOS::LCD::Printf(8, 120, RGB565(b0b0b0), RGB565(404040), "Device Date            Device Time");
+        BIOS::LCD::Printf(8, 40, RGB565(b0b0b0), RGB565(404040), "System Date");
+        BIOS::LCD::Printf(8, 120, RGB565(b0b0b0), RGB565(404040), "Device Date");
+        BIOS::LCD::Printf(208-34, 40, RGB565(b0b0b0), RGB565(404040), "System Time");
+        BIOS::LCD::Printf(208-34, 120, RGB565(b0b0b0), RGB565(404040), "Device Time");
     }
     
     void RedrawButtons()

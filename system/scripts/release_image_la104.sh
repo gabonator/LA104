@@ -393,11 +393,13 @@ cp $FROM/99cube04.elf $TO/fun/cube.elf
 cp $FROM/2import.elf $TO/fun/triangle.elf
 cp $FROM/4snake.elf $TO/fun/snake.elf
 cp $FROM/39lcd.elf $TO/fun/scroll.elf
+cp $FROM/116break.elf $TO/fun/breakout.elf
 
 echo -n "{\"description\":{short:\"Cube\",long:\"Rotating cube\"},\"icon\":\"app.bmp\",\"execute\":\"cube.elf\",\"youtube\":\"8FxnDp6G_iQ?t=645\"}" > $TO/fun/cube.lnk
 echo -n "{\"description\":{short:\"Triangle\",long:\"Sierpinski triangle\"},\"icon\":\"app.bmp\",\"execute\":\"triangle.elf\"}" > $TO/fun/triangle.lnk
 echo -n "{\"description\":{short:\"Snake\",long:\"Snake game\"},\"icon\":\"app.bmp\",\"execute\":\"snake.elf\"}" > $TO/fun/snake.lnk
 echo -n "{\"description\":{short:\"Scroll\",long:\"Scroll test\"},\"icon\":\"app.bmp\",\"execute\":\"scroll.elf\"}" > $TO/fun/scroll.lnk
+echo -n "{\"description\":{short:\"Breakout\",long:\"Breakout\"},\"icon\":\"app.bmp\",\"execute\":\"breakout.elf\"}" > $TO/fun/breakout.lnk
 
 cp $ICON/games.bmp $TO/fun/app.bmp
 
