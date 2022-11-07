@@ -52,6 +52,7 @@ include_directories("../../os_host/source")
 
 file(GLOB application_src
     "source/*.cpp"
+    "source/*.c"
     "source/*.h"
 )
 

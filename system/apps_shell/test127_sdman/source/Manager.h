@@ -31,7 +31,6 @@ public:
 class CLayout
 {
 public:
-    //virtual ~CLayout() {};
     virtual const CArray<CString>& GetPath() = 0;
     virtual const CArray<CString>& GetElements() = 0;
     virtual bool HasDetails() = 0;
@@ -41,7 +40,6 @@ public:
     virtual void DrawHeading(const CRect& rc) = 0;
     virtual void DrawElement(const CRect& rc, int index, bool focus) = 0;
 };
-
 
 class CFolder 
 {                         

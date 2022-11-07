@@ -346,11 +346,10 @@ public:
     //0xd1600
     void ListFiles(bool (*process)(direntry_t&))
     {
-        uint32_t sector = mFirstDataSector;
-        uint32_t cluster = mCluster;//???
-        sector = (cluster-2) * mBpb.SectorPerCluster + mFirstDataSector;
+        uint32_t cluster = mCluster;
         while (true)
         {
+            uint32_t sector = (cluster-2) * mBpb.SectorPerCluster + mFirstDataSector;
             for (int j = 0; j < mBpb.SectorPerCluster; j++)
             {
                 mSd.readSector(mData, mPartitionBegin + sector + j);
@@ -371,9 +370,58 @@ public:
                 Platform::log_e("Wrong cluster");
                 return;
             }
-            sector = (cluster-2) * mBpb.SectorPerCluster + mFirstDataSector;
         }
     }
+    /*
+    void Read(int cluster, int offset, int size, uint8_t* buffer)
+    {
+//        if (size == 157)
+//        {
+//            int f =9;
+//        }
+        while (offset > 512 * mBpb.SectorPerCluster)
+        {
+            cluster = NextCluster(cluster);
+            offset -= 512 * mBpb.SectorPerCluster;
+        }
+        int sector = (cluster-2) * mBpb.SectorPerCluster + mFirstDataSector;
+
+        int offsetBlk = offset / 512;
+        offset &= 511;
+        while (size > 0)
+        {
+            mSd.readSector(mData, mPartitionBegin + sector + offsetBlk);
+
+            int toRead = min(511-offset, size);
+            memcpy(buffer, mData+offset, toRead);
+            offset = 0;
+            buffer += toRead;
+            size -= toRead;
+            if (++offsetBlk == mBpb.SectorPerCluster)
+            {
+                cluster = NextCluster(cluster);
+                sector = (cluster-2) * mBpb.SectorPerCluster + mFirstDataSector;
+                offsetBlk = 0;
+            }
+        }
+    }*/
+    bool ReadFile(direntry_t& entry)
+    {
+        if ((unsigned)entry.readSectors * mBpb.BytesPerSector >= entry.FileSize)
+            return false;
+        
+        if ((entry.readSectors % mBpb.SectorPerCluster) == 0)
+        {
+            if (entry.readCluster == (uint32_t)-1)
+                entry.readCluster = entry.FstClusLO | (entry.FstClusHI<<16);
+            else
+                entry.readCluster = NextCluster(entry.readCluster);
+        }
+        mSd.readSector(mData, mPartitionBegin + (entry.readCluster - 2)*mBpb.SectorPerCluster + mFirstDataSector + (entry.readSectors % mBpb.SectorPerCluster));
+        entry.readSectors++;
+        return true;
+    }
+
 
 
 };

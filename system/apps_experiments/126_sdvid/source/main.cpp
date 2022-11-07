@@ -841,30 +841,40 @@ public:
         return cluster;
     }
 
-    bool FindFile(const char* name, direntry_t& dirEntry)
+    bool FindPath(char* name, direntry_t& dirEntry)
     {
-        uint32_t sector = mFirstDataSector;
         uint32_t cluster = 2;
+        char* token = nullptr;
+        while (*name)
+        {
+            if ((token = strstr(name, "/")) != nullptr)
+            {
+                token[0] = 0;
+                if (!FindFile(cluster, name, dirEntry))
+                    return false;
+                cluster = (dirEntry.FstClusHI<<16) | dirEntry.FstClusLO;
+                name = token+1;
+            } else
+                return FindFile(cluster, name, dirEntry);
+       }
+       return false;
+    }
+
+    bool FindFile(int cluster, const char* name, direntry_t& dirEntry)
+    {
         while (true)
         {
+            uint32_t sector = (cluster-2) * mBpb.SectorPerCluster + mFirstDataSector;
             for (int j = 0; j < mBpb.SectorPerCluster; j++)
             {
                 mSd.readSector(mData, mPartitionBegin + sector + j);
                 for (int i = 0; i < 16; i++)
                 {
+                    char temp[16];
                     dirEntry.Load(mData + i*32);
-
-                    if (dirEntry.IsFile())
-                    {
-                        char fileName[16];
-                        dirEntry.GetName(fileName);
-                        if (strcmp(name, fileName) == 0)
-                        {
-                            dirEntry.readSectors = 0;
-                            dirEntry.readCluster = (uint32_t)-1;
-                            return true;
-                        }
-                    }
+                    dirEntry.GetName(temp);
+                    if (strcmp(temp, name) == 0)
+                        return true;
                 }
             }
             
@@ -876,7 +886,6 @@ public:
                 Platform::log_e("Wrong cluster");
                 return false;
             }
-            sector = (cluster - 2) * mBpb.SectorPerCluster + mFirstDataSector;
         }
         return false;
     }
@@ -931,9 +940,6 @@ public:
                     char fileName[16];
                     dirEntry.GetName(fileName);
                     
-//                    if (!strstr(fileName, ".txt"))
-//                        continue;
-                    
                     if (dirEntry.IsDirectory())
                         Platform::log_i("<%s>, %x/%x  ", fileName,
                             dirEntry.FstClusLO, dirEntry.FstClusHI);
@@ -959,7 +965,6 @@ public:
 
 uint8_t sector[512];
 uint8_t sector2[512];
-//int sectors[1024*2];
 
 __attribute__((__section__(".entry")))
 int main(void)
@@ -985,22 +990,24 @@ int main(void)
         BIOS::SYS::DelayMs(5000);
         return 1;
     }
-//    fat.dump();
-    CFat32::direntry_t entry;
-/*
-    int si = 0;
-//    if (fat.FindFile("alexan~1.mp3", entry))
-    if (fat.FindFile("texture.raw", entry))
+
+//    if (!BIOS::OS::HasArgument())
+//    {
+//       BIOS::DBG::Print("No argument specified\n");
+//       BIOS::SYS::DelayMs(1000);
+//       return 1;
+//    }
+    char* path = BIOS::OS::GetArgument();
+    if (!path || strstr(path, "SD0:/") == 0)
     {
-        int sect = 0;
-        while ((sect = fat.ReadFileSector(entry)) != -1 && si < COUNT(sectors))
-        {
-            sectors[si++] = sect;
-        }
+       BIOS::DBG::Print("Wrong argument\n");
+       BIOS::SYS::DelayMs(1000);
+       return 1;
     }
-*/
-    BIOS::SYS::DelayMs(1000);
-    if (fat.FindFile("texture.raw", entry))
+    path = strstr(path, "SD0:/")+5;
+
+    CFat32::direntry_t entry;
+    if (fat.FindPath(path, entry))
     {
         BIOS::LCD::BufferBegin(CRect(0, 16, BIOS::LCD::Width, BIOS::LCD::Height-16));
         uint32_t processed = 0;
@@ -1025,10 +1032,7 @@ int main(void)
 
               sec++;
               fsec++;
-//              fat.mSd.readSector2(sector, sec++);
-//              BIOS::LCD::BufferWrite((uint16_t*)sector, sizeof(sector)/2);
               processed += sizeof(sector);
-//              bufs++;
 
               if (++bufs==130*2)
               {
@@ -1055,54 +1059,9 @@ int main(void)
         }
         fat.mSd.readBytes2Stop();
         BIOS::LCD::BufferEnd();
-//        BIOS::DBG::Print("Done\n");
     } else
         BIOS::DBG::Print("Not found\n");
 
-/*
-    CFat32::direntry_t entry;
-    if (fat.FindFile("short.txt", entry))
-    {
-        BIOS::DBG::Print("File contents (%d bytes):\n", entry.FileSize);
-        while (fat.ReadFile(entry))
-        {
-            sector[16] = 0;
-            BIOS::DBG::Print("%s...\n", sector);
-        }
-        BIOS::DBG::Print("Done\n");
-    } else
-        BIOS::DBG::Print("Not found\n");
-
-    if (fat.FindFile("long.txt", entry))
-    {
-        BIOS::DBG::Print("File contents (%d bytes):\n", entry.FileSize);
-        while (fat.ReadFile(entry))
-        {
-            sector[16] = 0;
-            BIOS::DBG::Print("%s...\n", sector);
-        }
-        BIOS::DBG::Print("Done\n");
-    } else
-        BIOS::DBG::Print("Not found\n");
-
-    if (fat.FindFile("longer.txt", entry))
-    {
-        BIOS::DBG::Print("File contents (%d bytes):\n", entry.FileSize);
-        while (fat.ReadFile(entry))
-        {
-            sector[16] = 0;
-            BIOS::DBG::Print("%s...\n", sector);
-        }
-        BIOS::DBG::Print("Done\n");
-    } else
-        BIOS::DBG::Print("Not found\n");
-  */
-//    BIOS::KEY::EKey key = BIOS::KEY::None;
-//    while ((key = BIOS::KEY::GetKey()) != BIOS::KEY::Escape)
-//    {
-//        BIOS::LCD::BufferWrite((uint16_t*)sector, sizeof(sector)/2-3);
-//    }
     spi.end();
-
     return 0;
 }
