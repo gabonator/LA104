@@ -373,9 +373,9 @@ public:
             {
                 char strFullPath[64];
                 if (strstr(_shortName, ".jpg") != 0)
-                    strcpy(strFullPath, "sdjpg.elf ");
+                    strcpy(strFullPath, "tools/sdjpg.elf ");
                 else if (strstr(_shortName, ".vid") != 0)
-                    strcpy(strFullPath, "sdvid.elf ");
+                    strcpy(strFullPath, "tools/sdvid.elf ");
                 else
                 {
                     BIOS::DBG::Print("Unsupported file\n");
@@ -640,7 +640,7 @@ public:
     }
     virtual void DrawElement(const CRect& _rc, int index, bool focus) override
     {
-        CRect rc(_rc.left, _rc.top, _rc.left + 120, _rc.bottom);
+        CRect rc(_rc.left, _rc.top, _rc.left + 112, _rc.bottom);
         CRect rcLine(3, rc.top, 4, rc.bottom);
         rcLine.Offset(13*8+4, 0);
         if (index < 0)
@@ -823,7 +823,12 @@ void CWndManager::OnTimer()
     if (mpLayout == &mLayoutDetect)
     {
         if (mLayoutDetect.Changed())
+        {
+            mpItems = &mpLayout->GetElements();
+            mPosition.GetLast().mIndex = 0;
+            BIOS::SYS::Beep(50);
             Invalidate();
+        }
     }
 }
 void CWndManager::OnMessage(CWnd* pSender, int code, uintptr_t data)

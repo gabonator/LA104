@@ -197,6 +197,9 @@ cp $FROM/21mplayl.elf $TO/tools/midiplay.elf
 cp $FROM/105avrfl.elf $TO/tools/avrflash.elf
 cp $FROM/103servo.elf $TO/tools/servo.elf
 cp $FROM/115huntr.elf $TO/tools/hunter.elf
+cp $FROM/127_sdm.elf $TO/tools/sd.elf
+cp $FROM/126sdvid.elf $TO/tools/sdvid.elf
+cp $FROM/128sdjpg.elf $TO/tools/sdjpg.elf
 
 echo -n "{\"description\":{short:\"Character map\",long:\"Character map\"},\"icon\":\"charmap.bmp\",\"execute\":\"charmap.elf\",order:50}" > $TO/tools/charmap.lnk
 echo -n "{\"description\":{short:\"DCF77\",long:\"DCF77 decoder\"},\"icon\":\"dcf77.bmp\",\"execute\":\"dcf77.elf\",order:40}" > $TO/tools/dcf77.lnk
@@ -211,6 +214,7 @@ echo -n "{\"description\":{short:\"AvrFlash\",long:\"Atmel firmware flasher\"},\
 echo -n "{\"description\":{short:\"Servo\",long:\"Servo controller PCA9685\"},\"icon\":\"servo.bmp\",\"execute\":\"servo.elf\",order:65,youtube:\"heYFrqVF1P4\"}" > $TO/tools/servo.lnk
 echo -n "{\"description\":{short:\"Hunter\",long:\"Hunter X-core controller\"},\"icon\":\"hunter.bmp\",\"execute\":\"hunter.elf\",order:66}" > $TO/tools/hunter.lnk
 echo -n "{\"description\":{short:\"Pasteur\",long:\"Pasteurisation calculator\"},\"icon\":\"pasteur.bmp\",\"execute\":\"pasteur.elf\",order:66}" > $TO/tools/pasteur.lnk
+echo -n "{\"description\":{short:\"SD Card\",long:\"SD Card browser\"},\"icon\":\"sd.bmp\",\"execute\":\"sd.elf\",order:10}" > $TO/tools/sd.lnk
 
 cp $ICON/charmap.bmp $TO/tools/charmap.bmp
 cp $ICON/dcf77.bmp $TO/tools/dcf77.bmp
@@ -225,6 +229,7 @@ cp $ICON/arduino.bmp $TO/tools/avrflash.bmp
 cp $ICON/servo.bmp $TO/tools/servo.bmp
 cp $ICON/hunter.bmp $TO/tools/hunter.bmp
 cp $ICON/pasteur.bmp $TO/tools/pasteur.bmp
+cp $ICON/sdcard.bmp $TO/tools/sd.bmp
 
 cp ../apps_featured/test21_midiplay/midi/laisla.mid $TO/tools/laisla.mid
 cp ../apps/105_avrprogrammer/arduino/blink.hex $TO/tools/blink.hex

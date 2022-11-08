@@ -25,7 +25,8 @@ public:
         Fat12 = 0x01,
         Fat16 = 0x06,  // fat16 b
         Fat32 = 0x0b,  // fat32 chs
-        Fat32Lba = 0x0c
+        Fat32Lba = 0x0c,
+        Linux = 0x83
     };
     
     struct mbr_t
@@ -88,6 +89,10 @@ public:
                     return "fat16";
                 case PartitionType::Fat32:
                     return "fat32";
+                case PartitionType::Fat32Lba:
+                    return "fat32";
+                case PartitionType::Linux:
+                    return "linux";
                 default:
                     return "?";
             }

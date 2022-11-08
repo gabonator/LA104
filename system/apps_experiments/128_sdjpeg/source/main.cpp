@@ -1,4 +1,6 @@
 #include <library.h>
+#include "../../os_host/source/framework/Console.h"
+#include "../../os_host/source/framework/SimpleApp.h"
 #include "sd.h"
 #include "tjpgd.h"
 
@@ -10,7 +12,7 @@ uint8_t tjpg_work[TJPGD_WORKSPACE_SIZE];
 CFat32::direntry_t tjpg_direntry;
 int tjpg_offset = 0;
 int tjpg_x = 0;
-int tjpg_y = 0;
+int tjpg_y = 14;
 int tjpg_scale = 0;
 bool tjpg_exit = false;
 
@@ -66,7 +68,7 @@ int tjpgd_data_writer(JDEC* decoder, void* bitmap, JRECT* rectangle)
     CRect rc(rectangle->left, rectangle->top, rectangle->right+1, rectangle->bottom+1);
     rc.Offset(tjpg_x, tjpg_y);
     CRect rcScreen(0, 0, BIOS::LCD::Width, BIOS::LCD::Height);
-    if (rc.top >= rcScreen.bottom)
+    if (rc.top >= rcScreen.bottom-14)
         return 0;
     if (rc.right > rcScreen.right || rc.bottom > rcScreen.bottom)
         return 1;
@@ -114,16 +116,26 @@ void RenderJpeg(const CFat32::direntry_t& direntry)
 
         JRESULT result;
         result = jd_prepare(&decoder, tjpgd_data_reader, tjpg_work, sizeof(tjpg_work), 0);
+
+        if (tjpg_x==0 && decoder.width < 320)
+          tjpg_x = (320-decoder.width)/2;
+
         if (tjpg_x + (decoder.width<<tjpg_scale) < BIOS::LCD::Width)
-            BIOS::LCD::Bar(tjpg_x + decoder.width, 0, BIOS::LCD::Width, BIOS::LCD::Height, 0);
+            BIOS::LCD::Bar(tjpg_x + decoder.width, 14, BIOS::LCD::Width, BIOS::LCD::Height, 0);
         if (tjpg_y + (decoder.height<<tjpg_scale) < BIOS::LCD::Height)
-            BIOS::LCD::Bar(0, tjpg_y + decoder.height, BIOS::LCD::Width, BIOS::LCD::Height, 0);
+            BIOS::LCD::Bar(0, tjpg_y + decoder.height, BIOS::LCD::Width, BIOS::LCD::Height-14, 0);
         if (tjpg_x > 0)
-            BIOS::LCD::Bar(0, 0, tjpg_x, BIOS::LCD::Height, 0);
-        if (tjpg_y > 0)
-            BIOS::LCD::Bar(0, 0, BIOS::LCD::Width, tjpg_y, 0);
+            BIOS::LCD::Bar(0, 14, tjpg_x, BIOS::LCD::Height-14, 0);
+        if (tjpg_y > 14)
+            BIOS::LCD::Bar(0, 14, BIOS::LCD::Width, tjpg_y, 0);
+
+        char status[64];
+        sprintf(status, "jpeg %dx%d %d%%   ", decoder.width, decoder.height, 100>>tjpg_scale);
+        APP::Status(status);
+
         _ASSERT (result == JDR_OK);
         result = jd_decomp(&decoder, tjpgd_data_writer, tjpg_scale);
+        APP::Status(status);
 //        _ASSERT (result == JDR_OK);
     }
 };
@@ -131,25 +143,41 @@ void RenderJpeg(const CFat32::direntry_t& direntry)
 __attribute__((__section__(".entry")))
 int main(void)
 {
+    CONSOLE::colorBack = RGB565(000000);
+    APP::Init("SD View");
+    char* path = BIOS::OS::GetArgument();
+    if (path)
+      path = strstr(path, "SD0:/");
+
+    char shortPath[40];
+    if (strlen(path) <= 30)
+      strcpy(shortPath, path);
+    else
+    {
+      strcpy(shortPath, "...");
+      strcat(shortPath, path+strlen(path)-(30-3));
+    }
+
+    BIOS::LCD::Print(BIOS::LCD::Width-4-strlen(shortPath)*8, 0, RGB565(b0b0b0), RGBTRANS, shortPath);
+
     bool initStatus = sd.init();
     if (!initStatus || sd.mType != 2 || sd.mSectors == 0)
     {
-        BIOS::DBG::Print("Exiting\n");
+        CONSOLE::Print("SD init failed\n");
         BIOS::SYS::DelayMs(5000);
         return 1;
     }
 
     if (!fat.init())
     {
-        BIOS::DBG::Print("Exiting\n");
+        CONSOLE::Print("No fat\n");
         BIOS::SYS::DelayMs(5000);
         return 1;
     }
 
-    char* path = BIOS::OS::GetArgument();
     if (!path || strstr(path, "SD0:/") == 0)
     {
-       BIOS::DBG::Print("Wrong argument\n");
+       CONSOLE::Print("Wrong argument\n");
        BIOS::SYS::DelayMs(1000);
        return 1;
     }
@@ -160,7 +188,7 @@ int main(void)
     {
         RenderJpeg(entry);
     } else
-        BIOS::DBG::Print("Not found\n");
+        CONSOLE::Print("Not found\n");
 
     spi.end();
     return 0;
