@@ -175,7 +175,13 @@ public:
 		_ASSERT( m_nCount > 0 );
 		return m_arrElements[m_nCount-1];
 	}
-    
+
+    const TYPE &GetLast() const
+    {
+        _ASSERT( m_nCount > 0 );
+        return m_arrElements[m_nCount-1];
+    }
+
 	// returns pointer to existing element
 	TYPE& RemoveLast()
 	{

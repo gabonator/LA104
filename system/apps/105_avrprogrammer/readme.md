@@ -34,9 +34,9 @@ ICSP:
   ADC: PB3, PB4
   PWM: PB0, PB1
  
- RST  1   8  VCC
-      2   7  CLK
-      3   6  MISO
- GND  4   5  MOSI
+P1 RST  1   8  VCC   +
+        2   7  CLK   P4
+        3   6  MISO  P3
+-  GND  4   5  MOSI  P2
 
 ```

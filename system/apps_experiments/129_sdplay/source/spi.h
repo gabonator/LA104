@@ -300,122 +300,31 @@ RCC->APB2ENR |= RCC_APB2Periph_GPIOB;
                 *bufRead++ = rcv;
         }
     }
-/*
-    void transferBytes3(uint8_t* bufRead, int len) const
-    {
-      uint16_t tmp;
-      len >>= 3;
-      SPI2->CR1 |= 0x800;
-      
-        while (len--)
-        {
-	    SPI2->DR = 0xffff;
-	    while (!(SPI2->SR & SPI_I2S_FLAG_RXNE));
-	    tmp = SPI2->DR;
 
-	    SPI2->DR = 0xffff;
-	    *bufRead++ = tmp >> 8;
-	    *bufRead++ = tmp;
-	    while (!(SPI2->SR & SPI_I2S_FLAG_RXNE));
-	    tmp = SPI2->DR;
+#define LCD_DAT_W(Data) { GPIOE->ODR = Data; \
+                          GPIOD->BRR = GPIO_Pin_9; \
+                          GPIOD->BSRR = GPIO_Pin_9; }
 
-	    SPI2->DR = 0xffff;
-	    *bufRead++ = tmp >> 8;
-	    *bufRead++ = tmp;
-	    while (!(SPI2->SR & SPI_I2S_FLAG_RXNE));
-	    tmp = SPI2->DR;
-
-	    SPI2->DR = 0xffff;
-	    *bufRead++ = tmp >> 8;
-	    *bufRead++ = tmp;
-	    while (!(SPI2->SR & SPI_I2S_FLAG_RXNE));
-	    tmp = SPI2->DR;
-	    *bufRead++ = tmp >> 8;
-	    *bufRead++ = tmp;
-	}
-      SPI2->CR1 &= ~0x800;
-
-    }
-*/
     void transferBytes2(uint8_t* bufWrite, uint8_t* bufRead, int len) const
     {
-      uint16_t tmp1 = 0;
-      SPI2->CR1 |= 0x800;
-      len >>= 4;
+      len >>= 1;
+      uint16_t tmp;
       while (len--)
       {
-          SPI2->DR = 0xffff;
-
+//          while (!(SPI2->SR & SPI_I2S_FLAG_TXE));
+          SPI2->DR = 0xff;
           while (!(SPI2->SR & SPI_I2S_FLAG_RXNE));
-          tmp1 = SPI2->DR;
+          tmp = SPI2->DR;
 
-          SPI2->DR = 0xffff;
-          GPIOE->ODR = tmp1;
+  //        while (!(SPI2->SR & SPI_I2S_FLAG_TXE));
+          SPI2->DR = 0xff;
+          while (!(SPI2->SR & SPI_I2S_FLAG_RXNE));
+          tmp |= SPI2->DR << 8;
+
+          GPIOE->ODR = tmp;
           GPIOD->BRR = GPIO_Pin_9;
           GPIOD->BSRR = GPIO_Pin_9;
-
-          while (!(SPI2->SR & SPI_I2S_FLAG_RXNE));
-          tmp1 = SPI2->DR;
-
-          SPI2->DR = 0xffff;
-          GPIOE->ODR = tmp1;
-          GPIOD->BRR = GPIO_Pin_9;
-          GPIOD->BSRR = GPIO_Pin_9;
-
-          while (!(SPI2->SR & SPI_I2S_FLAG_RXNE));
-          tmp1 = SPI2->DR;
-
-          SPI2->DR = 0xffff;
-          GPIOE->ODR = tmp1;
-          GPIOD->BRR = GPIO_Pin_9;
-          GPIOD->BSRR = GPIO_Pin_9;
-
-          while (!(SPI2->SR & SPI_I2S_FLAG_RXNE));
-          tmp1 = SPI2->DR;
-
-          SPI2->DR = 0xffff;
-          GPIOE->ODR = tmp1;
-          GPIOD->BRR = GPIO_Pin_9;
-          GPIOD->BSRR = GPIO_Pin_9;
-
-          while (!(SPI2->SR & SPI_I2S_FLAG_RXNE));
-          tmp1 = SPI2->DR;
-
-          SPI2->DR = 0xffff;
-          GPIOE->ODR = tmp1;
-          GPIOD->BRR = GPIO_Pin_9;
-          GPIOD->BSRR = GPIO_Pin_9;
-
-          while (!(SPI2->SR & SPI_I2S_FLAG_RXNE));
-          tmp1 = SPI2->DR;
-
-          SPI2->DR = 0xffff;
-          GPIOE->ODR = tmp1;
-          GPIOD->BRR = GPIO_Pin_9;
-          GPIOD->BSRR = GPIO_Pin_9;
-
-          while (!(SPI2->SR & SPI_I2S_FLAG_RXNE));
-          tmp1 = SPI2->DR;
-
-          SPI2->DR = 0xffff;
-          GPIOE->ODR = tmp1;
-          GPIOD->BRR = GPIO_Pin_9;
-          GPIOD->BSRR = GPIO_Pin_9;
-
-          while (!(SPI2->SR & SPI_I2S_FLAG_RXNE));
-          tmp1 = SPI2->DR;
-
-          GPIOE->ODR = tmp1;
-          GPIOD->BRR = GPIO_Pin_9;
-          GPIOD->BSRR = GPIO_Pin_9;
-
       }
-
-      SPI2->DR = 0xffff;
-      while (!(SPI2->SR & SPI_I2S_FLAG_RXNE));
-      tmp1 = SPI2->DR;
-
-      SPI2->CR1 &= ~0x800;
     }
 
     void select() const

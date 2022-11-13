@@ -99,8 +99,9 @@ bool DoFlashing(char* name)
     uint8_t params84[20] = {0x14, 0x00, 0x00, 0x01, 0x01, 0x01, 0x01, 0x03, 0xff, 0xff, 0xff, 0xff, 0x00, 0x40, 0x02, 0x00, 0x00, 0x00, 0x20, 0x00};
     // only device code, page size, eeprom size
     memcpy(buffer, params84, sizeof(params84));
-    constexpr uint8_t signature84[] = {0x1e, 0x93, 0x0c};
-    constexpr uint8_t signature45[] = {0x1e, 0x92, 0x06};
+    constexpr uint8_t signature84[] =   {0x1e, 0x93, 0x0c};
+    constexpr uint8_t signature45[] =   {0x1e, 0x92, 0x06};
+    constexpr uint8_t signature328p[] = {0x1e, 0x95, 0x0f};
     set_parameters();
 
     start_pmode();
@@ -118,6 +119,10 @@ bool DoFlashing(char* name)
     if (signature[0] == signature45[0] && signature[1] == signature45[1] && signature[2] == signature45[2])
     {    
         CONSOLE::Print("ATTiny45\n"); 
+    } else
+    if (signature[0] == signature328p[0] && signature[1] == signature328p[1] && signature[2] == signature328p[2])
+    {    
+        CONSOLE::Print("ATMega328p\n"); 
     } else
     {
         CONSOLE::Color(RGB565(ff0000));

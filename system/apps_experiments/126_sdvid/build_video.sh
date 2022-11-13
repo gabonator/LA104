@@ -1,3 +1,2 @@
-youtube-dl -f 22 9myCC7e3gjo
-ffmpeg -i "Big Buck Bunny (Gran Conejo Buck) CORTOMETRAJE COMPLETO FullHD 1080p Dibujos Animados para Niños-9myCC7e3gjo.mkv" \
-  -vf "transpose=dir=1" -s 208x320 -r 2 -vcodec rawvideo -f rawvideo -pix_fmt rgb565 "big buck bunny.vid"
+youtube-dl 9myCC7e3gjo -o bigbuckbunny.mp4
+ffmpeg -i bigbuckbunny.mp4 -vf "scale=w=320:h=208:force_original_aspect_ratio=increase,crop=320:208,transpose=dir=1" -r 7 -vcodec rawvideo -f rawvideo -pix_fmt rgb565be "Big buck bunny.vid"

@@ -1,9 +1,39 @@
 #include "Manager.h"
 #include "platform.h"
 
+#ifndef __APPLE__
+//__attribute__((__section__(".persistent")))
+#endif
+//char mPersistentConfig[256];
+char* mPersistentConfig = (char*)0x20007f00;
+
+void SetCookie(char* cookie)
+{
+    strcpy(mPersistentConfig, "GABs"); 
+    if (cookie)
+      strcpy(mPersistentConfig+4, cookie); 
+    else
+      strcpy(mPersistentConfig+4, ""); 
+}
+
+char* GetCookie()
+{
+#ifdef __APPLE__
+    return (char*) "";
+#endif
+    if (mPersistentConfig[0] != 'G' || mPersistentConfig[1] != 'A' || mPersistentConfig[2] != 'B' || mPersistentConfig[3] != 's')
+        return nullptr;
+    return mPersistentConfig+4;
+}
+
+
 int _min(int a, int b)
 {
     return a<b?a:b;
+}
+int _max(int a, int b)
+{
+    return a>b?a:b;
 }
 
 #ifndef __APPLE__
@@ -50,94 +80,6 @@ CSd mSd(mSpi);
 CFat mFat(mSd, mSharedSector);
 CFat32 mFat32(mSd, mSharedSector);
 
-/*
-JDEC decoder;
-uint8_t tjpg_work[3500];
-int tjpg_offset = 0;
-//int tjpg_basesector = 0;
-direntry_t tjpg_direntry;
-int tjpg_x = 0;
-int tjpg_y = 0;
-static size_t tjpgd_data_reader(JDEC *decoder, uint8_t *buffer, size_t size)
-{
-    if (tjpg_direntry.readCluster == (uint32_t)-1)
-        mFat32.ReadFile(tjpg_direntry);
-
-    int rsize = size;
-    int baseCurrent = (tjpg_direntry.readSectors-1) * mFat32.mBpb.BytesPerSector;
-    int baseRequest = tjpg_offset & ~511;
-    _ASSERT(baseCurrent == baseRequest);
-    while (size > 0)
-    {
-        int ofsRequest = tjpg_offset & 511;
-        int toRead = _min(512-ofsRequest, size);
-        if (buffer)
-            memcpy(buffer, mSharedSector+ofsRequest, toRead);
-        
-        size -= toRead;
-        buffer += toRead;
-        tjpg_offset += toRead;
-        if ((tjpg_offset & 511) == 0)
-        {
-            mFat32.ReadFile(tjpg_direntry);
-            baseCurrent += 512;
-        }
-    }
-    return rsize;
-}
-static int tjpgd_data_writer(JDEC* decoder, void* bitmap, JRECT* rectangle)
-{
-    CRect rc(rectangle->left, rectangle->top, rectangle->right+1, rectangle->bottom+1);
-    rc.Offset(tjpg_x, tjpg_y);
-    CRect rcScreen(0, 0, BIOS::LCD::Width, BIOS::LCD::Height);
-    if (rc.right > rcScreen.right || rc.bottom > rcScreen.bottom)
-        return 1;
-    if (rc.left < 0 || rc.top < 0)
-        return 1;
-
-    BIOS::LCD::BufferBegin(rc);
-    BIOS::LCD::BufferWrite((uint16_t*)bitmap, rc.Width()*rc.Height());
-    BIOS::LCD::BufferEnd();
-    return 1;
-}
-void RenderJpeg(int sector)
-{
-    BIOS::KEY::EKey key;
-    while ((key = BIOS::KEY::GetKey()) != BIOS::KEY::Escape)
-    {
-        tjpg_direntry.FstClusHI = sector >> 16;
-        tjpg_direntry.FstClusLO = sector & 0xffff;
-        tjpg_direntry.FileSize = 200000;
-        tjpg_direntry.readSectors = 0;
-        tjpg_direntry.readCluster = -1;
-        decoder.swap = true;
-        tjpg_offset = 0;
-     
-        switch (key)
-        {
-            case BIOS::KEY::Up: tjpg_y -= 16; break;
-            case BIOS::KEY::Down: tjpg_y += 16; break;
-            case BIOS::KEY::Left: tjpg_x -= 16; break;
-            case BIOS::KEY::Right: tjpg_x += 16; break;
-            default:
-                continue;
-        }
-        JRESULT result;
-        result = jd_prepare(&decoder, tjpgd_data_reader, tjpg_work, 3500, 0);
-        if (tjpg_x + decoder.width < BIOS::LCD::Width)
-            BIOS::LCD::Bar(tjpg_x + decoder.width, 0, BIOS::LCD::Width, BIOS::LCD::Height, 0);
-        if (tjpg_y + decoder.height < BIOS::LCD::Height)
-            BIOS::LCD::Bar(0, tjpg_y + decoder.height, BIOS::LCD::Width, BIOS::LCD::Height, 0);
-        if (tjpg_x > 0)
-            BIOS::LCD::Bar(0, 0, tjpg_x, BIOS::LCD::Height, 0);
-        if (tjpg_y > 0)
-            BIOS::LCD::Bar(0, 0, BIOS::LCD::Width, tjpg_y, 0);
-        _ASSERT (result == JDR_OK);
-        result = jd_decomp(&decoder, tjpgd_data_writer, 0);
-        _ASSERT (result == JDR_OK);
-    }
-};
-*/
 class CLayoutTerminate : public CLayout
 {
 public:
@@ -149,12 +91,14 @@ public:
     [[noreturn]] virtual CLayout& Leave(int& row) override { while (1); }
     [[noreturn]] virtual void DrawHeading(const CRect& rc) override { while (1); }
     [[noreturn]] virtual void DrawElement(const CRect& rc, int index, bool focus) override { while (1); }
+    [[noreturn]] virtual int Hint(const char*) override { while (1); }
 };
 
 CLayoutTerminate mLayoutTerminate;
 
 class CLayoutFat32 : public CLayout
 {
+public:
     CArray<CString> m_arrPath;
     CArray<CString> m_arrItems;
 
@@ -344,11 +288,13 @@ public:
         static const char* _element;
         _element = m_arrItems[row];
         static int _target;
+//        static uint32_t _size;
         static char shortName[16];
         static char* _shortName = shortName;
         static bool _isFile;
         _isFile = false;
         _target = -1;
+//        _size = 0;
         ForEachFile([](direntry_t& entry, char* name)
         {
             if (entry.IsFile() && strcmp(name, _element) == 0)
@@ -356,6 +302,7 @@ public:
                 _target = (entry.FstClusHI<<16)|entry.FstClusLO;
                 entry.GetName(_shortName);
                 _isFile = true;
+//                _size = entry.FileSize;
                 return false;
             }
             if (entry.IsDirectory() && strcmp(name, _element) == 0)
@@ -376,6 +323,10 @@ public:
                     strcpy(strFullPath, "tools/sdjpg.elf ");
                 else if (strstr(_shortName, ".vid") != 0)
                     strcpy(strFullPath, "tools/sdvid.elf ");
+                else if (strstr(_shortName, ".pcm") != 0)
+                    strcpy(strFullPath, "tools/sdpcm.elf ");
+                else if (strstr(_shortName, ".mp3") != 0)
+                    strcpy(strFullPath, "tools/sdpcm.elf ");
                 else
                 {
                     BIOS::DBG::Print("Unsupported file\n");
@@ -388,6 +339,9 @@ public:
                     strcat(strFullPath, "/");
                 }
                 strcat(strFullPath, _shortName);
+
+                SetCookie(strstr(strFullPath, "SD0:"));
+
                 BIOS::OS::SetArgument(strFullPath);
                 return mLayoutTerminate;
             } else {
@@ -445,6 +399,50 @@ public:
         rcLine.Offset(-8*9, 0);
         BIOS::LCD::Bar(rcLine, clrLine);
     }
+    
+    virtual int Hint(const char* hint) override
+    {
+        static const char* _find;
+        char find2[42] = {0};
+        static char* _find2;
+        _find = hint;
+        _find2 = find2;
+        
+        m_arrItems.RemoveAll();
+        static CArray<CString>* _m_arrItems;
+        _m_arrItems = &m_arrItems;
+
+        ForEachFile([](direntry_t& entry, char* name)
+        {
+            if (_m_arrItems->GetSize() >= _m_arrItems->GetMaxSize()-1)
+                return false;
+            _m_arrItems->Add(name);
+            char temp[16];
+            entry.GetName(temp);
+            if (strcmp(temp, _find) == 0)
+                strcpy(_find2, name); // TODO: pointer should be enough
+                
+            return true;
+        });
+        if (!_find2 || !_find2[0])
+            return -1;
+        m_arrItems.Sort([](CString& a, CString& b)
+        {
+            bool folderA = a[32] == 'F';
+            bool folderB = b[32] == 'F';
+            if (folderA != folderB)
+                return folderA - folderB;
+            return strcmp(b, a);
+            
+        });
+        for (int i=0; i<m_arrItems.GetSize(); i++)
+        {
+            if (strcmp(m_arrItems[i], _find2) == 0)
+                return i;
+        }
+        return -1;
+    }
+
 };
 
 CLayoutFat32 mLayoutFat32;
@@ -674,6 +672,10 @@ public:
         Platform::redirect = nullptr;
         return nowGood != mGood;
     }
+    virtual int Hint(const char* hint) override
+    {
+        return -1;
+    }
 };
 
 CLayoutDetect mLayoutDetect;
@@ -719,7 +721,54 @@ void CWndManager::Create(CWnd *pParent, ui16 dwFlags)
     SetTimer(250);
     mPosition.Init(mPositionData, COUNT(mPositionData));
     mPosition.Add(Position{0, 0});
-    Select(mLayoutDetect);
+
+    char* path = GetCookie();
+//    char ppath[64] = {0};
+//    char* path = ppath;
+//    strcpy(ppath, "SD0:/jpegs/panda.jpg");
+    if (path && path[0] && strstr(path, "SD0:/"))
+    {
+        path += 5;
+        mLayoutDetect.GetElements();
+        mLayoutDetect.GetDetails(0);
+        mLayoutDetect.GetDetails(1);
+        mLayoutDetect.Enter(1);
+        mLayoutFat32.UpdateDir();
+        mLayoutFat32.GetElements();
+        while (path && path[0])
+        {
+          if (strstr(path, "/"))
+          {
+            char* next= strstr(path, "/");
+            next[0] = 0;
+              int index = mLayoutFat32.Hint(path);
+              _ASSERT(index != -1);
+              mLayoutFat32.Enter(index);
+              mLayoutFat32.GetElements();
+            path = next+1;
+          } else
+          {
+            Position& cur = mPosition.GetLast();
+            mLayoutFat32.UpdateDir();
+            Select(mLayoutFat32);
+            int row = mpLayout->Hint(path);
+            if (row < 0)
+              row = 0;
+            cur.mIndex = row;
+            if (cur.mIndex > MaxLines)
+            {
+                  cur.mOffset = cur.mIndex - (MaxLines-1);
+                  cur.mIndex = MaxLines-1;
+            }
+            break;
+          }
+        }
+    } else {
+//BIOS::DBG::Print("no cookie :( %02x %02x %02x %02x, %08x", mPersistentConfig[0],
+// mPersistentConfig[1], mPersistentConfig[2], mPersistentConfig[3], mPersistentConfig);
+//BIOS::SYS::DelayMs(3000);
+        Select(mLayoutDetect);
+}
 }
 
 void CWndManager::Select(CLayout& layout)
@@ -888,8 +937,16 @@ void CWndManager::OnKey(int nKey)
     }
     if ( nKey == BIOS::KEY::Escape )
     {
+        char temp[16] = {0};
+        if (mpLayout->GetPath().GetSize() > 0)
+          strcpy(temp, mpLayout->GetPath().GetLast());
         int row = 0;
-        Select(mpLayout->Leave(row));
+        CLayout& pLayout = mpLayout->Leave(row);
+        row = mpLayout->Hint(temp);
+
+        Select(pLayout);
+        if (row < 0)
+            row = 0;
         cur.mIndex = row;
         if (cur.mIndex > MaxLines)
         {

@@ -39,6 +39,7 @@ public:
     virtual CLayout& Leave(int& row) = 0;
     virtual void DrawHeading(const CRect& rc) = 0;
     virtual void DrawElement(const CRect& rc, int index, bool focus) = 0;
+    virtual int Hint(const char* hint) = 0;
 };
 
 class CFolder 
