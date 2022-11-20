@@ -11,17 +11,21 @@ arm-none-eabi-g++ -Wall -Os -Werror -fno-common -mcpu=cortex-m3 -mthumb -msoft-f
   -I ../../../os_host/source/ \
   -D USE_STDPERIPH_DRIVER \
   -D STM32F10X_HD \
-  ../source/main.cpp \
+  ../playback_dma/main.cpp \
+  ../../../os_host/source/framework/Serialize.cpp \
   ../../../os_host/library/STM32F10x_StdPeriph_Driver/src/stm32f10x_spi.c \
   ../../../os_host/library/STM32F10x_StdPeriph_Driver/src/stm32f10x_rcc.c \
+  ../../../os_host/library/STM32F10x_StdPeriph_Driver/src/stm32f10x_dma.c \
   -I../../../os_library/include/
 
-arm-none-eabi-gcc -fPIC -mcpu=cortex-m3 -mthumb -o output.elf -nostartfiles -T ../source/app.lds \
-  ./main.o ./stm32f10x_spi.o ./stm32f10x_rcc.o -lbios_la104 -lm -L../../../os_library/build
+arm-none-eabi-gcc -fPIC -mcpu=cortex-m3 -mthumb -o output.elf -nostartfiles -T ../playback_dma/app.lds \
+  ./main.o ./stm32f10x_spi.o ./stm32f10x_rcc.o ./stm32f10x_dma.o ./Serialize.o \
+  -lbios_la104 -lm -L../../../os_library/build
 
 arm-none-eabi-objdump -d -S output.elf > output.asm
+arm-none-eabi-nm --print-size --size-sort -gC output.elf > symbols_all.txt
 
 find . -type f -name '*.o' -delete
 find . -type f -name '*.d' -delete
 
-../../../../tools/elfstrip/elfstrip output.elf 130mic.elf
+../../../../tools/elfstrip/elfstrip output.elf 132wav.elf
