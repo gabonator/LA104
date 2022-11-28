@@ -17,6 +17,7 @@ class CApplication : public CApplicationData, public CWnd
     friend class CPagePort;
     friend class CPageLog;
     friend class CPageSend;
+    friend class CPageGpio;
     
     uint32_t* mGpioStatus{nullptr};
     int mRxBytes{0};
@@ -219,6 +220,8 @@ public:
     {
         GPIO::PinMode(GPIO::P1, GPIO::Input);
         GPIO::PinMode(GPIO::P2, GPIO::Input);
+        GPIO::PinMode(GPIO::P3, GPIO::Input);
+        GPIO::PinMode(GPIO::P4, GPIO::Input);
     }
     
     virtual void ConfigureUart() override
@@ -250,6 +253,8 @@ public:
 #include "pageview.h"
 #include "pagesend.h"
 #include "pagelog.h"
+#include "gpio.h"
+#include "pagegpio.h"
 #include "logger.h"
 
 class CApplicationGui : public CApplicationLogger
@@ -259,7 +264,8 @@ class CApplicationGui : public CApplicationLogger
     CPageView mPageView{*this};
     CPageSend mPageSend{*this};
     CPageLog mPageLog{*this};
-    CPage* mPages[4] = {&mPagePort, &mPageView, &mPageSend, &mPageLog};
+    CPageGpio mPageGpio{*this};
+    CPage* mPages[5] = {&mPagePort, &mPageView, &mPageSend, &mPageLog, &mPageGpio};
     int mnPage{0};
     
 public:
