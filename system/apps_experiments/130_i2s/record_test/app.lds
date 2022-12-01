@@ -1,7 +1,8 @@
 MEMORY
 {
-  rom (rx) :   ORIGIN = 0x08020000, LENGTH = 64K
-  ram (rwx) : ORIGIN = 0x20004800, LENGTH = 16K
+  rom (rx)  : ORIGIN = 0x08014400, LENGTH = 63K
+  ram (rwx) : ORIGIN = 0x20004800, LENGTH = 26K
+
   null (rwx): ORIGIN = 0x00001000, LENGTH = 4K
 }
 
@@ -16,8 +17,8 @@ SECTIONS
     } >rom
 
     .data : {
+      *(.data)        /* Data memory */
       *(.data*)        /* Data memory */
-/*      *(.dynamic*) */
     } >ram AT >rom
 
   .bss : {

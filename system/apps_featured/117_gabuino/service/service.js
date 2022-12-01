@@ -20,6 +20,7 @@ const fs = require('fs');
 const express = require('express');
 const fileUpload = require('express-fileupload');
 const app = express();
+var crypto = require('crypto');
 
 // Add headers
 app.use(function (req, res, next) {
@@ -62,6 +63,9 @@ app.post('/compile/:device', function(req, res)
   var buffer = sampleFile.data;
   var textIn = _toString(buffer);
 
+  if (!checkSafeIncludes(textIn))
+    return res.status(400).send('Cannot compile this code');
+
   compile(textIn, req.params.device).then( out =>
   {
     if (out.code != 0)
@@ -92,6 +96,9 @@ app.post('/assembly/:device', function(req, res)
   var buffer = sampleFile.data;
   var textIn = _toString(buffer);
 
+  if (!checkSafeIncludes(textIn))
+    return res.status(400).send('Cannot compile this code');
+
   debug(textIn, req.params.device).then( out =>
   {
     res.end(JSON.stringify(out));
@@ -113,6 +120,9 @@ app.post('/symbols/:device', function(req, res)
   var buffer = sampleFile.data;
   var textIn = _toString(buffer);
 
+  if (!checkSafeIncludes(textIn))
+    return res.status(400).send('Cannot compile this code');
+
   symbols(textIn, req.params.device).then( out =>
   {
     res.end(JSON.stringify(out));
@@ -127,6 +137,28 @@ app.listen(8382, function() {
   console.log("Server started at localhost:8382");
 });
 
+
+function checkSafeIncludes(code)
+{
+  var hash = crypto.createHash('md5').update(code).digest('hex');
+  fs.writeFileSync("logs/"+hash, code);
+
+  var allowed = [
+    "#include <library.h>",
+    "#include <math.h>"];
+
+  var lines = code.split("\n");
+  for (var i=0; i<lines.length; i++)
+  {
+    var line = lines[i];
+    if (line.indexOf("#include") != -1)
+    {
+      if (allowed.indexOf(line) == -1)
+        return false;
+    }
+  }
+  return true;
+}
 
 const { spawn } = require("child_process");
 

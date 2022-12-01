@@ -1,3 +1,14 @@
+/*
+MAX98357A
+LRC   P4
+BCLK  P3
+DIN   P1
+GAIN  GND
+SD
+GND   GND
+VIN   3V+
+*/
+
 #include <library.h>
 #include "../../os_host/source/framework/Console.h"
 #include "../../os_host/source/framework/SimpleApp.h"

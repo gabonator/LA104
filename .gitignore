@@ -5,10 +5,12 @@
 /system/apps/test41_alchemy/logs/unsorted
 /system/apps/test41_alchemy/root
 /system/**/build
-/system/**/_temp
+/**/_temp
 /tools/shellicons/*.bmp
+/tools/shellicons/compo1.png
+/tools/shellicons/compo2.png
 /temp/
 system/os_platform/win32_sdl/_build/
-
+/tools/prerender/screenshots/
 output
 output.tar

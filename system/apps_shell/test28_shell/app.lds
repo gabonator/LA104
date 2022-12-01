@@ -29,9 +29,9 @@ MEMORY
   ram (rwx) : ORIGIN = 0x20005000, LENGTH = 6K
   null (rwx): ORIGIN = 0x00001000, LENGTH = 4K
 */
-  persistent (rwx) :   ORIGIN = 0x20004f00, LENGTH = 64K
+  persistent (rwx) :   ORIGIN = 0x20008100, LENGTH = 512
   rom (rx) :   ORIGIN = 0x0801f000, LENGTH = 20K
-  ram (rwx) : ORIGIN = 0x20004800, LENGTH = 16K
+  ram (rwx) : ORIGIN = 0x20004800, LENGTH = 15K
   null (rwx) : ORIGIN = 0xf0000000, LENGTH = 10K
 
 }

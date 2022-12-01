@@ -164,3 +164,20 @@ docker rm -v $id
 - copy **shell.elf** and **2import.elf**, press first button to reload the shell or power cycle the device
 - you should see file manager with filesystem listing
 
+## Cmake
+
+### Troubleshooting
+
+In case of following message
+
+```
+-- The C compiler identification is unknown
+-- The CXX compiler identification is unknown
+CMake Error at CMakeLists.txt:4 (project):
+  No CMAKE_C_COMPILER could be found.
+```
+
+Tun these commands:
+
+- sudo xcode-select --reset
+- brew install sdl2
