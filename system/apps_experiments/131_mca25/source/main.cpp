@@ -54,7 +54,7 @@ unsigned char make_fcs(const unsigned char *input, int count)
 
 class CMca25
 {
-    char buffer[512];
+    char buffer[256];
     char buffermux[64];
     int readMuxBytes{0};
     int bufferi{0};
@@ -292,6 +292,8 @@ public:
         Send2(0x81, 0xEF, "\x83\x00\x17\x42\x00\x14" "x-bt/camera-info" "\x00");
         // Wait for the first packet
         ReadMux(false);
+        BIOS::SYS::DelayMs(10);
+
         while (BIOS::GPIO::UART::Available())
         {
             ReadMux(false);
