@@ -1,10 +1,20 @@
 #include <library.h>
 #include "../../../os_host/source/framework/Console.h"
 #include "../../../os_host/source/framework/SimpleApp.h"
+#include "../../../os_host/source/framework/BufferedIo.h"
+#ifndef __APPLE__
+#include "../../../os_host/source/framework/Serialize.cpp"
+#endif
 #include "gpio.h"
+#include "tjpgd.h"
+
+//uint8_t gFatSharedBuffer[BIOS::FAT::SharedBufferSize];
+CBufferedWriter mWriter;
+uint32_t* mGpioStatus = nullptr;
 
 // https://github.com/sperner/SerialCameras/blob/master/mca25.pl
 // http://web.archive.org/web/20130410163851/http://avr.auctionant.de/avr-ip-webcam/mca-25-protokoll.html
+// http://web.archive.org/web/20100414054050/http://avr.auctionant.de/avr-ip-webcam/mca-25-protokoll-livepreview.txt
 // https://www.programmersought.com/article/13038985632/
 // https://github.com/ya-jeks/gsmmux/blob/master/buffer.c
 // https://www.mikrocontroller.net/topic/29509?page=single
@@ -52,12 +62,118 @@ unsigned char make_fcs(const unsigned char *input, int count)
     return 0xFF-fcs;
 }
 
+class CJpeg
+{
+  static CJpeg* self;
+  JDEC decoder;
+  uint8_t tjpg_work[TJPGD_WORKSPACE_SIZE];
+  void (*requestFrame)(uint8_t**, int*);
+  uint8_t* frameBuffer{nullptr};
+    int frameBytes{0};
+  
+  static size_t tjpgd_data_reader(JDEC *decoder, uint8_t *buffer, size_t size)
+  {
+      uint8_t* rbuffer = buffer;
+      //BIOS::SYS::DelayMs(1000);
+
+      size_t rsize = size;
+      if (self->frameBytes > 0 && self->frameBytes < size)
+      {
+          //CONSOLE::Print("A");BIOS::SYS::DelayMs(1000);
+          _ASSERT(self->frameBuffer);
+          if (buffer)
+              memcpy(buffer, self->frameBuffer, self->frameBytes);
+         size -= self->frameBytes;
+         buffer += self->frameBytes;
+         self->frameBytes = 0;
+         // CONSOLE::Print("B");BIOS::SYS::DelayMs(1000);
+      }
+      if (self->frameBytes == 0)
+      {
+          //CONSOLE::Print("C");BIOS::SYS::DelayMs(1000);
+          self->requestFrame(&self->frameBuffer, &self->frameBytes);
+//          CONSOLE::Print(".%d[%02x %02x %02x %02x]\n", self->frameBytes, self->frameBuffer[0],
+//                         self->frameBuffer[1], self->frameBuffer[2], self->frameBuffer[3]);
+          //BIOS::SYS::DelayMs(1000);
+      }
+      if (self->frameBytes >= size)
+      {
+          //CONSOLE::Print("D%08x,%08x,%d\n", buffer, self->frameBuffer, size);BIOS::SYS::DelayMs(5000);
+          if (buffer)
+         memcpy(buffer, self->frameBuffer, size); // <---
+          //CONSOLE::Print("E");BIOS::SYS::DelayMs(1000);
+         self->frameBuffer += size;
+         self->frameBytes -= size;
+      }
+      //CONSOLE::Print("done ");
+      //BIOS::SYS::DelayMs(1000);
+//      if (buffer)
+//      {
+//          CONSOLE::Print("{");
+//          for (int i=0; i<rsize; i++)
+//              CONSOLE::Print("%02x ", rbuffer[i]);
+//          CONSOLE::Print("}\n");
+//          //BIOS::SYS::DelayMs(5000);
+//      }
+      return rsize;
+  }
+
+  static int tjpgd_data_writer(JDEC* decoder, void* bitmap, JRECT* rectangle)
+  {
+      CRect rc(rectangle->left, rectangle->top, rectangle->right+1, rectangle->bottom+1);
+      rc.Offset(0, 0);
+
+      CRect rcScreen(0, 0, BIOS::LCD::Width, BIOS::LCD::Height);
+      //if (rc.top >= rcScreen.bottom-14)
+      //    return 1;
+      if (rc.right > rcScreen.right || rc.bottom > rcScreen.bottom)
+          return 1;
+      if (rc.left < 0 || rc.top < 14)
+          return 1;
+
+      BIOS::LCD::BufferBegin(rc);
+      BIOS::LCD::BufferWrite((uint16_t*)bitmap, rc.Width()*rc.Height());
+      BIOS::LCD::BufferEnd();
+      return 1;
+  }
+  public:
+  void Render(void (*req)(uint8_t**, int*))
+  {
+      frameBuffer = nullptr;
+      frameBytes = 0;
+
+    self = this;
+    requestFrame = req;
+    decoder.swap = true;
+    JRESULT result;
+    result = jd_prepare(&decoder, tjpgd_data_reader, tjpg_work, sizeof(tjpg_work), 0);
+      if (result != JDR_OK)
+      {
+          CONSOLE::Print("jd_prepare error %d\n", result);
+          return;
+      }
+    _ASSERT (result == JDR_OK);
+//      CONSOLE::Print("jd: width=%d, height=%d\n", decoder.width, decoder.height);
+    result = jd_decomp(&decoder, tjpgd_data_writer, 0);
+    _ASSERT (result == JDR_OK);
+    requestFrame = nullptr;
+  }
+/*
+  void PushBinary(uint8_t* buf, int len)
+  {
+  }*/
+};
+
+CJpeg jpeg;
+CJpeg* CJpeg::self{nullptr};
+
 class CMca25
 {
     char buffer[256];
     char buffermux[64];
     int readMuxBytes{0};
     int bufferi{0};
+    uint8_t extrabuf[512];
 
 public:
     char* Process()
@@ -85,6 +201,8 @@ public:
 
     bool Init()
     {
+        mGpioStatus = (uint32_t*)BIOS::SYS::GetAttribute(BIOS::SYS::EAttribute::GpioStatus);
+
         BIOS::GPIO::PinMode(BIOS::GPIO::P1, BIOS::GPIO::Uart);
         BIOS::GPIO::PinMode(BIOS::GPIO::P2, BIOS::GPIO::Uart);
         BIOS::GPIO::UART::Setup(9600, (BIOS::GPIO::UART::EConfig)0);
@@ -122,63 +240,185 @@ public:
             return false;
         }
         CONSOLE::Print("Ok!\n");
-
         CRect preview(BIOS::LCD::Width-60, BIOS::LCD::Height-80, BIOS::LCD::Width, BIOS::LCD::Height);
+#if 0
         BIOS::LCD::BufferBegin(preview);
         while (!BIOS::KEY::GetKey())
         {
             if (!Grab())
             {
-                int32_t t0 = BIOS::SYS::GetTick();
-                while (BIOS::SYS::GetTick() - t0 < 100)
-                {
-                    if (BIOS::GPIO::UART::Available())
-                        t0 = BIOS::SYS::GetTick();
-                    while(BIOS::GPIO::UART::Available())
-                        BIOS::GPIO::UART::Read();
-                }
+                Flush();
                 BIOS::LCD::BufferBegin(preview);
             }
         }
         BIOS::LCD::BufferEnd();
+#else
+//        BIOS::LCD::BufferBegin(preview);
+//        for (int i=0; i<20; i++)
+//            if (!Grab())
+//            {
+//                Flush();
+//                BIOS::LCD::BufferBegin(preview);
+//            }
+//        BIOS::LCD::BufferEnd();
+        while (!BIOS::KEY::GetKey())
+        {
+            BIOS::LCD::BufferBegin(preview);
+            for (int i=0; i<10; i++)
+                if (!Grab())
+                {
+                    CONSOLE::Print("#");
+                    Flush();
+                    BIOS::LCD::BufferBegin(preview);
+                }
+            BIOS::LCD::BufferEnd();
+            DisplayJpeg();
+        }
+/*
+        GrabJpeg("mca25a.jpg");
+        Grab();
+        GrabJpeg("mca25b.jpg");
+        Grab();
+        GrabJpeg("mca25c.jpg");
+*/
+#endif
         Gpio::SetLevel(Gpio::BASEB, Gpio::P3, 0);
         return true;
     }
 
+    void Flush()
+    {
+        int32_t t0 = BIOS::SYS::GetTick();
+        while (BIOS::SYS::GetTick() - t0 < 100)
+        {
+            if (BIOS::GPIO::UART::Available())
+                t0 = BIOS::SYS::GetTick();
+            while(BIOS::GPIO::UART::Available())
+                BIOS::GPIO::UART::Read();
+        }
+    }
+    
     void _Send(const char* buf, size_t len)
     {
         while (len--)
             BIOS::GPIO::UART::Write(*buf++);
     }
 
-    const char* ReadMux(bool check = true)
+    void Check(const char* msg)
     {
+        return;
+        if (*mGpioStatus != 0)
+        {
+            CONSOLE::Print("%s gpio state: %x\n", msg, *mGpioStatus);
+            *mGpioStatus = 0;
+        }
+    }
+    const char* ReadMux(bool check = true, bool quiet = false)
+    {
+        bool marked = false;
+        Check("Pre read");
         readMuxBytes = 0;
         int32_t t0 = BIOS::SYS::GetTick();
         memset(buffer, 0, sizeof(buffer));
         for(int cnt=0; cnt < sizeof(buffer); cnt++)
         {
-
+            if (cnt == sizeof(buffer)-1)
+            {
+                CONSOLE::Print("Small buffer!");
+                return "";
+            }
             while (!BIOS::GPIO::UART::Available())
             {
-                if (BIOS::SYS::GetTick()-t0 > 1000)
+                if (BIOS::SYS::GetTick()-t0 > 400)
                 {
-                    CONSOLE::Print("Timeout!");
+                    if (!quiet)
+                    {
+                        CONSOLE::Print("Timeout!");
+                        Check("Tmo");
+                    }
                     return "";
                 }
             }
-            buffer[cnt] = BIOS::GPIO::UART::Read();
+            uint8_t rd = BIOS::GPIO::UART::Read();
+            /*
+            if (rd == 0x7d)
+            {
+                CONSOLE::Print("*");
+                while (!BIOS::GPIO::UART::Available())
+                {
+                    if (BIOS::SYS::GetTick()-t0 > 1000)
+                    {
+                        CONSOLE::Print("Timeout!");
+                        Check("Tmo");
+                        return "";
+                    }
+                }
+                rd = BIOS::GPIO::UART::Read() ^ 0x20;
+            }*/
+            buffer[cnt] = rd;
+#if 1
+//            if (cnt > 3 && cnt == 5 + (buffer[3] >> 1) && buffer[cnt] != '\xF9')
+//                marked = true;
+            if (cnt > 3 && cnt >= 5 + (buffer[3] >> 1))
+            {
+                if (rd != 0xf9)
+                {
+                    //CONSOLE::Print("*"); // TODO: fixme!
+                    while (!BIOS::GPIO::UART::Available());
+                    rd = BIOS::GPIO::UART::Read();
+                    _ASSERT(rd == 0xf9);
+                    buffer[++cnt] = rd;
+                }
+                /*
+//                _ASSERT(rd == 0xf9);
+                  if (rd != 0xf9)
+                  {
+                        CONSOLE::Print("Term wrong %02x; ", rd);
+                    while (!BIOS::GPIO::UART::Available());
+                        CONSOLE::Print("%02x ", BIOS::GPIO::UART::Read());
+                    while (!BIOS::GPIO::UART::Available());
+                        CONSOLE::Print("%02x ", BIOS::GPIO::UART::Read());
+                    while (!BIOS::GPIO::UART::Available());
+                        CONSOLE::Print("%02x ", BIOS::GPIO::UART::Read());
+
+                   return "";
+                }*/
+                readMuxBytes = cnt;
+                /*
+                if (marked)
+                {
+                    CONSOLE::Print("Unal%d: ", readMuxBytes+1);
+                    for (int i=0; i<readMuxBytes+1; i++)
+                        CONSOLE::Print("%02x ", buffer[i]);
+                    CONSOLE::Print("\n");
+                }*/
+                break;
+            }
+#else
             if ((cnt>0 && buffer[cnt] == '\xF9'))
             {
                 readMuxBytes = cnt;
                 break;
             }
+#endif
+            if (cnt==0 && buffer[cnt] != '\xF9')
+            {
+                CONSOLE::Print("Wrong start! (%02x)", rd);
+                for (int i=0; i<8; i++)
+                {
+                    while (!BIOS::GPIO::UART::Available());
+                    CONSOLE::Print("%02x ", BIOS::GPIO::UART::Read());
+                }
+                return "";
+            }
         }
         if (BIOS::GPIO::UART::Available() && check)
         {
             CONSOLE::Print("Not drained!");
+            Check("Drn");
             return "";
         }
+        Check("Post read");
         return buffer;
     }
 
@@ -233,23 +473,32 @@ public:
 
     bool InitCmux()
     {
+        CONSOLE::Print("A");
         if (!CheckMux2(0x03, 0x3F, ""))
             return false;
         Send2(0x03, 0x73, "");
+        CONSOLE::Print("B");
         if (!CheckMux2(0x23, 0x3F, ""))
             return false;
         Send2(0x23, 0x73, "");
+        CONSOLE::Print("C");
+
         if (!CheckMux2(0x03, 0xEF, "\xE3\x05\x23\x8D"))
             return false;
         Send2(0x01, 0xEF, "\xE3\x07\x23\x0C\x01");
+        CONSOLE::Print("D");
+
         if (!CheckMux2P(0x03, 0xEF, "\xE1\x07\x23\x0C\x01"))
             return false;
         Send2(0x01, 0xEF, "\xE1\x05\x23\x8D");
         if (!CheckMux2(0x23, 0xEF, "AT*EACS=17,1\r"))
             return false;
+        CONSOLE::Print("E");
         Send2(0x21, 0xEF, "\r\nOK\r\n");
         if (!CheckMux2(0x23, 0xEF, "AT+CSCC=1,199\r"))
             return false;
+        CONSOLE::Print("F");
+
         Send2(0x21, 0xEF, "\r\n+CSCC: E3\r\n");
         Send2(0x21, 0xEF, "\r\nOK\r\n");
         if (!CheckMux2(0x23, 0xEF, "AT+CSCC=2,199,B9\r"))
@@ -307,6 +556,81 @@ public:
     {
         Send2(0x81, 0xEF, "\x83\x00\x03");
     }
+
+    template <typename T> bool Transfer(int length, /*void(*handler)(uint8_t* buf, int len, int ofs)*/ T handler)
+//    bool Transfer(int length, void(*handler)(uint8_t* buf, int len, int ofs))
+    {
+        if (length == 506)
+        {
+            int extrabufi = 0;
+            while (extrabufi < 512)
+            {
+                ReadMux(false, true);
+                if (readMuxBytes == 0)
+                {
+                    break;
+                }
+                if (buffer[1] != 0x83 || buffer[2] != 0xef)
+                {
+                    CONSOLE::Print("e2!");
+                    return false;
+                }
+                int packetLen = buffer[3] >> 1;
+                for (int i=0; i<packetLen; i++)
+                    extrabuf[extrabufi++] = (uint8_t)buffer[4+i];
+            }
+            handler(extrabuf+6, extrabufi-6, 506);
+            return true;
+        }
+        int extrabufi = 0;
+        int readBytes = 0;
+        int realBytes = 0;
+        int sentBytes = 0;
+
+        while (length <= 0 || realBytes < length)
+        {
+            ReadMux(false);
+            if (readMuxBytes == 0)
+            {
+                CONSOLE::Print("tmo");
+                // timeout
+                if (extrabufi != 0)
+                    handler(extrabuf+6, extrabufi-6, sentBytes);
+                return true;
+            }
+            if (buffer[1] != 0x83 || buffer[2] != 0xef)
+            {
+                return false;
+            }
+
+            int packetLen = buffer[3] >> 1;
+            for (int i=0; i<packetLen; i++)
+                extrabuf[extrabufi++] = (uint8_t)buffer[4+i];
+
+            readBytes += packetLen;
+            if ((readBytes & 511) == 0)
+            {
+                handler(extrabuf+6, extrabufi-6, sentBytes);
+                sentBytes += extrabufi-6;
+                extrabufi = 0;
+                realBytes -= 6;
+                _ASSERT(!BIOS::GPIO::UART::Available());
+                SendAck(); //F9 81 EF 07 83 00 03 A6 F9
+            } else
+            if (length > 0 && realBytes + packetLen >= length)
+            {
+//                if (realBytes + packetLen != length)
+//                    CONSOLE::Print("[%d+%d=%d,%d]", realBytes, packetLen, length, extrabufi);
+                // TODO: -6 ???
+                _ASSERT(realBytes + packetLen-6 == length);
+                _ASSERT(extrabufi > 6);
+                // last packet, finished
+                handler(extrabuf+6, extrabufi-6, sentBytes);
+            }
+            realBytes += packetLen;
+        }
+        return true;
+    }
     
     bool Grab()
     {
@@ -338,68 +662,32 @@ public:
         Send2(0x81, 0xef, "0\"/>B\x00!x-bt/imaging-monitoring-");
         Send2(0x81, 0xef, "image\x00\x4c\x00\x06\x06\x01\x80");
 
-        ReadMux(false);
-        if (readMuxBytes == 0)
+        static int counter = 0;
+        static int counter2 = 0;
+        counter = 0;
+        counter2 = 0;
+        while (1)
         {
-            CONSOLE::Print("ERR1!");
-            return false;
-        }
-        bool hasValid = false;
-        if (memcmp(buffer, BuildMux(0x23, 0xef, "AT*ECUR=1000\r", sizeof("AT*ECUR=1000\r")-1), sizeof("AT*ECUR=1000\r")-1+6) == 0)
-        {
-            // ok
-        } else if (memcmp(buffer, "\xf9\x83\xef\x3f", 4) == 0)
-        {
-            //valid buffer!
-            hasValid = true;
-        } else {
-            CONSOLE::Print("other:");
-            for (int i=0; i<readMuxBytes+1; i++)
-                CONSOLE::Print("%02x ", buffer[i]);
-            CONSOLE::Print("\n");
-            _ASSERT(0);
-        }
-        
-        int toReadAll = 4880;
-        bool drop = true;
-        while (toReadAll > 0)
-        {
-            int toRead = min(toReadAll, 512);
-            while (toRead > 0)
+            if (Transfer(80*60+20, [&](uint8_t* buf, int len, int ofs)
             {
-                if (hasValid)
-                {
-                    hasValid = false;
-                } else if (ReadMux(false)[0] == 0)
-                {
-                    CONSOLE::Print("No data!");
-                    return false;
-                }
-                if (buffer[1] != 0x83 || buffer[2] != 0xef)
-                {
-                    CONSOLE::Print("Wrong data header!\n");
-                    for (int i=0; i<readMuxBytes+1; i++)
-                        CONSOLE::Print("%02x ", buffer[i]);
-                    CONSOLE::Print("\n");
-                    return false;
-                }
-                _ASSERT(buffer[1] == 0x83 && buffer[2] == 0xef);
-                int packetLen = buffer[3] >> 1;
-                for (int i=drop ? 6 : 0; i<packetLen; i++)
-                    PushByte(buffer[4+i]);
-                drop = false;
-                _ASSERT(packetLen > 1);
-                toRead -= packetLen;
-                toReadAll -= packetLen;
-                if (toRead < 0)
-                    CONSOLE::Print("Extra %d bytes", -toRead);
-                _ASSERT(toRead >= 0);
+              if (ofs == 0)
+              {
+                buf += 20;
+                len -= 20;
+              }
+              for (int i=0; i<len; i++)
+                PushPixel(buf[i]);
+            }))
+            {
+                break;
             }
-            SendAck();
-            drop = true;
+            if (memcmp(buffer, BuildMux(0x23, 0xef, "AT*ECUR=1000\r", sizeof("AT*ECUR=1000\r")-1), sizeof("AT*ECUR=1000\r")-1+6) == 0)
+                continue;
+            else
+                break;
         }
-
-        // AT*ECUR=41\r
+        /*
+        SendAck();
         if (!CheckMux2(0x83, 0xEF, "\xA0\x00\x03"))
         {
             CONSOLE::Print("Wrong terminator!\n");
@@ -414,13 +702,94 @@ public:
                 return false;
             }
         }
+*/
         _ASSERT(!BIOS::GPIO::UART::Available())
         return true;
+    }
+    
+    void GrabJpeg(const char* name)
+    {
+        CONSOLE::Print("Jpeg:\n");
+
+        //_ASSERT(sizeof(gFatSharedBuffer) >= BIOS::SYS::GetAttribute(BIOS::SYS::EAttribute::DiskSectorSize));
+        //BIOS::FAT::SetSharedBuffer(gFatSharedBuffer);
+        mWriter.Open((char*)name);
+
+        Send2(0x81, 0xef, "\x83\x00\x82q\x00X<monitoring-command versi");
+        Send2(0x81, 0xef, "on=\"1.0\" take-pic=\"NO\" send-pix");
+        Send2(0x81, 0xef, "el-size=\"320*240\" zoom=\"10\"/>B\x00");
+        Send2(0x81, 0xef, "!x-bt/imaging-monitoring-image\x00");
+        Send2(0x81, 0xef, "L\x00\x06\x06\x01\x80");
+        Transfer(0, [](uint8_t* buf, int len, int ofs)
+        {
+          mWriter << CStream(buf, len);
+        });
+        mWriter.Close();
+        //BIOS::FAT::SetSharedBuffer(nullptr);
+    }
+
+    void DisplayJpeg()
+    {
+        Send2(0x81, 0xef, "\x83\x00\x82q\x00X<monitoring-command versi");
+        Send2(0x81, 0xef, "on=\"1.0\" take-pic=\"NO\" send-pix");
+        Send2(0x81, 0xef, "el-size=\"320*240\" zoom=\"10\"/>B\x00");
+        Send2(0x81, 0xef, "!x-bt/imaging-monitoring-image\x00");
+        Send2(0x81, 0xef, "L\x00\x06\x06\x01\x80");
+
+        static uint8_t* tempBuf;
+        static int tempLen;
+        static CMca25* self;
+        //while (!BIOS::GPIO::UART::Available());
+        bool ok = Transfer(506, [](uint8_t* buf, int len, int ofs) {
+          tempBuf = buf;
+          tempLen = len;
+        });
+        _ASSERT(ok);
+        static bool first;
+        self = this;
+        first = true;
+        jpeg.Render([](uint8_t** buf, int* len)
+        {
+          if (!first)
+          {
+            // transfer single 512 chunk, should end with ACK, we have
+            // plenty time to decode jpeg stream
+            self->SendAck();
+            //while (!BIOS::GPIO::UART::Available());
+            bool ok = self->Transfer(506, [](uint8_t* buf, int len, int ofs) {
+              tempBuf = buf;
+              tempLen = len;
+            });
+            _ASSERT(ok);
+          } else {
+            first = false;
+          }
+          *buf = tempBuf;
+          *len = tempLen;
+        });
+        Send2(0x01, 0xEF, "\xE3\x07\x23\x0C\x01");
+        if (!CheckMux2P(0x03, 0xEF, "\xe1\x07\x23\x0c\x01"))
+        {
+            _ASSERT(0);
+            return;
+        }
+//        if (!CheckMux2(0x23, 0xEF, "AT*ECUR=41\r"))
+//        {
+//            _ASSERT(0);
+//            return;
+//        }
+
+//        ReadMux();
+//        CONSOLE::Print("other:");
+//        for (int i=0; i<readMuxBytes+1; i++)
+//            CONSOLE::Print("%02x ", buffer[i]);
+//        CONSOLE::Print("\n");
+        
+        _ASSERT (!BIOS::GPIO::UART::Available());
     }
 };
 
 CMca25 camera;
-
 #ifdef _ARM
 __attribute__((__section__(".entry")))
 #endif
@@ -428,9 +797,23 @@ int _main(void)
 {
     APP::Init("MCA25 Camera test");
     APP::Status("");
+#ifdef __APPLE__
+    jpeg.Render([](uint8_t** buf, int* len)
+    {
+        static FILE* f = nullptr;
+        static uint8_t buffer[512];
+        if (!f)
+            f = fopen("/Users/gabrielvalky/Documents/git/LA104/system/apps_experiments/131_mca25/_temp/4/MCA25A.JPG", "rb");
+        fread(buffer, 506, 1, f);
+        *buf = buffer;
+        *len = 506;
+    });
+#else
+
     camera.Init();
     BIOS::GPIO::PinMode(BIOS::GPIO::P1, BIOS::GPIO::Input);
     BIOS::GPIO::PinMode(BIOS::GPIO::P2, BIOS::GPIO::Input);
+#endif
     CONSOLE::Print("Press any key to exit...\n");
     while (!BIOS::KEY::GetKey());
     return 0;
