@@ -200,6 +200,7 @@ cp $FROM/115huntr.elf $TO/tools/hunter.elf
 cp $FROM/127_sdm.elf $TO/tools/sd.elf
 cp $FROM/126sdvid.elf $TO/tools/sdvid.elf
 cp $FROM/128sdjpg.elf $TO/tools/sdjpg.elf
+cp $FROM/62memvw.elf $TO/tools/memview.elf
 
 echo -n "{\"description\":{short:\"Character map\",long:\"Character map\"},\"icon\":\"charmap.bmp\",\"execute\":\"charmap.elf\",order:50}" > $TO/tools/charmap.lnk
 echo -n "{\"description\":{short:\"DCF77\",long:\"DCF77 decoder\"},\"icon\":\"dcf77.bmp\",\"execute\":\"dcf77.elf\",order:40}" > $TO/tools/dcf77.lnk
@@ -215,6 +216,7 @@ echo -n "{\"description\":{short:\"Servo\",long:\"Servo controller PCA9685\"},\"
 echo -n "{\"description\":{short:\"Hunter\",long:\"Hunter X-core controller\"},\"icon\":\"hunter.bmp\",\"execute\":\"hunter.elf\",order:66}" > $TO/tools/hunter.lnk
 echo -n "{\"description\":{short:\"Pasteur\",long:\"Pasteurisation calculator\"},\"icon\":\"pasteur.bmp\",\"execute\":\"pasteur.elf\",order:66}" > $TO/tools/pasteur.lnk
 echo -n "{\"description\":{short:\"SD Card\",long:\"SD Card browser\"},\"icon\":\"sd.bmp\",\"execute\":\"sd.elf\",order:10}" > $TO/tools/sd.lnk
+echo -n "{\"description\":{short:\"Mem view\",long:\"Memory viewer\"},\"icon\":\"memview.bmp\",\"execute\":\"memview.elf\",order:10}" > $TO/tools/memview.lnk
 
 cp $ICON/charmap.bmp $TO/tools/charmap.bmp
 cp $ICON/dcf77.bmp $TO/tools/dcf77.bmp
@@ -230,6 +232,7 @@ cp $ICON/servo.bmp $TO/tools/servo.bmp
 cp $ICON/hunter.bmp $TO/tools/hunter.bmp
 cp $ICON/pasteur.bmp $TO/tools/pasteur.bmp
 cp $ICON/sdcard.bmp $TO/tools/sd.bmp
+cp $ICON/bineye.bmp $TO/tools/memview.bmp
 
 cp ../apps_featured/test21_midiplay/midi/laisla.mid $TO/tools/laisla.mid
 cp ../apps/105_avrprogrammer/arduino/blink.hex $TO/tools/blink.hex
@@ -266,6 +269,7 @@ cp $ICON/fchip.bmp $TO/devices/devices.bmp
 cp $ICON/radsens.bmp $TO/devices/radsens.bmp
 cp $ICON/co2.bmp $TO/devices/mhz19b.bmp
 cp $ICON/ps2keyb.bmp $TO/devices/ps2keyb.bmp
+cp $ICON/camera.bmp $TO/devices/camera.bmp
 echo -n "{\"description\":{\"short\":\"Devices\",\"long\":\"Device drivers\"},\"icon\":\"devices.bmp\",order:7}" > $TO/devices/index.lnk
 
 cp $FROM/45simcom.elf $TO/devices/simcom.elf
@@ -286,6 +290,7 @@ cp $FROM/106mpr12.elf $TO/devices/mpr121.elf
 cp $FROM/109radse.elf $TO/devices/radsens.elf
 cp $FROM/110co2.elf $TO/devices/mhz19b.elf
 cp $FROM/120keyb.elf $TO/devices/ps2keyb.elf
+cp $FROM/131mca25.elf $TO/devices/mca25.elf
 
 echo -n "{\"description\":{short:\"APDS9960\",long:\"APDS9960 color gesture sensor\"},\"icon\":\"chip.bmp\",\"execute\":\"apds9960.elf\"}" > $TO/devices/apds9960.lnk
 echo -n "{\"description\":{short:\"BMP085\",long:\"BMP085 Barometric sensor\"},\"icon\":\"chip.bmp\",\"execute\":\"bmp085.elf\"}" > $TO/devices/bmp085.lnk
@@ -305,6 +310,7 @@ echo -n "{\"description\":{short:\"MPR121\",long:\"MPR121 12 channel toch sensor
 echo -n "{\"description\":{short:\"RADSENS\",long:\"Radsens dosimeter\"},\"icon\":\"radsens.bmp\",\"execute\":\"radsens.elf\"}" > $TO/devices/radsens.lnk
 echo -n "{\"description\":{short:\"MHZ19B\",long:\"MH-Z19B\"},\"icon\":\"mhz19b.bmp\",\"execute\":\"mhz19b.elf\"}" > $TO/devices/mhz19b.lnk
 echo -n "{\"description\":{short:\"Keyboard\",long:\"PS2 Keyboard\"},\"icon\":\"ps2keyb.bmp\",\"execute\":\"ps2keyb.elf\"}" > $TO/devices/ps2keyb.lnk
+echo -n "{\"description\":{short:\"MCA25\",long:\"MCA25 camera\"},\"icon\":\"camera.bmp\",\"execute\":\"mca25.elf\"}" > $TO/devices/mca25.lnk
 
 cp $ICON/chip.bmp $TO/devices/chip.bmp
 

@@ -59,5 +59,8 @@ bool GetLevel(uint32_t nPortBase, int nPin)
   return (((uint32_t*)nPortBase)[2] >> nPin) & 1;
 }
 
+#undef PERIPH_BASE
+#undef APB2PERIPH_BASE
+#undef GPIOB_BASE
 }
 

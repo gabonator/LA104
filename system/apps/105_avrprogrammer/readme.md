@@ -1,5 +1,4 @@
 ```
-
 LA104:
 
  GND
@@ -23,6 +22,9 @@ ICSP:
   
 
 
+Arduino pro mini:
+  blue, white, gray
+  green, purple, black
 
  ATTiny45 / ATTiny25
  PB5  1   8  VCC

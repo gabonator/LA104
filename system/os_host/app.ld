@@ -66,7 +66,7 @@ SECTIONS
   } >ram AT >rom
  
   .addressRomEnd (NOLOAD) : {
-    _addressRomEnd = .;  /* Includes pre initialized ram data stored at end of rom */
+    _addressRomEnd = .;
   } > rom
 }  
 /*========== end of file ==========*/

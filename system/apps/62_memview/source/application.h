@@ -2,6 +2,10 @@ int main( int argc, char** argv );
 
 bool memError = false;
 
+#include "shapes.h"
+#include "layout.h"
+#include "list.h"
+
 class CApplication : public CWnd
 {
 	uint32_t mSetAddress {0x1FFFF000};
@@ -9,6 +13,7 @@ class CApplication : public CWnd
 	uint32_t mLastGoodAddress {0x08000000};
 	uint16_t mBuffer[16*8];
 	int mPos{9};
+    CListDialog mDialog;
 	
 public:
     void Create( const char* pszId, ui16 dwFlags, const CRect& rc, CWnd* pParent )
@@ -34,11 +39,12 @@ public:
 		  IDMA2_Channel1_IRQ, IDMA2_Channel2_IRQ, IDMA2_Channel3_IRQ,
 		  IDMA2_Channel4_5_IRQ };
 */
+        /*
 		BIOS::OS::SetInterruptVector(BIOS::OS::EInterruptVector::IHardFaultException, [](){BIOS::DBG::Print("hard"); memError = true;});
 		BIOS::OS::SetInterruptVector(BIOS::OS::EInterruptVector::IMemManageException, [](){BIOS::DBG::Print("mem"); memError = true;});
 		BIOS::OS::SetInterruptVector(BIOS::OS::EInterruptVector::IBusFaultException, [](){BIOS::DBG::Print("bus");memError = true;});
 		BIOS::OS::SetInterruptVector(BIOS::OS::EInterruptVector::IUsageFaultException, [](){BIOS::DBG::Print("use");memError = true;});
-
+*/
         CWnd::Create(pszId, dwFlags, rc, pParent);
 
 		/*
@@ -68,12 +74,12 @@ public:
 	{
 		if (key == BIOS::KEY::EKey::Down)
 		{
-			if (mPos < 8)
+			if (mPos >= 1 && mPos < 9)
 			{
-				mSetAddress -= 0x10000000 >> (mPos*4);
+				mSetAddress -= 0x10000000 >> (mPos*4-4);
 				ShowTitle();
 			}
-			if (mPos == 9)
+			if (mPos == 10)
 			{
 				mAddress += 8;
 				Redraw();
@@ -81,12 +87,12 @@ public:
 		}
 		if (key == BIOS::KEY::EKey::Up)
 		{
-			if (mPos < 8)
+			if (mPos >= 1 && mPos < 9)
 			{
-				mSetAddress += 0x10000000 >> (mPos*4);
+				mSetAddress += 0x10000000 >> (mPos*4-4);
 				ShowTitle();
 			}
-			if (mPos == 9)
+			if (mPos == 10)
 			{
 				mAddress -= 8;
 				Redraw();
@@ -97,16 +103,21 @@ public:
 			mPos--;
 			ShowTitle();
 		}
-		if (key == BIOS::KEY::EKey::Right && mPos < 9)
+		if (key == BIOS::KEY::EKey::Right && mPos < 10)
 		{
 			mPos++;
 			ShowTitle();
 		}
-		if (key == BIOS::KEY::EKey::Enter && mPos == 8)
+		if (key == BIOS::KEY::EKey::Enter && mPos == 9)
 		{
 			mAddress = mSetAddress;
 			Redraw();
 		}
+        if (key == BIOS::KEY::EKey::Enter && mPos == 0)
+        {
+            ShowShortcuts(mAddress);
+            Invalidate();
+        }
 	}
 	
     void OnPaint() override
@@ -129,24 +140,32 @@ public:
 		rc1.left = 80;
 		rc1.bottom = 14;
 		GUI::Background(rc1, RGB565(4040b0), RGB565(404040));
-
+        
 		int x = rc1.left;
-		for (int i=0; i<8; i++)
+        
+        if (mPos == 0)
+            x += BIOS::LCD::Printf(x, 0, RGBTRANS, RGB565(ffffff), "...");
+        else
+            x += BIOS::LCD::Printf(x, 0, RGB565(ffffff), RGBTRANS, "...");
+
+        x += 8;
+
+        for (int i=0; i<8; i++)
 		{
-			if (mPos == i)
+			if (mPos == i+1)
 				x += BIOS::LCD::Printf(x, 0, RGBTRANS, RGB565(ffffff), "%x", (mSetAddress >> (28-i*4)) & 0xf);
 			else
 				x += BIOS::LCD::Printf(x, 0, RGB565(ffffff), RGBTRANS, "%x", (mSetAddress >> (28-i*4)) & 0xf);
 		}
 		
 		x += 8;
-		if (mPos == 8)
+		if (mPos == 9)
 			x += BIOS::LCD::Printf(x, 0, RGBTRANS, RGB565(ffffff), "GO");
 		else
 			x += BIOS::LCD::Printf(x, 0, RGB565(ffffff), RGBTRANS, "GO");
 
 		x += 8;
-		if (mPos == 9)
+		if (mPos == 10)
 			x += BIOS::LCD::Printf(x, 0, RGBTRANS, RGB565(ffffff), "MOVE");
 		else
 			x += BIOS::LCD::Printf(x, 0, RGB565(ffffff), RGBTRANS, "MOVE");
@@ -185,7 +204,7 @@ public:
 	void ShowPage(uint32_t address, bool showChanges = false)
 	{
 		uint32_t lastGood = address;
-		
+        const bool wide = BIOS::SYS::GetAttribute(BIOS::SYS::EAttribute::ScreenWidth) >= 400;
 		int local = 0;
 		bool changes[8] = {false};
 		for (int y=16; y<=BIOS::LCD::Height-14; y+=14)
@@ -226,13 +245,22 @@ public:
 					continue;
 				
 				int color = showChanges ? RGB565(ffff00) : RGB565(ffffff);
-					
-				if (i>=4)
-					BIOS::LCD::Printf(x + i*24+8, y, color, RGB565(404040), "%02x", data[i]);
-				else
-					BIOS::LCD::Printf(x + i*24, y, color, RGB565(404040), "%02x", data[i]);
-				
-				BIOS::LCD::Print(x + 220 + i*8, y, color, RGB565(404040), data[i]);
+                if (wide)
+                {
+                    if (i>=4)
+                        BIOS::LCD::Printf(x + i*24+8, y, color, RGB565(404040), "%02x", data[i]);
+                    else
+                        BIOS::LCD::Printf(x + i*24, y, color, RGB565(404040), "%02x", data[i]);
+                    
+                    BIOS::LCD::Print(x + 220 + i*8, y, color, RGB565(404040), data[i]);
+                } else {
+                    if (i>=4)
+                        BIOS::LCD::Printf(x + i*19+4, y, color, RGB565(404040), "%02x", data[i]);
+                    else
+                        BIOS::LCD::Printf(x + i*19, y, color, RGB565(404040), "%02x", data[i]);
+                    
+                    BIOS::LCD::Print(x + 172 + i*8, y, color, RGB565(404040), data[i]);
+                }
 			}
 			
 			address += 8;
@@ -240,4 +268,45 @@ public:
 		}
 		mLastGoodAddress = lastGood;
 	}
+    
+    void ShowShortcuts(uint32_t& address)
+    {
+        mDialog.mElements.Init(mDialog.mElementsData, COUNT(mDialog.mElementsData));
+        mDialog.mElements.RemoveAll();
+        mDialog.mElements.Add("08000000 Firmware rom");
+        mDialog.mElements.Add("08008000 LA104 OS begin");
+        mDialog.mElements.Add("08013000 LA104 OS end");
+        CString<32> s;
+        sprintf(s, "%08x Font table", BIOS::SYS::GetAttribute(BIOS::SYS::EAttribute::CharRom));
+        mDialog.mElements.Add(s);
+        sprintf(s, "%08x Build info", BIOS::SYS::GetAttribute(BIOS::SYS::EAttribute::BuildRevision));
+        mDialog.mElements.Add(s);
+        sprintf(s, "%08x OS RAM begin", 0x20000000);
+        mDialog.mElements.Add(s);
+        sprintf(s, "%08x OS counters", 0x200002b0);
+        mDialog.mElements.Add(s);
+        sprintf(s, "%08x This app", (uintptr_t)this);
+        mDialog.mElements.Add(s);
+        sprintf(s, "%08x GPIOB MMIO", (uintptr_t)0x40010C00);
+        mDialog.mElements.Add(s);
+        int index = mDialog.ModalShow(this, "Shortcuts");
+        if (index != -1)
+        {
+            uint32_t addr = 0;
+            for (int i=0; i<8; i++)
+            {
+                char c = ((char*)mDialog.mElements[index])[i];
+                addr <<= 4;
+                if (c >= '0' && c <= '9')
+                    addr |= c - '0';
+                else if (c >= 'a' && c <= 'f')
+                    addr |= c - 'a' + 10;
+                else if (c >= 'A' && c <= 'F')
+                    addr |= c - 'A' + 10;
+                else
+                    _ASSERT(0);
+            }
+            address = addr;
+        }
+    }
 };

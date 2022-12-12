@@ -511,7 +511,9 @@ namespace UART
   	USART_InitStructure.USART_HardwareFlowControl = USART_HardwareFlowControl_None;
   	USART_InitStructure.USART_Mode = USART_Mode_Rx | USART_Mode_Tx;
 
+  	USART_Cmd(USART3, DISABLE);
   	USART_Init(USART3, &USART_InitStructure);
+  	USART_Cmd(USART3, ENABLE);
   }
 
   void uart_init()

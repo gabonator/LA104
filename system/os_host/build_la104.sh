@@ -1,10 +1,7 @@
-#https://developer.arm.com/open-source/gnu-toolchain/gnu-rm/downloads
-
 set -e
 
 GITREVISION=`git log --pretty=format:'%h' -n 1`
 TARGET=LA104
-
 
 mkdir -p build
 cd build
@@ -132,7 +129,12 @@ arm-none-eabi-gcc -mcpu=cortex-m3 -mthumb -o output_la104.elf -nostartfiles -T .
 
 arm-none-eabi-objcopy -O binary ./output_la104.elf ./output_la104.bin
 node ../../../tools/crc32/force.js ./output_la104.bin ./output_la104.elf 0x6ab02021 ./hash_la104
-arm-none-eabi-objcopy -O ihex ./output_la104.elf ./system_la104.hex
+
+# Hack: When generating HEX directly from ELF, it places last four bytes of rom contents in 
+# separate record on unaligned address. DFU loader refuses to flash this record and then the 
+# CRC check fails. Extract raw binary blob from ELF and then convert it back to hex to keep 
+# all records aligned to 16 bytes. Warning: base address is hardcoded here to 08008000
+arm-none-eabi-objcopy -I binary -O ihex --change-addresses 0x08008000 output_la104.bin system_la104.hex
 
 arm-none-eabi-readelf -all output_la104.elf > output_la104.txt
 arm-none-eabi-objdump -d -S output_la104.elf > output_la104.asm
@@ -140,9 +142,9 @@ arm-none-eabi-objdump -d -S output_la104.elf > output_la104.asm
 find . -type f -name '*.o' -delete
 find . -type f -name '*.d' -delete
 
-nm --print-size -gC output_la104.elf | grep " B " > symbols_ram_la104.txt
-nm --print-size -gC output_la104.elf | grep " T " > symbols_rom_la104.txt
-nm --print-size -gC output_la104.elf > symbols_all_la104.txt
+nm --print-size --size-sort -gC output_la104.elf | grep " B " > symbols_ram_la104.txt
+nm --print-size --size-sort -gC output_la104.elf | grep " T " > symbols_rom_la104.txt
+nm --print-size --size-sort -gC output_la104.elf > symbols_all_la104.txt
 cat symbols_all_la104.txt | grep _addressR
 
 node ../../apps_featured/117_gabuino/service/nmparse.js symbols_all_la104.txt la104_os_$(<hash_la104) > symbols_la104.js
