@@ -393,7 +393,7 @@ Application groups
 
 Version information
 ---------------------
-mar/2021 release
+dec/2022 release
 EOM
 
 mkdir $TO/fun

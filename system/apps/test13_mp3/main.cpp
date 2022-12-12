@@ -9,7 +9,7 @@
 #include "../../os_host/source/framework/BufferedIo.h"
 #include "../../os_host/source/framework/Serialize.h"
 #include "../../os_host/source/framework/Serialize.cpp"
-#include "gif/GifDecoder.h"
+//#include "gif/GifDecoder.h"
 
 // void *__dso_handle = (void *)NULL;
 // void *_fini = (void *)NULL;
@@ -22,7 +22,8 @@ MD_YX5300 mp3;  // = nullptr
 
 void _HandleAssertion(const char* file, int line, const char* cond)
 {
-    BIOS::DBG::Print("Assertion failed in %s [%d]: %s\n", file, line, cond);
+    BIOS::DBG::Print("Assertion failed in ");
+    BIOS::DBG::Print("%s [%d]: %s\n", file, line, cond);
     while (1);
 }
 
