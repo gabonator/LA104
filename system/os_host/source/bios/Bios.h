@@ -239,7 +239,7 @@ namespace BIOS
           EConfig::stopBits2, parity = EConfig::parityNone | EConfig::parityEven | EConfig::parityOdd, flow = EConfig::flowNone | EConfig::flowHw
       };
       void Setup(int baudrate, EConfig config);
-      bool Available();
+      int Available();
       uint8_t Read();
       void Write(uint8_t);
     }

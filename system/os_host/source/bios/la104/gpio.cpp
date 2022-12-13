@@ -846,9 +846,9 @@ namespace BIOS
         ::UART::uart_configure(baudrate, dataBits, parity, stopBits); 
       }
 
-      bool Available()
+      int Available()
       {
-        return mUartBuffer.size() > 0;
+        return mUartBuffer.size();
       }
 
       uint8_t Read()

@@ -62,6 +62,7 @@ protected:
     void SetBaudRate(int baudrate)
     {
         mBaudrate = baudrate;
+        ConfigureUart();
     }
     
     int GetBaudRate()

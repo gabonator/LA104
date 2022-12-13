@@ -111,7 +111,7 @@ namespace BIOS
     namespace UART
     {
       void Setup(int baudrate, EConfig config) {}
-      bool Available() {return false;}
+      int Available() {return 0;}
       uint8_t Read() {return 0;}
       void Write(uint8_t) {}
     }

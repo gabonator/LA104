@@ -16,7 +16,10 @@ class Analyser
       {
         var result = this.uartDecoder.decode(bitstream, ch);
         if (result)
-          console.log("UART: " + result.map(x => String.fromCharCode(x)).join(""));
+        {
+          var baudrate = Math.floor(bitstream.rate*this.timebase());
+          console.log(`UART${ch.substr(-1)}@${(baudrate/1000).toFixed(1)}kbps: ${this.readable(result)}`);
+        }
       }
     }
     if (mode == "LED-RGB")
@@ -29,6 +32,44 @@ class Analyser
           console.log("LED-RGB: " + JSON.stringify(result));
       }
     }
+  }
+  timebase()
+  {
+    var t = INTERFACE.timebase;
+    if (t.substr(-2) == "ns")
+      return 30/(parseInt(t.substr(0, t.length-2))*1e-9);
+    if (t.substr(-2) == "us")
+      return 30/(parseInt(t.substr(0, t.length-2))*1e-6);
+    if (t.substr(-2) == "ms")
+      return 30/(parseInt(t.substr(0, t.length-2))*1e-3);
+    if (t.substr(-1) == "s")
+      return 30/(parseInt(t.substr(0, t.length-1)));
+    throw "wrong timebase";
+  }
+  readable(data)
+  {
+    var aux = "";
+    if (data.length > 2 && 
+        data[0] != 0x0d && data[0] != 0x0a && data[0] < 32 &&
+        data[1] != 0x0d && data[1] != 0x0a && data[1] < 32)
+    {
+        aux = "(HEX)";
+        for (var i=0; i<data.length; i++)
+            aux += " " + ("0" + data[i].toString(16)).substr(-2);
+    } else {
+      for (var i=0; i<data.length; i++)
+          if (String.fromCharCode(data[i]) == '\r') 
+              aux += "\\r";
+          else if (String.fromCharCode(data[i]) == '\n') 
+              aux += "\\n";
+          else if (String.fromCharCode(data[i]) == '\"') 
+              aux += "\\\"";
+          else if (data[i] >= 0x20 && data[i] < 0x80) 
+              aux += String.fromCharCode(data[i]);
+          else
+              aux += "\\x" + ("0" + data[i].toString(16)).substr(-2);
+    }
+    return aux;
   }
 }
 

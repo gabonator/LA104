@@ -104,7 +104,7 @@ uintptr_t GetProcAddress(char* symbol)
     case 0x00008ee3: return (uint32_t)static_cast<uint8_t(*)()>(BIOS::GPIO::UART::Read); //_ZN4BIOS4GPIO4UART4ReadEv
     case 0x0000ee78: return (uint32_t)static_cast<void(*)(int, BIOS::GPIO::UART::EConfig)>(BIOS::GPIO::UART::Setup); //_ZN4BIOS4GPIO4UART5SetupEiNS1_7EConfigE
     case 0x0000ae65: return (uint32_t)static_cast<void(*)(unsigned char)>(BIOS::GPIO::UART::Write); //_ZN4BIOS4GPIO4UART5WriteEh
-    case 0x0000e98d: return (uint32_t)static_cast<bool(*)()>(BIOS::GPIO::UART::Available); //_ZN4BIOS4GPIO4UART9AvailableEv
+    case 0x0000e98d: return (uint32_t)static_cast<int(*)()>(BIOS::GPIO::UART::Available); //_ZN4BIOS4GPIO4UART9AvailableEv
     case 0x0000ddad: return (uint32_t)static_cast<void(*)(BIOS::GPIO::EPin, BIOS::GPIO::EMode)>(BIOS::GPIO::PinMode); //_ZN4BIOS4GPIO7PinModeENS0_4EPinENS0_5EModeE
 #endif
 #if defined(USE_FLASHING_SUPPORT)
