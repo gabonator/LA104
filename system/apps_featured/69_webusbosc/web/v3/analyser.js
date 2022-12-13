@@ -62,15 +62,16 @@ class BitstreamAnalyser
         return false;
 
       var bits = 0;
-      if (count >= minPeriod*9 && risingEdge)  // TODO: uart?
+      if (count >= minPeriod*10 && risingEdge)  // TODO: uart?
       {
         return false;
       }
-      else if (count >= minPeriod*9 && !risingEdge)  // TODO: uart?
+      else if (count >= minPeriod*10 && !risingEdge)  // TODO: uart?
       {
         // ignore idle line
         return true;
       }
+      else if (count >= minPeriod*9) bits = 9;
       else if (count >= minPeriod*8) bits = 8;
       else if (count >= minPeriod*7) bits = 7;
       else if (count >= minPeriod*6) bits = 6;
