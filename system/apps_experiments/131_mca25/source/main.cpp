@@ -8,7 +8,6 @@
 #include "gpio.h"
 #include "tjpgd.h"
 
-//uint8_t gFatSharedBuffer[BIOS::FAT::SharedBufferSize];
 CBufferedWriter mWriter;
 uint32_t* mGpioStatus = nullptr;
 
@@ -18,6 +17,7 @@ uint32_t* mGpioStatus = nullptr;
 // https://www.programmersought.com/article/13038985632/
 // https://github.com/ya-jeks/gsmmux/blob/master/buffer.c
 // https://www.mikrocontroller.net/topic/29509?page=single
+// http://ww2.cs.lamar.edu/doc/bluetooth/image-pro.pdf
 
 const unsigned char r_crctable[256] = { //reversed, 8-bit, poly=0x07
     0x00, 0x91, 0xE3, 0x72, 0x07, 0x96, 0xE4, 0x75,
@@ -66,55 +66,38 @@ class CJpeg
 {
   static CJpeg* self;
   JDEC decoder;
-  uint8_t tjpg_work[TJPGD_WORKSPACE_SIZE];
   void (*requestFrame)(uint8_t**, int*);
   uint8_t* frameBuffer{nullptr};
     int frameBytes{0};
+public:
+  uint8_t tjpg_work[TJPGD_WORKSPACE_SIZE];
+private:
   
   static size_t tjpgd_data_reader(JDEC *decoder, uint8_t *buffer, size_t size)
   {
       uint8_t* rbuffer = buffer;
-      //BIOS::SYS::DelayMs(1000);
 
       size_t rsize = size;
       if (self->frameBytes > 0 && self->frameBytes < size)
       {
-          //CONSOLE::Print("A");BIOS::SYS::DelayMs(1000);
           _ASSERT(self->frameBuffer);
           if (buffer)
               memcpy(buffer, self->frameBuffer, self->frameBytes);
          size -= self->frameBytes;
          buffer += self->frameBytes;
          self->frameBytes = 0;
-         // CONSOLE::Print("B");BIOS::SYS::DelayMs(1000);
       }
       if (self->frameBytes == 0)
       {
-          //CONSOLE::Print("C");BIOS::SYS::DelayMs(1000);
           self->requestFrame(&self->frameBuffer, &self->frameBytes);
-//          CONSOLE::Print(".%d[%02x %02x %02x %02x]\n", self->frameBytes, self->frameBuffer[0],
-//                         self->frameBuffer[1], self->frameBuffer[2], self->frameBuffer[3]);
-          //BIOS::SYS::DelayMs(1000);
       }
       if (self->frameBytes >= size)
       {
-          //CONSOLE::Print("D%08x,%08x,%d\n", buffer, self->frameBuffer, size);BIOS::SYS::DelayMs(5000);
-          if (buffer)
-         memcpy(buffer, self->frameBuffer, size); // <---
-          //CONSOLE::Print("E");BIOS::SYS::DelayMs(1000);
+         if (buffer)
+             memcpy(buffer, self->frameBuffer, size);
          self->frameBuffer += size;
          self->frameBytes -= size;
       }
-      //CONSOLE::Print("done ");
-      //BIOS::SYS::DelayMs(1000);
-//      if (buffer)
-//      {
-//          CONSOLE::Print("{");
-//          for (int i=0; i<rsize; i++)
-//              CONSOLE::Print("%02x ", rbuffer[i]);
-//          CONSOLE::Print("}\n");
-//          //BIOS::SYS::DelayMs(5000);
-//      }
       return rsize;
   }
 
@@ -124,8 +107,6 @@ class CJpeg
       rc.Offset(0, 0);
 
       CRect rcScreen(0, 0, BIOS::LCD::Width, BIOS::LCD::Height);
-      //if (rc.top >= rcScreen.bottom-14)
-      //    return 1;
       if (rc.right > rcScreen.right || rc.bottom > rcScreen.bottom)
           return 1;
       if (rc.left < 0 || rc.top < 14)
@@ -153,15 +134,10 @@ class CJpeg
           return;
       }
     _ASSERT (result == JDR_OK);
-//      CONSOLE::Print("jd: width=%d, height=%d\n", decoder.width, decoder.height);
     result = jd_decomp(&decoder, tjpgd_data_writer, 0);
     _ASSERT (result == JDR_OK);
     requestFrame = nullptr;
   }
-/*
-  void PushBinary(uint8_t* buf, int len)
-  {
-  }*/
 };
 
 CJpeg jpeg;
@@ -207,6 +183,8 @@ public:
         BIOS::GPIO::PinMode(BIOS::GPIO::P2, BIOS::GPIO::Uart);
         BIOS::GPIO::UART::Setup(9600, (BIOS::GPIO::UART::EConfig)0);
 
+        APP::Status("AT mode @ 9600 bps");
+
         Gpio::SetState(Gpio::BASEB, Gpio::P3, Gpio::StateOutput10Mhz | Gpio::StateOutputPushPull);
         Gpio::SetLevel(Gpio::BASEB, Gpio::P3, 0);
         BIOS::SYS::DelayMs(5);
@@ -216,10 +194,23 @@ public:
 
         BIOS::SYS::DelayMs(5);
         Gpio::SetLevel(Gpio::BASEB, Gpio::P3, 1);
-        CONSOLE::Print("Entering cmux mode... ");
+        CONSOLE::Print("Camera init...\n");
         if (!EnterCmux())
         {
-            CONSOLE::Print("Failed!\n");
+            CONSOLE::Print("Failed! Check your wiring:\n");
+            CONSOLE::Print("  Camera        LA104\n");           
+            CONSOLE::Print("  1             \n");  
+            CONSOLE::Print("  2             \n");  
+            CONSOLE::Print("  3             \n");  
+            CONSOLE::Print("  4 tx          P2 - rx\n");  
+            CONSOLE::Print("  5 rx          P1 - tx\n");  
+            CONSOLE::Print("  6             \n");  
+            CONSOLE::Print("  7 acc. ctl    P3\n");
+            CONSOLE::Print("  8             \n");  
+            CONSOLE::Print("  (9)           \n");  
+            CONSOLE::Print("  10 gnd        GND\n");  
+            CONSOLE::Print("  11 vcc        3.3V\n");  
+
             Gpio::SetLevel(Gpio::BASEB, Gpio::P3, 0);
             return false;
         }
@@ -241,48 +232,69 @@ public:
         }
         CONSOLE::Print("Ok!\n");
         CRect preview(BIOS::LCD::Width-60, BIOS::LCD::Height-80, BIOS::LCD::Width, BIOS::LCD::Height);
-#if 0
-        BIOS::LCD::BufferBegin(preview);
-        while (!BIOS::KEY::GetKey())
+        BIOS::KEY::EKey key;
+        bool pause = false;
+        bool save = false;
+        int index = GetFreeIndex();
+        while ((key = BIOS::KEY::GetKey()) != BIOS::KEY::Escape)
         {
-            if (!Grab())
+            if (key == BIOS::KEY::F4)
+              save = !save;
+            if (key == BIOS::KEY::F3)
+              pause = !pause;
+            if (pause)
             {
-                Flush();
-                BIOS::LCD::BufferBegin(preview);
+              Flush();
+              continue;
             }
-        }
-        BIOS::LCD::BufferEnd();
-#else
-//        BIOS::LCD::BufferBegin(preview);
-//        for (int i=0; i<20; i++)
-//            if (!Grab())
-//            {
-//                Flush();
-//                BIOS::LCD::BufferBegin(preview);
-//            }
-//        BIOS::LCD::BufferEnd();
-        while (!BIOS::KEY::GetKey())
-        {
-            BIOS::LCD::BufferBegin(preview);
+
+            APP::Status("Preview 80x60px 8bpp");
             for (int i=0; i<10; i++)
-                if (!Grab())
+                if (!GrabPreview())
                 {
                     CONSOLE::Print("#");
                     Flush();
                     BIOS::LCD::BufferBegin(preview);
                 }
-            BIOS::LCD::BufferEnd();
+            APP::Status("Transfer 320x240 jpeg");
             DisplayJpeg();
+            if (save)
+            {
+              char name[16];
+              char temp[32];
+              sprintf(name, "img%03d.jpg", index++);
+              sprintf(temp, "Saving %s...", name);
+              APP::Status(temp);
+              if (!GrabJpeg(name))
+              {
+                APP::Status("Saving Failed!");
+                BIOS::SYS::DelayMs(200);
+              }
+            }
         }
-/*
-        GrabJpeg("mca25a.jpg");
-        Grab();
-        GrabJpeg("mca25b.jpg");
-        Grab();
-        GrabJpeg("mca25c.jpg");
-*/
-#endif
         Gpio::SetLevel(Gpio::BASEB, Gpio::P3, 0);
+        return true;
+    }
+
+    int GetFreeIndex()
+    {
+        for (int i=0; i<99; i++)
+        {
+            char test[16];
+            sprintf(test, "img%03d.jpg", i);
+            if (!Exists(test))
+                return i;
+        }
+        _ASSERT(!"Too many files");
+        return 100;
+    }
+
+    bool Exists(char* fileName)
+    {
+        if (BIOS::FAT::Open(fileName, BIOS::FAT::EIoMode::IoRead) != BIOS::FAT::EResult::EOk)
+            return false;
+        
+        BIOS::FAT::Close();
         return true;
     }
 
@@ -340,25 +352,8 @@ public:
                 }
             }
             uint8_t rd = BIOS::GPIO::UART::Read();
-            /*
-            if (rd == 0x7d)
-            {
-                CONSOLE::Print("*");
-                while (!BIOS::GPIO::UART::Available())
-                {
-                    if (BIOS::SYS::GetTick()-t0 > 1000)
-                    {
-                        CONSOLE::Print("Timeout!");
-                        Check("Tmo");
-                        return "";
-                    }
-                }
-                rd = BIOS::GPIO::UART::Read() ^ 0x20;
-            }*/
             buffer[cnt] = rd;
-#if 1
-//            if (cnt > 3 && cnt == 5 + (buffer[3] >> 1) && buffer[cnt] != '\xF9')
-//                marked = true;
+
             if (cnt > 3 && cnt >= 5 + (buffer[3] >> 1))
             {
                 if (rd != 0xf9)
@@ -369,38 +364,10 @@ public:
                     _ASSERT(rd == 0xf9);
                     buffer[++cnt] = rd;
                 }
-                /*
-//                _ASSERT(rd == 0xf9);
-                  if (rd != 0xf9)
-                  {
-                        CONSOLE::Print("Term wrong %02x; ", rd);
-                    while (!BIOS::GPIO::UART::Available());
-                        CONSOLE::Print("%02x ", BIOS::GPIO::UART::Read());
-                    while (!BIOS::GPIO::UART::Available());
-                        CONSOLE::Print("%02x ", BIOS::GPIO::UART::Read());
-                    while (!BIOS::GPIO::UART::Available());
-                        CONSOLE::Print("%02x ", BIOS::GPIO::UART::Read());
+                readMuxBytes = cnt;
+                break;
+            }
 
-                   return "";
-                }*/
-                readMuxBytes = cnt;
-                /*
-                if (marked)
-                {
-                    CONSOLE::Print("Unal%d: ", readMuxBytes+1);
-                    for (int i=0; i<readMuxBytes+1; i++)
-                        CONSOLE::Print("%02x ", buffer[i]);
-                    CONSOLE::Print("\n");
-                }*/
-                break;
-            }
-#else
-            if ((cnt>0 && buffer[cnt] == '\xF9'))
-            {
-                readMuxBytes = cnt;
-                break;
-            }
-#endif
             if (cnt==0 && buffer[cnt] != '\xF9')
             {
                 CONSOLE::Print("Wrong start! (%02x)", rd);
@@ -458,6 +425,7 @@ public:
                 Send("\r\nOK\r\n");
                 CONSOLE::Print("Switching to 460.8 kbps\n");
                 BIOS::GPIO::UART::Setup(460800, (BIOS::GPIO::UART::EConfig)0);
+                APP::Status("AT mode @ 460800 bps");
             }
             if (strcmp(msg, "AT+CMUX=?") == 0)
                 Send("\r\n+CMUX: (0),(0),(1-7),(31),(10),(3),(30),(10),(1-7)\r\nOK\r\n");
@@ -473,32 +441,24 @@ public:
 
     bool InitCmux()
     {
-        CONSOLE::Print("A");
+        APP::Status("MUX mode @ 460800 bps");
         if (!CheckMux2(0x03, 0x3F, ""))
             return false;
         Send2(0x03, 0x73, "");
-        CONSOLE::Print("B");
         if (!CheckMux2(0x23, 0x3F, ""))
             return false;
         Send2(0x23, 0x73, "");
-        CONSOLE::Print("C");
-
         if (!CheckMux2(0x03, 0xEF, "\xE3\x05\x23\x8D"))
             return false;
         Send2(0x01, 0xEF, "\xE3\x07\x23\x0C\x01");
-        CONSOLE::Print("D");
-
         if (!CheckMux2P(0x03, 0xEF, "\xE1\x07\x23\x0C\x01"))
             return false;
         Send2(0x01, 0xEF, "\xE1\x05\x23\x8D");
         if (!CheckMux2(0x23, 0xEF, "AT*EACS=17,1\r"))
             return false;
-        CONSOLE::Print("E");
         Send2(0x21, 0xEF, "\r\nOK\r\n");
         if (!CheckMux2(0x23, 0xEF, "AT+CSCC=1,199\r"))
             return false;
-        CONSOLE::Print("F");
-
         Send2(0x21, 0xEF, "\r\n+CSCC: E3\r\n");
         Send2(0x21, 0xEF, "\r\nOK\r\n");
         if (!CheckMux2(0x23, 0xEF, "AT+CSCC=2,199,B9\r"))
@@ -557,9 +517,9 @@ public:
         Send2(0x81, 0xEF, "\x83\x00\x03");
     }
 
-    template <typename T> bool Transfer(int length, /*void(*handler)(uint8_t* buf, int len, int ofs)*/ T handler)
-//    bool Transfer(int length, void(*handler)(uint8_t* buf, int len, int ofs))
+    template <typename T> bool Transfer(int length, T handler)
     {
+        // TODO: join!
         if (length == 506)
         {
             int extrabufi = 0;
@@ -589,10 +549,10 @@ public:
 
         while (length <= 0 || realBytes < length)
         {
-            ReadMux(false);
+            ReadMux(false, true);
             if (readMuxBytes == 0)
             {
-                CONSOLE::Print("tmo");
+                //CONSOLE::Print("tmo");
                 // timeout
                 if (extrabufi != 0)
                     handler(extrabuf+6, extrabufi-6, sentBytes);
@@ -619,8 +579,6 @@ public:
             } else
             if (length > 0 && realBytes + packetLen >= length)
             {
-//                if (realBytes + packetLen != length)
-//                    CONSOLE::Print("[%d+%d=%d,%d]", realBytes, packetLen, length, extrabufi);
                 // TODO: -6 ???
                 _ASSERT(realBytes + packetLen-6 == length);
                 _ASSERT(extrabufi > 6);
@@ -632,27 +590,14 @@ public:
         return true;
     }
     
-    bool Grab()
+    bool GrabPreview()
     {
-        unsigned char state;
-        unsigned char datapos;
-
-        static int sum = 0;
-        sum = 0;
-        static int index;
-        index = -20;
         auto PushPixel = [](uint8_t d) {
-            sum++;
             int r = ((d & 0b11100000) >> 5) << 5;
             int g = ((d & 0b00011100) >> 2) << 5;
             int b = ((d & 0b00000011) >> 0) << 6;
             uint16_t c = RGB565RGB(r, g, b);
             BIOS::LCD::BufferWrite(c);
-        };
-        auto PushByte = [&](uint8_t d) {
-            if (index >= 0 && index < 80*60)
-                PushPixel(d);
-            index++;
         };
 
         // Everything should be drained
@@ -662,21 +607,24 @@ public:
         Send2(0x81, 0xef, "0\"/>B\x00!x-bt/imaging-monitoring-");
         Send2(0x81, 0xef, "image\x00\x4c\x00\x06\x06\x01\x80");
 
-        static int counter = 0;
-        static int counter2 = 0;
-        counter = 0;
-        counter2 = 0;
         while (1)
         {
             if (Transfer(80*60+20, [&](uint8_t* buf, int len, int ofs)
             {
-              if (ofs == 0)
-              {
-                buf += 20;
-                len -= 20;
-              }
               for (int i=0; i<len; i++)
+              {
+                if (ofs+i-20 < 0)
+                  continue;
+                if ((ofs+i-20)%80 == 0)
+                {
+                  int row = (ofs+i-20)/80;
+                  BIOS::LCD::BufferBegin(CRect(BIOS::LCD::Width-80, BIOS::LCD::Height-60-14+row,
+                    BIOS::LCD::Width, BIOS::LCD::Height-60-14+row+1));
+                }
                 PushPixel(buf[i]);
+                if ((ofs+i-20)%80 == 79)
+                  BIOS::LCD::BufferEnd();
+              }
             }))
             {
                 break;
@@ -686,46 +634,28 @@ public:
             else
                 break;
         }
-        /*
-        SendAck();
-        if (!CheckMux2(0x83, 0xEF, "\xA0\x00\x03"))
-        {
-            CONSOLE::Print("Wrong terminator!\n");
-            return false;
-        }
-
-        if (BIOS::GPIO::UART::Available())
-        {
-            if (!CheckMux2(0x23, 0xEF, "AT*ECUR=41\r"))
-            {
-                CONSOLE::Print("Wrong terminator!\n");
-                return false;
-            }
-        }
-*/
         _ASSERT(!BIOS::GPIO::UART::Available())
         return true;
     }
     
-    void GrabJpeg(const char* name)
+    bool GrabJpeg(const char* name)
     {
-        CONSOLE::Print("Jpeg:\n");
-
-        //_ASSERT(sizeof(gFatSharedBuffer) >= BIOS::SYS::GetAttribute(BIOS::SYS::EAttribute::DiskSectorSize));
-        //BIOS::FAT::SetSharedBuffer(gFatSharedBuffer);
+        _ASSERT(sizeof(jpeg.tjpg_work) >= BIOS::SYS::GetAttribute(BIOS::SYS::EAttribute::DiskSectorSize));
+        BIOS::FAT::SetSharedBuffer(jpeg.tjpg_work);
         mWriter.Open((char*)name);
 
         Send2(0x81, 0xef, "\x83\x00\x82q\x00X<monitoring-command versi");
         Send2(0x81, 0xef, "on=\"1.0\" take-pic=\"NO\" send-pix");
-        Send2(0x81, 0xef, "el-size=\"320*240\" zoom=\"10\"/>B\x00");
+        Send2(0x81, 0xef, "el-size=\"640*480\" zoom=\"10\"/>B\x00");
         Send2(0x81, 0xef, "!x-bt/imaging-monitoring-image\x00");
         Send2(0x81, 0xef, "L\x00\x06\x06\x01\x80");
-        Transfer(0, [](uint8_t* buf, int len, int ofs)
+        bool ok = Transfer(0, [](uint8_t* buf, int len, int ofs)
         {
           mWriter << CStream(buf, len);
         });
         mWriter.Close();
-        //BIOS::FAT::SetSharedBuffer(nullptr);
+        BIOS::FAT::SetSharedBuffer(nullptr);
+        return ok;
     }
 
     void DisplayJpeg()
@@ -739,7 +669,6 @@ public:
         static uint8_t* tempBuf;
         static int tempLen;
         static CMca25* self;
-        //while (!BIOS::GPIO::UART::Available());
         bool ok = Transfer(506, [](uint8_t* buf, int len, int ofs) {
           tempBuf = buf;
           tempLen = len;
@@ -755,7 +684,6 @@ public:
             // transfer single 512 chunk, should end with ACK, we have
             // plenty time to decode jpeg stream
             self->SendAck();
-            //while (!BIOS::GPIO::UART::Available());
             bool ok = self->Transfer(506, [](uint8_t* buf, int len, int ofs) {
               tempBuf = buf;
               tempLen = len;
@@ -773,17 +701,6 @@ public:
             _ASSERT(0);
             return;
         }
-//        if (!CheckMux2(0x23, 0xEF, "AT*ECUR=41\r"))
-//        {
-//            _ASSERT(0);
-//            return;
-//        }
-
-//        ReadMux();
-//        CONSOLE::Print("other:");
-//        for (int i=0; i<readMuxBytes+1; i++)
-//            CONSOLE::Print("%02x ", buffer[i]);
-//        CONSOLE::Print("\n");
         
         _ASSERT (!BIOS::GPIO::UART::Available());
     }
