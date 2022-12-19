@@ -5,62 +5,121 @@
 #include "stm32f10x.h"
 #include "stm32f10x_spi.h"
 #include "stm32f10x_dma.h"
-//#include "../../os_host/library/STM32F10x_StdPeriph_Driver/src/stm32f10x_spi.c"
-//#include "../../os_host/library/STM32F10x_StdPeriph_Driver/src/stm32f10x_rcc.c"
-//#undef FLAG_Mask
-//#include "../../os_host/library/STM32F10x_StdPeriph_Driver/src/stm32f10x_dma.c"
-
 #include "gpio.h"
-//#include <math.h>
 
-//#include "../../../os_host/source/framework/BufferedIo.h"
-uint8_t gFatSharedBuffer[BIOS::FAT::SharedBufferSize];
-uint16_t* sharedBuffer16 = (uint16_t*)gFatSharedBuffer;
-//CBufferedWriter mWriter;
-
+uint16_t sectorA[BIOS::FAT::SharedBufferSize/2];
+uint16_t sectorB[BIOS::FAT::SharedBufferSize/2];
+uint16_t* active = sectorA;
+volatile uint16_t* ready = nullptr;
+int sectorOffset = 0;
+const int N = 1024+1024;
+uint16_t buffer[N+4];
+int pcmOffset = -1;
+volatile int overflow = 0;
 volatile bool flag1 = false;
 volatile bool flag2 = false;
+volatile int ofsChange = 0;
+uint16_t header[8];
+uint16_t header0[8];
 
 // dma table: https://deepbluembedded.com/stm32-dma-tutorial-using-direct-memory-access-dma-in-stm32/
 
 #define __irq__ __attribute__((interrupt("IRQ"), optimize("O2")))
 
-void crash_with_message(const char *message, void *caller)
+int32_t dc = -8192; //-16384;
+
+void Process(uint16_t* pbuf)
 {
-  BIOS::DBG::Print("Error: %s", message);
-  while (1);
-}
+  // [aaaaaaaa aaaaaaaa][bb000000 00000000]
+  //  aaaaaaaa aaaaaaaa  00000000 00000000  aa << 16
+  //  aaaaaaaa aaaaaaaa  bb000000 00000000  (aa << 16) | b
+  //  ssssssss ssssssaa  aaaaaaaa aaaaaabb  ((aa << 16) | b)>>14
+
+  // 18 bits
+  int n = N/2/4;
+  while (n--)
+  {
+    int32_t vv1 = (pbuf[0]<<16)|pbuf[1];
+    vv1 >>= 14;
+    pbuf += 4;
+    vv1 -= dc;
+    if (vv1 > 32767)
+      vv1 = 32767;
+    if (vv1 < -32767)
+      vv1 = -32767;
+    active[sectorOffset++] = vv1;
+  }
+};
 
 void __irq__ DMA1_Channel4_IRQHandler()
 {
+
     if (DMA1->ISR & DMA_ISR_TEIF4)
     {
-        crash_with_message("Oh noes: DMA channel 4 transfer error!",
-            __builtin_return_address(0)
-        );
-        while(1);
+      _ASSERT(0);
     }
     else if (DMA1->ISR & DMA_ISR_HTIF4)
-    {
-//        process_samples(&adc_fifo[0]);
-        flag1 = true;
-        DMA1->IFCR = DMA_IFCR_CHTIF4;
-        if (DMA1->ISR & DMA_ISR_TCIF4)
-        {
-            crash_with_message("Oh noes: ADC fifo overflow in HTIF", __builtin_return_address(0));
-            while(1);
-        }
+    { 
+/*
+      header[0] = buffer[0];
+      header[1] = buffer[1];
+      header[2] = buffer[2];
+      header[3] = buffer[3];
+      header[4] = buffer[4];
+      header[5] = buffer[5];
+      header[6] = buffer[6];
+      header[7] = buffer[7];
+ */
+      int newOfs = 0;
+      if (buffer[0] == 0 && buffer[3] == 0)
+        newOfs = 1;
+      else if (buffer[0] == 0 && buffer[1] == 0)
+        newOfs = 2;
+      else
+        newOfs = 0;
+      if (pcmOffset != newOfs)
+      {
+        pcmOffset = newOfs;
+        ofsChange++;
+      }
+
+      Process(buffer+pcmOffset);
+      if (sectorOffset == BIOS::FAT::SharedBufferSize/2)
+      {
+        if (ready)
+          overflow++;
+
+        ready = active;
+        active = active == sectorA ? sectorB : sectorA;
+        sectorOffset = 0;
+      }
+      DMA1->IFCR = DMA_IFCR_CHTIF4;
+      _ASSERT(!(DMA1->ISR & DMA_ISR_TCIF4));
     }
     else if (DMA1->ISR & DMA_ISR_TCIF4)
-    {
-//        process_samples(&adc_fifo[ADC_FIFO_HALFSIZE]);
-        flag2 = true;
+    { 
+      if (pcmOffset == -1)
+      {
         DMA1->IFCR = DMA_IFCR_CTCIF4;
-        if (DMA1->ISR & DMA_ISR_HTIF4)
-        {
-            crash_with_message("Oh noes: ADC fifo overflow in TCIF", __builtin_return_address(0));
-            while(1);
-        }
+        _ASSERT(!(DMA1->ISR & DMA_ISR_HTIF4));
+        return;
+      }
+
+      buffer[N] = buffer[0];
+      buffer[N+1] = buffer[1];
+      buffer[N+2] = buffer[2]; 
+      Process(buffer+N/2+pcmOffset);
+      if (sectorOffset == BIOS::FAT::SharedBufferSize/2)
+      {
+        if (ready)
+          overflow++;
+
+        ready = active;
+        active = active == sectorA ? sectorB : sectorA;
+        sectorOffset = 0;
+      }
+      DMA1->IFCR = DMA_IFCR_CTCIF4;
+      _ASSERT(!(DMA1->ISR & DMA_ISR_HTIF4));
     }
 }
 
@@ -74,13 +133,13 @@ void __irq__ DMA1_Channel4_IRQHandler()
   PC6 I2S2_MCK
 */
 
-const int N = 2048+1024+1024;
-uint16_t buffer[N+4];
 
 __attribute__((__section__(".entry")))
 int main(void)
 {
     APP::Init("I2S Test1 - record");
+    memset(sectorB, 1, sizeof(sectorB));
+    memset(sectorB, 1, sizeof(sectorB));
 
     Gpio::SetState(Gpio::BASEB, Gpio::P1, Gpio::StateInput | Gpio::StateInputFloating);
     Gpio::SetState(Gpio::BASEB, Gpio::P2, Gpio::StateInput | Gpio::StateInputFloating);
@@ -103,7 +162,7 @@ int main(void)
     initStruct.I2S_Standard = I2S_Standard_Phillips;
     initStruct.I2S_DataFormat = I2S_DataFormat_24b;
     initStruct.I2S_MCLKOutput = I2S_MCLKOutput_Disable;
-    initStruct.I2S_AudioFreq = I2S_AudioFreq_16k; //I2S_AudioFreq_44k; // 8, 11, 16, 22, 32, 44, 48, 96, 192
+    initStruct.I2S_AudioFreq = I2S_AudioFreq_32k; //I2S_AudioFreq_44k; // 8, 11, 16, 22, 32, 44, 48, 96, 192
     initStruct.I2S_CPOL = I2S_CPOL_Low;
 
     BIOS::OS::SetInterruptVector(BIOS::OS::EInterruptVector::IDMA1_Channel4_IRQ, DMA1_Channel4_IRQHandler);
@@ -141,82 +200,122 @@ int main(void)
     NVIC_EnableIRQ(DMA1_Channel4_IRQn);
     NVIC_SetPriority(DMA1_Channel4_IRQn, 0); // Highest priority
 
-        DMA_Cmd (DMA1_Channel4, ENABLE);
+    BIOS::FAT::Open((char*)"record.pcm", BIOS::FAT::IoWrite);
 
+    DMA_Cmd (DMA1_Channel4, ENABLE);
+    for (int i=0; i<500; i++)
+    {
+      while (!ready);
+      ready = nullptr;
+    }
+    pcmOffset = -1;
 
-        _ASSERT(sizeof(gFatSharedBuffer) >= BIOS::SYS::GetAttribute(BIOS::SYS::EAttribute::DiskSectorSize));
-        //BIOS::FAT::SetSharedBuffer(gFatSharedBuffer);
-        //mWriter.Open((char*)"record.pcm");
-      BIOS::FAT::Open((char*)"record.pcm", BIOS::FAT::IoWrite);
-
-    BIOS::SYS::DelayMs(30);
-
-    int ofs = 0;
-    if (buffer[0] == 0 && buffer[3] == 0)
-      ofs = 1;
-    else if (buffer[0] == 0 && buffer[1] == 0)
-      ofs = 2;
-    if (ofs != 0)
-      CONSOLE::Print("Wave ofs %d!", ofs);
-    flag1 = 0;
-    flag2 = 0;
-//    int32_t sum;
-    int32_t dc = -20000;
-//    int32_t targetdc = dc;
-//    int amp = 256;
-    int totalSamples = 0;
-    int bufferOffset = 0;
+    int totalBytes = 0;
     while (!BIOS::KEY::GetKey())
     {
-      if (flag1)
+      // f8f09 8000 0000 0000
+/*
+      {EVERY(4000)
       {
-        flag1 = 0;
-        int j = ofs;
-        for (int i=0; i<N/2; i+=4)
-        {
-          int32_t vv1 = (buffer[j]<<4)|(buffer[j+1]>>12);
-          if (vv1 & 0x80000)
-            vv1 |= ~0x7ffff;
-          vv1 -= dc;
-          j += 4;
-          sharedBuffer16[bufferOffset++] = vv1;
-          if (bufferOffset == BIOS::FAT::SharedBufferSize/2)
-          {
-            totalSamples += bufferOffset;
-            bufferOffset = 0;
-            BIOS::FAT::Write((uint8_t*)sharedBuffer16);
-          }
-        }
-        if (flag1)
-          CONSOLE::Print("X");
+        CONSOLE::Print("<%04x %04x %04x %04x-%04x %04x %04x>\n", 
+          header0[0], header0[1], header0[2], header0[3], header0[4], header0[5], header0[6]);
+      }}
+      EVERY(1000)
+      {
+        CONSOLE::Print("%d %04x %04x %04x %04x-%04x %04x %04x\n", 
+          pcmOffset, header[0], header[1], header[2], header[3], header[4], header[5], header[6]);
       }
-
-      if (flag2)
+*/
+      if (ready)
+      {
+        uint8_t* save = (uint8_t*)ready;
+        ready = nullptr;
+//        CONSOLE::Print(".");
+        BIOS::FAT::Write(save);
+        totalBytes += BIOS::FAT::SharedBufferSize;
+/*
+        if (active == nullptr)
+          CONSOLE::Print("g");
+        else if (active != (uint16_t*)ready)
+          CONSOLE::Print("p");
+        else if (active == (uint16_t*)ready)
+          CONSOLE::Print("e");
+        else
+          _ASSERT(0);
+*/
+      }
+      if (overflow)
+      {
+        overflow = 0;
+        CONSOLE::Print("O");
+      }
+      if (ofsChange)
+      {
+        ofsChange = 0;
+        CONSOLE::Print(">");
+      }
+#if 0
+      while (!flag1)
+      {
+      }
+      //if (flag1)
+      {
+        if (flag2)
+          CONSOLE::Print("F");
+        flag1 = 0;
+        Process(ofs);
+        if (flag1)
+          CONSOLE::Print("P");
+      }
+      while (!flag2)
+      {
+      }
+      //if (flag2)
       {
         flag2 = 0;
-        int j = N/2+ofs;
         buffer[N] = buffer[0];
         buffer[N+1] = buffer[1];
         buffer[N+2] = buffer[2];
         buffer[N+3] = buffer[3];
-        for (int i=0; i<N/2; i+=4)
-        {
-          int32_t vv1 = (buffer[j]<<4)|(buffer[j+1]>>12);
-          if (vv1 & 0x80000)
-            vv1 |= ~0x7ffff;
-          vv1 -= dc;
-          j += 4;
-          sharedBuffer16[bufferOffset++] = vv1;
-          if (bufferOffset == BIOS::FAT::SharedBufferSize/2)
-          {
-            totalSamples += bufferOffset;
-            bufferOffset = 0;
-            BIOS::FAT::Write((uint8_t*)sharedBuffer16);
-          }
-        }
+        Process(N/2+ofs);
+        pOldSysTick();
         if (flag2)
-          CONSOLE::Print("Y");
+          CONSOLE::Print("Q");
       }
+      while (!flag1)
+      {
+      }
+      //if (flag1)
+      {
+        flag1 = 0;
+        Process(ofs);
+        pOldSysTick();
+        if (flag1)
+          CONSOLE::Print("R");
+      }
+      while (!flag2)
+      {
+      }
+      //if (flag2)
+      {
+        flag2 = 0;
+        buffer[N] = buffer[0];
+        buffer[N+1] = buffer[1];
+        buffer[N+2] = buffer[2];
+        buffer[N+3] = buffer[3];
+        Process(N/2+ofs);
+        if (flag2)
+          CONSOLE::Print("S");
+      }
+      _ASSERT(bufferOffset == BIOS::FAT::SharedBufferSize/2);
+          totalSamples += bufferOffset;
+          bufferOffset = 0;
+          BIOS::FAT::Write((uint8_t*)sharedBuffer16);
+//        if (flag1)
+//          CONSOLE::Print("T");
+        if (flag2)
+          CONSOLE::Print("U");
+#endif
 #if 0
       if (flag1)
       {
@@ -291,13 +390,13 @@ int main(void)
       }
 #endif
     }
+    DMA_Cmd (DMA1_Channel4, DISABLE);
 
-    BIOS::FAT::Close(totalSamples*2);
+    BIOS::FAT::Close(totalBytes);
 
 //        mWriter.Close();
 //        BIOS::FAT::SetSharedBuffer(nullptr);
 
-    DMA_Cmd (DMA1_Channel4, DISABLE);
     I2S_Cmd(SPI2, DISABLE);
     Gpio::SetState(Gpio::BASEB, Gpio::P1MOSI, Gpio::StateInput | Gpio::StateInputFloating);
     Gpio::SetState(Gpio::BASEB, Gpio::P2MISO, Gpio::StateInput | Gpio::StateInputFloating);
@@ -305,6 +404,7 @@ int main(void)
     Gpio::SetState(Gpio::BASEB, Gpio::P4CS, Gpio::StateInput | Gpio::StateInputFloating);
 
     // warning: where does it point?
+    //BIOS::OS::SetInterruptVector(BIOS::OS::ISysTick, pOldSysTick);
     BIOS::OS::SetInterruptVector(BIOS::OS::EInterruptVector::IDMA1_Channel5_IRQ, [](){});
 
     CONSOLE::Print("\n\nDone. Press any key to exit.");

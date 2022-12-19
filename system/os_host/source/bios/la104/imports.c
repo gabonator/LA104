@@ -131,14 +131,14 @@ enum
 
 void ExtFlash_CS_LOW(void)
 {
-    __Bios(FLSHDEV, DSBL);
-//  GPIO_ResetBits(DISK_nSS1_PORT, DISK_nSS1_PIN);
+  // PB1 = 0
+  (*(uint16_t*)0x42218184) = 0;
 }
 
 void ExtFlash_CS_HIGH(void)
 {
-    __Bios(FLSHDEV, ENBL);
-//  GPIO_SetBits(DISK_nSS1_PORT,   DISK_nSS1_PIN);
+  // PB1 = 1
+  (*(uint16_t*)0x42218184) = 1;
 }
 
 void xBeep(bool b)

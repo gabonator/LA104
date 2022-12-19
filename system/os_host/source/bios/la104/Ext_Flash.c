@@ -190,17 +190,9 @@ u8 ExtFlashReadByte(void)
 *******************************************************************************/
 u8 ExtFlashSendByte(u8 Byte)
 {
-    u32 Tout = 0;
-    while (SPI_I2S_GetFlagStatus(SPIx, SPI_I2S_FLAG_TXE) == RESET)
-    {
-        if (Tout++ > TMAX) return 255;
-    }
+    while (SPI_I2S_GetFlagStatus(SPIx, SPI_I2S_FLAG_TXE) == RESET);
     SPI_I2S_SendData(SPIx, Byte);
-    Tout = 0;
-    while (SPI_I2S_GetFlagStatus(SPIx, SPI_I2S_FLAG_RXNE) == RESET)
-    {
-        if (Tout++ > TMAX) return 255;
-    }
+    while (SPI_I2S_GetFlagStatus(SPIx, SPI_I2S_FLAG_RXNE) == RESET);
     return SPI_I2S_ReceiveData(SPIx);
 }
 
