@@ -32,6 +32,14 @@ public:
 		m_nOffset = 0;
 	}
 
+	CStream( const char* strBuffer, int nLength )
+	{
+	        // TODO: ugly!
+		m_pBuffer = (char*)(void*)strBuffer;
+		m_nLength = nLength;
+		m_nOffset = 0;
+	}
+
 	void Reset()
 	{
 		m_nOffset = 0;
@@ -73,6 +81,12 @@ public:
 		stream >> *this;
 		return *this;
 	}
+
+	CStream& operator <<(uint32_t t)
+	{
+		return *this << CStream(&t, sizeof(t));
+	}
+
 	const int& GetLength() const
 	{
 		return m_nLength;

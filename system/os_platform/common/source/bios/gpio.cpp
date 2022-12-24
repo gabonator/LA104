@@ -66,7 +66,7 @@ namespace BIOS
             gHal->UartClose();
         }
 
-      bool Available()
+      int Available()
       {
           return gHal->UartAvailable();
       }

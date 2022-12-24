@@ -1,7 +1,18 @@
+/*
+  SPH0645
+  SEL     - N/C
+  LRCL    - P4
+  DOUT    - P1
+  BCLK    - P3
+  GND     - GND
+  3V      - 3V
+*/
+
 #include <library.h>
 #include "../../os_host/source/framework/Console.h"
 #include "../../os_host/source/framework/SimpleApp.h"
 #include "../../os_host/source/framework/BufferedIo.h"
+#include "../../os_host/source/framework/Serialize.h"
 #include "stm32f10x.h"
 #include "stm32f10x_spi.h"
 #include "stm32f10x_dma.h"
@@ -21,6 +32,9 @@ volatile bool flag2 = false;
 volatile int ofsChange = 0;
 uint16_t header[8];
 uint16_t header0[8];
+volatile int32_t wmin = 0;
+volatile int32_t wmax = 0;
+uint16_t indicator[200];
 
 // dma table: https://deepbluembedded.com/stm32-dma-tutorial-using-direct-memory-access-dma-in-stm32/
 
@@ -37,6 +51,8 @@ void Process(uint16_t* pbuf)
 
   // 18 bits
   int n = N/2/4;
+  int xmin = 0, xmax = 0, xdc = 0;
+//  xmin = xmax = (((pbuf[0]<<16)|pbuf[1])>>14)-dc;
   while (n--)
   {
     int32_t vv1 = (pbuf[0]<<16)|pbuf[1];
@@ -47,9 +63,28 @@ void Process(uint16_t* pbuf)
       vv1 = 32767;
     if (vv1 < -32767)
       vv1 = -32767;
+    if (xmin==0 && xmax==0)
+    {
+      xmin = xmax = vv1;
+    } else {
+      if (vv1 < xmin)
+        xmin = vv1;
+      if (vv1 > xmax)
+        xmax = vv1;
+    }
+    if (vv1 > 0)
+      xdc++;
+    if (vv1 < 0)
+      xdc--;
     active[sectorOffset++] = vv1;
   }
-};
+  wmin = xmin;
+  wmax = xmax;
+  if (xdc > 0)
+    dc++;
+  if (xdc < 0)
+    dc--;
+}
 
 void __irq__ DMA1_Channel4_IRQHandler()
 {
@@ -137,9 +172,8 @@ void __irq__ DMA1_Channel4_IRQHandler()
 __attribute__((__section__(".entry")))
 int main(void)
 {
-    APP::Init("I2S Test1 - record");
-    memset(sectorB, 1, sizeof(sectorB));
-    memset(sectorB, 1, sizeof(sectorB));
+    const int sampleRate = I2S_AudioFreq_32k;
+    APP::Init("I2S Recording @ 32kHz");
 
     Gpio::SetState(Gpio::BASEB, Gpio::P1, Gpio::StateInput | Gpio::StateInputFloating);
     Gpio::SetState(Gpio::BASEB, Gpio::P2, Gpio::StateInput | Gpio::StateInputFloating);
@@ -162,7 +196,7 @@ int main(void)
     initStruct.I2S_Standard = I2S_Standard_Phillips;
     initStruct.I2S_DataFormat = I2S_DataFormat_24b;
     initStruct.I2S_MCLKOutput = I2S_MCLKOutput_Disable;
-    initStruct.I2S_AudioFreq = I2S_AudioFreq_32k; //I2S_AudioFreq_44k; // 8, 11, 16, 22, 32, 44, 48, 96, 192
+    initStruct.I2S_AudioFreq = sampleRate; //I2S_AudioFreq_44k; // 8, 11, 16, 22, 32, 44, 48, 96, 192
     initStruct.I2S_CPOL = I2S_CPOL_Low;
 
     BIOS::OS::SetInterruptVector(BIOS::OS::EInterruptVector::IDMA1_Channel4_IRQ, DMA1_Channel4_IRQHandler);
@@ -200,202 +234,90 @@ int main(void)
     NVIC_EnableIRQ(DMA1_Channel4_IRQn);
     NVIC_SetPriority(DMA1_Channel4_IRQn, 0); // Highest priority
 
-    BIOS::FAT::Open((char*)"record.pcm", BIOS::FAT::IoWrite);
+    BIOS::FAT::Open((char*)"record.wav", BIOS::FAT::IoWrite);
+
+    struct WaveFormat 
+    {
+      uint16_t wFormatTag{1}; // PCM
+      uint16_t nChannels{1};
+      uint32_t nSamplesPerSec{sampleRate};
+      uint32_t nAvgBytesPerSec{sampleRate*2};
+      uint16_t nBlockAlign{2};
+      uint16_t wBitsPerSample{16};
+      uint16_t cbSize{0};
+    } WaveFormat;
+
+    memset(sectorA, 0, sizeof(sectorA));
+    CStream((uint8_t*)sectorA, sizeof(sectorA))
+      << CStream("RIFF", 4)
+      << (uint32_t)-1   // 4+4+sizeof(WaveFormat)+4+size
+      << CStream("WAVE", 4)
+        << CStream("fmt ", 4)
+        << (uint32_t)sizeof(WaveFormat)
+        << CStream(&WaveFormat, sizeof(WaveFormat))
+        << CStream("data", 4)
+        << (uint32_t)-1;
+
+    // save header, pad with zeroes to align to sector size
+    BIOS::FAT::Write((uint8_t*)sectorA);
 
     DMA_Cmd (DMA1_Channel4, ENABLE);
-    for (int i=0; i<500; i++)
-    {
-      while (!ready);
-      ready = nullptr;
-    }
-    pcmOffset = -1;
-
+    BIOS::LCD::BufferBegin(CRect(0, 14, BIOS::LCD::Width, 14+128));
     int totalBytes = 0;
+    int inhibit = 20;
     while (!BIOS::KEY::GetKey())
     {
       // f8f09 8000 0000 0000
-/*
-      {EVERY(4000)
-      {
-        CONSOLE::Print("<%04x %04x %04x %04x-%04x %04x %04x>\n", 
-          header0[0], header0[1], header0[2], header0[3], header0[4], header0[5], header0[6]);
-      }}
-      EVERY(1000)
-      {
-        CONSOLE::Print("%d %04x %04x %04x %04x-%04x %04x %04x\n", 
-          pcmOffset, header[0], header[1], header[2], header[3], header[4], header[5], header[6]);
-      }
-*/
       if (ready)
       {
         uint8_t* save = (uint8_t*)ready;
         ready = nullptr;
-//        CONSOLE::Print(".");
-        BIOS::FAT::Write(save);
-        totalBytes += BIOS::FAT::SharedBufferSize;
-/*
-        if (active == nullptr)
-          CONSOLE::Print("g");
-        else if (active != (uint16_t*)ready)
-          CONSOLE::Print("p");
-        else if (active == (uint16_t*)ready)
-          CONSOLE::Print("e");
-        else
-          _ASSERT(0);
-*/
-      }
-      if (overflow)
-      {
-        overflow = 0;
-        CONSOLE::Print("O");
-      }
-      if (ofsChange)
-      {
-        ofsChange = 0;
-        CONSOLE::Print(">");
-      }
-#if 0
-      while (!flag1)
-      {
-      }
-      //if (flag1)
-      {
-        if (flag2)
-          CONSOLE::Print("F");
-        flag1 = 0;
-        Process(ofs);
-        if (flag1)
-          CONSOLE::Print("P");
-      }
-      while (!flag2)
-      {
-      }
-      //if (flag2)
-      {
-        flag2 = 0;
-        buffer[N] = buffer[0];
-        buffer[N+1] = buffer[1];
-        buffer[N+2] = buffer[2];
-        buffer[N+3] = buffer[3];
-        Process(N/2+ofs);
-        pOldSysTick();
-        if (flag2)
-          CONSOLE::Print("Q");
-      }
-      while (!flag1)
-      {
-      }
-      //if (flag1)
-      {
-        flag1 = 0;
-        Process(ofs);
-        pOldSysTick();
-        if (flag1)
-          CONSOLE::Print("R");
-      }
-      while (!flag2)
-      {
-      }
-      //if (flag2)
-      {
-        flag2 = 0;
-        buffer[N] = buffer[0];
-        buffer[N+1] = buffer[1];
-        buffer[N+2] = buffer[2];
-        buffer[N+3] = buffer[3];
-        Process(N/2+ofs);
-        if (flag2)
-          CONSOLE::Print("S");
-      }
-      _ASSERT(bufferOffset == BIOS::FAT::SharedBufferSize/2);
-          totalSamples += bufferOffset;
-          bufferOffset = 0;
-          BIOS::FAT::Write((uint8_t*)sharedBuffer16);
-//        if (flag1)
-//          CONSOLE::Print("T");
-        if (flag2)
-          CONSOLE::Print("U");
-#endif
-#if 0
-      if (flag1)
-      {
-        flag1 = 0;
-        sum = 0;
-        int l90 = 0;
-        for (int i=0; i<COUNT(buffer)/2; i+=4)
-        {
-          if ((i>>5)&1)
-          {
-            if (targetdc > dc) dc++;
-            if (targetdc < dc) dc--;
-          }
-          int32_t vv1 = (buffer[(i+ofs)%N]<<4)|(buffer[(i+1+ofs)%N]>>12);
-          if (vv1 & 0x80000)
-            vv1 |= ~0x7ffff;
-          vv1 -= dc;
-          vv1 = (vv1 * amp)/256;
-          sum += vv1;
-          vv1 += 20000;
-          if (vv1 < -32767) {vv1 = -32767;}
-          if (vv1 > 32767) {vv1 = 32767;}
-          if (vv1 < -32767*0.9) {amp-=8;}
-          if (vv1 > 32767*0.9) {amp-=8;}
-          if (vv1 < -32767*0.8) {l90++;}
-          if (vv1 > 32767*0.8) {l90++;}
-          mWriter << (uint16_t)vv1;
+        if (inhibit > 0)
+          inhibit--;
+        else {
+          BIOS::FAT::Write(save);
+          totalBytes += BIOS::FAT::SharedBufferSize;
         }
-        if (l90 == 0 && amp < 256)
-          amp++;
-        int newdc = sum/(COUNT(buffer)/2/4);
-        targetdc = (dc*20+newdc*12)/32;
-        if (flag1)
-          CONSOLE::Print("X");
-      }
-
-      if (flag2)
-      {
-        flag2 = 0;
-        sum = 0;
-        int l90 = 0;
-        for (int i=COUNT(buffer)/2; i<COUNT(buffer); i+=4)
+      } else {
+        EVERY(30)
         {
-          if ((i>>5)&1)
+          int cmin = (wmin+32768)*128/65536;
+          int cmax = (wmax+32768)*128/65536;
+          if (cmin > 0) cmin--;
+          if (cmax < 127) cmax++;
+          wmin = 0;
+          wmax = 0;
+          uint16_t base = ((totalBytes>>16) & 1) ? RGB565(2020b0) : RGB565(2050b0);
+          if (inhibit)
+            base = RGB565(404080);
+          if (overflow)
           {
-            if (targetdc > dc) dc++;
-            if (targetdc < dc) dc--;
+            overflow = 0;
+            base = RGB565(d00000);
           }
-          int32_t vv1 = (buffer[(i+ofs)%N]<<4)|(buffer[(i+1+ofs)%N]>>12);
-          if (vv1 & 0x80000)
-            vv1 |= ~0x7ffff;
-          vv1 -= dc;
-          vv1 = (vv1 * amp)/256;
-          sum += vv1;
-          vv1 += 20000;
-          if (vv1 < -32767) {vv1 = -32767;}
-          if (vv1 > 32767) {vv1 = 32767;}
-          if (vv1 < -32767*0.9) {amp-=8;}
-          if (vv1 > 32767*0.9) {amp-=8;}
-          if (vv1 < -32767*0.8) {l90++;}
-          if (vv1 > 32767*0.8) {l90++;}
-          mWriter << (uint16_t)vv1;
+          if (ofsChange)
+          {
+            ofsChange = 0;
+            base = RGB565(d000d0);
+          }
+          for (int i=0; i<128; i++)
+            indicator[i] = base;
+          for (int i=0; i<128; i+=16)
+            indicator[i] = RGB565(202090);
+          for (int i=cmin; i<64; i++)
+            indicator[i] = RGB565(808000);
+          for (int i=64; i<cmax; i++)
+            indicator[i] = RGB565(808000);
+          for (int i=cmin; i<cmax; i++)
+            indicator[i] = RGB565(e0e000);
+          BIOS::LCD::BufferWrite(indicator, 128);
         }
-        if (l90 == 0 && amp < 256)
-          amp++;
-        int newdc = sum/(COUNT(buffer)/2/4);
-        targetdc = (dc*20+newdc*12)/32;
-//        _ASSERT(!flag1 && !flag2);
-        if (flag2)
-          CONSOLE::Print("Y");
-*/
       }
-#endif
     }
+    BIOS::LCD::BufferEnd();
     DMA_Cmd (DMA1_Channel4, DISABLE);
 
     BIOS::FAT::Close(totalBytes);
-
-//        mWriter.Close();
-//        BIOS::FAT::SetSharedBuffer(nullptr);
 
     I2S_Cmd(SPI2, DISABLE);
     Gpio::SetState(Gpio::BASEB, Gpio::P1MOSI, Gpio::StateInput | Gpio::StateInputFloating);

@@ -1,6 +1,7 @@
 #include <library.h>
 #include "../../os_host/source/framework/BufferedIo.h"
 #include "../../os_host/source/framework/Serialize.h"
+uint8_t gFatSharedBuffer[BIOS::FAT::SharedBufferSize];
 
 void _HandleAssertion(const char* file, int line, const char* cond)
 {
@@ -30,6 +31,9 @@ __attribute__((__section__(".entry")))
 #endif
 int _main(void)
 { 
+  _ASSERT(sizeof(gFatSharedBuffer) >= BIOS::SYS::GetAttribute(BIOS::SYS::EAttribute::DiskSectorSize));
+  BIOS::FAT::SetSharedBuffer(gFatSharedBuffer);
+
   BIOS::LCD::Clear(RGB565(404040));
   BIOS::DBG::Print("Dumping SRAM...");
   if (DumpMem("ram.dat", 0x20000000, 48*1024))
@@ -48,6 +52,7 @@ int _main(void)
     BIOS::DBG::Print(" Ok\n");
   else
     BIOS::DBG::Print(" Error\n");
+  BIOS::FAT::SetSharedBuffer(nullptr);
 
   return 0;
 }

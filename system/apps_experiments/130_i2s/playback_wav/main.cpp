@@ -145,10 +145,11 @@ int main(void)
     Gpio::SetState(Gpio::BASEB, Gpio::P4, Gpio::StateInput | Gpio::StateInputFloating);
 
     Gpio::SetState(Gpio::BASEB, Gpio::P1MOSI, Gpio::StateOutput10Mhz | Gpio::StateOutputFunctionPushPull);
-    Gpio::SetState(Gpio::BASEB, Gpio::P2MISO, Gpio::StateInput | Gpio::StateInputFloating);
+    Gpio::SetState(Gpio::BASEB, Gpio::P2MISO, Gpio::StateOutput10Mhz | Gpio::StateOutputPushPull);
+//    Gpio::SetState(Gpio::BASEB, Gpio::P2MISO, Gpio::StateInput | Gpio::StateInputFloating);
     Gpio::SetState(Gpio::BASEB, Gpio::P3SCK2, Gpio::StateOutput10Mhz | Gpio::StateOutputFunctionPushPull);
     Gpio::SetState(Gpio::BASEB, Gpio::P4CS, Gpio::StateOutput10Mhz | Gpio::StateOutputFunctionPushPull);
-
+    Gpio::SetLevel(Gpio::BASEB, Gpio::P2MISO, 0);
     RCC->APB1ENR |= RCC_APB1Periph_SPI2;
     RCC->APB2ENR |= RCC_APB2Periph_GPIOB;
 
@@ -157,7 +158,7 @@ int main(void)
 
     initStruct.I2S_Mode = I2S_Mode_MasterTx;
     initStruct.I2S_Standard = I2S_Standard_Phillips;
-    initStruct.I2S_DataFormat = I2S_DataFormat_32b;
+    initStruct.I2S_DataFormat = I2S_DataFormat_16b;
     initStruct.I2S_MCLKOutput = I2S_MCLKOutput_Disable;
     initStruct.I2S_AudioFreq = I2S_AudioFreq_44k; // 8, 11, 16, 22, 32, 44, 48, 96, 192
     initStruct.I2S_CPOL = I2S_CPOL_Low;
