@@ -134,10 +134,15 @@ module spi_slave(input wire clk, input wire reset,
                      $write("MISO: status with data"); 
                      miso_out_reg <= 1;
                   end else 
+`ifdef _VERILATOR
                   if(counter_read == 7) begin //status, read master to slave successful
                      $write("MISO: STATUS_FPGA_SEND_MASK"); 
                      miso_out_reg <= 1;
-                  end else if(counter_read >= 8 /*&& counter_read <= 31*/) begin
+                  end else
+                  if(counter_read >= 8 /*&& counter_read <= 31*/) begin
+`else
+                  if(counter_read >= 7 /*&& counter_read <= 31*/) begin
+`endif
                      miso_out_reg <= wr_data_reg[0];
                      wr_data_reg[23:0] <= {wr_data_reg[0], wr_data_reg[23:1]};
                   end

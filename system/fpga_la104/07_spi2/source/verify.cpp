@@ -155,8 +155,10 @@ bool verify()
     spi_send(SPI_READ_VEC, no_param, &spi_status);
     Verilator::PrintTrace("read req vector, status: 0x%x\n", spi_status);
 
+#ifdef _VERILATOR
     spi_read(data_read, &spi_status);
     Verilator::PrintTrace("read req vector, skip status: 0x%x\n", spi_status);
+#endif
     //read values the fastest possible
     for (size_t i = 0; i < 4; i++) {
        spi_read(data_read, &spi_status);
