@@ -62,7 +62,7 @@ namespace BIOS
 
     void BufferBegin(const CRect& rc);
     void BufferWrite(uint16_t clr);
-    void BufferWrite(uint16_t* buffer, int length);
+    void BufferWrite(const uint16_t* buffer, int length);
     uint16_t BufferRead();
     void BufferRead(uint16_t* buffer, int length);
     void BufferEnd();

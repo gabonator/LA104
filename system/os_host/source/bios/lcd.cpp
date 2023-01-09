@@ -191,7 +191,7 @@ void BIOS::LCD::BufferWrite(uint16_t clr)
   Set_Pixel(clr);
 }
 
-void BIOS::LCD::BufferWrite(uint16_t* buffer, int length)
+void BIOS::LCD::BufferWrite(const uint16_t* buffer, int length)
 {
   while (length--)
     Set_Pixel(*buffer++);

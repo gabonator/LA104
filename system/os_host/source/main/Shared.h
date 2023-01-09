@@ -58,7 +58,7 @@ uintptr_t GetProcAddress(char* symbol)
     case 0x00008f74: return (uint32_t)static_cast<void(*)(unsigned short*, int)>(BIOS::LCD::BufferRead); //_ZN4BIOS3LCD10BufferReadEPti
     case 0x00000cc5: return (uint32_t)static_cast<uint16_t(*)()>(BIOS::LCD::BufferRead); //_ZN4BIOS3LCD10BufferReadEv
     case 0x00000430: return (uint32_t)static_cast<void(*)(CRect const&)>(BIOS::LCD::BufferBegin); //_ZN4BIOS3LCD11BufferBeginERK5CRect
-    case 0x0000d8f4: return (uint32_t)static_cast<void(*)(unsigned short*, int)>(BIOS::LCD::BufferWrite); //_ZN4BIOS3LCD11BufferWriteEPti
+    case 0x00008203: return (uint32_t)static_cast<void(*)(unsigned short const*, int)>(BIOS::LCD::BufferWrite); //_ZN4BIOS3LCD11BufferWriteEPKti
     case 0x0000f243: return (uint32_t)static_cast<void(*)(unsigned short)>(BIOS::LCD::BufferWrite); //_ZN4BIOS3LCD11BufferWriteEt
     case 0x0000ff2f: return (uint32_t)static_cast<void(*)(CRect const&, unsigned short)>(BIOS::LCD::Bar); //_ZN4BIOS3LCD3BarERK5CRectt
     case 0x0000e34c: return (uint32_t)static_cast<void(*)(int, int, int, int, unsigned short)>(BIOS::LCD::Bar); //_ZN4BIOS3LCD3BarEiiiit

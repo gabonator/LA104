@@ -5,6 +5,11 @@
 #endif
 uint8_t gFatSharedBuffer[BIOS::FAT::SharedBufferSize];
 
+using namespace BIOS;
+#include "file/shapes.h"
+#include "file/layout.h"
+#include "file/file.h"
+
 #ifdef __APPLE__
 class CTestBenchIo
 {
@@ -303,12 +308,14 @@ private:
     bool mLsbFirst{false};
     void (*mHandler)(Level*){nullptr};
     void (*mHandlerMsg)(const char*){nullptr};
+    void (*mHandlerGroup)(const char*){nullptr};
 
 public:
-    void setHandler(void (*handler)(Level*), void (*handlerMsg)(const char*))
+    void setHandler(void (*handler)(Level*), void (*handlerMsg)(const char*), void (*handlerGroup)(const char*))
     {
         mHandler = handler;
         mHandlerMsg = handlerMsg;
+        mHandlerGroup = handlerGroup;
     }
     void spiBegin(bool lsb)
     {
@@ -435,6 +442,16 @@ public:
         if (mHandlerMsg)
             mHandlerMsg(msg);
     }
+    void groupBegin(const char* msg)
+    {
+        if (mHandlerGroup)
+            mHandlerGroup(msg);
+    }
+    void groupEnd()
+    {
+        if (mHandlerGroup)
+            mHandlerGroup(nullptr);
+    }
 };
 
 bool main_verify(CTestBench& test)
@@ -448,15 +465,22 @@ bool main_verify(CTestBench& test)
     test.tick();
     test.tick();
     test.tick();
-    test.printLabel("spi write1");
+    
+    test.groupBegin("spi write1");
     if (test.spiTransfer(0xf0) != 1)
         test.printError("should be 0x01");
-    test.printLabel("spi write2");
+    test.groupEnd();
+    
+    test.groupBegin("spi write2");
     if (test.spiTransfer(0xf1) != 2)
         test.printError("should be 0x02");
-    test.printLabel("spi write3");
+    test.groupEnd();
+    
+    test.groupBegin("spi write3");
     if (test.spiTransfer(0xf2) != 8)
         test.printError("should be 0x08"); // 0x03!
+    test.groupEnd();
+    
     test.eval();
     test.cs(1);
     test.eval();
@@ -475,6 +499,8 @@ class DiskNotify
     BIOS::FAT::TFindFile mFileVerify{0};
     bool mFpgaNewer{false};
     bool mVerifyNewer{false};
+    char mFpgaName[16];
+    char mVerifyName[16];
     
 public:
     DiskNotify()
@@ -485,8 +511,26 @@ public:
         mpFlashWriteRange[0] = -1;
         mpFlashWriteRange[1] = -1;
 #endif
+        strcpy(mFpgaName, "bench.fpg");
+        strcpy(mVerifyName, "bench.vlf");
     }
     
+    void SetFpgaName(char* name)
+    {
+        strcpy(mFpgaName, name);
+        // force reload
+        if (mpFlashWriteRange)
+            mpFlashWriteRange[0] = 0;
+    }
+
+    void SetVerifyName(char* name)
+    {
+        strcpy(mVerifyName, name);
+        // force reload
+        if (mpFlashWriteRange)
+            mpFlashWriteRange[0] = 0;
+    }
+
     int compare(const char* s1, const char* s2)
     {
         auto lcase = [](char a) -> char{
@@ -534,11 +578,11 @@ public:
         }
 
         BIOS::FAT::TFindFile fileTemp1;
-        if (FindFile("bench.fpg", fileTemp1))
+        if (FindFile(mFpgaName, fileTemp1))
             mFpgaNewer = CheckNewer(mFileFpga, fileTemp1);
 
         BIOS::FAT::TFindFile fileTemp2;
-        if (FindFile("bench.vlf", fileTemp2))
+        if (FindFile(mVerifyName, fileTemp2))
             mVerifyNewer = CheckNewer(mFileVerify, fileTemp2);
     }
     
@@ -663,6 +707,7 @@ class CApplication : public CWnd
         char timestamp[20];
         char name[20];
         ModuleStatus status{None};
+        bool focus{false};
     };
     ModuleInfo mModuleFpga;
     ModuleInfo mModuleVerify;
@@ -676,8 +721,9 @@ class CApplication : public CWnd
     
     CFpga mFpga;
     CSimulator mSimulator;
+    int mWaveformLength{0};
     uint16_t mWaveform[1024];
-    int mWaveformScale{1};
+    int mWaveformScale{0};
     int mWaveformShift{0};
     bool mMeasure{false};
     CTestBench mTestBench;
@@ -687,8 +733,23 @@ class CApplication : public CWnd
         int index;
         int row;
     };
+    struct TGroup {
+        int begin;
+        int end;
+        uint16_t color;
+    };
+    
     TLabel mLabelsData[10];
     CArray<TLabel> mLabels;
+
+    TGroup mGroupsData[10];
+    CArray<TGroup> mGroups;
+    int mFocus{0};
+    
+    CFileDialog mFile;
+    CFileFilterSuffix filterFpga{".FPG"};
+    CFileFilterSuffix filterVerification{".GEN"};
+    bool mAutoRun{false};
     
 public:
     
@@ -697,7 +758,9 @@ public:
         _ASSERT(sizeof(gFatSharedBuffer) >= BIOS::SYS::GetAttribute(BIOS::SYS::EAttribute::DiskSectorSize));
         BIOS::FAT::SetSharedBuffer(gFatSharedBuffer);
 
+        mModuleFpga.focus = true;
         mLabels.Init(mLabelsData, COUNT(mLabelsData));
+        mGroups.Init(mGroupsData, COUNT(mGroupsData));
         CWnd::Create(pszId, dwFlags, rc, pParent);
         SetTimer(100);
         for (int i=0; i<COUNT(mWaveform); i++)
@@ -713,26 +776,127 @@ public:
 
 	void OnKey(int key) override
 	{
+        int move = mFocus == 0 ? 4 : 40;
         if (key == BIOS::KEY::Left)
         {
-            if (mWaveformShift > 0)
+            switch (mFocus)
             {
-                mWaveformShift = max(0, mWaveformShift-4);
-                DrawWave();
+                case 0:
+                case 1:
+                    if (mWaveformShift > 0)
+                    {
+                        mWaveformShift = max(0, mWaveformShift-move);
+                        DrawWave();
+                        DrawScrollbar();
+                    }
+                    break;
+                case 2:
+                    if (mWaveformScale > 0)
+                    {
+                        ZoomOut();
+                        DrawWave();
+                        DrawUi();
+                    }
+                    break;
+                case 3:
+                    mModuleFpga.focus = true;
+                    mModuleVerify.focus = false;
+                    DrawFooter(mModuleFpga, mModuleVerify);
+                    break;
+                    
             }
         }
         if (key == BIOS::KEY::Right)
         {
-            mWaveformShift += 4;
-            DrawWave();
+            switch (mFocus)
+            {
+                case 0:
+                case 1:
+                    if (mWaveformShift < mWaveformLength-256+128)
+                    {
+                        mWaveformShift = min(mWaveformShift + move, mWaveformLength-256+128);
+                        DrawWave();
+                        DrawScrollbar();
+                    }
+                    break;
+                case 2:
+                    ZoomIn();
+                    DrawWave();
+                    DrawUi();
+                    break;
+                case 3:
+                    mModuleFpga.focus = false;
+                    mModuleVerify.focus = true;
+                    DrawFooter(mModuleFpga, mModuleVerify);
+                    break;
+            }
         }
         if (key == BIOS::KEY::Enter)
         {
-            mMeasure = true;
+            switch (mFocus)
+            {
+                case 0:
+                case 1:
+                case 2:
+                    mMeasure = true;
+                    break;
+                case 3:
+                    if (mModuleFpga.focus)
+                        LoadFile("Load FPGA image", mModuleFpga, filterFpga);
+                    if (mModuleVerify.focus)
+                        LoadFile("Verification module", mModuleVerify, filterVerification);
+                    break;
+            }
         }
+        if (key == BIOS::KEY::Up)
+        {
+            if (mFocus > 0)
+            {
+                mFocus--;
+                DrawUi();
+                DrawFooter(mModuleFpga, mModuleVerify);
+            }
+        }
+        if (key == BIOS::KEY::Down)
+        {
+            if (mFocus < 3)
+            {
+                mFocus++;
+                DrawUi();
+                DrawFooter(mModuleFpga, mModuleVerify);
+            }
+        }
+        if (key == BIOS::KEY::F4)
+        {
+            mAutoRun = !mAutoRun;
+        }
+
 	}
 
-    
+    void LoadFile(const char* title, ModuleInfo& mod, CFileFilterSuffix& filter)
+    {
+        if (mFile.ModalShow(nullptr, title, &filter))
+        {
+            if (&mod == &mModuleFpga)
+                mNotify.SetFpgaName(mFile.GetFilename());//gabo
+            if (&mod == &mModuleVerify)
+                mNotify.SetVerifyName(mFile.GetFilename());
+        }
+        SetFocus();
+        Invalidate();
+    }
+    void ZoomIn()
+    {
+        mWaveformScale++;
+        mWaveformShift += (512>>mWaveformScale)/4;
+    }
+    void ZoomOut()
+    {
+        mWaveformShift -= (512>>mWaveformScale)/4;
+        mWaveformShift = max(mWaveformShift, 0);
+        mWaveformScale--;
+    }
+
     void OnPaint() override
     {
 		BIOS::LCD::Bar(m_rcClient, RGB565(404040));
@@ -743,7 +907,7 @@ public:
 
         BIOS::LCD::Print(8, 0, RGB565(ffffff), RGBTRANS, "FPGA Test bench");
 
-        const int labelsY = 40;
+        const int labelsY = 20;
         const int labelWidth = 64;
         const int labelHeight = 16;
         const int labelSpacing = 4;
@@ -758,15 +922,18 @@ public:
         y += labelHeight + labelSpacing;
         SignalHeading(CRect(0, y, labelWidth, y+labelHeight), "miso", true);
         y += labelHeight;
-        
-        
-        //DrawFooter(mModuleFpga, mModuleVerify);
+
         DrawWave();
+        DrawPreview();
+        DrawUi();
+        strcpy(mModuleFpga.timestamp, "FPGA not loaded");
+        strcpy(mModuleVerify.timestamp, "Default wave");
+        DrawFooter(mModuleFpga, mModuleVerify);
     }
     
     void DrawWave()
     {
-        const int labelsY = 40;
+        const int labelsY = 20;
         const int labelWidth = 64;
         const int labelHeight = 16;
         const int labelSpacing = 4;
@@ -784,9 +951,25 @@ public:
         Level o3 = (Level)((vals >> 6) & 7);
         Level o4 = (Level)((vals >> 3) & 7);
         Level o5 = (Level)((vals >> 0) & 7);
+        int curGroup = 0;
+        uint16_t activeGroup = 0;
+        
         for (int i=0; i<BIOS::LCD::Width-labelWidth; i++)
         {
-            uint16_t vals = mWaveformShift+i < COUNT(mWaveform) ? mWaveform[mWaveformShift+i] : Invalid;
+            int ii = i >> mWaveformScale;
+            if (mGroups.GetSize() > curGroup)
+            {
+                if (!activeGroup && mWaveformShift+ii >= mGroups[curGroup].begin)
+                {
+                    activeGroup = mGroups[curGroup].color;
+                }
+                if (activeGroup && mWaveformShift+ii >= mGroups[curGroup].end)
+                {
+                    activeGroup = 0;
+                    curGroup++;
+                }
+            }
+            uint16_t vals = mWaveformShift+ii < COUNT(mWaveform) ? mWaveform[mWaveformShift+ii] : Invalid;
             Level l1 = (Level)((vals >> 12) & 7);
             Level l2 = (Level)((vals >> 9) & 7);
             Level l3 = (Level)((vals >> 6) & 7);
@@ -798,15 +981,15 @@ public:
                 //l1 = l2 = l3 = l4 = l5 = High;
             }
 
-            DrawLevel(i, o1, l1);
+            DrawLevel(i, o1, l1, activeGroup);
             BIOS::LCD::BufferWrite(lineSkip, labelSpacing);
-            DrawLevel(i, o2, l2);
+            DrawLevel(i, o2, l2, activeGroup);
             BIOS::LCD::BufferWrite(lineSkip, labelSpacing);
-            DrawLevel(i, o3, l3);
+            DrawLevel(i, o3, l3, activeGroup);
             BIOS::LCD::BufferWrite(lineSkip, labelSpacing);
-            DrawLevel(i, o4, l4);
+            DrawLevel(i, o4, l4, activeGroup);
             BIOS::LCD::BufferWrite(lineSkip, labelSpacing);
-            DrawLevel(i, o5, l5);
+            DrawLevel(i, o5, l5, activeGroup);
             
             o1 = l1;
             o2 = l2;
@@ -815,14 +998,15 @@ public:
             o5 = l5;
         }
         BIOS::LCD::BufferEnd();
+        
         // Annotations
         const int annotationY = labelsY+4*labelSpacing+5*labelHeight+4;
-        BIOS::LCD::Bar(CRect(0, annotationY, BIOS::LCD::Width, annotationY+28), RGB565(404040));
+        BIOS::LCD::Bar(CRect(8, annotationY, BIOS::LCD::Width-8, annotationY+28), RGB565(404040));
         for (int i=0; i<mLabels.GetSize(); i++)
         {
             const TLabel& label = mLabels[i];
             int labelSize = strlen(label.msg)*8+12;
-            int x = 64 + label.index - mWaveformShift;
+            int x = 64 + ((label.index - mWaveformShift)<<mWaveformScale);
             int y = annotationY + label.row*14;
             if (x+labelSize >= 8 && x < BIOS::LCD::Width-16)
             {
@@ -831,15 +1015,116 @@ public:
                 x += 12;
                 for (int i=0; label.msg[i]; i++)
                 {
-                    if (x >= 8 && x+8 < BIOS::LCD::Width)
+                    if (x >= 8 && x+16 < BIOS::LCD::Width)
                         BIOS::LCD::Print(x, y, RGB565(b0b0b0), RGB565(404040), label.msg[i]);
                     x += 8;
                 }
             }
         }
+    }
+    
+    void DrawUi()
+    {
+        BIOS::LCD::Print(0, 122, mFocus == 0 ? RGB565(404040) : RGB565(b0b0b0),  mFocus == 0 ? RGB565(ffffff) : RGB565(404040), "\x11");
+        BIOS::LCD::Print(BIOS::LCD::Width-8, 122, mFocus == 0 ? RGB565(404040) : RGB565(b0b0b0), mFocus == 0 ? RGB565(ffffff) : RGB565(404040), "\x10");
+        BIOS::LCD::Printf(8, 186, mFocus == 2 ? RGB565(b0b0b0) : RGB565(b0b0b0), mFocus == 2 ? RGB565(ffffff) : RGB565(404040), "Zoom: %dx ", 1<<mWaveformScale);
+        DrawScrollbar();
+    }
+    
+    void DrawScrollbar()
+    {
+        if (mWaveformLength == 0)
+            return;
+        int viewRangeMin = mWaveformShift;
+        int viewRangeMax = mWaveformShift + (256 >> mWaveformScale);
+
+        CRect rcScroll(viewRangeMin*BIOS::LCD::Width/mWaveformLength, 155-4,
+                       viewRangeMax*BIOS::LCD::Width/mWaveformLength, 155-1);
+        rcScroll.right = min(rcScroll.right, BIOS::LCD::Width);
+        if (rcScroll.left > 0)
+            BIOS::LCD::Bar(CRect(0, rcScroll.top, rcScroll.left, rcScroll.bottom), RGB565(404040));
+        if (rcScroll.right < BIOS::LCD::Width)
+            BIOS::LCD::Bar(CRect(rcScroll.right, rcScroll.top, BIOS::LCD::Width, rcScroll.bottom), RGB565(404040));
+        BIOS::LCD::Bar(rcScroll, mFocus == 1 ? RGB565(ffffff) : RGB565(b0b0b0));
+        rcScroll.Offset(0, 25);
+        if (rcScroll.left > 0)
+            BIOS::LCD::Bar(CRect(0, rcScroll.top, rcScroll.left, rcScroll.bottom), RGB565(404040));
+        if (rcScroll.right < BIOS::LCD::Width)
+            BIOS::LCD::Bar(CRect(rcScroll.right, rcScroll.top, BIOS::LCD::Width, rcScroll.bottom), RGB565(404040));
+        BIOS::LCD::Bar(rcScroll, mFocus == 1 ? RGB565(ffffff) : RGB565(b0b0b0));
+    }
+    
+    void DrawPreview()
+    {
+        BIOS::LCD::BufferBegin(CRect(0, 155, BIOS::LCD::Width, 155+5*4));
+        const int increment[] = {0, 0, 2, 1, 1};
+
+        int activeGroup = 0;
+        int curGroup = 0;
+
+        for (int i=0; i<BIOS::LCD::Width; i++)
+        {
+            int j1 = i*mWaveformLength/BIOS::LCD::Width;
+            int j2 = (i+1)*mWaveformLength/BIOS::LCD::Width;
+            
+            if (mGroups.GetSize() > curGroup)
+            {
+                if (!activeGroup && j1 >= mGroups[curGroup].begin)
+                {
+                    activeGroup = mGroups[curGroup].color;
+                }
+                if (activeGroup && j1 >= mGroups[curGroup].end)
+                {
+                    activeGroup = 0;
+                    curGroup++;
+                }
+            }
+
+            int sum[5] = {0};
+            for (int j=j1; j<j2; j++)
+            {
+                uint16_t vals = mWaveform[j];
+                Level o1 = (Level)((vals >> 12) & 7);
+                Level o2 = (Level)((vals >> 9) & 7);
+                Level o3 = (Level)((vals >> 6) & 7);
+                Level o4 = (Level)((vals >> 3) & 7);
+                Level o5 = (Level)((vals >> 0) & 7);
+                sum[0] += increment[o1];
+                sum[1] += increment[o2];
+                sum[2] += increment[o3];
+                sum[3] += increment[o4];
+                sum[4] += increment[o5];
+            }
+            
+            for (int l=0; l<5; l++)
+            {
+                if (!activeGroup)
+                {
+                    int lvl = (sum[l]*0xb0)/(j2-j1)/2;
+                    if (lvl < 0x40)
+                        lvl = 0x40;
+                    uint16_t color = RGB565RGB(lvl, lvl, lvl);
+                    for (int k=0; k<4; k++)
+                        BIOS::LCD::BufferWrite(color);
+                } else {
+                    int lvl = (sum[l]*0x100)/(j2-j1)/2;
+                    int clrr = (Get565R(activeGroup)*lvl)>>8;
+                    int clrg = (Get565G(activeGroup)*lvl)>>8;
+                    int clrb = (Get565B(activeGroup)*lvl)>>8;
+                    clrr = max(clrr, 0x40);
+                    clrg = max(clrg, 0x40);
+                    clrb = max(clrb, 0x40);
+                    uint16_t color = RGB565RGB(clrr, clrg, clrb);
+                    for (int k=0; k<4; k++)
+                        BIOS::LCD::BufferWrite(color);
+                }
+            }
+        }
+        BIOS::LCD::BufferEnd();
+        
 
     }
-    void DrawLevel(int x, Level o, Level l)
+    void DrawLevel(int x, Level o, Level l, uint16_t ovrColor)
     {
         uint16_t G = RGB565(b0b0b0), B = RGB565(404040), H = RGB565(ffffff);
         const uint16_t lineHigh[16] = {G, G, G, G, G, G, G, G, G, G, G, G, G, G, G, H};
@@ -862,11 +1147,62 @@ public:
             return;
         }
         const uint16_t* lines[] = {lineSkip, lineLow, lineHigh, lineZ1, lineTrans};
-        BIOS::LCD::BufferWrite(lines[l], 16);
+        
+        if (!ovrColor)
+        {
+            BIOS::LCD::BufferWrite(lines[l], 16);
+            return;
+        }
+
+        uint16_t temp[16];
+        memcpy(temp, lines[l], sizeof(temp));
+        for (int i=0; i<16; i++)
+            if (temp[i] == G)
+                temp[i] = ovrColor;
+        BIOS::LCD::BufferWrite(temp, 16);
     }
     
     void DrawFooter(const ModuleInfo& mod1, const ModuleInfo& mod2)
     {
+        static const char floppy0[] =
+        "\x10"
+        "................"
+        ".              ."
+        ".              ."
+        ".......        ."
+        ".     .    ....."
+        ".     .    ....."
+        ".     .    ....."
+        ".     .    ....."
+        ".     .    ....."
+        ".     .    .   ."
+        ".     .    ....."
+        ".     .        ."
+        ".......        ."
+        ".              ."
+        ".             . "
+        "..............  ";
+
+        static const char floppy1[] =
+        "\x10"
+        "................"
+        "................"
+        "................"
+        ".      ........."
+        ".      ....    ."
+        ".      ....    ."
+        ".      ....    ."
+        ".      ....    ."
+        ".      ....    ."
+        ".      .... .. ."
+        ".      ....    ."
+        ".      ........."
+        ".      ........."
+        "................"
+        "............... "
+        "..............  ";
+
+        
         CRect rcFooter(m_rcClient.left, m_rcClient.bottom-32, m_rcClient.right, m_rcClient.bottom);
         //GUI::Background(rcFooter, RGB565(4040b0), RGB565(4040a0));
         
@@ -884,24 +1220,14 @@ public:
         const uint16_t* grad1 = grad[mod1.status];
         const uint16_t* grad2 = grad[mod2.status];
         
-        /*
-         enum ModuleStatus {
-             None,
-             Loaded,
-             Error,
-             Loading1,
-             Loading2,
-             Loading3,
-             Loading4,
-             Loading5,
-             Loading6,
-             Loading7,
-         };
-         */
         GUI::Background(CRect(rcFooter.left, rcFooter.top, rcFooter.CenterX(), rcFooter.bottom), grad1[0], grad1[1]);
 
         GUI::Background(CRect(rcFooter.CenterX(), rcFooter.top, rcFooter.right, rcFooter.bottom), grad2[0], grad2[1]);
 
+        bool focus1 = mod1.focus && mFocus == 3;
+        bool focus2 = mod2.focus && mFocus == 3;
+        BIOS::LCD::Draw(rcFooter.CenterX()-18, rcFooter.top+2, focus1 ? RGB565(ffffff) : RGB565(b0b0b0), RGBTRANS, focus1 ? floppy1 : floppy0);
+        BIOS::LCD::Draw(rcFooter.right-18, rcFooter.top+2, focus2 ? RGB565(ffffff) : RGB565(b0b0b0), RGBTRANS, focus2 ? floppy1 : floppy0);
         BIOS::LCD::Print(8, rcFooter.top+2, RGB565(ffffff), RGBTRANS, mod1.timestamp);
         BIOS::LCD::Print(8, rcFooter.top+2+16, RGB565(ffffff), RGBTRANS, mod1.name);
         BIOS::LCD::Print(rcFooter.CenterX()+8, rcFooter.top+2, RGB565(ffffff), RGBTRANS, mod2.timestamp);
@@ -921,7 +1247,7 @@ public:
 
         BIOS::LCD::Print(rc.Center().x-labelWidth/2+16, rc.Center().y-labelHeight/2, RGB565(ffffff), RGBTRANS, name);
         BIOS::LCD::Print(rc.left + 8, rc.Center().y-labelHeight/2,
-                         inOut ? RGB565(b0ffb0) : RGB565(b0b0ff), RGBTRANS, inOut ? "\x1b" : "\x1a");
+                         inOut ? RGB565(b0ffb0) : RGB565(b0b0ff), RGBTRANS, inOut ? "\x1a" : "\x1b");
     }
     void RedrawButtons()
     {
@@ -937,6 +1263,13 @@ public:
 
     void OnTimer() override
     {
+        if (mAutoRun)
+        {
+            EVERY(300)
+            {
+                mMeasure = true;
+            }
+        }
         if (mMeasure)
         {
             mModuleVerify.status = Loading1;
@@ -1005,27 +1338,30 @@ public:
     void Measure()
     {
         memset(mWaveform, 0, sizeof(mWaveform));
-        static int mWaveIndex;
         static CApplication* pThis;
-        mWaveIndex = 0;
         pThis = this;
         static int firstRowMaxX;
         firstRowMaxX = -1;
+        static TGroup group;
+        
+        mWaveformLength = 0;
+        mLabels.RemoveAll();
+        mGroups.RemoveAll();
         
         mTestBench.Init();
         BIOS::SYS::DelayMs(20);
-
+        
         mTestBench.setHandler([](CTestBench::Level* levels){
             uint16_t vals = (levels[0] << 0) | (levels[1] << 3) | (levels[2] << 6) | (levels[3] << 9) | (levels[4] << 12);
-            _ASSERT(mWaveIndex < COUNT(pThis->mWaveform));
-            pThis->mWaveform[mWaveIndex++] = vals;
+            _ASSERT(pThis->mWaveformLength < COUNT(pThis->mWaveform));
+            pThis->mWaveform[pThis->mWaveformLength++] = vals;
         }, [](const char* msg) {
             if (pThis->mLabels.GetSize() < pThis->mLabels.GetMaxSize())
             {
                 TLabel label;
-                label.index = mWaveIndex;
-                int maxX = mWaveIndex + strlen(msg)*8;
-                if (firstRowMaxX < mWaveIndex)
+                label.index = pThis->mWaveformLength;
+                int maxX = label.index + strlen(msg)*8;
+                if (firstRowMaxX < label.index)
                 {
                     label.row = 0;
                     firstRowMaxX = maxX;
@@ -1041,11 +1377,47 @@ public:
                 }
                 pThis->mLabels.Add(label);
             }
+        }, [](const char* msg) {
+            if (msg)
+            {
+                if (pThis->mLabels.GetSize() < pThis->mLabels.GetMaxSize())
+                {
+                    TLabel label;
+                    label.index = pThis->mWaveformLength;
+                    int maxX = label.index + strlen(msg)*8;
+                    if (firstRowMaxX < label.index)
+                    {
+                        label.row = 0;
+                        firstRowMaxX = maxX;
+                    } else {
+                        label.row = 1;
+                    }
+                    if (strlen(msg) < sizeof(label.msg)-1)
+                        strcpy(label.msg, msg);
+                    else
+                    {
+                        memcpy(label.msg, msg, sizeof(label.msg)-1);
+                        label.msg[sizeof(label.msg)-1] = 0;
+                    }
+                    pThis->mLabels.Add(label);
+                }
+            }
+            if (msg)
+                group.begin = pThis->mWaveformLength;
+            if (!msg)
+            {
+                const uint16_t colors[] = {RGB565(ffb0b0), RGB565(b0ffb0), RGB565(b0b0ff)};
+                group.end = pThis->mWaveformLength;
+                group.color = colors[pThis->mGroups.GetSize()%COUNT(colors)];
+                pThis->mGroups.Add(group);
+            }
         });
 
         main_verify(mTestBench);
-        mTestBench.setHandler(nullptr, nullptr);
+        mTestBench.setHandler(nullptr, nullptr, nullptr);
         DrawWave();
+        DrawPreview();
+        DrawScrollbar();
         
         BIOS::SYS::DelayMs(20);
         mTestBench.Deinit();
