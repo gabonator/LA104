@@ -107,6 +107,11 @@ namespace Layout
                 case 'x': mX += BIOS::LCD::Draw(mX, mRect.top, mF, mB, CShapes_check_box); break;
                 case 'X': BIOS::LCD::Draw(mX, mRect.top, mF, mB, CShapes_check_box);
                     mX += BIOS::LCD::Draw(mX, mRect.top, RGB565(ff0000), RGBTRANS, CShapes_check_on); break;
+                case '$':
+                        if (mRect.right-8 > mX)
+                            BIOS::LCD::Bar(mX, mRect.top, mRect.right-8, mRect.top+14, mB);
+                        mX = mRect.right-8;
+                    break;
                 default:
                 {
                     char str[2] = {c, 0};
@@ -204,6 +209,29 @@ namespace Layout
             {
                 *r << Color(RGBTRANS, RGB565(ffffff)) << '<' << mValue << Select(false);
                 *r << Color(RGBTRANS, RGB565(ffffff)) << '>';
+            }
+            *r << Color(RGB565(b0b0b0), RGBTRANS);
+        }
+    };
+
+    class MenuItem : public Sublayout
+    {
+        const char* mValue;
+
+    public:
+        MenuItem(const char* value) : mValue(value)
+        {
+        }
+        virtual void Visit(Render* r) const
+        {
+            if (!r->IsSelected())
+            {
+                *r << Color(RGB565(b0b0b0), RGB565(404040)) << ' ' << mValue << Select(false);
+                *r << Color(RGB565(b0b0b0), RGB565(404040)) << '$' << ' ';
+            } else
+            {
+                *r << Color(RGB565(404040), RGB565(ffffff)) << '<' << mValue << Select(false);
+                *r << Color(RGB565(404040), RGB565(ffffff)) << '$' << '>';
             }
             *r << Color(RGB565(b0b0b0), RGBTRANS);
         }

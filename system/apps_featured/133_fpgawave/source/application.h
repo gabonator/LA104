@@ -9,6 +9,7 @@ using namespace BIOS;
 #include "file/shapes.h"
 #include "file/layout.h"
 #include "file/file.h"
+#include "screenshot.h"
 
 #ifdef __APPLE__
 class CTestBenchIo
@@ -303,19 +304,18 @@ public:
         Z,
         Transition
     };
+    enum { Label, Error, GroupBegin, GroupEnd } MsgType;
     
 private:
     bool mLsbFirst{false};
     void (*mHandler)(Level*){nullptr};
-    void (*mHandlerMsg)(const char*){nullptr};
-    void (*mHandlerGroup)(const char*){nullptr};
+    void (*mHandlerMsg)(int, const char*){nullptr};
 
 public:
-    void setHandler(void (*handler)(Level*), void (*handlerMsg)(const char*), void (*handlerGroup)(const char*))
+    void setHandler(void (*handler)(Level*), void (*handlerMsg)(int msgType, const char*))
     {
         mHandler = handler;
         mHandlerMsg = handlerMsg;
-        mHandlerGroup = handlerGroup;
     }
     void spiBegin(bool lsb)
     {
@@ -336,8 +336,8 @@ public:
     {
         Scan();
         Scan();
-        Scan();
-        Scan();
+//        Scan();
+//        Scan();
     }
     
     void Scan()
@@ -435,22 +435,22 @@ public:
     void printError(const char* msg)
     {
         if (mHandlerMsg)
-            mHandlerMsg(msg);
+            mHandlerMsg(Error, msg);
     }
     void printLabel(const char* msg)
     {
         if (mHandlerMsg)
-            mHandlerMsg(msg);
+            mHandlerMsg(Label, msg);
     }
     void groupBegin(const char* msg)
     {
-        if (mHandlerGroup)
-            mHandlerGroup(msg);
+        if (mHandlerMsg)
+            mHandlerMsg(GroupBegin, msg);
     }
-    void groupEnd()
+    void groupEnd(const char* msg = nullptr)
     {
-        if (mHandlerGroup)
-            mHandlerGroup(nullptr);
+        if (mHandlerMsg)
+            mHandlerMsg(GroupEnd, msg);
     }
 };
 
@@ -466,20 +466,43 @@ bool main_verify(CTestBench& test)
     test.tick();
     test.tick();
     
-    test.groupBegin("spi write1");
-    if (test.spiTransfer(0xf0) != 1)
-        test.printError("should be 0x01");
-    test.groupEnd();
+    char temp[32];
+    int read;
     
-    test.groupBegin("spi write2");
-    if (test.spiTransfer(0xf1) != 2)
-        test.printError("should be 0x02");
-    test.groupEnd();
+    test.groupBegin("write 0xf0");
+    read = test.spiTransfer(0xf0);
+    sprintf(temp, "read 0x%02x", read);
+    test.groupEnd(temp);
     
-    test.groupBegin("spi write3");
-    if (test.spiTransfer(0xf2) != 8)
-        test.printError("should be 0x08"); // 0x03!
-    test.groupEnd();
+    test.groupBegin("write 0xf1");
+    read = test.spiTransfer(0xf1);
+    sprintf(temp, "read 0x%02x", read);
+    test.groupEnd(temp);
+    
+    test.groupBegin("write 0xf2");
+    read = test.spiTransfer(0xf2);
+    sprintf(temp, "read 0x%02x", read);
+    test.groupEnd(temp);
+
+    test.groupBegin("write 0x73");
+    read = test.spiTransfer(0x73);
+    sprintf(temp, "read 0x%02x", read);
+    test.groupEnd(temp);
+
+    test.groupBegin("write 0x48");
+    read = test.spiTransfer(0x48);
+    sprintf(temp, "read 0x%02x", read);
+    test.groupEnd(temp);
+
+    test.groupBegin("write 0xa9");
+    read = test.spiTransfer(0xa9);
+    sprintf(temp, "read 0x%02x", read);
+    test.groupEnd(temp);
+
+    test.groupBegin("write 0xf5");
+    read = test.spiTransfer(0x48);
+    sprintf(temp, "read 0x%02x", read);
+    test.groupEnd(temp);
     
     test.eval();
     test.cs(1);
@@ -688,6 +711,89 @@ public:
     }
 };
 
+class CTools : public CWnd
+{
+    constexpr static int Width = 180;
+    constexpr static int Height = 128;
+    
+    bool mSelected{false};
+    bool mQuit{false};
+    int mIndex{0};
+    
+public:
+    int ModalShow(CWnd* pParent)
+    {
+        Create("tools", CWnd::WsVisible, CRect(LCD::Width/2 - Width/2, LCD::Height/2 - Height/2, LCD::Width/2 + Width/2, LCD::Height/2 + Height/2), pParent);
+
+        Layout::Render(m_rcClient) << Layout::Window("Tools");
+
+        mSelected = false;
+        mQuit = false;
+
+        SetFocus();
+        WindowMessage(CWnd::WmPaint);
+        while (!mSelected && !mQuit)
+        {
+            BIOS::KEY::EKey key = BIOS::KEY::GetKey();
+            if (key != BIOS::KEY::EKey::None)
+                WindowMessage(CWnd::WmKey, key);
+            WindowMessage(CWnd::WmTick);
+        }
+        
+        Destroy();
+        pParent->SetFocus();
+        return mSelected ? mIndex : -1;
+    }
+
+    virtual void OnPaint() override
+    {
+        using namespace Layout;
+        CRect rcInner(m_rcClient);
+        rcInner.Deflate(8, 20, 8, 8);
+        Layout::Render(rcInner)
+            << Select(mIndex == 0) << Layout::MenuItem("Run (F4)") << Layout::NewLine()
+            << Select(mIndex == 1) << Layout::MenuItem("Loop") << Layout::NewLine()
+            << Select(mIndex == 2) << Layout::MenuItem("Load FPGA image") << Layout::NewLine()
+            << Select(mIndex == 3) << Layout::MenuItem("Load verification") << Layout::NewLine()
+            << Select(mIndex == 4) << Layout::MenuItem("Load waveform") << Layout::NewLine()
+            << Select(mIndex == 5) << Layout::MenuItem("Save waveform") << Layout::NewLine()
+            << Select(mIndex == 6) << Layout::MenuItem("Save screenshot") << Layout::NewLine();
+    }
+    
+    virtual void OnKey(int key) override
+    {
+        if (key == BIOS::KEY::Up && mIndex > 0)
+        {
+            mIndex--;
+            Invalidate();
+        }
+        if (key == BIOS::KEY::Down && mIndex < 6)
+        {
+            mIndex++;
+            Invalidate();
+        }
+        if (key == BIOS::KEY::Enter)
+            mSelected = true;
+        if (key == BIOS::KEY::Escape)
+            mQuit = true;
+    }
+};
+
+class CFreeFile
+{
+    const char* mPattern;
+public:
+    CFreeFile(const char* pattern) : mPattern{pattern}
+    {
+    }
+    
+    void Next(char* name)
+    {
+        // TODO!
+        sprintf(name, mPattern, 0);
+    }
+};
+
 class CApplication : public CWnd
 {
     DiskNotify mNotify;
@@ -722,16 +828,17 @@ class CApplication : public CWnd
     CFpga mFpga;
     CSimulator mSimulator;
     int mWaveformLength{0};
-    uint16_t mWaveform[1024];
+    uint16_t mWaveform[1024+512*2];
     int mWaveformScale{0};
     int mWaveformShift{0};
     bool mMeasure{false};
     CTestBench mTestBench;
     
     struct TLabel {
-        char msg[32];
+        char msg[16];
         int index;
         int row;
+        int type;
     };
     struct TGroup {
         int begin;
@@ -739,7 +846,7 @@ class CApplication : public CWnd
         uint16_t color;
     };
     
-    TLabel mLabelsData[10];
+    TLabel mLabelsData[20];
     CArray<TLabel> mLabels;
 
     TGroup mGroupsData[10];
@@ -750,7 +857,11 @@ class CApplication : public CWnd
     CFileFilterSuffix filterFpga{".FPG"};
     CFileFilterSuffix filterVerification{".GEN"};
     bool mAutoRun{false};
-    
+    CTools mTools;
+    CBufferedWriter mWriter;
+    CBufferedReader mReader;
+    CFreeFile mFreeWave{"fpga%03d.htm"};
+
 public:
     
     void Create( const char* pszId, ui16 dwFlags, const CRect& rc, CWnd* pParent )
@@ -772,10 +883,18 @@ public:
             int v5 = (i > 80) ? Level::High : Level::Z;
             mWaveform[i] = v1 | (v2<<3) | (v3<<6) | (v4<<9) | (v5<<12);
         }
+        strcpy(mModuleFpga.timestamp, "FPGA not loaded");
+        strcpy(mModuleVerify.timestamp, "Default wave");
     }
 
 	void OnKey(int key) override
 	{
+        if (mAutoRun)
+        {
+            mAutoRun = false;
+            return;
+        }
+        
         int move = mFocus == 0 ? 4 : 40;
         if (key == BIOS::KEY::Left)
         {
@@ -838,7 +957,32 @@ public:
                 case 0:
                 case 1:
                 case 2:
-                    mMeasure = true;
+                    switch (mTools.ModalShow(this))
+                    {
+                        case 0:
+                            mMeasure = true;
+                            break;
+                        case 1:
+                            mAutoRun = true;
+                            break;
+                        case 2:
+                            LoadFile("Load FPGA image", mModuleFpga, filterFpga);
+                            break;
+                        case 3:
+                            LoadFile("Verification module", mModuleVerify, filterVerification);
+                            break;
+                        case 5:
+                            SaveWaveform();
+                            break;
+                        case 4:
+                            LoadWaveform();
+                            break;
+                        case 6:
+                            Screenshot();
+                            break;
+
+                    }
+                    Invalidate();
                     break;
                 case 3:
                     if (mModuleFpga.focus)
@@ -867,12 +1011,227 @@ public:
             }
         }
         if (key == BIOS::KEY::F4)
-        {
-            mAutoRun = !mAutoRun;
-        }
-
+            mMeasure = true;
 	}
 
+    void SaveWaveform()
+    {
+        // fpgbench.htm
+        // fpga001.js
+        /*
+         testbenchrecord = {
+            fpga: {
+              file: "bench.fpg",
+              timestamp:
+              crc
+            },
+            verify:
+            fpgacrc: 0x12312312,
+
+
+         testbenchrecord = {
+            fpga: "bench.fpg",
+            fpgacrc: 0x12312312,
+            verify: nullptr,
+            verifycrc: 0,
+            waveforms: {
+                clk:  "010101010101",
+                sck:  "101010101010",
+                cs:   "1123129031302",
+                mosi: "11010101010101",
+                miso: "zzzzzzzzzz1000111010"
+            }
+         };
+         */
+        char temp[16];
+        mFreeWave.Next(temp);
+        mWriter.Open(temp);
+        mWriter << "testbench_target = {\n";
+        mWriter << "  fpga: {\n";
+        if (mModuleFpga.name[0])
+            mWriter << "    file: \"" << mModuleFpga.name << "\",\n";
+        else
+            mWriter << "    file: null,\n";
+        mWriter << "    timestamp: \"" << mModuleFpga.timestamp << "\",\n";
+        mWriter << "    crc: " << "0" << "\n";
+        mWriter << "  },\n";
+        mWriter << "  verify: {\n";
+        if (mModuleVerify.name[0])
+            mWriter << "    file: \"" << mModuleVerify.name << "\",\n";
+        else
+            mWriter << "    file: null,\n";
+        mWriter << "    timestamp: \"" << mModuleVerify.timestamp << "\",\n";
+        mWriter << "    crc: " << "0" << "\n";
+        mWriter << "  },\n";
+        mWriter << "  waveforms: {\n";
+        for (int j=0; j<5; j++)
+        {
+            static const char* waveNames[] = {" clk", " sck", "  cs", "mosi", "miso"};
+            static const char waveTypes[] = {'?', '0', '1', 'z', 'x', 'E', 'E'};
+            mWriter << "    " << waveNames[j] << ": \"";
+            for (int i=0; i<mWaveformLength; i++)
+                mWriter << waveTypes[(mWaveform[i] >> j*3) & 7];
+            mWriter << '\"';
+            if (j < 5-1)
+                mWriter << ',';
+            mWriter << '\n';
+        }
+        mWriter << "  },\n";
+        mWriter << "  labels: [\n";
+        for (int i=0; i<mLabels.GetSize(); i++)
+        {
+            TLabel& l = mLabels[i];
+            char temp[8];
+            sprintf(temp, "%d", l.index);
+            mWriter << "    {";
+            mWriter << "pos: " << temp << ", ";
+            sprintf(temp, "%d", l.type);
+            mWriter << "type: " << temp << ", ";
+            mWriter << "text: \"" << l.msg << "\"";
+            mWriter << "}";
+            if (i < mLabels.GetSize()-1)
+                mWriter << ',';
+            mWriter << '\n';
+        }
+        mWriter << "  ],\n";
+        mWriter << "  groups: [\n";
+        for (int i=0; i<mGroups.GetSize(); i++)
+        {
+            TGroup& g = mGroups[i];
+            char temp[8];
+            sprintf(temp, "%d", g.begin);
+            mWriter << "    {";
+            mWriter << "begin: " << temp << ", ";
+            sprintf(temp, "%d", g.end);
+            mWriter << "end: " << temp << ", ";
+            sprintf(temp, "#%02x%02x%02x", Get565R(g.color), Get565G(g.color), Get565B(g.color));
+            mWriter << "color: \"" << temp << "\"";
+            mWriter << "}";
+            if (i < mGroups.GetSize()-1)
+                mWriter << ',';
+            mWriter << '\n';
+        }
+        mWriter << "  ]\n";
+        mWriter << "};\n";
+        mWriter.Close();
+    }
+        
+    void LoadWaveform()
+    {
+        // TODO: file dialog
+        char temp[16];
+        mFreeWave.Next(temp);
+        if (!mReader.Open(temp))
+        {
+            _ASSERT(0);
+            return;
+        }
+        bool continuous = false;
+        int currentWave = -1;
+        int currentGroup = 0;
+        
+        memset(mWaveform, 0, sizeof(mWaveform));
+        mWaveformLength = 0;
+        mGroups.RemoveAll();
+        mLabels.RemoveAll();
+        
+        while (!mReader.Eof())
+        {
+            bool wrap = true;
+            mReader.ReadLine(temp, sizeof(temp), &wrap);
+            char* wave = (currentWave != -1) ? temp : nullptr;
+//            switch (currentGroup)
+//            {
+//            }
+            if (!continuous)
+            {
+                if ((wave = strstr(temp, " clk: \"")) != nullptr)
+                {
+                    wave += 7;
+                    currentWave = 0;
+                    mWaveformLength = 0;
+                } else
+                if ((wave = strstr(temp, " sck: \"")) != nullptr)
+                {
+                    wave += 7;
+                    currentWave = 1;
+                    mWaveformLength = 0;
+                } else
+                if ((wave = strstr(temp, " cs: \"")) != nullptr)
+                {
+                    wave += 6;
+                    currentWave = 2;
+                    mWaveformLength = 0;
+                } else
+                if ((wave = strstr(temp, " miso: \"")) != nullptr)
+                {
+                    wave += 8;
+                    currentWave = 3;
+                    mWaveformLength = 0;
+                } else
+                if ((wave = strstr(temp, " mosi: \"")) != nullptr)
+                {
+                    wave += 8;
+                    currentWave = 4;
+                    mWaveformLength = 0;
+                }
+                if (strstr(temp, " labels: [") != nullptr)
+                    currentGroup = 1;
+                if (strstr(temp, " groups: [") != nullptr)
+                    currentGroup = 2;
+                if (strstr(temp, " ]") != nullptr)
+                    currentGroup = 0;
+            }
+            if (currentWave != -1 && wave)
+            {
+                for (int i=0; wave[i]; i++)
+                {
+                    if (wave[i] == '\"')
+                    {
+                        currentWave = -1;
+                        break;
+                    }
+                    int value = 0;
+                    switch (wave[i])
+                    {
+                        case '?':
+                            value = Undefined;
+                            break;
+                        case '0':
+                            value = Low;
+                            break;
+                        case '1':
+                            value = High;
+                            break;
+                        case 'z':
+                            value = Z;
+                            break;
+                        case 'x':
+                            value = Transition;
+                            break;
+                        case '\"':
+                            currentWave = -1;
+                            wave = nullptr;
+                            break;
+                        default:
+                            _ASSERT(0);
+                    }
+                    if (!wave)
+                        break;
+                    mWaveform[mWaveformLength++] |= value << (currentWave*3);
+                }
+            }
+            continuous = wrap;
+        }
+        mReader.Close();
+    }
+    
+    void Screenshot()
+    {
+        Invalidate();
+        _ASSERT(SaveScreenshot16((char*)"fpgawave.bmp"));
+    }
+    
     void LoadFile(const char* title, ModuleInfo& mod, CFileFilterSuffix& filter)
     {
         if (mFile.ModalShow(nullptr, title, &filter))
@@ -926,8 +1285,6 @@ public:
         DrawWave();
         DrawPreview();
         DrawUi();
-        strcpy(mModuleFpga.timestamp, "FPGA not loaded");
-        strcpy(mModuleVerify.timestamp, "Default wave");
         DrawFooter(mModuleFpga, mModuleVerify);
     }
     
@@ -1010,8 +1367,12 @@ public:
             int y = annotationY + label.row*14;
             if (x+labelSize >= 8 && x < BIOS::LCD::Width-16)
             {
-                if (x-3 >= 8 && x-3+8 < BIOS::LCD::Width)
-                    BIOS::LCD::Print(x-3, y, RGB565(b0b0b0), RGB565(404040), '\x18');
+                if (label.type == CTestBench::Label)
+                    if (x-3 >= 8 && x-3+8 < BIOS::LCD::Width)
+                        BIOS::LCD::Print(x-3, y, RGB565(b0b0b0), RGB565(404040), '\x18');
+                if (label.type == CTestBench::GroupBegin)
+                    if (x-3 >= 8 && x-3+8 < BIOS::LCD::Width)
+                        BIOS::LCD::Print(x-3, y, RGB565(b0b0b0), RGB565(404040), '\xc0');
                 x += 12;
                 for (int i=0; label.msg[i]; i++)
                 {
@@ -1228,10 +1589,10 @@ public:
         bool focus2 = mod2.focus && mFocus == 3;
         BIOS::LCD::Draw(rcFooter.CenterX()-18, rcFooter.top+2, focus1 ? RGB565(ffffff) : RGB565(b0b0b0), RGBTRANS, focus1 ? floppy1 : floppy0);
         BIOS::LCD::Draw(rcFooter.right-18, rcFooter.top+2, focus2 ? RGB565(ffffff) : RGB565(b0b0b0), RGBTRANS, focus2 ? floppy1 : floppy0);
-        BIOS::LCD::Print(8, rcFooter.top+2, RGB565(ffffff), RGBTRANS, mod1.timestamp);
-        BIOS::LCD::Print(8, rcFooter.top+2+16, RGB565(ffffff), RGBTRANS, mod1.name);
-        BIOS::LCD::Print(rcFooter.CenterX()+8, rcFooter.top+2, RGB565(ffffff), RGBTRANS, mod2.timestamp);
-        BIOS::LCD::Print(rcFooter.CenterX()+8, rcFooter.top+2+14, RGB565(ffffff), RGBTRANS, mod2.name);
+        BIOS::LCD::Print(8, rcFooter.top+2, RGB565(b0b0b0), RGBTRANS, mod1.timestamp);
+        BIOS::LCD::Print(8, rcFooter.top+2+16, RGB565(b0b0b0), RGBTRANS, mod1.name);
+        BIOS::LCD::Print(rcFooter.CenterX()+8, rcFooter.top+2, RGB565(b0b0b0), RGBTRANS, mod2.timestamp);
+        BIOS::LCD::Print(rcFooter.CenterX()+8, rcFooter.top+2+14, RGB565(b0b0b0), RGBTRANS, mod2.name);
     }
     
     void SignalHeading(CRect rc, const char* name, bool inOut)
@@ -1355,11 +1716,16 @@ public:
             uint16_t vals = (levels[0] << 0) | (levels[1] << 3) | (levels[2] << 6) | (levels[3] << 9) | (levels[4] << 12);
             _ASSERT(pThis->mWaveformLength < COUNT(pThis->mWaveform));
             pThis->mWaveform[pThis->mWaveformLength++] = vals;
-        }, [](const char* msg) {
-            if (pThis->mLabels.GetSize() < pThis->mLabels.GetMaxSize())
+        }, [](int msgType, const char* msg) {
+            int index = pThis->mWaveformLength;
+            if (msgType == CTestBench::GroupEnd)
+                index = group.begin;
+            
+            if (msg && pThis->mLabels.GetSize() < pThis->mLabels.GetMaxSize())
             {
                 TLabel label;
-                label.index = pThis->mWaveformLength;
+                label.type = msgType;
+                label.index = index;
                 int maxX = label.index + strlen(msg)*8;
                 if (firstRowMaxX < label.index)
                 {
@@ -1377,44 +1743,20 @@ public:
                 }
                 pThis->mLabels.Add(label);
             }
-        }, [](const char* msg) {
-            if (msg)
-            {
-                if (pThis->mLabels.GetSize() < pThis->mLabels.GetMaxSize())
-                {
-                    TLabel label;
-                    label.index = pThis->mWaveformLength;
-                    int maxX = label.index + strlen(msg)*8;
-                    if (firstRowMaxX < label.index)
-                    {
-                        label.row = 0;
-                        firstRowMaxX = maxX;
-                    } else {
-                        label.row = 1;
-                    }
-                    if (strlen(msg) < sizeof(label.msg)-1)
-                        strcpy(label.msg, msg);
-                    else
-                    {
-                        memcpy(label.msg, msg, sizeof(label.msg)-1);
-                        label.msg[sizeof(label.msg)-1] = 0;
-                    }
-                    pThis->mLabels.Add(label);
-                }
-            }
-            if (msg)
-                group.begin = pThis->mWaveformLength;
-            if (!msg)
+            if (msgType == CTestBench::GroupBegin)
+                group.begin = index;
+            if (msgType == CTestBench::GroupEnd)
             {
                 const uint16_t colors[] = {RGB565(ffb0b0), RGB565(b0ffb0), RGB565(b0b0ff)};
                 group.end = pThis->mWaveformLength;
                 group.color = colors[pThis->mGroups.GetSize()%COUNT(colors)];
                 pThis->mGroups.Add(group);
             }
+
         });
 
         main_verify(mTestBench);
-        mTestBench.setHandler(nullptr, nullptr, nullptr);
+        mTestBench.setHandler(nullptr, nullptr);
         DrawWave();
         DrawPreview();
         DrawScrollbar();
