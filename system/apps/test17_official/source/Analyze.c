@@ -59,8 +59,8 @@ void SPI_AnalyzeFrame(void)
                 {
                     if(SCK_Now == CLK_Polarity)
                     {
-                        AnalyzeBuf[j * 3 + 0] |= BIT_Order ? ((Status & 0x01) << k) : ((Status & 0x01) << (7 - k));
-                        AnalyzeBuf[j * 3 + 1] |= BIT_Order ? (((Status >> 1) & 0x01) << k) : (((Status >> 1) & 0x01) << (7 - k));
+                        AnalyzeBuf[j * 3 + 0] |= (BIT_Order == LSB) ? ((Status & 0x01) << k) : ((Status & 0x01) << (7 - k));
+                        AnalyzeBuf[j * 3 + 1] |= (BIT_Order == LSB) ? (((Status >> 1) & 0x01) << k) : (((Status >> 1) & 0x01) << (7 - k));
                         if(k < 7) k++;
                     }
                 }
@@ -68,8 +68,8 @@ void SPI_AnalyzeFrame(void)
                 {
                     if(SCK_Now != CLK_Polarity)
                     {
-                        AnalyzeBuf[j * 3 + 0] |= BIT_Order ? ((Status & 0x01) << k) : ((Status & 0x01) << (7 - k));
-                        AnalyzeBuf[j * 3 + 1] |= BIT_Order ? (((Status >> 1) & 0x01) << k) : (((Status >> 1) & 0x01) << (7 - k));
+                        AnalyzeBuf[j * 3 + 0] |= (BIT_Order == LSB) ? ((Status & 0x01) << k) : ((Status & 0x01) << (7 - k));
+                        AnalyzeBuf[j * 3 + 1] |= (BIT_Order == LSB) ? (((Status >> 1) & 0x01) << k) : (((Status >> 1) & 0x01) << (7 - k));
                         if(k < 7) k++;
                     }
                 }
@@ -84,8 +84,8 @@ void SPI_AnalyzeFrame(void)
                     {
                         if(SCK_Now == CLK_Polarity)
                         {
-                            AnalyzeBuf[j * 3 + 0] |= BIT_Order ? ((Status & 0x01) << k) : ((Status & 0x01) << (7 - k));
-                            AnalyzeBuf[j * 3 + 1] |= BIT_Order ? (((Status >> 1) & 0x01) << k) : (((Status >> 1) & 0x01) << (7 - k));
+                            AnalyzeBuf[j * 3 + 0] |= (BIT_Order == LSB) ? ((Status & 0x01) << k) : ((Status & 0x01) << (7 - k));
+                            AnalyzeBuf[j * 3 + 1] |= (BIT_Order == LSB) ? (((Status >> 1) & 0x01) << k) : (((Status >> 1) & 0x01) << (7 - k));
                             if(k < 7) k++;
                         }
                     }
@@ -93,8 +93,8 @@ void SPI_AnalyzeFrame(void)
                     {
                         if(SCK_Now != CLK_Polarity)
                         {
-                            AnalyzeBuf[j * 3 + 0] |= BIT_Order ? ((Status & 0x01) << k) : ((Status & 0x01) << (7 - k));
-                            AnalyzeBuf[j * 3 + 1] |= BIT_Order ? (((Status >> 1) & 0x01) << k) : (((Status >> 1) & 0x01) << (7 - k));
+                            AnalyzeBuf[j * 3 + 0] |= (BIT_Order == LSB) ? ((Status & 0x01) << k) : ((Status & 0x01) << (7 - k));
+                            AnalyzeBuf[j * 3 + 1] |= (BIT_Order == LSB) ? (((Status >> 1) & 0x01) << k) : (((Status >> 1) & 0x01) << (7 - k));
                             if(k < 7) k++;
                         }
                     }
