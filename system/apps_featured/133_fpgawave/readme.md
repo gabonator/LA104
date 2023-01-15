@@ -1,5 +1,5 @@
-# RTC Monitor
+# FPGA test bench
 
 ![readme.png](readme.png)
 
-Displays date and time of PCF8563 I2C RTC clock.
+[Sample recording](https://rawgit.valky.eu/gabonator/LA104/master/system/apps_featured/133_fpgawave/readme.html)

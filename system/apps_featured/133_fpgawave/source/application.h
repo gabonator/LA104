@@ -1046,6 +1046,7 @@ public:
         char temp[16];
         mFreeWave.Next(temp);
         mWriter.Open(temp);
+        mWriter << "<script>\n";
         mWriter << "testbench_target = {\n";
         mWriter << "  fpga: {\n";
         if (mModuleFpga.name[0])
@@ -1113,6 +1114,8 @@ public:
         }
         mWriter << "  ]\n";
         mWriter << "};\n";
+        mWriter << "</script>\n";
+        mWriter << "<script src=\"https://x.valky.eu/la104_fpga_env1\"></script>\n";
         mWriter.Close();
     }
         
