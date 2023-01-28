@@ -7,6 +7,44 @@ if (typeof(testbench_verilator) != "undefined")
 var testbench;
 calculateTestbench();
 
+function checkChildren()
+{
+  if (self != top)
+  {
+    // if we are iframe embedded inside other window, post our data to parent
+    if (typeof(testbench_target) != "undefined")
+      parent.postMessage(JSON.stringify({testbench_child:testbench_target}), "*");
+    if (typeof(testbench_verilator) != "undefined")
+      parent.postMessage(JSON.stringify({testbench_child:testbench_verilator}), "*");
+  }
+
+  if (self == top)
+  {
+    // we are top window, be ready to process data from children
+    window.addEventListener("message", function(event) {
+      var edata = JSON.parse(event.data);
+      if (typeof(edata.testbench_child) == "undefined")
+        return false;
+      //console.log("got data:" + edata.testbench_child.title);
+      testbenches.push(edata.testbench_child);
+      calculateTestbench();
+      updateInfo();
+      main(testbench);
+    });
+
+    var iframe = document.createElement('iframe');
+    var url = document.location.href;
+    if (url.includes("_target."))
+      url = url.replace("_target.", "_verilated.");
+    else if (url.includes("_verilated."))
+      url = url.replace("_verilated.", "_target.");
+
+    iframe.src = "allinput_verilated.html"
+    iframe.style = "display:none"
+    document.body.appendChild(iframe);
+  }
+}
+
 function calculateTestbench()
 {
   if (testbenches.length == 0)
@@ -156,6 +194,7 @@ window.addEventListener('DOMContentLoaded',function(){
   `;
   document.body.appendChild(sheet);
   updateInfo();
+  checkChildren();
 });
 
 

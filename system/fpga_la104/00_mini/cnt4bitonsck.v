@@ -14,6 +14,10 @@ reg[1:0] spi_ss_reg;
 //wire spi_clk_falling_edge;
 reg inhibit;
 reg transmit;
+wire Tx_En;
+wire Rx_Data;
+wire spi_ss_falling_edge;
+wire spi_clk_falling_edge;
 
 assign Tx_En = enabled && ~inhibit;
 wire Tx_Data = transmit; //sending[0]; // MSB first

@@ -7,6 +7,7 @@ module app (
 );
 
 reg [1:0] spi_clk_reg = 0;
+wire spi_clk_falling_edge;
 assign spi_clk_falling_edge = (spi_clk_reg[1:0] == 2'b10);
 
 reg sampled = 0;
@@ -21,3 +22,4 @@ begin
 end
 
 endmodule
+

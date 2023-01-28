@@ -14,6 +14,11 @@ reg[1:0] spi_ss_reg;
 reg inhibit;
 reg transmit;
 
+wire Tx_En;
+wire Rx_Data;
+wire spi_ss_falling_edge;
+wire spi_clk_falling_edge;
+
 assign Tx_En = enabled && ~inhibit;
 wire Tx_Data = transmit;
 assign MISO = Tx_En ? Tx_Data : 1'bZ;

@@ -4,12 +4,15 @@
 module app (
     input wire clk,
     input wire SSEL,
+    input wire MOSI,
+    input wire SCK,
     inout wire MISO
 );
 
 reg [32:0] counter;
 reg test;
-
+wire Tx_En;
+wire Rx_Data;
 assign Tx_En = ~SSEL;
 wire Tx_Data = counter[3];
 assign MISO = Tx_En ? Tx_Data : 1'bZ;

@@ -570,9 +570,11 @@ public:
     }
     bool FindFile(const char* name, BIOS::FAT::TFindFile& found)
     {
-        BIOS::FAT::EResult result = BIOS::FAT::OpenDir((char*)"");
+//        BIOS::DBG::Print("p");
+        BIOS::FAT::EResult result = BIOS::FAT::OpenDir((char*)""); // freezes!
         _ASSERT(result == BIOS::FAT::EOk);
         BIOS::FAT::TFindFile file;
+//        BIOS::DBG::Print("f");
         while (BIOS::FAT::FindNext(&file) == BIOS::FAT::EOk)
         {
             if (compare(file.strName, name) == 0)
@@ -581,6 +583,7 @@ public:
                 return true;
             }
         }
+//        BIOS::DBG::Print(".");
         return false;
     }
     
@@ -593,13 +596,14 @@ public:
                 return;
             while (mpFlashWriteRange[0] != -1 || mpFlashWriteRange[1] != 0)
             {
-                BIOS::SYS::DelayMs(30);
                 mpFlashWriteRange[0] = -1;
                 mpFlashWriteRange[1] = 0;
+                BIOS::SYS::DelayMs(50);
             }
-            BIOS::SYS::DelayMs(200);
+//            BIOS::SYS::DelayMs(300); // 300 ok
         }
 
+        // TODO: Deadlock here
         BIOS::FAT::TFindFile fileTemp1;
         if (FindFile(mFpgaName, fileTemp1))
             mFpgaNewer = CheckNewer(mFileFpga, fileTemp1);
@@ -832,6 +836,7 @@ class CApplication : public CWnd
     int mWaveformScale{0};
     int mWaveformShift{0};
     bool mMeasure{false};
+    bool mAutosave{true};
     CTestBench mTestBench;
     
     struct TLabel {
@@ -1016,6 +1021,13 @@ public:
 
     void SaveWaveform()
     {
+        char temp[16];
+        mFreeWave.Next(temp);
+        SaveWaveform(temp);
+    }
+    
+    void SaveWaveform(char* name)
+    {
         // fpgbench.htm
         // fpga001.js
         /*
@@ -1043,11 +1055,10 @@ public:
             }
          };
          */
-        char temp[16];
-        mFreeWave.Next(temp);
-        mWriter.Open(temp);
+        mWriter.Open(name);
         mWriter << "<script>\n";
         mWriter << "testbench_target = {\n";
+        mWriter << "  title: \"LA104 - AG1KLPQ48\",\n";
         mWriter << "  fpga: {\n";
         if (mModuleFpga.name[0])
             mWriter << "    file: \"" << mModuleFpga.name << "\",\n";
@@ -1115,7 +1126,7 @@ public:
         mWriter << "  ]\n";
         mWriter << "};\n";
         mWriter << "</script>\n";
-        mWriter << "<script src=\"https://x.valky.eu/la104_fpga_env1\"></script>\n";
+        mWriter << "<script src=\"https://l.valky.eu/la104fpgaenv1\"></script>\n";
         mWriter.Close();
     }
         
@@ -1261,7 +1272,7 @@ public:
 
     void OnPaint() override
     {
-		BIOS::LCD::Bar(m_rcClient, RGB565(404040));
+        BIOS::LCD::Bar(m_rcClient, RGB565(404040));
         
         CRect rc1(m_rcClient);
         rc1.bottom = 14;
@@ -1640,6 +1651,14 @@ public:
             DrawFooter(mModuleFpga, mModuleVerify);
             mMeasure = false;
             Measure();
+            if (mAutosave && !mAutoRun)
+            {
+                if (strcmp(mModuleFpga.name, "BENCH.FPG") == 0)
+                {
+                    BIOS::SYS::DelayMs(1000); //1500ok 1000ok 500bad
+                    SaveWaveform((char*)"bench.htm");
+                }
+            }
             return;
         }
         const ModuleStatus transition[10] = {
@@ -1653,6 +1672,7 @@ public:
         mModuleVerify.status = transition[mModuleVerify.status];
 
         mNotify.CheckNew();
+
         bool fpgaNewer = mNotify.IsFpgaNewer();
         bool verifyNewer = mNotify.IsVerifyNewer();
         if (!fpgaNewer && !verifyNewer)
