@@ -39,8 +39,8 @@ function checkChildren()
     else if (url.includes("_verilated."))
       url = url.replace("_verilated.", "_target.");
 
-    iframe.src = "allinput_verilated.html"
-    iframe.style = "display:none"
+    iframe.src = url;
+    iframe.style = "display:none";
     document.body.appendChild(iframe);
   }
 }
