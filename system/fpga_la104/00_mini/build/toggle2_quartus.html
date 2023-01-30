@@ -1,0 +1,1045 @@
+
+<script>
+window.addEventListener("load", () => {
+  document.querySelectorAll("p").forEach(el =>
+  {
+    el.style = "white-space:pre-wrap";
+    var html = el.innerHTML;
+    var hasInsert = false;
+    while (html.indexOf("\x1b") != -1)
+    {
+      var tokbegin = html.indexOf("\x1b");
+      var tokend = html.indexOf("m", tokbegin);
+      var tok = html.substr(tokbegin+1, tokend-tokbegin);
+      var insert = "";
+      if (tok == "[0;32m")
+        insert = "<font color=green>"
+      else if (tok == "[0m")
+        insert = "<font color=black>"
+      else if (tok == "[0;36m")
+        insert = "<font color=blue>"
+      else if (tok == "[0;31m")
+        insert = "<font color=red>"
+      else {
+        console.log("What to do? ", tok);
+        throw "wrong attribute"
+      }
+      if (hasInsert)
+        insert = "</font>" + insert;
+      hasInsert = true;
+      html = html.substr(0, tokbegin) + insert + html.substr(tokend+1);
+    }
+    if (hasInsert)
+     html += "</font>";
+    el.innerHTML = html;
+  })
+  if (!document.querySelector("b:last-child")?.innerHTML.includes("exit code"))
+  {
+    setTimeout(()=>document.location.reload(), 2000);
+    setTimeout(()=>window.scrollTo(0, document.body.scrollHeight), 0);
+  }
+});
+</script>
+
+<b>svc: af -B, --setup, --mode, QUARTUS, --design, app, --device, AG1KLPQ48, -X, set DEVICE_FAMILY 1</b><p>
+af: /root/apps/altasvc/../altagate//Supra-2019.10.b0/lib/libao.so.4: no version information available (required by af)
+Total IO  : 84
+Total Pin : 40/7
+Top array is built.
+Loading architect libraries...
+## CPU time: 0:0:0, REAL time: 0:0:0
+## Memory Usage: 0MB (0MB)
+Warn: Can not find SDC file ./app.sdc, create a empty one.
+Info: Can not find ASF file ./app.pre.asf, create a empty one.
+Info: Can not find ASF file ./app.post.asf, create a empty one.
+
+Setup done...
+Next, compile with quartus using one of following 2 approaches:
+ 1) Command line base, run 'quartus_sh -t af_quartus.tcl'
+ 2) GUI base, start quartus GUI, open project app,
+    select Tools->Tcl Scripts..., load af_quartus.tcl and run
+Then, run 'af_run' to generate app bit-stream files
+
+Total 0 fatals, 0 errors, 1 warnings, 2 infos.
+
+</p><b>svc: af exit code 0</b>
+
+<b>svc: quartus_map --read_settings_files=on, --write_settings_files=off, app, -c, app</b><p>
+[0;32mInfo: *******************************************************************
+[0m[0;32mInfo: Running Quartus II 32-bit Analysis & Synthesis
+[0m[0;32m    Info: Version 13.1.0 Build 162 10/23/2013 SJ Full Version
+[0m[0;32m    Info: Copyright (C) 1991-2013 Altera Corporation. All rights reserved.
+[0m[0;32m    Info: Your use of Altera Corporation's design tools, logic functions 
+[0m[0;32m    Info: and other software and tools, and its AMPP partner logic 
+[0m[0;32m    Info: functions, and any output files from any of the foregoing 
+[0m[0;32m    Info: (including device programming or simulation files), and any 
+[0m[0;32m    Info: associated documentation or information are expressly subject 
+[0m[0;32m    Info: to the terms and conditions of the Altera Program License 
+[0m[0;32m    Info: Subscription Agreement, Altera MegaCore Function License 
+[0m[0;32m    Info: Agreement, or other applicable license agreement, including, 
+[0m[0;32m    Info: without limitation, that your use is for the sole purpose of 
+[0m[0;32m    Info: programming logic devices manufactured by Altera and sold by 
+[0m[0;32m    Info: Altera or its authorized distributors.  Please refer to the 
+[0m[0;32m    Info: applicable agreement for further details.
+[0m[0;32m    Info: Processing started: Sun Jan 29 08:02:02 2023
+[0m[0;32mInfo: Command: quartus_map --read_settings_files=on --write_settings_files=off app -c app
+[0m[0;32mInfo (125068): Revision "app" was previously opened in Quartus II software version 11.1. Created Quartus II Default Settings File /root/apps/altasvc/temp/app_assignment_defaults.qdf, which contains the default assignment setting information from Quartus II software version 11.1.
+[0m[0;32mInfo (125069): Default assignment values were changed in the current version of the Quartus II software -- changes to default assignments values are contained in file /root/apps/altasvc/../altagate/Quartus-13.1/linux/assignment_defaults.qdf
+[0m[0;36mWarning (125096): Overriding device family setting Cyclone IV GX -- part EP4CE75F23C8 belongs to device family Cyclone IV E
+[0m[0;32m    Info (125063): set_global_assignment -name DEVICE EP4CE75F23C8
+[0m[0;32mInfo (20029): Only one processor detected - disabling parallel compilation
+[0m[0;32mInfo (12021): Found 1 design units, including 1 entities, in source file app.v
+[0m[0;32m    Info (12023): Found entity 1: app
+[0m[0;32m[0m[0;32m[0m[0;36m[0m[0;32m[0m[0;32mInfo (12021): Found 49 design units, including 49 entities, in source file /root/apps/altagate/Supra-2019.10.b0/etc/arch/rodinia/alta_sim.v
+[0m[0;32m    Info (12023): Found entity 1: alta_slice
+[0m[0;32m    Info (12023): Found entity 2: alta_clkenctrl_rst
+[0m[0;32m    Info (12023): Found entity 3: alta_clkenctrl
+[0m[0;32m    Info (12023): Found entity 4: alta_asyncctrl
+[0m[0;32m    Info (12023): Found entity 5: alta_syncctrl
+[0m[0;32m    Info (12023): Found entity 6: alta_io_gclk
+[0m[0;32m    Info (12023): Found entity 7: alta_gclksel
+[0m[0;32m    Info (12023): Found entity 8: alta_gclkgen
+[0m[0;32m    Info (12023): Found entity 9: alta_gclkgen0
+[0m[0;32m    Info (12023): Found entity 10: alta_gclkgen2
+[0m[0;32m    Info (12023): Found entity 11: alta_io
+[0m[0;32m    Info (12023): Found entity 12: alta_rio
+[0m[0;32m    Info (12023): Found entity 13: alta_srff
+[0m[0;32m    Info (12023): Found entity 14: alta_dff
+[0m[0;32m    Info (12023): Found entity 15: alta_ufm_gddd
+[0m[0;32m    Info (12023): Found entity 16: alta_dff_stall
+[0m[0;32m    Info (12023): Found entity 17: alta_srlat
+[0m[0;32m    Info (12023): Found entity 18: alta_dio
+[0m[0;32m    Info (12023): Found entity 19: alta_ufms
+[0m[0;32m    Info (12023): Found entity 20: alta_ufms_sim
+[0m[0;32m    Info (12023): Found entity 21: alta_pll
+[0m[0;32m    Info (12023): Found entity 22: alta_pllx
+[0m[0;32m    Info (12023): Found entity 23: pll_clk_trim
+[0m[0;32m    Info (12023): Found entity 24: alta_pllv
+[0m[0;32m    Info (12023): Found entity 25: alta_pllve
+[0m[0;32m    Info (12023): Found entity 26: alta_sram
+[0m[0;32m    Info (12023): Found entity 27: alta_dpram16x4
+[0m[0;32m    Info (12023): Found entity 28: alta_spram16x4
+[0m[0;32m    Info (12023): Found entity 29: alta_wram
+[0m[0;32m    Info (12023): Found entity 30: alta_bram_pulse_generator
+[0m[0;32m    Info (12023): Found entity 31: alta_bram
+[0m[0;32m    Info (12023): Found entity 32: alta_ram4k
+[0m[0;32m    Info (12023): Found entity 33: alta_boot
+[0m[0;32m    Info (12023): Found entity 34: alta_osc
+[0m[0;32m    Info (12023): Found entity 35: alta_ufml
+[0m[0;32m    Info (12023): Found entity 36: alta_jtag
+[0m[0;32m    Info (12023): Found entity 37: alta_mult
+[0m[0;32m    Info (12023): Found entity 38: alta_dff_en
+[0m[0;32m    Info (12023): Found entity 39: alta_multm_add
+[0m[0;32m    Info (12023): Found entity 40: alta_multm
+[0m[0;32m    Info (12023): Found entity 41: alta_i2c
+[0m[0;32m    Info (12023): Found entity 42: alta_spi
+[0m[0;32m    Info (12023): Found entity 43: alta_irda
+[0m[0;32m    Info (12023): Found entity 44: alta_bram9k
+[0m[0;32m    Info (12023): Found entity 45: alta_ram9k
+[0m[0;32m    Info (12023): Found entity 46: alta_mcu
+[0m[0;32m    Info (12023): Found entity 47: alta_mcu_m3
+[0m[0;32m    Info (12023): Found entity 48: alta_remote
+[0m[0;32m    Info (12023): Found entity 49: alta_saradc
+[0m[0;36mWarning (10236): Verilog HDL Implicit Net warning at alta_sim.v(161): created implicit net for "ena_reg"
+[0m[0;36mWarning (10236): Verilog HDL Implicit Net warning at alta_sim.v(185): created implicit net for "ena_int"
+[0m[0;36mWarning (10236): Verilog HDL Implicit Net warning at alta_sim.v(186): created implicit net for "ena_reg"
+[0m[0;36mWarning (10236): Verilog HDL Implicit Net warning at alta_sim.v(450): created implicit net for "outreg_h"
+[0m[0;36mWarning (10236): Verilog HDL Implicit Net warning at alta_sim.v(451): created implicit net for "outreg_l"
+[0m[0;36mWarning (10236): Verilog HDL Implicit Net warning at alta_sim.v(459): created implicit net for "oe_reg_h"
+[0m[0;36mWarning (10236): Verilog HDL Implicit Net warning at alta_sim.v(460): created implicit net for "oe_reg_l"
+[0m[0;36mWarning (10236): Verilog HDL Implicit Net warning at alta_sim.v(2881): created implicit net for "dffOut"
+[0m[0;36mWarning (10222): Verilog HDL Parameter Declaration warning at alta_sim.v(2374): Parameter Declaration in module "alta_bram_pulse_generator" behaves as a Local Parameter Declaration because the module has a Module Parameter Port List
+[0m[0;32mInfo (12127): Elaborating entity "app" for the top level hierarchy
+[0m[0;32mInfo (270000): Limiting DSP block usage to 0 DSP block(s) for the partition Top
+[0m[0;32mInfo (270017): Limiting M4K/M9K RAM block usage to 0 M4K/M9K RAM block(s) for the Top
+[0m[0;32mInfo (270017): Limiting M4K/M9K RAM block usage to 0 M4K/M9K RAM block(s) for the Top
+[0m[0;32mInfo (17026): Resynthesizing 0 WYSIWYG logic cells and I/Os using "balanced" technology mapper which leaves 0 WYSIWYG logic cells and I/Os untouched
+[0m[0;32mInfo (286030): Timing-Driven Synthesis is running
+[0m[0;32mInfo (128000): Starting physical synthesis optimizations for speed
+[0m[0;32mInfo (332104): Reading SDC File: 'app.sdc'
+[0m[0;32mInfo (332104): Reading SDC File: 'app_derate.sdc'
+[0m[0;36mWarning (332190): Using the -early option with a derate factor of 2.0, i.e., greater than 1.0, causes less conservative delays which might lead to optimistic results from timing analysis.
+[0m[0;32mInfo (332144): No user constrained base clocks found in the design
+[0m[0;32mInfo (332143): No user constrained clock uncertainty found in the design. Calling "derive_clock_uncertainty"
+[0m[0;32mInfo (332154): The derive_clock_uncertainty command did not apply clock uncertainty to any clock-to-clock transfers.
+[0m[0;32mInfo (332128): Timing requirements not specified -- optimizing circuit to achieve the following default global requirements
+[0m[0;32m    Info (332127): Assuming a default timing requirement
+[0m[0;32mInfo (332111): Found 1 clocks
+[0m[0;32m    Info (332111):   Period   Clock Name
+[0m[0;32m    Info (332111): ======== ============
+[0m[0;32m    Info (332111):    1.000          clk
+[0m[0;32mInfo (128002): Starting physical synthesis algorithm combinational resynthesis using boolean division
+[0m[0;32mInfo (128003): Physical synthesis algorithm combinational resynthesis using boolean division complete: estimated slack improvement of 0 ps
+[0m[0;32mInfo (128001): Physical synthesis optimizations for speed complete: elapsed time is 00:00:01
+[0m[0;32mInfo (144001): Generated suppressed messages file /root/apps/altasvc/temp/quartus_logs/app.map.smsg
+[0m[0;32mInfo (16010): Generating hard_block partition "hard_block:auto_generated_inst"
+[0m[0;32m    Info (16011): Adding 0 node(s), including 0 DDIO, 0 PLL, 0 transceiver and 0 LCELL
+[0m[0;36mWarning (21074): Design contains 2 input pin(s) that do not drive logic
+[0m[0;36m    Warning (15610): No output dependent on input pin "SSEL"
+[0m[0;36m    Warning (15610): No output dependent on input pin "MOSI"
+[0m[0;32mInfo (21057): Implemented 8 device resources after synthesis - the final resource count might be different
+[0m[0;32m    Info (21058): Implemented 4 input pins
+[0m[0;32m    Info (21059): Implemented 1 output pins
+[0m[0;32m    Info (21061): Implemented 3 logic cells
+[0m[0;32mInfo: Quartus II 32-bit Analysis & Synthesis was successful. 0 errors, 14 warnings
+[0m[0;32m    Info: Peak virtual memory: 438 megabytes
+[0m[0;32m    Info: Processing ended: Sun Jan 29 08:02:06 2023
+[0m[0;32m    Info: Elapsed time: 00:00:04
+[0m[0;32m    Info: Total CPU time (on all processors): 00:00:04
+[0m
+</p><b>svc: quartus_map exit code 0</b>
+
+<b>svc: quartus_map --read_settings_files=on, --write_settings_files=off, app, -c, app</b><p>
+[0;32mInfo: *******************************************************************
+[0m[0;32mInfo: Running Quartus II 32-bit Analysis & Synthesis
+[0m[0;32m    Info: Version 13.1.0 Build 162 10/23/2013 SJ Full Version
+[0m[0;32m    Info: Copyright (C) 1991-2013 Altera Corporation. All rights reserved.
+[0m[0;32m    Info: Your use of Altera Corporation's design tools, logic functions 
+[0m[0;32m    Info: and other software and tools, and its AMPP partner logic 
+[0m[0;32m    Info: functions, and any output files from any of the foregoing 
+[0m[0;32m    Info: (including device programming or simulation files), and any 
+[0m[0;32m    Info: associated documentation or information are expressly subject 
+[0m[0;32m    Info: to the terms and conditions of the Altera Program License 
+[0m[0;32m    Info: Subscription Agreement, Altera MegaCore Function License 
+[0m[0;32m    Info: Agreement, or other applicable license agreement, including, 
+[0m[0;32m    Info: without limitation, that your use is for the sole purpose of 
+[0m[0;32m    Info: programming logic devices manufactured by Altera and sold by 
+[0m[0;32m    Info: Altera or its authorized distributors.  Please refer to the 
+[0m[0;32m    Info: applicable agreement for further details.
+[0m[0;32m    Info: Processing started: Sun Jan 29 08:02:11 2023
+[0m[0;32mInfo: Command: quartus_map --read_settings_files=on --write_settings_files=off app -c app
+[0m[0;32mInfo (125069): Default assignment values were changed in the current version of the Quartus II software -- changes to default assignments values are contained in file /root/apps/altasvc/../altagate/Quartus-13.1/linux/assignment_defaults.qdf
+[0m[0;36mWarning (125096): Overriding device family setting Cyclone IV GX -- part EP4CE75F23C8 belongs to device family Cyclone IV E
+[0m[0;32m    Info (125063): set_global_assignment -name DEVICE EP4CE75F23C8
+[0m[0;32mInfo (20029): Only one processor detected - disabling parallel compilation
+[0m[0;32mInfo (12021): Found 1 design units, including 1 entities, in source file app.v
+[0m[0;32m    Info (12023): Found entity 1: app
+[0m[0;32m[0m[0;32m[0m[0;36m[0m[0;32m[0m[0;32mInfo (12021): Found 49 design units, including 49 entities, in source file /root/apps/altagate/Supra-2019.10.b0/etc/arch/rodinia/alta_sim.v
+[0m[0;32m    Info (12023): Found entity 1: alta_slice
+[0m[0;32m    Info (12023): Found entity 2: alta_clkenctrl_rst
+[0m[0;32m    Info (12023): Found entity 3: alta_clkenctrl
+[0m[0;32m    Info (12023): Found entity 4: alta_asyncctrl
+[0m[0;32m    Info (12023): Found entity 5: alta_syncctrl
+[0m[0;32m    Info (12023): Found entity 6: alta_io_gclk
+[0m[0;32m    Info (12023): Found entity 7: alta_gclksel
+[0m[0;32m    Info (12023): Found entity 8: alta_gclkgen
+[0m[0;32m    Info (12023): Found entity 9: alta_gclkgen0
+[0m[0;32m    Info (12023): Found entity 10: alta_gclkgen2
+[0m[0;32m    Info (12023): Found entity 11: alta_io
+[0m[0;32m    Info (12023): Found entity 12: alta_rio
+[0m[0;32m    Info (12023): Found entity 13: alta_srff
+[0m[0;32m    Info (12023): Found entity 14: alta_dff
+[0m[0;32m    Info (12023): Found entity 15: alta_ufm_gddd
+[0m[0;32m    Info (12023): Found entity 16: alta_dff_stall
+[0m[0;32m    Info (12023): Found entity 17: alta_srlat
+[0m[0;32m    Info (12023): Found entity 18: alta_dio
+[0m[0;32m    Info (12023): Found entity 19: alta_ufms
+[0m[0;32m    Info (12023): Found entity 20: alta_ufms_sim
+[0m[0;32m    Info (12023): Found entity 21: alta_pll
+[0m[0;32m    Info (12023): Found entity 22: alta_pllx
+[0m[0;32m    Info (12023): Found entity 23: pll_clk_trim
+[0m[0;32m    Info (12023): Found entity 24: alta_pllv
+[0m[0;32m    Info (12023): Found entity 25: alta_pllve
+[0m[0;32m    Info (12023): Found entity 26: alta_sram
+[0m[0;32m    Info (12023): Found entity 27: alta_dpram16x4
+[0m[0;32m    Info (12023): Found entity 28: alta_spram16x4
+[0m[0;32m    Info (12023): Found entity 29: alta_wram
+[0m[0;32m    Info (12023): Found entity 30: alta_bram_pulse_generator
+[0m[0;32m    Info (12023): Found entity 31: alta_bram
+[0m[0;32m    Info (12023): Found entity 32: alta_ram4k
+[0m[0;32m    Info (12023): Found entity 33: alta_boot
+[0m[0;32m    Info (12023): Found entity 34: alta_osc
+[0m[0;32m    Info (12023): Found entity 35: alta_ufml
+[0m[0;32m    Info (12023): Found entity 36: alta_jtag
+[0m[0;32m    Info (12023): Found entity 37: alta_mult
+[0m[0;32m    Info (12023): Found entity 38: alta_dff_en
+[0m[0;32m    Info (12023): Found entity 39: alta_multm_add
+[0m[0;32m    Info (12023): Found entity 40: alta_multm
+[0m[0;32m    Info (12023): Found entity 41: alta_i2c
+[0m[0;32m    Info (12023): Found entity 42: alta_spi
+[0m[0;32m    Info (12023): Found entity 43: alta_irda
+[0m[0;32m    Info (12023): Found entity 44: alta_bram9k
+[0m[0;32m    Info (12023): Found entity 45: alta_ram9k
+[0m[0;32m    Info (12023): Found entity 46: alta_mcu
+[0m[0;32m    Info (12023): Found entity 47: alta_mcu_m3
+[0m[0;32m    Info (12023): Found entity 48: alta_remote
+[0m[0;32m    Info (12023): Found entity 49: alta_saradc
+[0m[0;36mWarning (10236): Verilog HDL Implicit Net warning at alta_sim.v(161): created implicit net for "ena_reg"
+[0m[0;36mWarning (10236): Verilog HDL Implicit Net warning at alta_sim.v(185): created implicit net for "ena_int"
+[0m[0;36mWarning (10236): Verilog HDL Implicit Net warning at alta_sim.v(186): created implicit net for "ena_reg"
+[0m[0;36mWarning (10236): Verilog HDL Implicit Net warning at alta_sim.v(450): created implicit net for "outreg_h"
+[0m[0;36mWarning (10236): Verilog HDL Implicit Net warning at alta_sim.v(451): created implicit net for "outreg_l"
+[0m[0;36mWarning (10236): Verilog HDL Implicit Net warning at alta_sim.v(459): created implicit net for "oe_reg_h"
+[0m[0;36mWarning (10236): Verilog HDL Implicit Net warning at alta_sim.v(460): created implicit net for "oe_reg_l"
+[0m[0;36mWarning (10236): Verilog HDL Implicit Net warning at alta_sim.v(2881): created implicit net for "dffOut"
+[0m[0;36mWarning (10222): Verilog HDL Parameter Declaration warning at alta_sim.v(2374): Parameter Declaration in module "alta_bram_pulse_generator" behaves as a Local Parameter Declaration because the module has a Module Parameter Port List
+[0m[0;32mInfo (12127): Elaborating entity "app" for the top level hierarchy
+[0m[0;32mInfo (270000): Limiting DSP block usage to 0 DSP block(s) for the partition Top
+[0m[0;32mInfo (270017): Limiting M4K/M9K RAM block usage to 0 M4K/M9K RAM block(s) for the Top
+[0m[0;32mInfo (270017): Limiting M4K/M9K RAM block usage to 0 M4K/M9K RAM block(s) for the Top
+[0m[0;32mInfo (17026): Resynthesizing 0 WYSIWYG logic cells and I/Os using "balanced" technology mapper which leaves 0 WYSIWYG logic cells and I/Os untouched
+[0m[0;32mInfo (286030): Timing-Driven Synthesis is running
+[0m[0;32mInfo (128000): Starting physical synthesis optimizations for speed
+[0m[0;32mInfo (332104): Reading SDC File: 'app.sdc'
+[0m[0;32mInfo (332104): Reading SDC File: 'app_derate.sdc'
+[0m[0;36mWarning (332190): Using the -early option with a derate factor of 2.0, i.e., greater than 1.0, causes less conservative delays which might lead to optimistic results from timing analysis.
+[0m[0;32mInfo (332144): No user constrained base clocks found in the design
+[0m[0;32mInfo (332143): No user constrained clock uncertainty found in the design. Calling "derive_clock_uncertainty"
+[0m[0;32mInfo (332154): The derive_clock_uncertainty command did not apply clock uncertainty to any clock-to-clock transfers.
+[0m[0;32mInfo (332128): Timing requirements not specified -- optimizing circuit to achieve the following default global requirements
+[0m[0;32m    Info (332127): Assuming a default timing requirement
+[0m[0;32mInfo (332111): Found 1 clocks
+[0m[0;32m    Info (332111):   Period   Clock Name
+[0m[0;32m    Info (332111): ======== ============
+[0m[0;32m    Info (332111):    1.000          clk
+[0m[0;32mInfo (128002): Starting physical synthesis algorithm combinational resynthesis using boolean division
+[0m[0;32mInfo (128003): Physical synthesis algorithm combinational resynthesis using boolean division complete: estimated slack improvement of 0 ps
+[0m[0;32mInfo (128001): Physical synthesis optimizations for speed complete: elapsed time is 00:00:01
+[0m[0;32mInfo (144001): Generated suppressed messages file /root/apps/altasvc/temp/quartus_logs/app.map.smsg
+[0m[0;32mInfo (16010): Generating hard_block partition "hard_block:auto_generated_inst"
+[0m[0;32m    Info (16011): Adding 0 node(s), including 0 DDIO, 0 PLL, 0 transceiver and 0 LCELL
+[0m[0;36mWarning (21074): Design contains 2 input pin(s) that do not drive logic
+[0m[0;36m    Warning (15610): No output dependent on input pin "SSEL"
+[0m[0;36m    Warning (15610): No output dependent on input pin "MOSI"
+[0m[0;32mInfo (21057): Implemented 8 device resources after synthesis - the final resource count might be different
+[0m[0;32m    Info (21058): Implemented 4 input pins
+[0m[0;32m    Info (21059): Implemented 1 output pins
+[0m[0;32m    Info (21061): Implemented 3 logic cells
+[0m[0;32mInfo: Quartus II 32-bit Analysis & Synthesis was successful. 0 errors, 14 warnings
+[0m[0;32m    Info: Peak virtual memory: 431 megabytes
+[0m[0;32m    Info: Processing ended: Sun Jan 29 08:02:15 2023
+[0m[0;32m    Info: Elapsed time: 00:00:04
+[0m[0;32m    Info: Total CPU time (on all processors): 00:00:04
+[0m
+</p><b>svc: quartus_map exit code 0</b>
+
+<b>svc: quartus_sh -t, af_quartus.tcl</b><p>
+[0;32mInfo: *******************************************************************
+[0m[0;32mInfo: Running Quartus II 32-bit Shell
+[0m[0;32m    Info: Version 13.1.0 Build 162 10/23/2013 SJ Full Version
+[0m[0;32m    Info: Copyright (C) 1991-2013 Altera Corporation. All rights reserved.
+[0m[0;32m    Info: Your use of Altera Corporation's design tools, logic functions 
+[0m[0;32m    Info: and other software and tools, and its AMPP partner logic 
+[0m[0;32m    Info: functions, and any output files from any of the foregoing 
+[0m[0;32m    Info: (including device programming or simulation files), and any 
+[0m[0;32m    Info: associated documentation or information are expressly subject 
+[0m[0;32m    Info: to the terms and conditions of the Altera Program License 
+[0m[0;32m    Info: Subscription Agreement, Altera MegaCore Function License 
+[0m[0;32m    Info: Agreement, or other applicable license agreement, including, 
+[0m[0;32m    Info: without limitation, that your use is for the sole purpose of 
+[0m[0;32m    Info: programming logic devices manufactured by Altera and sold by 
+[0m[0;32m    Info: Altera or its authorized distributors.  Please refer to the 
+[0m[0;32m    Info: applicable agreement for further details.
+[0m[0;32m    Info: Processing started: Sun Jan 29 08:02:17 2023
+[0m[0;32mInfo: Command: quartus_sh -t af_quartus.tcl
+[0;32mInfo: *******************************************************************
+[0m[0;32mInfo: Running Quartus II 32-bit Shell
+[0m[0;32m    Info: Version 13.1.0 Build 162 10/23/2013 SJ Full Version
+[0m[0;32m    Info: Copyright (C) 1991-2013 Altera Corporation. All rights reserved.
+[0m[0;32m    Info: Your use of Altera Corporation's design tools, logic functions 
+[0m[0;32m    Info: and other software and tools, and its AMPP partner logic 
+[0m[0;32m    Info: functions, and any output files from any of the foregoing 
+[0m[0;32m    Info: (including device programming or simulation files), and any 
+[0m[0;32m    Info: associated documentation or information are expressly subject 
+[0m[0;32m    Info: to the terms and conditions of the Altera Program License 
+[0m[0;32m    Info: Subscription Agreement, Altera MegaCore Function License 
+[0m[0;32m    Info: Agreement, or other applicable license agreement, including, 
+[0m[0;32m    Info: without limitation, that your use is for the sole purpose of 
+[0m[0;32m    Info: programming logic devices manufactured by Altera and sold by 
+[0m[0;32m    Info: Altera or its authorized distributors.  Please refer to the 
+[0m[0;32m    Info: applicable agreement for further details.
+[0m[0;32m    Info: Processing started: Sun Jan 29 08:02:18 2023
+[0m[0;32mInfo: Command: quartus_sh -t af_ip.tcl
+[0m[0;32mInfo (125069): Default assignment values were changed in the current version of the Quartus II software -- changes to default assignments values are contained in file /root/apps/altagate/Quartus-13.1/linux/assignment_defaults.qdf
+[0m[0;36mWarning (125096): Overriding device family setting Cyclone IV GX -- part EP4CE75F23C8 belongs to device family Cyclone IV E
+[0m[0;32m    Info (125063): set_global_assignment -name DEVICE EP4CE75F23C8
+[0m[0;32mInfo: *******************************************************************
+[0m[0;32mInfo: Running Quartus II 32-bit Analysis & Synthesis
+[0m[0;32m    Info: Version 13.1.0 Build 162 10/23/2013 SJ Full Version
+[0m[0;32m    Info: Processing started: Sun Jan 29 08:02:23 2023
+[0m[0;32mInfo: Command: quartus_map --read_settings_files=on --write_settings_files=off app -c app
+[0m[0;36mWarning (125096): Overriding device family setting Cyclone IV -- part EP4CE75F23C8 belongs to device family Cyclone IV E
+[0m[0;32m    Info (125063): set_global_assignment -name FAMILY "Cyclone IV"
+[0m[0;32mInfo (20029): Only one processor detected - disabling parallel compilation
+[0m[0;32mInfo (12021): Found 1 design units, including 1 entities, in source file app.v
+[0m[0;32m    Info (12023): Found entity 1: app
+[0m[0;32m[0m[0;32m[0m[0;36m[0m[0;32m[0m[0;32mInfo (12021): Found 49 design units, including 49 entities, in source file /root/apps/altagate/Supra-2019.10.b0/etc/arch/rodinia/alta_sim.v
+[0m[0;32m    Info (12023): Found entity 1: alta_slice
+[0m[0;32m    Info (12023): Found entity 2: alta_clkenctrl_rst
+[0m[0;32m    Info (12023): Found entity 3: alta_clkenctrl
+[0m[0;32m    Info (12023): Found entity 4: alta_asyncctrl
+[0m[0;32m    Info (12023): Found entity 5: alta_syncctrl
+[0m[0;32m    Info (12023): Found entity 6: alta_io_gclk
+[0m[0;32m    Info (12023): Found entity 7: alta_gclksel
+[0m[0;32m    Info (12023): Found entity 8: alta_gclkgen
+[0m[0;32m    Info (12023): Found entity 9: alta_gclkgen0
+[0m[0;32m    Info (12023): Found entity 10: alta_gclkgen2
+[0m[0;32m    Info (12023): Found entity 11: alta_io
+[0m[0;32m    Info (12023): Found entity 12: alta_rio
+[0m[0;32m    Info (12023): Found entity 13: alta_srff
+[0m[0;32m    Info (12023): Found entity 14: alta_dff
+[0m[0;32m    Info (12023): Found entity 15: alta_ufm_gddd
+[0m[0;32m    Info (12023): Found entity 16: alta_dff_stall
+[0m[0;32m    Info (12023): Found entity 17: alta_srlat
+[0m[0;32m    Info (12023): Found entity 18: alta_dio
+[0m[0;32m    Info (12023): Found entity 19: alta_ufms
+[0m[0;32m    Info (12023): Found entity 20: alta_ufms_sim
+[0m[0;32m    Info (12023): Found entity 21: alta_pll
+[0m[0;32m    Info (12023): Found entity 22: alta_pllx
+[0m[0;32m    Info (12023): Found entity 23: pll_clk_trim
+[0m[0;32m    Info (12023): Found entity 24: alta_pllv
+[0m[0;32m    Info (12023): Found entity 25: alta_pllve
+[0m[0;32m    Info (12023): Found entity 26: alta_sram
+[0m[0;32m    Info (12023): Found entity 27: alta_dpram16x4
+[0m[0;32m    Info (12023): Found entity 28: alta_spram16x4
+[0m[0;32m    Info (12023): Found entity 29: alta_wram
+[0m[0;32m    Info (12023): Found entity 30: alta_bram_pulse_generator
+[0m[0;32m    Info (12023): Found entity 31: alta_bram
+[0m[0;32m    Info (12023): Found entity 32: alta_ram4k
+[0m[0;32m    Info (12023): Found entity 33: alta_boot
+[0m[0;32m    Info (12023): Found entity 34: alta_osc
+[0m[0;32m    Info (12023): Found entity 35: alta_ufml
+[0m[0;32m    Info (12023): Found entity 36: alta_jtag
+[0m[0;32m    Info (12023): Found entity 37: alta_mult
+[0m[0;32m    Info (12023): Found entity 38: alta_dff_en
+[0m[0;32m    Info (12023): Found entity 39: alta_multm_add
+[0m[0;32m    Info (12023): Found entity 40: alta_multm
+[0m[0;32m    Info (12023): Found entity 41: alta_i2c
+[0m[0;32m    Info (12023): Found entity 42: alta_spi
+[0m[0;32m    Info (12023): Found entity 43: alta_irda
+[0m[0;32m    Info (12023): Found entity 44: alta_bram9k
+[0m[0;32m    Info (12023): Found entity 45: alta_ram9k
+[0m[0;32m    Info (12023): Found entity 46: alta_mcu
+[0m[0;32m    Info (12023): Found entity 47: alta_mcu_m3
+[0m[0;32m    Info (12023): Found entity 48: alta_remote
+[0m[0;32m    Info (12023): Found entity 49: alta_saradc
+[0m[0;36mWarning (10236): Verilog HDL Implicit Net warning at alta_sim.v(161): created implicit net for "ena_reg"
+[0m[0;36mWarning (10236): Verilog HDL Implicit Net warning at alta_sim.v(185): created implicit net for "ena_int"
+[0m[0;36mWarning (10236): Verilog HDL Implicit Net warning at alta_sim.v(186): created implicit net for "ena_reg"
+[0m[0;36mWarning (10236): Verilog HDL Implicit Net warning at alta_sim.v(450): created implicit net for "outreg_h"
+[0m[0;36mWarning (10236): Verilog HDL Implicit Net warning at alta_sim.v(451): created implicit net for "outreg_l"
+[0m[0;36mWarning (10236): Verilog HDL Implicit Net warning at alta_sim.v(459): created implicit net for "oe_reg_h"
+[0m[0;36mWarning (10236): Verilog HDL Implicit Net warning at alta_sim.v(460): created implicit net for "oe_reg_l"
+[0m[0;36mWarning (10236): Verilog HDL Implicit Net warning at alta_sim.v(2881): created implicit net for "dffOut"
+[0m[0;36mWarning (10222): Verilog HDL Parameter Declaration warning at alta_sim.v(2374): Parameter Declaration in module "alta_bram_pulse_generator" behaves as a Local Parameter Declaration because the module has a Module Parameter Port List
+[0m[0;32mInfo (12127): Elaborating entity "app" for the top level hierarchy
+[0m[0;32mInfo (270000): Limiting DSP block usage to 0 DSP block(s) for the partition Top
+[0m[0;32mInfo (270017): Limiting M4K/M9K RAM block usage to 0 M4K/M9K RAM block(s) for the Top
+[0m[0;32mInfo (270017): Limiting M4K/M9K RAM block usage to 0 M4K/M9K RAM block(s) for the Top
+[0m[0;32mInfo (17026): Resynthesizing 0 WYSIWYG logic cells and I/Os using "balanced" technology mapper which leaves 0 WYSIWYG logic cells and I/Os untouched
+[0m[0;32mInfo (286030): Timing-Driven Synthesis is running
+[0m[0;32mInfo (128000): Starting physical synthesis optimizations for speed
+[0m[0;32mInfo (332104): Reading SDC File: 'app.sdc'
+[0m[0;32mInfo (332104): Reading SDC File: 'app_derate.sdc'
+[0m[0;36mWarning (332190): Using the -early option with a derate factor of 2.0, i.e., greater than 1.0, causes less conservative delays which might lead to optimistic results from timing analysis.
+[0m[0;32mInfo (332144): No user constrained base clocks found in the design
+[0m[0;32mInfo (332143): No user constrained clock uncertainty found in the design. Calling "derive_clock_uncertainty"
+[0m[0;32mInfo (332154): The derive_clock_uncertainty command did not apply clock uncertainty to any clock-to-clock transfers.
+[0m[0;32mInfo (332128): Timing requirements not specified -- optimizing circuit to achieve the following default global requirements
+[0m[0;32m    Info (332127): Assuming a default timing requirement
+[0m[0;32mInfo (332111): Found 1 clocks
+[0m[0;32m    Info (332111):   Period   Clock Name
+[0m[0;32m    Info (332111): ======== ============
+[0m[0;32m    Info (332111):    1.000          clk
+[0m[0;32mInfo (128002): Starting physical synthesis algorithm combinational resynthesis using boolean division
+[0m[0;32mInfo (128003): Physical synthesis algorithm combinational resynthesis using boolean division complete: estimated slack improvement of 0 ps
+[0m[0;32mInfo (128001): Physical synthesis optimizations for speed complete: elapsed time is 00:00:01
+[0m[0;32mInfo (144001): Generated suppressed messages file /root/apps/altasvc/temp/quartus_logs/app.map.smsg
+[0m[0;32mInfo (16010): Generating hard_block partition "hard_block:auto_generated_inst"
+[0m[0;32m    Info (16011): Adding 0 node(s), including 0 DDIO, 0 PLL, 0 transceiver and 0 LCELL
+[0m[0;36mWarning (21074): Design contains 2 input pin(s) that do not drive logic
+[0m[0;36m    Warning (15610): No output dependent on input pin "SSEL"
+[0m[0;36m    Warning (15610): No output dependent on input pin "MOSI"
+[0m[0;32mInfo (21057): Implemented 8 device resources after synthesis - the final resource count might be different
+[0m[0;32m    Info (21058): Implemented 4 input pins
+[0m[0;32m    Info (21059): Implemented 1 output pins
+[0m[0;32m    Info (21061): Implemented 3 logic cells
+[0m[0;32mInfo: Quartus II 32-bit Analysis & Synthesis was successful. 0 errors, 14 warnings
+[0m[0;32m    Info: Peak virtual memory: 431 megabytes
+[0m[0;32m    Info: Processing ended: Sun Jan 29 08:02:27 2023
+[0m[0;32m    Info: Elapsed time: 00:00:04
+[0m[0;32m    Info: Total CPU time (on all processors): 00:00:04
+[0m[0m[0;36mWarning (125096): Overriding device family setting Cyclone IV -- part EP4CE75F23C8 belongs to device family Cyclone IV E
+[0m[0;32m    Info (125063): set_global_assignment -name FAMILY "Cyclone IV"
+[0m[0;32mInfo: *******************************************************************
+[0m[0;32mInfo: Running Quartus II 32-bit Analysis & Synthesis
+[0m[0;32m    Info: Version 13.1.0 Build 162 10/23/2013 SJ Full Version
+[0m[0;32m    Info: Processing started: Sun Jan 29 08:02:33 2023
+[0m[0;32mInfo: Command: quartus_map --read_settings_files=on --write_settings_files=off app -c app
+[0m[0;36mWarning (125096): Overriding device family setting Cyclone IV -- part EP4CE75F23C8 belongs to device family Cyclone IV E
+[0m[0;32m    Info (125063): set_global_assignment -name FAMILY "Cyclone IV"
+[0m[0;32mInfo (20029): Only one processor detected - disabling parallel compilation
+[0m[0;32mInfo (12021): Found 1 design units, including 1 entities, in source file app.v
+[0m[0;32m    Info (12023): Found entity 1: app
+[0m[0;32m[0m[0;32m[0m[0;36m[0m[0;32m[0m[0;32mInfo (12021): Found 49 design units, including 49 entities, in source file /root/apps/altagate/Supra-2019.10.b0/etc/arch/rodinia/alta_sim.v
+[0m[0;32m    Info (12023): Found entity 1: alta_slice
+[0m[0;32m    Info (12023): Found entity 2: alta_clkenctrl_rst
+[0m[0;32m    Info (12023): Found entity 3: alta_clkenctrl
+[0m[0;32m    Info (12023): Found entity 4: alta_asyncctrl
+[0m[0;32m    Info (12023): Found entity 5: alta_syncctrl
+[0m[0;32m    Info (12023): Found entity 6: alta_io_gclk
+[0m[0;32m    Info (12023): Found entity 7: alta_gclksel
+[0m[0;32m    Info (12023): Found entity 8: alta_gclkgen
+[0m[0;32m    Info (12023): Found entity 9: alta_gclkgen0
+[0m[0;32m    Info (12023): Found entity 10: alta_gclkgen2
+[0m[0;32m    Info (12023): Found entity 11: alta_io
+[0m[0;32m    Info (12023): Found entity 12: alta_rio
+[0m[0;32m    Info (12023): Found entity 13: alta_srff
+[0m[0;32m    Info (12023): Found entity 14: alta_dff
+[0m[0;32m    Info (12023): Found entity 15: alta_ufm_gddd
+[0m[0;32m    Info (12023): Found entity 16: alta_dff_stall
+[0m[0;32m    Info (12023): Found entity 17: alta_srlat
+[0m[0;32m    Info (12023): Found entity 18: alta_dio
+[0m[0;32m    Info (12023): Found entity 19: alta_ufms
+[0m[0;32m    Info (12023): Found entity 20: alta_ufms_sim
+[0m[0;32m    Info (12023): Found entity 21: alta_pll
+[0m[0;32m    Info (12023): Found entity 22: alta_pllx
+[0m[0;32m    Info (12023): Found entity 23: pll_clk_trim
+[0m[0;32m    Info (12023): Found entity 24: alta_pllv
+[0m[0;32m    Info (12023): Found entity 25: alta_pllve
+[0m[0;32m    Info (12023): Found entity 26: alta_sram
+[0m[0;32m    Info (12023): Found entity 27: alta_dpram16x4
+[0m[0;32m    Info (12023): Found entity 28: alta_spram16x4
+[0m[0;32m    Info (12023): Found entity 29: alta_wram
+[0m[0;32m    Info (12023): Found entity 30: alta_bram_pulse_generator
+[0m[0;32m    Info (12023): Found entity 31: alta_bram
+[0m[0;32m    Info (12023): Found entity 32: alta_ram4k
+[0m[0;32m    Info (12023): Found entity 33: alta_boot
+[0m[0;32m    Info (12023): Found entity 34: alta_osc
+[0m[0;32m    Info (12023): Found entity 35: alta_ufml
+[0m[0;32m    Info (12023): Found entity 36: alta_jtag
+[0m[0;32m    Info (12023): Found entity 37: alta_mult
+[0m[0;32m    Info (12023): Found entity 38: alta_dff_en
+[0m[0;32m    Info (12023): Found entity 39: alta_multm_add
+[0m[0;32m    Info (12023): Found entity 40: alta_multm
+[0m[0;32m    Info (12023): Found entity 41: alta_i2c
+[0m[0;32m    Info (12023): Found entity 42: alta_spi
+[0m[0;32m    Info (12023): Found entity 43: alta_irda
+[0m[0;32m    Info (12023): Found entity 44: alta_bram9k
+[0m[0;32m    Info (12023): Found entity 45: alta_ram9k
+[0m[0;32m    Info (12023): Found entity 46: alta_mcu
+[0m[0;32m    Info (12023): Found entity 47: alta_mcu_m3
+[0m[0;32m    Info (12023): Found entity 48: alta_remote
+[0m[0;32m    Info (12023): Found entity 49: alta_saradc
+[0m[0;36mWarning (10236): Verilog HDL Implicit Net warning at alta_sim.v(161): created implicit net for "ena_reg"
+[0m[0;36mWarning (10236): Verilog HDL Implicit Net warning at alta_sim.v(185): created implicit net for "ena_int"
+[0m[0;36mWarning (10236): Verilog HDL Implicit Net warning at alta_sim.v(186): created implicit net for "ena_reg"
+[0m[0;36mWarning (10236): Verilog HDL Implicit Net warning at alta_sim.v(450): created implicit net for "outreg_h"
+[0m[0;36mWarning (10236): Verilog HDL Implicit Net warning at alta_sim.v(451): created implicit net for "outreg_l"
+[0m[0;36mWarning (10236): Verilog HDL Implicit Net warning at alta_sim.v(459): created implicit net for "oe_reg_h"
+[0m[0;36mWarning (10236): Verilog HDL Implicit Net warning at alta_sim.v(460): created implicit net for "oe_reg_l"
+[0m[0;36mWarning (10236): Verilog HDL Implicit Net warning at alta_sim.v(2881): created implicit net for "dffOut"
+[0m[0;36mWarning (10222): Verilog HDL Parameter Declaration warning at alta_sim.v(2374): Parameter Declaration in module "alta_bram_pulse_generator" behaves as a Local Parameter Declaration because the module has a Module Parameter Port List
+[0m[0;32mInfo (12127): Elaborating entity "app" for the top level hierarchy
+[0m[0;32mInfo (270000): Limiting DSP block usage to 0 DSP block(s) for the partition Top
+[0m[0;32mInfo (270017): Limiting M4K/M9K RAM block usage to 0 M4K/M9K RAM block(s) for the Top
+[0m[0;32mInfo (270017): Limiting M4K/M9K RAM block usage to 0 M4K/M9K RAM block(s) for the Top
+[0m[0;32mInfo (17026): Resynthesizing 0 WYSIWYG logic cells and I/Os using "balanced" technology mapper which leaves 0 WYSIWYG logic cells and I/Os untouched
+[0m[0;32mInfo (286030): Timing-Driven Synthesis is running
+[0m[0;32mInfo (128000): Starting physical synthesis optimizations for speed
+[0m[0;32mInfo (332104): Reading SDC File: 'app.sdc'
+[0m[0;32mInfo (332104): Reading SDC File: 'app_derate.sdc'
+[0m[0;36mWarning (332190): Using the -early option with a derate factor of 2.0, i.e., greater than 1.0, causes less conservative delays which might lead to optimistic results from timing analysis.
+[0m[0;32mInfo (332144): No user constrained base clocks found in the design
+[0m[0;32mInfo (332143): No user constrained clock uncertainty found in the design. Calling "derive_clock_uncertainty"
+[0m[0;32mInfo (332154): The derive_clock_uncertainty command did not apply clock uncertainty to any clock-to-clock transfers.
+[0m[0;32mInfo (332128): Timing requirements not specified -- optimizing circuit to achieve the following default global requirements
+[0m[0;32m    Info (332127): Assuming a default timing requirement
+[0m[0;32mInfo (332111): Found 1 clocks
+[0m[0;32m    Info (332111):   Period   Clock Name
+[0m[0;32m    Info (332111): ======== ============
+[0m[0;32m    Info (332111):    1.000          clk
+[0m[0;32mInfo (128002): Starting physical synthesis algorithm combinational resynthesis using boolean division
+[0m[0;32mInfo (128003): Physical synthesis algorithm combinational resynthesis using boolean division complete: estimated slack improvement of 0 ps
+[0m[0;32mInfo (128001): Physical synthesis optimizations for speed complete: elapsed time is 00:00:01
+[0m[0;32mInfo (144001): Generated suppressed messages file /root/apps/altasvc/temp/quartus_logs/app.map.smsg
+[0m[0;32mInfo (16010): Generating hard_block partition "hard_block:auto_generated_inst"
+[0m[0;32m    Info (16011): Adding 0 node(s), including 0 DDIO, 0 PLL, 0 transceiver and 0 LCELL
+[0m[0;36mWarning (21074): Design contains 2 input pin(s) that do not drive logic
+[0m[0;36m    Warning (15610): No output dependent on input pin "SSEL"
+[0m[0;36m    Warning (15610): No output dependent on input pin "MOSI"
+[0m[0;32mInfo (21057): Implemented 8 device resources after synthesis - the final resource count might be different
+[0m[0;32m    Info (21058): Implemented 4 input pins
+[0m[0;32m    Info (21059): Implemented 1 output pins
+[0m[0;32m    Info (21061): Implemented 3 logic cells
+[0m[0;32mInfo: Quartus II 32-bit Analysis & Synthesis was successful. 0 errors, 14 warnings
+[0m[0;32m    Info: Peak virtual memory: 431 megabytes
+[0m[0;32m    Info: Processing ended: Sun Jan 29 08:02:37 2023
+[0m[0;32m    Info: Elapsed time: 00:00:04
+[0m[0;32m    Info: Total CPU time (on all processors): 00:00:04
+[0m[0;36mWarning (125096): Overriding device family setting Cyclone IV -- part EP4CE75F23C8 belongs to device family Cyclone IV E
+[0m[0;32m    Info (125063): set_global_assignment -name FAMILY "Cyclone IV"
+[0m[0;32mInfo: *******************************************************************
+[0m[0;32mInfo: Running Quartus II 32-bit Fitter
+[0m[0;32m    Info: Version 13.1.0 Build 162 10/23/2013 SJ Full Version
+[0m[0;32m    Info: Processing started: Sun Jan 29 08:02:40 2023
+[0m[0;32mInfo: Command: quartus_fit --read_settings_files=off --write_settings_files=off app -c app --check_ios
+[0m[0;32mInfo: qfit2_default_script.tcl version: #1
+[0m[0;32mInfo: Project  = app
+[0m[0;32mInfo: Revision = app
+[0m[0;32mInfo (20029): Only one processor detected - disabling parallel compilation
+[0m[0;32mInfo (119006): Selected device EP4CE75F23C8 for design "app"
+[0m[0;32mInfo (21077): Low junction temperature is 0 degrees C
+[0m[0;32mInfo (21077): High junction temperature is 85 degrees C
+[0m[0;36mWarning (171002): Current optimization assignments may cause the Fitter to introduce hold timing violations on connections clocked by global signals
+[0m[0;32mInfo (176444): Device migration not selected. If you intend to use device migration later, you may need to change the pin assignments as they may be incompatible with other devices
+[0m[0;32m    Info (176445): Device EP4CE15F23C8 is compatible
+[0m[0;32m    Info (176445): Device EP4CE40F23C8 is compatible
+[0m[0;32m    Info (176445): Device EP4CE30F23C8 is compatible
+[0m[0;32m    Info (176445): Device EP4CE55F23C8 is compatible
+[0m[0;32m    Info (176445): Device EP4CE115F23C8 is compatible
+[0m[0;32mInfo (169124): Fitter converted 5 user pins into dedicated programming pins
+[0m[0;32m    Info (169125): Pin ~ALTERA_ASDO_DATA1~ is reserved at location D1
+[0m[0;32m    Info (169125): Pin ~ALTERA_FLASH_nCE_nCSO~ is reserved at location E2
+[0m[0;32m    Info (169125): Pin ~ALTERA_DCLK~ is reserved at location K2
+[0m[0;32m    Info (169125): Pin ~ALTERA_DATA0~ is reserved at location K1
+[0m[0;32m    Info (169125): Pin ~ALTERA_nCEO~ is reserved at location K22
+[0m[0;36mWarning (15714): Some pins have incomplete I/O assignments. Refer to the I/O Assignment Warnings report for details
+[0m[0;36mCritical Warning (169085): No exact pin location assignment(s) for 5 pins of 5 total pins
+[0m[0;32m    Info (169086): Pin SSEL not assigned to an exact location on the device
+[0m[0;32m    Info (169086): Pin MOSI not assigned to an exact location on the device
+[0m[0;32m    Info (169086): Pin MISO not assigned to an exact location on the device
+[0m[0;32m    Info (169086): Pin clk not assigned to an exact location on the device
+[0m[0;32m    Info (169086): Pin SCK not assigned to an exact location on the device
+[0m[0;32mInfo (176353): Automatically promoted node clk~input (placed in PIN G1 (CLK1, DIFFCLK_0n))
+[0m[0;32m    Info (176355): Automatically promoted destinations to use location or clock signal Global Clock CLKCTRL_G2
+[0m[0;32mInfo (176214): Statistics of I/O pins that need to be placed that use the same VCCIO and VREF, before I/O pin placement
+[0m[0;32m    Info (176211): Number of I/O pins in group: 4 (unused VREF, 3.3V VCCIO, 3 input, 1 output, 0 bidirectional)
+[0m[0;32m        Info (176212): I/O standards used: 3.3-V LVTTL.
+[0m[0;32mInfo (176215): I/O bank details before I/O pin placement
+[0m[0;32m    Info (176214): Statistics of I/O banks
+[0m[0;32m        Info (176213): I/O bank number 1 does not use VREF pins and has undetermined VCCIO pins. 5 total pin(s) used --  26 pins available
+[0m[0;32m        Info (176213): I/O bank number 2 does not use VREF pins and has undetermined VCCIO pins. 0 total pin(s) used --  37 pins available
+[0m[0;32m        Info (176213): I/O bank number 3 does not use VREF pins and has undetermined VCCIO pins. 0 total pin(s) used --  36 pins available
+[0m[0;32m        Info (176213): I/O bank number 4 does not use VREF pins and has undetermined VCCIO pins. 0 total pin(s) used --  40 pins available
+[0m[0;32m        Info (176213): I/O bank number 5 does not use VREF pins and has undetermined VCCIO pins. 0 total pin(s) used --  38 pins available
+[0m[0;32m        Info (176213): I/O bank number 6 does not use VREF pins and has undetermined VCCIO pins. 1 total pin(s) used --  34 pins available
+[0m[0;32m        Info (176213): I/O bank number 7 does not use VREF pins and has undetermined VCCIO pins. 0 total pin(s) used --  38 pins available
+[0m[0;32m        Info (176213): I/O bank number 8 does not use VREF pins and has undetermined VCCIO pins. 0 total pin(s) used --  38 pins available
+[0m[0;32mInfo (171121): Fitter preparation operations ending: elapsed time is 00:00:04
+[0m[0;36mWarning (169177): 4 pins must meet Altera requirements for 3.3-, 3.0-, and 2.5-V interfaces. For more information, refer to AN 447: Interfacing Cyclone IV E Devices with 3.3/3.0/2.5-V LVTTL/LVCMOS I/O Systems.
+[0m[0;32m    Info (169178): Pin SSEL uses I/O standard 3.3-V LVTTL at G4
+[0m[0;32m    Info (169178): Pin MOSI uses I/O standard 3.3-V LVTTL at G3
+[0m[0;32m    Info (169178): Pin clk uses I/O standard 3.3-V LVTTL at G1
+[0m[0;32m    Info (169178): Pin SCK uses I/O standard 3.3-V LVTTL at B2
+[0m[0;32mInfo (11763): Results from the I/O assignment analysis compilation cannot be preserved because I/O assignment analysis was run with Incremental Compilation enabled
+[0m[0;32mInfo: Quartus II 32-bit I/O Assignment Analysis was successful. 0 errors, 5 warnings
+[0m[0;32m    Info: Peak virtual memory: 419 megabytes
+[0m[0;32m    Info: Processing ended: Sun Jan 29 08:02:46 2023
+[0m[0;32m    Info: Elapsed time: 00:00:06
+[0m[0;32m    Info: Total CPU time (on all processors): 00:00:06
+[0m[0;36mWarning (125096): Overriding device family setting Cyclone IV -- part EP4CE75F23C8 belongs to device family Cyclone IV E
+[0m[0;32m    Info (125063): set_global_assignment -name FAMILY "Cyclone IV"
+[0m[0;32mInfo: *******************************************************************
+[0m[0;32mInfo: Running Quartus II 32-bit Fitter
+[0m[0;32m    Info: Version 13.1.0 Build 162 10/23/2013 SJ Full Version
+[0m[0;32m    Info: Processing started: Sun Jan 29 08:02:49 2023
+[0m[0;32mInfo: Command: quartus_fit --read_settings_files=off --write_settings_files=off app -c app
+[0m[0;32mInfo: qfit2_default_script.tcl version: #1
+[0m[0;32mInfo: Project  = app
+[0m[0;32mInfo: Revision = app
+[0m[0;32mInfo (20029): Only one processor detected - disabling parallel compilation
+[0m[0;32mInfo (119006): Selected device EP4CE75F23C8 for design "app"
+[0m[0;32mInfo (21077): Low junction temperature is 0 degrees C
+[0m[0;32mInfo (21077): High junction temperature is 85 degrees C
+[0m[0;32mInfo (171004): Fitter is performing a Standard Fit compilation using maximum Fitter effort to optimize design performance
+[0m[0;36mWarning (171002): Current optimization assignments may cause the Fitter to introduce hold timing violations on connections clocked by global signals
+[0m[0;32mInfo (176444): Device migration not selected. If you intend to use device migration later, you may need to change the pin assignments as they may be incompatible with other devices
+[0m[0;32m    Info (176445): Device EP4CE15F23C8 is compatible
+[0m[0;32m    Info (176445): Device EP4CE40F23C8 is compatible
+[0m[0;32m    Info (176445): Device EP4CE30F23C8 is compatible
+[0m[0;32m    Info (176445): Device EP4CE55F23C8 is compatible
+[0m[0;32m    Info (176445): Device EP4CE115F23C8 is compatible
+[0m[0;32mInfo (169124): Fitter converted 5 user pins into dedicated programming pins
+[0m[0;32m    Info (169125): Pin ~ALTERA_ASDO_DATA1~ is reserved at location D1
+[0m[0;32m    Info (169125): Pin ~ALTERA_FLASH_nCE_nCSO~ is reserved at location E2
+[0m[0;32m    Info (169125): Pin ~ALTERA_DCLK~ is reserved at location K2
+[0m[0;32m    Info (169125): Pin ~ALTERA_DATA0~ is reserved at location K1
+[0m[0;32m    Info (169125): Pin ~ALTERA_nCEO~ is reserved at location K22
+[0m[0;36mWarning (15714): Some pins have incomplete I/O assignments. Refer to the I/O Assignment Warnings report for details
+[0m[0;36mCritical Warning (169085): No exact pin location assignment(s) for 5 pins of 5 total pins
+[0m[0;32m    Info (169086): Pin SSEL not assigned to an exact location on the device
+[0m[0;32m    Info (169086): Pin MOSI not assigned to an exact location on the device
+[0m[0;32m    Info (169086): Pin MISO not assigned to an exact location on the device
+[0m[0;32m    Info (169086): Pin clk not assigned to an exact location on the device
+[0m[0;32m    Info (169086): Pin SCK not assigned to an exact location on the device
+[0m[0;32mInfo (332104): Reading SDC File: 'app.sdc'
+[0m[0;32mInfo (332104): Reading SDC File: 'app_derate.sdc'
+[0m[0;36mWarning (332190): Using the -early option with a derate factor of 2.0, i.e., greater than 1.0, causes less conservative delays which might lead to optimistic results from timing analysis.
+[0m[0;32mInfo (332144): No user constrained base clocks found in the design
+[0m[0;32mInfo (332143): No user constrained clock uncertainty found in the design. Calling "derive_clock_uncertainty"
+[0m[0;32mInfo (332154): The derive_clock_uncertainty command did not apply clock uncertainty to any clock-to-clock transfers.
+[0m[0;32mInfo (332128): Timing requirements not specified -- optimizing circuit to achieve the following default global requirements
+[0m[0;32m    Info (332127): Assuming a default timing requirement
+[0m[0;32mInfo (332111): Found 1 clocks
+[0m[0;32m    Info (332111):   Period   Clock Name
+[0m[0;32m    Info (332111): ======== ============
+[0m[0;32m    Info (332111):    1.000          clk
+[0m[0;32mInfo (176353): Automatically promoted node clk~input (placed in PIN G1 (CLK1, DIFFCLK_0n))
+[0m[0;32m    Info (176355): Automatically promoted destinations to use location or clock signal Global Clock CLKCTRL_G2
+[0m[0;32mInfo (176233): Starting register packing
+[0m[0;32m[0m[0;32m[0m[0;32m[0m[0;32m[0m[0;32m[0m[0;32m[0m[0;32m[0m[0;32m[0m[0;32mInfo (176235): Finished register packing
+[0m[0;32m    Extra Info (176219): No registers were packed into other blocks
+[0m[0;32mInfo (176214): Statistics of I/O pins that need to be placed that use the same VCCIO and VREF, before I/O pin placement
+[0m[0;32m    Info (176211): Number of I/O pins in group: 4 (unused VREF, 3.3V VCCIO, 3 input, 1 output, 0 bidirectional)
+[0m[0;32m        Info (176212): I/O standards used: 3.3-V LVTTL.
+[0m[0;32mInfo (176215): I/O bank details before I/O pin placement
+[0m[0;32m    Info (176214): Statistics of I/O banks
+[0m[0;32m        Info (176213): I/O bank number 1 does not use VREF pins and has undetermined VCCIO pins. 5 total pin(s) used --  26 pins available
+[0m[0;32m        Info (176213): I/O bank number 2 does not use VREF pins and has undetermined VCCIO pins. 0 total pin(s) used --  37 pins available
+[0m[0;32m        Info (176213): I/O bank number 3 does not use VREF pins and has undetermined VCCIO pins. 0 total pin(s) used --  36 pins available
+[0m[0;32m        Info (176213): I/O bank number 4 does not use VREF pins and has undetermined VCCIO pins. 0 total pin(s) used --  40 pins available
+[0m[0;32m        Info (176213): I/O bank number 5 does not use VREF pins and has undetermined VCCIO pins. 0 total pin(s) used --  38 pins available
+[0m[0;32m        Info (176213): I/O bank number 6 does not use VREF pins and has undetermined VCCIO pins. 1 total pin(s) used --  34 pins available
+[0m[0;32m        Info (176213): I/O bank number 7 does not use VREF pins and has undetermined VCCIO pins. 0 total pin(s) used --  38 pins available
+[0m[0;32m        Info (176213): I/O bank number 8 does not use VREF pins and has undetermined VCCIO pins. 0 total pin(s) used --  38 pins available
+[0m[0;32mInfo (128000): Starting physical synthesis optimizations for speed
+[0m[0;32mInfo (128001): Physical synthesis optimizations for speed complete: elapsed time is 00:00:01
+[0m[0;32mInfo (171121): Fitter preparation operations ending: elapsed time is 00:00:04
+[0m[0;32mInfo (170189): Fitter placement preparation operations beginning
+[0m[0;32mInfo (170190): Fitter placement preparation operations ending: elapsed time is 00:00:00
+[0m[0;32mInfo (170191): Fitter placement operations beginning
+[0m[0;32mInfo (170137): Fitter placement was successful
+[0m[0;32mInfo (170192): Fitter placement operations ending: elapsed time is 00:00:04
+[0m[0;32mInfo (128000): Starting physical synthesis optimizations for speed
+[0m[0;32mInfo (128002): Starting physical synthesis algorithm combinational resynthesis using boolean division
+[0m[0;32mInfo (128003): Physical synthesis algorithm combinational resynthesis using boolean division complete: estimated slack improvement of 0 ps
+[0m[0;32mInfo (128002): Starting physical synthesis algorithm logic replication
+[0m[0;32mInfo (128003): Physical synthesis algorithm logic replication complete: estimated slack improvement of 0 ps
+[0m[0;32mInfo (128001): Physical synthesis optimizations for speed complete: elapsed time is 00:00:01
+[0m[0;32mInfo (170193): Fitter routing operations beginning
+[0m[0;32mInfo (170195): Router estimated average interconnect usage is 0% of the available device resources
+[0m[0;32m    Info (170196): Router estimated peak interconnect usage is 0% of the available device resources in the region that extends from location X0_Y0 to location X10_Y11
+[0m[0;32mInfo (170194): Fitter routing operations ending: elapsed time is 00:00:03
+[0m[0;32mInfo (11888): Total time spent on timing analysis during the Fitter is 0.30 seconds.
+[0m[0;32mInfo (334003): Started post-fitting delay annotation
+[0m[0;32mInfo (334004): Delay annotation completed successfully
+[0m[0;32mInfo (334003): Started post-fitting delay annotation
+[0m[0;32mInfo (334004): Delay annotation completed successfully
+[0m[0;32mInfo (11218): Fitter post-fit operations ending: elapsed time is 00:00:02
+[0m[0;36mWarning (169177): 4 pins must meet Altera requirements for 3.3-, 3.0-, and 2.5-V interfaces. For more information, refer to AN 447: Interfacing Cyclone IV E Devices with 3.3/3.0/2.5-V LVTTL/LVCMOS I/O Systems.
+[0m[0;32m    Info (169178): Pin SSEL uses I/O standard 3.3-V LVTTL at AA10
+[0m[0;32m    Info (169178): Pin MOSI uses I/O standard 3.3-V LVTTL at F21
+[0m[0;32m    Info (169178): Pin clk uses I/O standard 3.3-V LVTTL at G1
+[0m[0;32m    Info (169178): Pin SCK uses I/O standard 3.3-V LVTTL at AB4
+[0m[0;32mInfo (144001): Generated suppressed messages file /root/apps/altasvc/temp/quartus_logs/app.fit.smsg
+[0m[0;32mInfo: Quartus II 32-bit Fitter was successful. 0 errors, 6 warnings
+[0m[0;32m    Info: Peak virtual memory: 661 megabytes
+[0m[0;32m    Info: Processing ended: Sun Jan 29 08:03:16 2023
+[0m[0;32m    Info: Elapsed time: 00:00:27
+[0m[0;32m    Info: Total CPU time (on all processors): 00:00:27
+[0m[0;32mInfo (293026): Skipped module Assembler due to the assignment FLOW_DISABLE_ASSEMBLER
+[0m[0;32mInfo (293026): Skipped module PowerPlay Power Analyzer due to the assignment FLOW_ENABLE_POWER_ANALYZER
+[0m[0;36mWarning (125096): Overriding device family setting Cyclone IV -- part EP4CE75F23C8 belongs to device family Cyclone IV E
+[0m[0;32m    Info (125063): set_global_assignment -name FAMILY "Cyclone IV"
+[0m[0;32mInfo: *******************************************************************
+[0m[0;32mInfo: Running Quartus II 32-bit TimeQuest Timing Analyzer
+[0m[0;32m    Info: Version 13.1.0 Build 162 10/23/2013 SJ Full Version
+[0m[0;32m    Info: Processing started: Sun Jan 29 08:03:20 2023
+[0m[0;32mInfo: Command: quartus_sta app -c app
+[0m[0;32mInfo: qsta_default_script.tcl version: #1
+[0m[0;32mInfo (20029): Only one processor detected - disabling parallel compilation
+[0m[0;32mInfo (21077): Low junction temperature is 0 degrees C
+[0m[0;32mInfo (21077): High junction temperature is 85 degrees C
+[0m[0;32mInfo (332104): Reading SDC File: 'app.sdc'
+[0m[0;32mInfo (332104): Reading SDC File: 'app_derate.sdc'
+[0m[0;36mWarning (332190): Using the -early option with a derate factor of 2.0, i.e., greater than 1.0, causes less conservative delays which might lead to optimistic results from timing analysis.
+[0m[0;32mInfo (332142): No user constrained base clocks found in the design. Calling "derive_clocks -period 1.0"
+[0m[0;32mInfo (332105): Deriving Clocks
+[0m[0;32m    Info (332105): create_clock -period 1.000 -name clk clk
+[0m[0;32mInfo (332143): No user constrained clock uncertainty found in the design. Calling "derive_clock_uncertainty"
+[0m[0;32mInfo (332123): Deriving Clock Uncertainty. Please refer to report_sdc in TimeQuest to see clock uncertainties.
+[0m[0;32mInfo: Found TIMEQUEST_REPORT_SCRIPT_INCLUDE_DEFAULT_ANALYSIS = ON
+[0m[0;32mInfo: Analyzing Slow 1200mV 85C Model
+[0m[0;36mCritical Warning (332148): Timing requirements not met
+[0m[0;32m    Info (11105): For recommendations on closing timing, run Report Timing Closure Recommendations in the TimeQuest Timing Analyzer.
+[0m[0;32mInfo (332146): Worst-case setup slack is -1.011
+[0m[0;32m    Info (332119):     Slack       End Point TNS Clock 
+[0m[0;32m    Info (332119): ========= =================== =====================
+[0m[0;32m    Info (332119):    -1.011              -1.986 clk 
+[0m[0;32mInfo (332146): Worst-case hold slack is -0.049
+[0m[0;32m    Info (332119):     Slack       End Point TNS Clock 
+[0m[0;32m    Info (332119): ========= =================== =====================
+[0m[0;32m    Info (332119):    -0.049              -0.049 clk 
+[0m[0;32mInfo (332140): No Recovery paths to report
+[0m[0;32mInfo (332140): No Removal paths to report
+[0m[0;32mInfo (332146): Worst-case minimum pulse width slack is -3.974
+[0m[0;32m    Info (332119):     Slack       End Point TNS Clock 
+[0m[0;32m    Info (332119): ========= =================== =====================
+[0m[0;32m    Info (332119):    -3.974             -14.922 clk 
+[0m[0;32mInfo: Analyzing Slow 1200mV 0C Model
+[0m[0;32mInfo (334003): Started post-fitting delay annotation
+[0m[0;32mInfo (334004): Delay annotation completed successfully
+[0m[0;32mInfo (332123): Deriving Clock Uncertainty. Please refer to report_sdc in TimeQuest to see clock uncertainties.
+[0m[0;36mCritical Warning (332148): Timing requirements not met
+[0m[0;32m    Info (11105): For recommendations on closing timing, run Report Timing Closure Recommendations in the TimeQuest Timing Analyzer.
+[0m[0;32mInfo (332146): Worst-case setup slack is -0.813
+[0m[0;32m    Info (332119):     Slack       End Point TNS Clock 
+[0m[0;32m    Info (332119): ========= =================== =====================
+[0m[0;32m    Info (332119):    -0.813              -1.588 clk 
+[0m[0;32mInfo (332146): Worst-case hold slack is -0.059
+[0m[0;32m    Info (332119):     Slack       End Point TNS Clock 
+[0m[0;32m    Info (332119): ========= =================== =====================
+[0m[0;32m    Info (332119):    -0.059              -0.059 clk 
+[0m[0;32mInfo (332140): No Recovery paths to report
+[0m[0;32mInfo (332140): No Removal paths to report
+[0m[0;32mInfo (332146): Worst-case minimum pulse width slack is -3.974
+[0m[0;32m    Info (332119):     Slack       End Point TNS Clock 
+[0m[0;32m    Info (332119): ========= =================== =====================
+[0m[0;32m    Info (332119):    -3.974             -14.922 clk 
+[0m[0;32mInfo: Analyzing Fast 1200mV 0C Model
+[0m[0;32mInfo (332123): Deriving Clock Uncertainty. Please refer to report_sdc in TimeQuest to see clock uncertainties.
+[0m[0;32mInfo (332146): Worst-case setup slack is 0.126
+[0m[0;32m    Info (332119):     Slack       End Point TNS Clock 
+[0m[0;32m    Info (332119): ========= =================== =====================
+[0m[0;32m    Info (332119):     0.126               0.000 clk 
+[0m[0;36mCritical Warning (332148): Timing requirements not met
+[0m[0;32m    Info (11105): For recommendations on closing timing, run Report Timing Closure Recommendations in the TimeQuest Timing Analyzer.
+[0m[0;32mInfo (332146): Worst-case hold slack is -0.032
+[0m[0;32m    Info (332119):     Slack       End Point TNS Clock 
+[0m[0;32m    Info (332119): ========= =================== =====================
+[0m[0;32m    Info (332119):    -0.032              -0.032 clk 
+[0m[0;32mInfo (332140): No Recovery paths to report
+[0m[0;32mInfo (332140): No Removal paths to report
+[0m[0;32mInfo (332146): Worst-case minimum pulse width slack is -3.000
+[0m[0;32m    Info (332119):     Slack       End Point TNS Clock 
+[0m[0;32m    Info (332119): ========= =================== =====================
+[0m[0;32m    Info (332119):    -3.000             -18.496 clk 
+[0m[0;32mInfo (332102): Design is not fully constrained for setup requirements
+[0m[0;32mInfo (332102): Design is not fully constrained for hold requirements
+[0m[0;32mInfo: Quartus II 32-bit TimeQuest Timing Analyzer was successful. 0 errors, 5 warnings
+[0m[0;32m    Info: Peak virtual memory: 413 megabytes
+[0m[0;32m    Info: Processing ended: Sun Jan 29 08:03:24 2023
+[0m[0;32m    Info: Elapsed time: 00:00:04
+[0m[0;32m    Info: Total CPU time (on all processors): 00:00:04
+[0m[0;32mInfo: *******************************************************************
+[0m[0;32mInfo: Running Quartus II 32-bit EDA Netlist Writer
+[0m[0;32m    Info: Version 13.1.0 Build 162 10/23/2013 SJ Full Version
+[0m[0;32m    Info: Processing started: Sun Jan 29 08:03:29 2023
+[0m[0;32mInfo: Command: quartus_eda --read_settings_files=off --write_settings_files=off app -c app
+[0m[0;32mInfo (204019): Generated file app_8_1200mv_85c_slow.vo in folder "/root/apps/altasvc/temp/simulation/modelsim/" for EDA simulation tool
+[0m[0;32mInfo (204019): Generated file app_8_1200mv_0c_slow.vo in folder "/root/apps/altasvc/temp/simulation/modelsim/" for EDA simulation tool
+[0m[0;32mInfo (204019): Generated file app_min_1200mv_0c_fast.vo in folder "/root/apps/altasvc/temp/simulation/modelsim/" for EDA simulation tool
+[0m[0;32mInfo (204019): Generated file app.vo in folder "/root/apps/altasvc/temp/simulation/modelsim/" for EDA simulation tool
+[0m[0;32mInfo (204019): Generated file app_8_1200mv_85c_v_slow.sdo in folder "/root/apps/altasvc/temp/simulation/modelsim/" for EDA simulation tool
+[0m[0;32mInfo (204019): Generated file app_8_1200mv_0c_v_slow.sdo in folder "/root/apps/altasvc/temp/simulation/modelsim/" for EDA simulation tool
+[0m[0;32mInfo (204019): Generated file app_min_1200mv_0c_v_fast.sdo in folder "/root/apps/altasvc/temp/simulation/modelsim/" for EDA simulation tool
+[0m[0;32mInfo (204019): Generated file app_v.sdo in folder "/root/apps/altasvc/temp/simulation/modelsim/" for EDA simulation tool
+[0m[0;32mInfo: Quartus II 32-bit EDA Netlist Writer was successful. 0 errors, 0 warnings
+[0m[0;32m    Info: Peak virtual memory: 346 megabytes
+[0m[0;32m    Info: Processing ended: Sun Jan 29 08:03:30 2023
+[0m[0;32m    Info: Elapsed time: 00:00:01
+[0m[0;32m    Info: Total CPU time (on all processors): 00:00:01
+[0m[0;32mInfo (293000): Quartus II Full Compilation was successful. 0 errors, 30 warnings
+[0m[0;32mInfo (23030): Evaluation of Tcl script af_quartus.tcl was successful
+[0m[0;32mInfo: Quartus II 32-bit Shell was successful. 0 errors, 31 warnings
+[0m[0;32m    Info: Peak virtual memory: 139 megabytes
+[0m[0;32m    Info: Processing ended: Sun Jan 29 08:03:31 2023
+[0m[0;32m    Info: Elapsed time: 00:01:14
+[0m[0;32m    Info: Total CPU time (on all processors): 00:01:10
+[0m
+</p><b>svc: quartus_sh exit code 0</b>
+
+<b>svc: af -B, --batch, --mode, QUARTUS, -X, set QUARTUS_SDC true, -X, set FITTING timing_more, -X, set FITTER full, -X, set EFFORT highest, -X, set HOLDX default, -X, set SKEW basic</b><p>
+af: /root/apps/altasvc/../altagate//Supra-2019.10.b0/lib/libao.so.4: no version information available (required by af)
+Sun Jan 29 08:03:32 2023
+Using pre-ASF file app.pre.asf.
+Total IO  : 84
+Total Pin : 40/7
+Top array is built.
+Loading architect libraries...
+## CPU time: 0:0:0, REAL time: 0:0:0
+## Memory Usage: 0MB (0MB)
+Loading route table...
+## CPU time: 0:0:1, REAL time: 0:0:1
+## Memory Usage: 63MB (63MB)
+Using design verilog file ./simulation/modelsim/app.vo.
+Preparing design...
+## CPU time: 0:0:0, REAL time: 0:0:0
+## Memory Usage: 63MB (63MB)
+Pseudo pack design...
+Packing Statistics
+ Total      Logics : 3/1280 (  0%)
+ Total        LUTs : 3/1280 (  0%)
+ Total   Registers : 3/1280 (  0%)
+ Total  Block Rams : 0/  15 (  0%)
+ Total  Slice Rams : 0/ 160 (  0%)
+ Total        PLLs : 0/   1 (  0%)
+ Total        Pins : 5/  40 ( 12%)
+ Global    Signals : 1/   8 ( 12%)
+      clk~inputclkctrl_outclk (from:   clk~input_o)
+ Total Lonely   Datain   : 0
+ Total Lonely   Register : 0
+ Total LUT-FF   Pairs    : 3
+ Total Register Packings : 0
+ Registers with synchronous    reset : 0
+ Registers with asynchronous   reset : 0
+ Registers with sync and async reset : 0
+## CPU time: 0:0:0, REAL time: 0:0:0
+## Memory Usage: 63MB (63MB)
+Filter verilog...
+## CPU time: 0:0:0, REAL time: 0:0:0
+## Memory Usage: 63MB (63MB)
+Read DB design...
+## CPU time: 0:0:0, REAL time: 0:0:1
+## Memory Usage: 80MB (80MB)
+Process design...
+Info: Found GCLK net clk~inputclkctrl_outclk (1).
+## CPU time: 0:0:0, REAL time: 0:0:0
+## Memory Usage: 80MB (80MB)
+Using design SDC file ./app.sdc.
+Using ASF file app.asf.
+Info: Auto constraint: create_clock -name Internal_generated_clock_app|clk -period 1000.000 clk.
+Placement Statistics
+ Total  Logic    Tiles   : 1/80 (1.2%)
+ Total  Valid    Nets    : 8 (3+5)
+ Total  Valid    Fanouts : 21 (6+15)
+ Total  Tile     Fanouts : 2
+ Tile   Zip      Fanins  : 1 (1:1)
+ Tile   Zip      Fanouts : 1 (1:1)
+ Total  Ignored  Nets    : 5
+ Total  Valid    Blocks  : 4 (1/3)
+ Total  Ignored  Blocks  : 1
+ Total  Zip Complexities : 2/2 1.00/2.00
+ Avg    Zip   Bottleneck : 0.00 0.00
+ Avg    Net   Bottleneck : 0.00 0.00
+Iter #1/1 ...
+Pass 1 #1/2 ...
+Partitioning...
+ step = 0, partition : 13,8
+
+ step = 1, partition : 6,5
+....................
+ step = 2, partition : 3,2
+....................
+ step = 3, partition : 2,2
+....................
+ step = 4, partition : 2,2
+....................
+
+## CPU time: 0:0:0, REAL time: 0:0:0
+Pass 1 #2/2 ...
+Partitioning...
+ step = 0, partition : 13,8
+
+ step = 1, partition : 6,5
+....................
+ step = 2, partition : 3,2
+....................
+ step = 3, partition : 2,2
+....................
+ step = 4, partition : 2,2
+....................
+
+## CPU time: 0:0:0, REAL time: 0:0:0
+Pass 2 #1/1 ...
+Legalization and Swapping...
+..........
+
+## CPU time: 0:0:0, REAL time: 0:0:0
+Pass 3 #1/1 ...
+Touchup...
+
+
+## CPU time: 0:0:0, REAL time: 0:0:0
+Pass 4 #1/1 ...
+Optimization...
+............................................................
+Finishing...
+
+## CPU time: 0:0:0, REAL time: 0:0:0
+Total wire cost after placement: 0:0:0(0:0) 5.116(2.288)+13(0)+0 13.8(1.55523)+9.75
+
+*** Post Placement Timing Report ***
+=== User constraints ===
+
+
+=== Auto constraints ===
+Fmax report
+  User constraint:   1.000MHz, Fmax: 602.419MHz, Clock: Internal_generated_clock_app|clk, Restricted Fmax: 500.000MHz
+
+Clock transfer report:
+  Worst setup: 998.340, with clock Internal_generated_clock_app|clk
+
+  Worst  hold:   1.052, with clock Internal_generated_clock_app|clk
+
+Coverage report
+  User constraints covered 0 connections out of 11 total, coverage: 0.0%
+  Auto constraints covered 9 connections out of 11 total, coverage: 81.8%
+
+
+Hold from sampled to sampled, clock Internal_generated_clock_app|clk, constraint 0.000
+  Slack:   1.052
+    Arrival Time:    3.092
+    Required Time:   2.040
+
+*** End Timing Report ***
+
+route_design -dump ./alta_db/route.tx -replace ./alta_db/replace.tx 
+Route Design Statistics
+ Total Routing Nets : 8
+ Fanout     Average : 1.62 (1..3)
+ Max   Fanout  Net  : AsyncReset_X10_Y1_GND
+ Logic       Slices : 3/1280 (0.2%)
+
+Routing...
+ Budget Useful Skew...
+=== User constraints ===
+=== Auto constraints ===
+Fmax report
+  User constraint:   1.000MHz, Fmax: 602.419MHz, Clock: Internal_generated_clock_app|clk, Restricted Fmax: 500.000MHz
+
+## CPU time: 0:0:0, REAL time: 0:0:0
+ iter = 1/1, route#: 8, violation# : 0, overflow# : 0, conflict# : 0, node#: 27
+## CPU time: 0:0:0, REAL time: 0:0:0
+ iter = 2/1, route#: 2, violation# : 0, overflow# : 0, conflict# : 0, node#: 27
+## CPU time: 0:0:0, REAL time: 0:0:1
+ iter = 3/1, route#: 2, violation# : 0, overflow# : 0, conflict# : 0, node#: 27
+## CPU time: 0:0:0, REAL time: 0:0:1
+ iter = 4/1, route#: 2, violation# : 0, overflow# : 0, conflict# : 0, node#: 27
+## CPU time: 0:0:0, REAL time: 0:0:1
+ iter = 5/1, route#: 2, violation# : 0, overflow# : 0, conflict# : 0, node#: 27
+## CPU time: 0:0:0, REAL time: 0:0:1
+ iter = 6/1, route#: 2, violation# : 0, overflow# : 0, conflict# : 0, node#: 27
+## CPU time: 0:0:0, REAL time: 0:0:1
+ iter = 7/1, route#: 2, violation# : 0, overflow# : 0, conflict# : 0, node#: 27
+Optimizing...
+...
+
+Done
+
+*** Post Routing Timing Report ***
+=== User constraints ===
+
+
+=== Auto constraints ===
+Fmax report
+  User constraint:   1.000MHz, Fmax: 548.235MHz, Clock: Internal_generated_clock_app|clk, Restricted Fmax: 500.000MHz
+
+Clock transfer report:
+  Worst setup: 998.176, with clock Internal_generated_clock_app|clk
+
+  Worst  hold:   1.052, with clock Internal_generated_clock_app|clk
+
+Coverage report
+  User constraints covered 0 connections out of 11 total, coverage: 0.0%
+  Auto constraints covered 9 connections out of 11 total, coverage: 81.8%
+
+
+Hold from sampled to sampled, clock Internal_generated_clock_app|clk, constraint 0.000
+  Slack:   1.052
+    Arrival Time:    4.110
+    Required Time:   3.058
+
+*** End Timing Report ***
+
+Sun Jan 29 08:03:37 2023
+Warn: User constraints coverage is too low at 0.0%.
+Info: Using config file ./app.bin to generate download file ./app_download.svf.
+Using post-ASF file app.post.asf.
+Sun Jan 29 08:03:37 2023
+
+Total 0 fatals, 0 errors, 1 warnings, 3 infos.
+
+</p><b>svc: af exit code 0</b>
+Done: 0.011, 0.292, 9.119, 8.950, 76.507, 5.677
