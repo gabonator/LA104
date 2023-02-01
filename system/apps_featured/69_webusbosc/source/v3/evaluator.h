@@ -225,12 +225,13 @@ class CEvaluator
 public:
   uint32_t Evaluate(char* command)
   {
-//BIOS::DBG::Print("cmd='%s'\n", command);
     char* args = strchr(command, '(');
+    if (!args)
+    {
+      BIOS::DBG::Print("Wrong RPC message '%s'.", command);
+      return -1;
+    }
     *args++ = 0;
-
-//BIOS::DBG::Print("func='%s'\n", command);
-//BIOS::DBG::Print("args='%s'\n", args);
 
     uint32_t functionPtr = RPC::GetProcAddress(command);
 

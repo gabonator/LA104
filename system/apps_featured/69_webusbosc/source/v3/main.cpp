@@ -62,6 +62,7 @@ int main(void)
   cdc_set_receive_callback([](uint8_t* buf, int len)
   {
     memcpy(command, buf, len);
+    command[len] = 0;
   });
 
   BIOS::OS::SetInterruptVector(BIOS::OS::IUSB_LP_CAN_RX0_IRQ, []() {
