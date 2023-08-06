@@ -214,6 +214,20 @@ public:
             strcpy(units, "hex");
             return;
         }
+        if ( strcmp(attr.key, "hcs200_enc") == 0)
+        {
+            strcpy(name, attr.key);
+            sprintf(value, "%08x", (int)attr.value);
+            strcpy(units, "hex");
+            return;
+        }
+        if ( strcmp(attr.key, "hcs200_serial") == 0)
+        {
+            strcpy(name, attr.key);
+            sprintf(value, "%07x", (int)attr.value);
+            strcpy(units, "hex");
+            return;
+        }        
         if (strcmp(attr.key, "battery_low") == 0 || strcmp(attr.key, "valid") == 0)
         {
             strcpy(name, attr.key);
