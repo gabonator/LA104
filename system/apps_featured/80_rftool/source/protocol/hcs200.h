@@ -183,7 +183,7 @@ private:
         int i;
         int preambule = 0;
         int pre_error = 0;
-        
+                
         if (pulse.GetSize() < 155)
            return false;
         
@@ -207,7 +207,7 @@ private:
 
         if (preambule < 23) // should be 23*Te
             return false;
-                      
+                     
         //should be 10*Te
         if (PulseLen(pulse[i]) >=9 && PulseLen(pulse[i]) <=11)
             i++;
@@ -223,7 +223,7 @@ private:
         {
            int p0 = PulseLen(pulse[i]);
            int p1 = PulseLen(pulse[i+1]);
-           if (p0==2 && p1==1)
+           if (p0==2 && (p1==1 || (p1 >=37)))  /* final pulse, artificially set to frame spacer*/
            {
               length++;
               bits <<= 1;
