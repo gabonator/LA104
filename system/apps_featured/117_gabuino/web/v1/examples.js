@@ -1153,7 +1153,7 @@ document.getElementById('input-file')
           html_editor,
           input.files[0])
 
-          <!-- dirty hack for now just to remove the drop down menu -->
+          //dirty hack for now just to remove the drop down menu
           document.getElementById('_examples').setAttribute('class','dropdown-menu')
       }
     }
