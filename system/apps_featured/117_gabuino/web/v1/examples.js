@@ -1148,7 +1148,7 @@ document.getElementById('input-file')
 
     function getFile(event) {
 	    const input = event.target
-      if ('files' in input && input.files.length > 0) {
+      if (input?.files.length) {
 	      placeFileContent(
           html_editor,
           input.files[0])
