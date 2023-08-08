@@ -200,14 +200,17 @@ public:
             strcpy(units, "bits");
             return;
         }
-        if (strcmp(attr.key, "id") == 0 || strcmp(attr.key, "channel") == 0 || strcmp(attr.key, "junk") == 0)
+        if (strcmp(attr.key, "id") == 0 || strcmp(attr.key, "channel") == 0 || strcmp(attr.key, "junk") == 0
+	        || strcmp(attr.key, "rpl_cnt") == 0)
         {
             strcpy(name, attr.key);
             sprintf(value, "%d", (int)attr.value);
             strcpy(units, "");
             return;
         }
-        if ( strcmp(attr.key, "key") == 0 || strcmp(attr.key, "counter") == 0)
+        if ( strcmp(attr.key, "key") == 0 || strcmp(attr.key, "counter") 
+        	|| strcmp(attr.key, "btn_mask") == 0
+        	|| strcmp(attr.key, "btn") == 0 || strcmp(attr.key, "code") == 0)
         {
             strcpy(name, attr.key);
             sprintf(value, "%x", (int)attr.value);
@@ -228,7 +231,8 @@ public:
             strcpy(units, "hex");
             return;
         }        
-        if (strcmp(attr.key, "battery_low") == 0 || strcmp(attr.key, "valid") == 0)
+        if (strcmp(attr.key, "battery_low") == 0 || strcmp(attr.key, "valid") == 0
+        	|| strcmp(attr.key, "learn") == 0 || strcmp(attr.key, "rpt") == 0)
         {
             strcpy(name, attr.key);
             if (attr.value)
