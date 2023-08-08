@@ -51,7 +51,6 @@ public:
     	   
     	if (b.GetSize() < 3) /*24 bit-s, 3bytes*/
     	{
-    	    _ASSERT(0);
     	    return;
     	}    	   	
     }
@@ -62,13 +61,11 @@ public:
     	
     	if (bitLength < 24)
     	{
-    	   _ASSERT(0);
     	   return;
     	}
     	
     	if (b.GetSize() < 3)
     	{
-    	   _ASSERT(0);
     	   return;
     	}    	
     	
