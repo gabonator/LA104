@@ -334,12 +334,6 @@ private:
 
     virtual void GetDescription(CAttributes& attributes, char* desc) override
     {
-    
-        if (attributes.indexOf("encrypted") != -1)
-            sprintf(desc, "encrypted: <%08x>", (int)attributes["hcs200_enc"]);
-   	if (attributes.indexOf("serial") != -1)
-            sprintf(desc, "serial: <%07x>", (int)attributes["hcs200_serial"]);
-        else
             sprintf(desc, "%d bits: <%08x %07x %04x %01x %01x>",
             	 (int)attributes["length"], (int)attributes["hcs200_enc"], (int)attributes["hcs200_serial"], 
             	 ((uint16_t)attributes["btn_mask"]), ((uint8_t)attributes["battery_low"]), ((uint8_t)attributes["rpt"]));
