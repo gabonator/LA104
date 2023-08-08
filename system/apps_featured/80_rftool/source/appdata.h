@@ -208,7 +208,7 @@ public:
             strcpy(units, "");
             return;
         }
-        if ( strcmp(attr.key, "key") == 0 || strcmp(attr.key, "counter") 
+        if ( strcmp(attr.key, "key") == 0 || strcmp(attr.key, "counter") == 0
         	|| strcmp(attr.key, "btn_mask") == 0
         	|| strcmp(attr.key, "btn") == 0 || strcmp(attr.key, "code") == 0)
         {
