@@ -122,9 +122,13 @@ public:
         return true;
     }
 
-    virtual int PulseDivisor() override { return 250; }
+    virtual int PulseDivisor() override { return pulse_divisor; }
     
 private:
+
+    int pulse_hist[10];
+    int pulse_hist_idx[10];
+    int pulse_divisor = 250;
 
     unsigned char reverse8(unsigned char b) {
         b = (b & 0xF0) >> 4 | (b & 0x0F) << 4;
@@ -135,22 +139,62 @@ private:
 
     int PulseLen(int microseconds)
     {
-        return (microseconds+(260/2))/260;
+        return (microseconds+(pulse_divisor/2))/pulse_divisor;
     }
 
     int PulseDuration(int ticks)
     {
-        return ticks*280;
+        return ticks*(pulse_divisor + 20);
     }
+    
+    int pulses_histogram(const CArray<uint16_t>& pulse, int* hist, int* hist_val_idx, int hist_size)
+    {
+        int res = 250;
+	memset(hist, 0, hist_size);
+	memset(hist_val_idx, 0, hist_size);
+	
+	for (int idx = 0; idx < pulse.GetSize(); idx++)
+	{
+	    for (int val_idx = 0; val_idx < hist_size; val_idx++)
+	    {
+	        if (hist_val_idx[val_idx] == pulse[idx] || hist_val_idx[val_idx] == 0)
+	        {
+	           hist_val_idx[val_idx] = pulse[idx];
+	           hist[val_idx]++;
+	        }
+	    }	
+	}
+	
+	int high_idx = -1;
+	for (int val_idx = 0; val_idx < hist_size; val_idx++)
+	{
+	    if ( hist_val_idx[val_idx] >= 160 && hist_val_idx[val_idx] < 500)
+	    {
+	         if (high_idx == -1 || hist[val_idx] > hist[high_idx])
+	            high_idx = val_idx;
+	         
+	    }
+	}
+	
+	if (high_idx != -1)
+	   res = hist_val_idx[high_idx];
+	
+	return res;
+    }
+    
 
     bool PulseToBytes(const CArray<uint16_t>& pulse, CArray<uint8_t>& bytes, int& length)
     {
         int i;
         bool preambule = false;
         
-        if (pulse.GetSize() < (2 + (2* 24)))
-           return false;       
+        int hist[4];
+        int hist_idx[4];
         
+        if (pulse.GetSize() < (2 + (2* 24)))
+           return false; 
+                     
+         pulse_divisor = pulses_histogram(pulse, pulse_hist, pulse_hist_idx, sizeof(pulse_hist_idx));
         
         for (i=0; i<pulse.GetSize()-1; i++)
         {
