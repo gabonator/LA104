@@ -54,7 +54,6 @@ public:
     	   
     	if (b.GetSize() < 9) /*66 bit-s, 8bytes and a bit more*/
     	{
-    	    _ASSERT(0);
     	    return;
     	}    	   	
     }
@@ -67,13 +66,11 @@ public:
     	
     	if (bitLength < 66)
     	{
-    	   _ASSERT(0);
     	   return;
     	}
     	
     	if (b.GetSize() < 9)
     	{
-    	   _ASSERT(0);
     	   return;
     	}    	
     	
