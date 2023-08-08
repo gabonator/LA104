@@ -75,11 +75,11 @@ public:
     	
         attributes["length"] = bitLength; // count of bits
         
-    	attributes["code_hex"] = (unsigned)((b[0] << 16) | (b[1] << 8) | b[2]);
+    	attributes["code"] = (unsigned)((b[0] << 16) | (b[1] << 8) | b[2]);
 
     	btn = (b[2] & 0x0f);
     	
-    	attributes["btn_hex"] = btn;    // buttons bitmask S2,S1,S0,S3
+    	attributes["btn"] = btn;    // buttons bitmask S2,S1,S0,S3
     	attributes["rpl_cnt"] = 1; // replay counter for remote emulation - limited to 2 due to  framer pulses array size
     }
 
@@ -88,8 +88,8 @@ public:
     {
         bitLength = attributes["length"];
         
-        uint32_t code = attributes["code_hex"];
-        int btn   = attributes["btn_hex"];
+        uint32_t code = attributes["code"];
+        int btn   = attributes["btn"];
 
         
 	//code 20bit, btn  bits
@@ -288,11 +288,13 @@ private:
     virtual void GetDescription(CAttributes& attributes, char* desc) override
     {
     
-        if (attributes.indexOf("encrypted") != -1)
-            sprintf(desc, "encrypted: <%05x>", (int)attributes["code_hex"]);
+        if (attributes.indexOf("code") != -1)
+            sprintf(desc, "code: <%05x>", (int)attributes["code"]);
+	if (attributes.indexOf("btn") != -1)
+            sprintf(desc, "btn: <%01x>", (int)attributes["btn"]);
         else
             sprintf(desc, "%d bits: <%05x %04x>",
-            	 (int)attributes["length"], (int)attributes["code_hex"], attributes["btn_hex"]);
+            	 (int)attributes["length"], (int)attributes["code"], attributes["btn"]);
     }
     
     virtual const char* GetString(int i) override
