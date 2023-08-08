@@ -287,14 +287,8 @@ private:
 
     virtual void GetDescription(CAttributes& attributes, char* desc) override
     {
-    
-        if (attributes.indexOf("code") != -1)
-            sprintf(desc, "code: <%05x>", (int)attributes["code"]);
-	if (attributes.indexOf("btn") != -1)
-            sprintf(desc, "btn: <%01x>", (int)attributes["btn"]);
-        else
-            sprintf(desc, "%d bits: <%05x %04x>",
-            	 (int)attributes["length"], (int)attributes["code"], attributes["btn"]);
+        sprintf(desc, "%d bits: <%05x %04x>",
+       	(int)attributes["length"], (int)attributes["code"], attributes["btn"]);
     }
     
     virtual const char* GetString(int i) override
