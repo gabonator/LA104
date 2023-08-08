@@ -77,7 +77,7 @@ public:
     	btn = (b[2] & 0x0f);
     	
     	attributes["btn"] = btn;    // buttons bitmask S2,S1,S0,S3
-    	attributes["rpl_cnt"] = 1; // replay counter for remote emulation - limited to 2 due to  framer pulses array size
+    	attributes["rpl_cnt"] = 1; // replay counter for remote emulation - limited to 8 due to  framer pulses array size
     }
 
 
