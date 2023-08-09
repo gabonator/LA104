@@ -30,7 +30,7 @@ namespace RPC
     if (strcmp(command, "LCD::BufferBegin")==0)
       return (uint32_t)static_cast<void(*)(CRect const&)>(BIOS::LCD::BufferBegin);
     if (strcmp(command, "LCD::BufferWrite")==0)
-      return (uint32_t)static_cast<void(*)(unsigned short*, int)>(BIOS::LCD::BufferWrite);
+      return (uint32_t)static_cast<void(*)(const unsigned short*, int)>(BIOS::LCD::BufferWrite);
     if (strcmp(command, "LCD::Background")==0)
       return (uint32_t)static_cast<void(*)(CRect const&, uint32_t, uint32_t)>(GUI::Background);
     if (strcmp(command, "LCD::Bar")==0)
