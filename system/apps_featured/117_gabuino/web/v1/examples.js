@@ -1142,3 +1142,33 @@ examples =
     '    return 0;\n' +
     '}\n'
 }
+
+document.getElementById('input-file')
+      .addEventListener('change', getFile)
+
+    function getFile(event) {
+	    const input = event.target
+      if (input?.files.length) {
+	      placeFileContent(
+          html_editor,
+          input.files[0])
+
+          //dirty hack for now just to remove the drop down menu
+          document.getElementById('_examples').setAttribute('class','dropdown-menu')
+      }
+    }
+
+    function placeFileContent(target, file) {
+	    readFileContent(file).then(content => {
+     	target.setValue(content)
+      }).catch(error => console.log(error))
+    }
+
+    function readFileContent(file) {
+	    const reader = new FileReader()
+      return new Promise((resolve, reject) => {
+        reader.onload = event => resolve(event.target.result)
+        reader.onerror = error => reject(error)
+        reader.readAsText(file)
+      })
+  }
