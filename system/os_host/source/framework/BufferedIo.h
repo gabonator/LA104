@@ -215,6 +215,14 @@ public:
 		*this << CStream(dwData);
 		return *this;
 	}
+	
+	virtual CBufferedWriter& operator <<( char c )
+	{
+		char buf[2];
+		buf[0] = c; buf[1] = 0;
+		*this << CStream(buf);
+		return *this;
+	}
 
 	virtual CBufferedWriter& operator <<( const CStream& stream_ )
 	{

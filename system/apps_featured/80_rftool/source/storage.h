@@ -84,8 +84,16 @@ public:
     void GetUniqueName(char* name, const char* suffix)
     {
         static int counter = 0;
-        GetCurrentPath(name);
-        sprintf(name + strlen(name), "/dump%03d.%s", counter++, suffix);
+        bool exists = true;
+        while (exists)
+        {
+            GetCurrentPath(name);
+            sprintf(name + strlen(name), "/dump%03d.%s", counter++, suffix);
+            if (!mCommonReader.Open(name))
+                exists = false;
+            else
+                mCommonReader.Close();
+        }
     }
 
     void SaveSignal(char* name, CArray<uint16_t>& data)

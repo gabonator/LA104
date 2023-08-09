@@ -53,7 +53,7 @@ namespace SPI
   	
   	__Bios(EXT_SPI, INIT);
 
-  	#define SPI_BaudRatePrescaler_16           ((u16)0x0018)
+  	#define SPI_BaudRatePrescaler_16           ((uint16_t)0x0018)
 
   	int clockDivider = SPI_BaudRatePrescaler_16;
   	const uint32_t SPI_CR1_BR = 0x38;
