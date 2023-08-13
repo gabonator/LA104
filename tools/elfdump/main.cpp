@@ -7,7 +7,7 @@
 //
 
 #include <iostream>
-
+#include <cstdarg>
 
 #include "elf.h"
 #include "BufferedIo.h"
