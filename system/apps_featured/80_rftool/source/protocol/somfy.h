@@ -134,11 +134,8 @@ public:
         {
 	   if (!BytesToPulse(b, length, pulse, rpl))
 	      return false;
-	   //last pulse is for zero - add the time guard for frames separation
-	   pulse[pulse.GetSize() - 1] += SOMFY_GUARD_TIME_US; //frame repeat pause
         }
-        
-       
+               
         return true;
     }
 
@@ -173,7 +170,7 @@ private:
         //12 pulses Preamble, 1 pulse soft sync, 166 halfbits       
         
       
-        if (pulse.GetSize() < 164+13)
+        if (pulse.GetSize() < 81+25)
            return false;
         
         for (i=0; i<pulse.GetSize(); i++)
@@ -287,6 +284,15 @@ private:
 	     }
         }
         
+        //last pulse not LOW -add frame spacer ???
+        if (pulse.GetSize() % 2 == 1)
+        {
+	   //last pulse must be zero - add the time guard for frames separation
+	   pulse.Add(SOMFY_GUARD_TIME_US); //frame repeat pause        
+        } else {
+           pulse[pulse.GetSize()-1]  += SOMFY_GUARD_TIME_US;
+        }
+                
         return true;
     }
     
