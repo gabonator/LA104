@@ -2,6 +2,25 @@ var canvas = new PreviewCanvas(900, 100);
 var detail = new DetailCanvas(900, 100);
 var gui = new RemoteGui();
 var aaa;
+var extWindows = [];
+
+function remoteAdd(url)
+{
+    extWindows.push(window.open(url, "_blank", "width=1200,height=800,location=no,menubar=no"));
+}
+function remoteAnalyse(buf)
+{
+  if (extWindows.length <= 0)
+    return;
+
+  var event = new CustomEvent("SignalChanged", {detail:{
+    data: buf,
+    sender: window.document
+  }});
+
+  for (var i in extWindows)
+    extWindows[i].document.dispatchEvent(event);
+}
 
 class Memory
 {
@@ -102,6 +121,7 @@ function dumpRange(first, last)
   buf = buf.map(x => x & 0xffffff);
   aaa = buf.map(x=>x/20);
   console.log("analyse: " + JSON.stringify(buf));
+  remoteAnalyse(buf);
   analyse(buf);
 }
 
@@ -135,7 +155,8 @@ document.querySelector("#dreconstruct").addEventListener('click', () => {
 });
 document.querySelector("#dendminus").addEventListener('click', () => { detail.trim(-1); });
 document.querySelector("#dendplus").addEventListener('click', () => { detail.trim(+1); });
-document.querySelector("#dsend").addEventListener('click', () => { sendPulse(detail.trim(0)); });
+//document.querySelector("#dsend").addEventListener('click', () => { sendPulse(detail.trim(0)); });
+document.querySelector("#openeditor").addEventListener('click', () => { remoteAdd("editor/index.html") });
 //document.querySelector("#dexample").addEventListener('click', () => { example(); });
 //document.querySelector("#aenable").addEventListener('click', () => { attackEnable(); });
 //document.querySelector("#adisable").addEventListener('click', () => { attackDisable(); });
