@@ -62,7 +62,6 @@ void _yield()
   EventLoop();
 }
 
-//extern "C" void myinit();
 __attribute__((__section__(".entry")))
 int main(void) 
 {

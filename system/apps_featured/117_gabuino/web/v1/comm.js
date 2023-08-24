@@ -213,7 +213,6 @@ COMM._sendRaw = function(msg)
         };
       }, error => {
         COMM.setConnectFailed(error);
-//        statusDisplay.textContent = error;
       });
     }
 
