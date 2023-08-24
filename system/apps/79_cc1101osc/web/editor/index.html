@@ -1124,7 +1124,7 @@ var onNewData;
         if (model[i].id == "InputSignal")
         {
           var inp = model[i].component;
-          inp.data.out = new Signal(JSON.parse(newsignal))
+          inp.data.out = new Signal(JSON.parse(data))
           editor.trigger('process');
           break;
         }

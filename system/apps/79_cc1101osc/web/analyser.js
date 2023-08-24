@@ -18,8 +18,8 @@ function remoteAnalyse(buf)
     sender: window.document
   }});
 
-  for (var i in extWindows)
-    extWindows[i].document.dispatchEvent(event);
+  for (var w of extWindows)
+    w.document.dispatchEvent(event);
 }
 
 class Memory
