@@ -797,6 +797,64 @@ function syncInfo()
 //    .then(() => INTERFACE.Finish());
 }
 
+downloadConfigRegs = [];
+
+function downloadConfig()
+{
+  var regs = "IOCFG2, IOCFG1, IOCFG0, FIFOTHR, SYNC1, SYNC0, PKTLEN, PKTCTRL1, PKTCTRL0, ADDR, CHANNR, FSCTRL1, FSCTRL0, FREQ2, FREQ1, FREQ0, MDMCFG4, MDMCFG3, MDMCFG2, MDMCFG1, MDMCFG0, DEVIATN, MCSM2, MCSM1, MCSM0, FOCCFG, BSCFG, AGCCTRL2, AGCCTRL1, AGCCTRL0, WOREVT1, WOREVT0, WORCTRL, FREND1, FREND0, FSCAL3, FSCAL2, FSCAL1, FSCAL0, RCCTRL1, RCCTRL0, FSTEST, PTEST, AGCTEST, TEST2, TEST1, TEST0";
+  regs = regs.split(" ").join("").split(",");
+  downloadConfigRegs = regs.map((r, i) => {var obj = {}; obj.name=r; obj.id=i; return obj})
+  var downloadConfigWorker = () =>
+  {
+    var i = downloadConfigRegs.findIndex(r => !("value" in r))
+    if (i == -1)
+    {
+      var aux = {};
+      downloadConfigRegs.forEach(r=>aux[r.name] = r.value);
+      //console.log(JSON.stringify(aux));
+      console.log(Object.values(aux).map(x=>("0"+x.toString(16)).substr(-2)).join(","));
+      return Promise.resolve(aux)
+    }
+    return MODEM.Read(downloadConfigRegs[i].id)
+      .then(v => downloadConfigRegs[i].value = v)
+      .then(downloadConfigWorker)
+  }
+  return downloadConfigWorker();
+}
+
+function checkConfig()
+{
+  var ref = {"IOCFG2":41,"IOCFG1":46,"IOCFG0":13,"FIFOTHR":7,"SYNC1":211,"SYNC0":145,"PKTLEN":4,"PKTCTRL1":6,"PKTCTRL0":48,"ADDR":0,"CHANNR":0,"FSCTRL1":6,"FSCTRL0":0,"FREQ2":16,"FREQ1":176,"FREQ0":2,"MDMCFG4":151,"MDMCFG3":67,"MDMCFG2":48,"MDMCFG1":34,"MDMCFG0":248,"DEVIATN":71,"MCSM2":7,"MCSM1":0,"MCSM0":24,"FOCCFG":118,"BSCFG":108,"AGCCTRL2":47,"AGCCTRL1":0,"AGCCTRL0":146,"WOREVT1":135,"WOREVT0":107,"WORCTRL":248,"FREND1":182,"FREND0":17,"FSCAL3":239,"FSCAL2":43,"FSCAL1":24,"FSCAL0":31,"RCCTRL1":65,"RCCTRL0":0,"FSTEST":89,"PTEST":127,"AGCTEST":63,"TEST2":129,"TEST1":53,"TEST0":9}
+  downloadConfig().then(cfg =>
+  {
+    var diff = false;
+    for (var i in ref)
+      if (ref[i] != cfg[i])
+      {
+        diff = true;
+        console.log(i, "should be", ref[i], "but is", cfg[i])
+      }
+    if (!diff)
+      console.log("configs are equal")
+  })
+  // noisy signal: AGCTEST should be 63 but is 23
+}
+function setConfig(j)
+{
+  var regs = "IOCFG2, IOCFG1, IOCFG0, FIFOTHR, SYNC1, SYNC0, PKTLEN, PKTCTRL1, PKTCTRL0, ADDR, CHANNR, FSCTRL1, FSCTRL0, FREQ2, FREQ1, FREQ0, MDMCFG4, MDMCFG3, MDMCFG2, MDMCFG1, MDMCFG0, DEVIATN, MCSM2, MCSM1, MCSM0, FOCCFG, BSCFG, AGCCTRL2, AGCCTRL1, AGCCTRL0, WOREVT1, WOREVT0, WORCTRL, FREND1, FREND0, FSCAL3, FSCAL2, FSCAL1, FSCAL0, RCCTRL1, RCCTRL0, FSTEST, PTEST, AGCTEST, TEST2, TEST1, TEST0";
+  regs = regs.split(" ").join("").split(",");
+  regs = regs.map((r, i) => {var obj = {}; obj.name=r; obj.id=i; return obj})
+  for (var i in j)
+  {
+    var r = regs.find(r=>r.name == i);
+    if (r)
+    {
+      console.log("Setting reg", r.id, "to value", j[i]);
+      MODEM.Write(r.id, j[i])
+    }
+  }
+}
+
     var loginfo = document.createElement("textarea");
     loginfo.style = "width:90%; height:200px";
     document.documentElement.appendChild(loginfo)
