@@ -86,16 +86,14 @@ class OptionControl extends Rete.Control {
 }
 
 class TextControl extends Rete.Control {
-  constructor(emitter, key, readonly, attrs) {
+
+  constructor(emitter, key, readonly) {
     super(key);
     this.component = VueTextControl;
-    this.props = { emitter, ikey: key, readonly, ...attrs};
+    this.props = { emitter, ikey: key, readonly};
   }
 
   setValue(val) {
     this.vueContext.value = val;
-  }
-  getValue() {
-    return this.vueContext.value;
   }
 }

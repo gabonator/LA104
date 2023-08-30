@@ -270,8 +270,8 @@ public:
 #ifdef __APPLE__
 		return true;
 #endif
-        if (mLoaded)
-            return true;
+//        if (mLoaded)
+//            return true;
         return Load(nullptr);
     }
 

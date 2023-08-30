@@ -94,6 +94,7 @@ int streamerBufferMaxCounter = 20000; // 1 second @ 50 kHz
 const int streamerPeriodUs = 20;
 volatile int totalSamples = 0;
 volatile int totalPulses = 0;
+volatile int totalPositive = 0;
 
 RingBufCPP<uint16_t, 512> streamerBuffer;
 
@@ -125,6 +126,7 @@ void streamerProcess(const volatile uint16_t *data)
   {   
     totalSamples++;
     int sample = GetLogic(*data++); 
+    totalPositive += sample;
     if (sample == streamerBufferLogic)
     {
       streamerBufferCounter++;

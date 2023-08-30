@@ -151,15 +151,8 @@ class Histogram extends Rete.Component {
 
     worker(node, inputs, outputs) {
         var n1 = inputs['in'].length ? inputs['in'][0] : new Signal();
-        if (n1.type.substr(0, 5) == "multi")
-          n1 = n1.multi[0];
         SignalHistogram(n1);
     }
-    destroyed(node)
-    {
-        SignalHistogram(new Signal());
-    }
-
 }
 
 
@@ -309,7 +302,7 @@ class ToInteger extends Rete.Component {
         var firstbit = new OptionControl(this.editor, 'firstbit');
         node.data.firstbit = {options: {"MSB": 0, "LSB": 1}, value:0, title:"First bit"}
         var datatype = new OptionControl(this.editor, 'datatype');
-        node.data.datatype = {options: {"uint4_t:": 0, "uint8_t": 1, "uint16_t": 2, "uint32_t": 3}, value:3, title:"Data type"}
+        node.data.datatype = {options: {"uint8_t": 0, "uint16_t": 1, "uint32_t": 2}, value:2, title:"Data type"}
 
         return node
             .addInput(inp)
@@ -319,52 +312,59 @@ class ToInteger extends Rete.Component {
     }
 
     worker(node, inputs, outputs) {
-        var inp = new Signal();
-        if (inputs['in'].length && inputs['in'][0])
-          inp = inputs['in'][0];
+        var arr = [];
+        if (inputs['in'].length && inputs['in'][0]?.data)
+          arr = [...inputs['in'][0].data];
 
-        var databits = [4, 8, 16, 32][node.data.datatype.value]
-        var datatype = ["uint4_t", "uint8_t", "uint16_t", "uint32_t"][node.data.datatype.value]
+        var uint = 0;
         var msb = node.data.firstbit.value == 0
-        var convert = arr => new Signal(arr, "bitstream").getBitstreamToHex(msb, databits);
-        var copy = new Signal();
-        if (inp.type.substr(0, 5) == "multi")
-        {
-          copy.type = "multi"+datatype;
-          copy.multi = [];
-          for (var i=0; i<inp.multi.length; i++)
+        var databits = [8*1, 8*2, 8*4][node.data.datatype.value]
+        var arrout = [];
+
+        var bitsToInt = (a, count, msb) => {
+          var uint = 0;
+          for (var i=0; i<a.length; i++)
           {
-            var conv = convert(inp.multi[i].data, msb, databits);
-            if (!conv)
-              continue;
-            copy.multi.push({data: conv.values, length: conv.bits, levels: []});
+            if (a[i] === "0" || a[i] === 0)
+            {
+            } else if (a[i] === "1" || a[i] === 1)
+            {
+              if (msb)
+                uint |= 1<<(count-1-i)
+              else
+                uint |= 1<<i
+            } else {
+              outputs['out'] = {data:[]}
+              this.out.name = `Error!`;
+              this.out.node.update();
+              throw "wrong data"
+            }
           }
-          if (copy.multi.length == 0)
-          {
-            outputs['out'] = new Signal();
-            this.out.name = `Error!`;
-            this.out.node.update();
-            throw "wrong bit value";
-            return;
-          }
-        } else {
-          var conv = convert(inp.data, msb, databits);
-          if (conv)
-          {
-            copy.data = conv.values;
-            copy.level = [];
-            copy.length = conv.bits;
-            copy.type = datatype;
-          } else {
-            outputs['out'] = new Signal();
-            this.out.name = `Error!`;
-            this.out.node.update();
-            throw "wrong bit value";
-            return;
-          }
+
+          var digits = (count+3)>>2;
+          var hex = "0x"+(("00000000"+uint.toString(16)).substr(-digits));
+          return hex;
         }
-        outputs['out'] = copy;
-        this.out.name = copy.getInfo();
+
+        if (arr.length < databits)
+        {
+          arrout.push(bitsToInt(arr, arr.length, msb));
+        } else {
+          while (arr.length % databits != 0)
+            arr.unshift(0);
+
+          while (arr.length >= databits)
+          {
+            var part = arr.splice(0, databits);
+            arrout.push(bitsToInt(part, databits, msb));
+          }
+          if (arr.length)
+            arrout.push(bitsToInt(arr, databits, msb));
+        }
+        if (!msb)
+          arrout.reverse();
+        outputs['out'] = {data:arrout}
+        this.out.name = `uint32_t [${arrout.length}]`; // TODO: signal
         this.out.node.update();
     }
 }
@@ -381,18 +381,10 @@ class Attributes extends Rete.Component {
         var attribute2 = new StrDoubleControl(this.editor, 'attribute2', {width1: 60, width2: 140});
         var attribute3 = new StrDoubleControl(this.editor, 'attribute3', {width1: 60, width2: 140});
         var attribute4 = new StrDoubleControl(this.editor, 'attribute4', {width1: 60, width2: 140});
-        var attribute5 = new StrDoubleControl(this.editor, 'attribute5', {width1: 60, width2: 140});
-        var attribute6 = new StrDoubleControl(this.editor, 'attribute6', {width1: 60, width2: 140});
-        var attribute7 = new StrDoubleControl(this.editor, 'attribute7', {width1: 60, width2: 140});
-        var attribute8 = new StrDoubleControl(this.editor, 'attribute8', {width1: 60, width2: 140});
         node.data.attribute1 = ["id", "\"Came 001unip\""]
         node.data.attribute2 = ["code", "arr[0]"]
         node.data.attribute3 = ["", ""]
         node.data.attribute4 = ["", ""]
-        node.data.attribute5 = ["", ""]
-        node.data.attribute6 = ["", ""]
-        node.data.attribute7 = ["", ""]
-        node.data.attribute8 = ["", ""]
         var static1 = new StaticControl(this.editor, "static1")
         node.data.static1 = "Atribute&nbsp;&nbsp;&nbsp;Value"
 
@@ -403,117 +395,31 @@ class Attributes extends Rete.Component {
             .addControl(attribute2)
             .addControl(attribute3)
             .addControl(attribute4)
-            .addControl(attribute5)
-            .addControl(attribute6)
-            .addControl(attribute7)
-            .addControl(attribute8)
             .addOutput(this.out);
     }
 
     worker(node, inputs, outputs) {
         var _node = this.editor.nodes.find(n => n.id == node.id)
-        var inp = inputs['in'].length ? inputs['in'][0] : new Signal();
+        var arr = inputs['in'].length ? [...inputs['in'][0].data] : [];
 
         _node.controls.get('attribute1').setVisible(true)
         _node.controls.get('attribute2').setVisible(node.data.attribute1.join("") != "")
         _node.controls.get('attribute3').setVisible(node.data.attribute2.join("") != "")
         _node.controls.get('attribute4').setVisible(node.data.attribute3.join("") != "")
-        _node.controls.get('attribute5').setVisible(node.data.attribute4.join("") != "")
-        _node.controls.get('attribute6').setVisible(node.data.attribute5.join("") != "")
-        _node.controls.get('attribute7').setVisible(node.data.attribute6.join("") != "")
-        _node.controls.get('attribute8').setVisible(node.data.attribute7.join("") != "")
-        var attrs = [node.data.attribute1, node.data.attribute2, node.data.attribute3, node.data.attribute4,
-          node.data.attribute5, node.data.attribute6, node.data.attribute7, node.data.attribute8]
+        var attrs = [node.data.attribute1, node.data.attribute2, node.data.attribute3, node.data.attribute4]
         var arrout = [];
-        var arr = null;
-        if (inp.type.substr(0, 5) == "multi")
-        {
-          for (var i=0; i<inp.multi.length; i++)
-          {
-            var val = inp.multi[i].data;
-            if (arr === null)
-              arr = val;
-            else if (arr.toString() != val.toString())
-            {
-              outputs['out'] = new Signal(`Inconsistent input!`, "error");
-              this.out.name = `Inconsistent input!`;
-              this.out.node.update();
-              //throw "different multi values"
-              return;
-            }
-          }
-        } else {
-          arr = inp.data;
-        }
-
         for (var attr of attrs)
         {
-          var key = attr[0];
-          var rexp = attr[1];
-          var rval = "?";
-          if (key == "")
+          if (attr[0] == "")
             continue;
-          if (rexp[0] == "\"")
-            rval = rexp;
+          if (attr[1][0] == "\"")
+            arrout.push([attr[0], attr[1]]);
           else
-          {
-            var subStream = null;
-            if (rexp.match("arr\\[(\\d+):(\\d+)]"))
-            {
-              var tokens = rexp.match("arr\\[(\\d+):(\\d+)]");
-              rexp = rexp.split(tokens[0]).join(`hexrange(${tokens[1]},${tokens[2]})`)
-            }
-            if (rexp == "arr")
-            {
-              rexp = `hexrange(0,${arr.length-1})`
-            }
-            var hexrange = (first, last) => {
-              var subStream = new Signal(arr, "bitstream").makeRange(first, last);
-              var hex = subStream.getBitstreamToHex(true, 32);
-              if (hex.values.length == 1)
-                return hex.values[0];
-              return hex.values;
-            }
-            try {
-              rval = eval(rexp);
-            } catch (e) {
-              outputs['out'] = new Signal("Cant convert to integer", "error");
-              this.out.name = `Conversion failure`;
-              this.out.node.update();
-              return;
-            }
-            if (Array.isArray(rval))
-            {
-              for (var i=0; i<rval.length; i++)
-                arrout.push([key+i, rval[i]]);
-              continue;
-            }
-/*
-            if (subStream)
-            {
-              rval = subStream.getBitstreamToHex(true, 32);
-              if (!rval || rval.values.length == 0)
-              {
-                outputs['out'] = new Signal("Cant convert to integer", "error");
-                this.out.name = `Conversion failure`;
-                this.out.node.update();
-                return;
-              } else if (rval.values.length == 1)
-              {
-                rval = rval.values[0];
-              } else {
-                for (var i=0; i<rval.values.length; i++)
-                  arrout.push([key+i, rval.values[i]]);
-                continue;
-              }
-            }
-*/
-          }
-          arrout.push([key, rval]);
+            arrout.push([attr[0], eval(attr[1])]);
         }
-        outputs['out'] = new Signal(arrout, "attributes");
+        outputs['out'] = {data:arrout, type:"attributes"};
 
-        this.out.name = outputs['out'].getInfo();
+        this.out.name = `Array of ${arrout.length} attributes`;
         this.out.node.update();
     }
 }
@@ -531,9 +437,6 @@ class DisplaySignal extends Rete.Component {
     worker(node, inputs, outputs) {
         var _node = this.editor.nodes.find(n => n.id == node.id)
         var n1 = inputs['in'].length ? inputs['in'][0] : new Signal();
-        if (n1.type.substr(0, 5) == "multi")
-          n1 = n1.multi[0];
-
         if (n1.data.length == 0)
           _node.window.hide();
         else
@@ -561,32 +464,14 @@ class Print extends Rete.Component {
         return node.addInput(inp).addControl(this.print);
     }
     worker(node, inputs, outputs) {
-        var description = (input) => {
-          if (input?.type == "attributes")
-            return input.data.map(pair => `${pair[0]}: ${pair[1]}`).join("\n")
-          else        
-            return input.data.join(", ");
-        }
-
-        var input = inputs['in'].length ? inputs['in'][0] : new Signal("No input", "message");
+        var input = inputs['in'].length ? inputs['in'][0] : {data:[]}
+        var arr = input.data;
         var p = "";
-        if (input.type == "message")
-          p = `${input.message}`
-        else if (input.type == "error")
-          p = `Error: ${input.message}`
+        if (input?.type == "attributes")
+          p = arr.map(pair => `${pair[0]}: ${pair[1]}`).join("\n")
         else
-        {
-          if (input.type.substr(0, 5) == "multi")
-          {
-            for (var i=0; i<input.multi.length; i++)
-            {
-              p += input.type + "[" + i + "]:\n"
-              p += description(input.multi[i]) + "\n";
-            }
-          } else {
-            p = description(input);
-          }
-        }
+          p = arr.join(", ");
+        console.log(arr);
         this.editor.nodes.find(n => n.id == node.id).controls.get('print').setValue(p);
     }         
 }
@@ -598,7 +483,6 @@ class Assert extends Rete.Component {
 
     builder(node) {
         var inp = new Rete.Input('in', "Signal", arrSocket);
-        var out = new Rete.Output('out', "Signal", arrSocket);
         var condition = new StrControl(this.editor, 'condition', false, 'Condition');
         var static1 = new StaticControl(this.editor, "static1")
         node.data.condition = "arr.length == 24";
@@ -606,55 +490,18 @@ class Assert extends Rete.Component {
         return node
             .addInput(inp)
             .addControl(condition)
-            .addControl(static1)
-            .addOutput(out)
+            .addControl(static1);
     }
 
     worker(node, inputs, outputs) {
         var _node = this.editor.nodes.find(n => n.id == node.id)
         var input = inputs['in'].length ? inputs['in'][0] : new Signal();
-        outputs['out'] = input;
-        var result = "";
-        if (input.type.substr(0, 5) == "multi")
-        {
-          var bad = 0;
-          for (var i=0; i<input.multi.length; i++)
-          {
-            if (!input.checkAssertion(node.data.condition, i))
-            {
-              bad++;
-              input.multi.splice(i--, 1);
-            }
-          }
-          if (bad == 0)
-            result = `${input.multi.length} x OK`
-          else
-            result = `${bad} x Error! ${input.multi.length} x OK`
-/*
-          var r = input.checkAssertion(node.data.condition);
-          if (r > 0)
-            result = r + " x OK "
-          if (input.multi.length - r > 0)
-            result += (input.multi.length - r) + " x Error!"
-*/
-        } else
-        {
-          if (input.checkAssertion(node.data.condition))
-          {
-            result = "OK";
-          }
-          else
-          {
-            result = "Error!";
-            outputs['out'] = new Signal();
-          }
-        }
-        _node.controls.get('static1').setValue(result);
-
-        var _node = this.editor.nodes.find(n => n.id == node.id);
-        _node.outputs.get("out").name = outputs['out'].getInfo();
-        _node.outputs.get("out").node.update();
-
+        var result;
+        if (input.checkAssertion(node.data.condition))
+          result = "OK";
+        else
+          result = "Error!";
+        _node.controls.get('static1').setValue(result)
     }
 }
 
@@ -685,278 +532,6 @@ class Count extends Rete.Component {
 
         var _node = this.editor.nodes.find(n => n.id == node.id)
         _node.outputs.get("out").name = `Number ${result}`; //outputs['out'][0]; // TODO: getInfo
-        _node.outputs.get("out").node.update();
-    }
-}
-
-class Denoise extends Rete.Component {
-    constructor(){
-        super("Denoise");
-    }
-
-    builder(node) {
-        var inp = new Rete.Input('in', "Signal", arrSocket);
-        this.out = new Rete.Output('out', "Signal", arrSocket);
-        var len = new NumControl(this.editor, 'len');
-        node.data.len = 100;
-        return node
-            .addInput(inp)
-            .addControl(len)
-            .addOutput(this.out);
-    }
-
-    worker(node, inputs, outputs) {
-        var _node = this.editor.nodes.find(n => n.id == node.id)
-        var input = inputs['in'].length ? inputs['in'][0] : new Signal();
-        outputs['out'] = input.makeDenoised(node.data.len);
-        _node.outputs.get("out").name = outputs['out'].getInfo();
-        _node.outputs.get("out").node.update();
-    }
-}
-
-class Select extends Rete.Component {
-    constructor(){
-        super("Select");
-    }
-
-    builder(node) {
-        var inp = new Rete.Input('in', "Signal", arrSocket);
-        this.out = new Rete.Output('out', "Signal", arrSocket);
-        var index = new NumControl(this.editor, 'index');
-        node.data.index = 0;
-        return node
-            .addInput(inp)
-            .addControl(index)
-            .addOutput(this.out);
-    }
-
-    worker(node, inputs, outputs) {
-        var _node = this.editor.nodes.find(n => n.id == node.id)
-        var input = inputs['in'].length ? inputs['in'][0] : new Signal();
-        outputs['out'] = input.makeSelect(node.data.index);
-        _node.outputs.get("out").name = outputs['out'].getInfo();
-        _node.outputs.get("out").node.update();
-    }
-}
-
-class Code extends Rete.Component {
-    constructor(){
-        super("Code");
-    }
-
-    builder(node) {
-        var inp = new Rete.Input('in', "Signal", arrSocket);
-        var out = new Rete.Output('out', "Signal", arrSocket);
-        var code = new TextControl(this.editor, 'code', false, {textWidth:"400px"});
-        return node.addInput(inp).addControl(code).addOutput(out);
-    }
-    worker(node, inputs, outputs) {
-        var input = inputs['in'].length ? inputs['in'][0] : new Signal();
-        var arr = [...input.data];
-
-        var code = this.editor.nodes.find(n => n.id == node.id).controls.get('code')
-        code = code.getValue();
-        eval(code);
-
-        outputs['out'] = new Signal(arr, "symbols")
-        var _node = this.editor.nodes.find(n => n.id == node.id)
-        _node.outputs.get("out").name = outputs['out'].getInfo();
-        _node.outputs.get("out").node.update();
-    }         
-}
-
-// reverse
-
-class RevAttributes extends Rete.Component {
-    constructor(){
-        super("Reverse Attributes");
-    }
-
-    builder(node) {
-        var inp = new Rete.Input('in', "Attributes", arrSocket);
-        var out = new Rete.Output('out', "Bitstream", arrSocket);
-        var attribute1 = new StrDoubleControl(this.editor, 'attribute1', {width1: 60, width2: 140});
-        var attribute2 = new StrDoubleControl(this.editor, 'attribute2', {width1: 60, width2: 140});
-        var attribute3 = new StrDoubleControl(this.editor, 'attribute3', {width1: 60, width2: 140});
-        var attribute4 = new StrDoubleControl(this.editor, 'attribute4', {width1: 60, width2: 140});
-        var attribute5 = new StrDoubleControl(this.editor, 'attribute5', {width1: 60, width2: 140});
-        var attribute6 = new StrDoubleControl(this.editor, 'attribute6', {width1: 60, width2: 140});
-        var attribute7 = new StrDoubleControl(this.editor, 'attribute7', {width1: 60, width2: 140});
-        var attribute8 = new StrDoubleControl(this.editor, 'attribute8', {width1: 60, width2: 140});
-        node.data.attribute1 = ["", ""]
-        node.data.attribute2 = ["", ""]
-        node.data.attribute3 = ["", ""]
-        node.data.attribute4 = ["", ""]
-        node.data.attribute5 = ["", ""]
-        node.data.attribute6 = ["", ""]
-        node.data.attribute7 = ["", ""]
-        node.data.attribute8 = ["", ""]
-        var static1 = new StaticControl(this.editor, "static1")
-        node.data.static1 = "Atribute&nbsp;&nbsp;&nbsp;Value"
-
-        return node
-            .addInput(inp)
-            .addControl(static1)
-            .addControl(attribute1)
-            .addControl(attribute2)
-            .addControl(attribute3)
-            .addControl(attribute4)
-            .addControl(attribute5)
-            .addControl(attribute6)
-            .addControl(attribute7)
-            .addControl(attribute8)
-            .addOutput(out);
-    }
-
-    worker(node, inputs, outputs) {
-        var _node = this.editor.nodes.find(n => n.id == node.id)
-        var inp = inputs['in'].length ? inputs['in'][0] : new Signal();
-
-        _node.controls.get('attribute1').setVisible(true)
-        _node.controls.get('attribute2').setVisible(node.data.attribute1.join("") != "")
-        _node.controls.get('attribute3').setVisible(node.data.attribute2.join("") != "")
-        _node.controls.get('attribute4').setVisible(node.data.attribute3.join("") != "")
-        _node.controls.get('attribute5').setVisible(node.data.attribute4.join("") != "")
-        _node.controls.get('attribute6').setVisible(node.data.attribute5.join("") != "")
-        _node.controls.get('attribute7').setVisible(node.data.attribute6.join("") != "")
-        _node.controls.get('attribute8').setVisible(node.data.attribute7.join("") != "")
-        if (inp.type != "attributes")
-          throw "wrong input"
-
-        var inattr = {}
-        for (var a of inp.data)
-          if (a[0])
-            inattr[a[0]] = a[1];
-
-        var attrs = [node.data.attribute1, node.data.attribute2, node.data.attribute3, node.data.attribute4,
-          node.data.attribute5, node.data.attribute6, node.data.attribute7, node.data.attribute8]
-
-        var outattr = {}
-        for (var a of attrs)
-          if (a[0])
-            outattr[a[0]] = a[1];
-
-        var bitstream = [];
-
-        for (var a in outattr)
-        {
-          var key = a;
-          if (outattr[key][0] == "\"")
-          {
-            if (inattr[key] != outattr[key])
-              throw "String mismatch"
-            continue;
-          }
-
-          if (outattr[key].match("arr\\[(\\d+):(\\d+)]"))
-          {
-            var tokens = outattr[key].match("arr\\[(\\d+):(\\d+)]");
-            var vals = []
-            if (key+"0" in inattr)
-            {
-              for (var i=0; i<10; i++)
-                if (key + i in inattr)
-                  vals.push(inattr[key+i]) 
-            } else
-              vals.push(inattr[key])
-            var ev = outattr[key].split(tokens[0]).join(`setrange(${tokens[1]},${tokens[2]},[${vals}])`)
-            var setrange = (first, last, data) =>
-            {
-              var remain = Math.max(first, last) - Math.min(first, last) + 1;
-              var bits = 0;
-              var check = 1<<((remain - 1)%32);
-              for (var i=bitstream.len; i <= Math.max(first, last); i++)
-                bitstream[i] = '?';
-              if (last >= first)
-                for (var i=first; i <= last; i++)
-                {
-                  bitstream[i] = data[bits>>5] & check ? '1' : '0'
-                  bits++;
-                  check = (check >>> 1) | (check << 31)
-                }
-
-            }
-            eval(ev);
-          } else
-            throw "dont know what to do"
-        }
-        outputs['out'] = new Signal(bitstream, "bitstream");
-
-        var _node = this.editor.nodes.find(n => n.id == node.id);
-        _node.outputs.get("out").name = outputs['out'].getInfo();
-        _node.outputs.get("out").node.update();
-    }
-}
-
-class Sequence extends Rete.Component {
-    constructor(){
-        super("Sequence");
-    }
-
-    builder(node) {
-        var inp = new Rete.Input('in', "Array", arrSocket);
-        var out = new Rete.Output('out', "Signal", arrSocket);
-        var seq0 = new StrDoubleControl(this.editor, 'sequence0', {width1: 60, width2: 140});
-        var seq1 = new StrDoubleControl(this.editor, 'sequence1', {width1: 60, width2: 140});
-        var seq2 = new StrDoubleControl(this.editor, 'sequence2', {width1: 60, width2: 140});
-        var seq3 = new StrDoubleControl(this.editor, 'sequence3', {width1: 60, width2: 140});
-        node.data.sequence0 = ["", ""]
-        node.data.sequence1 = ["", ""]
-        node.data.sequence2 = ["", ""]
-        node.data.sequence3 = ["", ""]
-        var static1 = new StaticControl(this.editor, "static1")
-        node.data.static1 = "Repeat&nbsp;&nbsp;&nbsp;&nbsp;Sequence"
-
-        return node
-            .addInput(inp)
-            .addControl(static1)
-            .addControl(seq0)
-            .addControl(seq1)
-            .addControl(seq2)
-            .addControl(seq3)
-            .addOutput(out);
-    }
-
-    worker(node, inputs, outputs) {
-        var _node = this.editor.nodes.find(n => n.id == node.id)
-        var inp = inputs['in'].length ? inputs['in'][0] : new Signal();
-
-        _node.controls.get('sequence0').setVisible(true)
-        _node.controls.get('sequence1').setVisible(node.data.sequence0.join("") != "")
-        _node.controls.get('sequence2').setVisible(node.data.sequence1.join("") != "")
-        _node.controls.get('sequence3').setVisible(node.data.sequence2.join("") != "")
-
-        var out = new Signal([], "signal");
-        var seq = [node.data.sequence0, node.data.sequence1, node.data.sequence2, node.data.sequence3]
-        for (var s of seq)
-          if (s[1])
-          {
-            var pulses = s[1].split(",").map(x=>x.trim());
-            var repeat = s[0] ? parseInt(s[0]) : 1;
-            for (var r=0; r<repeat; r++)
-              for (var p of pulses)
-              {
-                if (p.substr(-1) == "H")
-                {
-                  out.data.push(parseInt(p));
-                  out.level.push("h");
-                }
-                else if (p.substr(-1) == "L")
-                {
-                  out.data.push(parseInt(p));
-                  out.level.push("l");
-                }
-                else if (p=="arr")
-                {
-                  out.data = out.data.concat(inp.data);
-                  out.level = out.level.concat(inp.level);
-                }
-              }
-          }
-        outputs['out'] = out;
-
-        var _node = this.editor.nodes.find(n => n.id == node.id);
-        _node.outputs.get("out").name = outputs['out'].getInfo();
         _node.outputs.get("out").node.update();
     }
 }

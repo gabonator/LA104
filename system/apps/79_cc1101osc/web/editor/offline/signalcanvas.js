@@ -179,7 +179,7 @@ class SignalCanvas
   show(pulse, zoom)
   {
     this.container.style.display = "none";
-    if (!pulse || (pulse.type && pulse.type != "signal"))
+    if (!pulse || pulse.type != "signal")
       throw "wrong type"
     this.container.style.display = "block";
 

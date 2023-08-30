@@ -174,12 +174,10 @@ var VueOptionControl = {
 }
 
 var VueTextControl = {
-  props: ['readonly', 'emitter', 'ikey', 'getData', 'putData', 'textWidth'],
-//  template: '<textarea :style="{width:width1}" style="width:{{width}}; height:200px; font-size:18px;" :readonly="readonly" :value="value" @input="change($event)" @dblclick.stop="" @pointerdown.stop="" @pointermove.stop=""/>',
-  template: '<textarea :style="{width:textWidth}" style="height:200px; font-size:18px;" :readonly="readonly" :value="value" @input="change($event)" @dblclick.stop="" @pointerdown.stop="" @pointermove.stop=""/>',
+  props: ['readonly', 'emitter', 'ikey', 'getData', 'putData'],
+  template: '<textarea style="width:100%; height:80px" :readonly="readonly" :value="value" @input="change($event)" @dblclick.stop="" @pointerdown.stop="" @pointermove.stop=""/>',
   data() {
     return {
-      textWidth: "100%",
       value: "init text",
     }
   },

@@ -250,7 +250,7 @@ function onMain()
             }
           })
           .then( () => MODEM.Status())
-          .then( status => { if (status) console.log("Buffer overflow!"); })
+          .then( status => { if (status) { console.log("Buffer overflow!"); level = 1;} })
           .catch(console.log);
         }, 200);
 

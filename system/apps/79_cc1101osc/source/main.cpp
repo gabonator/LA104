@@ -7,6 +7,11 @@
 #include "evaluator.h"
 #include "webusb/webusb.h"
 
+extern volatile int totalSamples;
+extern volatile int totalPositive;
+int lastSamples = 0;
+int lastPositive = 0;
+
 char command[128] = {0};
 char buffer[128];
 const char anim[] = "|/-\\|/-\\";
@@ -87,7 +92,32 @@ int main(void)
     EVERY(1000)
     {
       BIOS::LCD::Printf(BIOS::LCD::Width-16, BIOS::LCD::Height-14, RGB565(b0b0b0), RGB565(404040), "%c", anim[animphase++&7]);
+//      BIOS::LCD::Printf(100, BIOS::LCD::Height-14, RGB565(ffb0b0), RGB565(404040), " %d %d ", totalSamples, totalPositive);
     }
+    {EVERY(100)
+    {
+      int curSamples = totalSamples - lastSamples;
+      int curPositive = totalPositive - lastPositive;
+      lastSamples = totalSamples;
+      lastPositive = totalPositive;
+
+      uint16_t clr = RGB565(404040);
+      if (curSamples == 0)
+        clr = RGB565(404040);
+      else
+      {
+        if (curPositive >= curSamples/2)
+          clr = RGB565(40ff40);
+        else if (curPositive > 0)
+          clr = RGB565(40b040);
+        else
+          clr = RGB565(808080);
+      }
+      if (BIOS::GPIO::DigitalRead(BIOS::GPIO::P4))
+        clr = RGB565(ffff40);
+      BIOS::LCD::Bar(CRect(BIOS::LCD::Width-4, BIOS::LCD::Height-4, BIOS::LCD::Width, BIOS::LCD::Height), clr);
+    }}
+
     APP::Do();
   }
   APP::End();
