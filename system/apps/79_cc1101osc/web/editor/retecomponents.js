@@ -458,10 +458,17 @@ class Attributes extends Rete.Component {
           else
           {
             var subStream = null;
-            if (rexp.match("arr\\[(\\d+):(\\d+)]"))
+            if (rexp.match("arr\\[(\\d+)\\s*:\\s*(\\d+)]"))
             {
-              var tokens = rexp.match("arr\\[(\\d+):(\\d+)]");
+              var tokens = rexp.match("arr\\[(\\d+)\\s*:\\s*(\\d+)]");
               rexp = rexp.split(tokens[0]).join(`hexrange(${tokens[1]},${tokens[2]})`)
+            }
+            if (rexp.match("arr\\[(\\d+)\\s*\\+:\\s*(\\d+)]"))
+            {
+              // verilog indexed part select
+              var tokens = rexp.match("arr\\[(\\d+)\\s*\\+:\\s*(\\d+)]");
+              tokens = [tokens[0], parseInt(tokens[1]), parseInt(tokens[2])]
+              rexp = rexp.split(tokens[0]).join(`hexrange(${tokens[1]+tokens[2]-1},${tokens[1]})`)
             }
             if (rexp == "arr")
             {
@@ -469,7 +476,15 @@ class Attributes extends Rete.Component {
             }
             var hexrange = (first, last) => {
               var subStream = new Signal(arr, "bitstream").makeRange(first, last);
-              var hex = subStream.getBitstreamToHex(true, 32);
+              // encode bitstream as LSB first
+              // MSB first looks better (nicely matches the nibbles when displayed as 4 bits per row)
+              // 0, 0, 0, 0; 0, 1, 1, 0; 0, 0, 0, 1 -> 0x061
+              // but we would need to encode bitstream length attribute
+              // (or we would store it as 0x06100000),
+              // to make sure that the very first bit is the bit at 31. position
+              // storing it as LSB makes it easy to extract the bite range in encoder - first bitstream
+              // bit is the LSB of first DWORD
+              var hex = subStream.getBitstreamToHex(false, 32);
               if (hex.values.length == 1)
                 return hex.values[0];
               return hex.values;
@@ -848,9 +863,10 @@ class RevAttributes extends Rete.Component {
             continue;
           }
 
-          if (outattr[key].match("arr\\[(\\d+):(\\d+)]"))
+          if (outattr[key].match("arr\\[(\\d+)\\s*(\\+?):\\s*(\\d+)]"))
           {
-            var tokens = outattr[key].match("arr\\[(\\d+):(\\d+)]");
+            var tokens = outattr[key].match("arr\\[(\\d+)\\s*(\\+?):\\s*(\\d+)]");
+            tokens = [tokens[0], parseInt(tokens[1]), tokens[2], parseInt(tokens[3])]
             var vals = []
             if (key+"0" in inattr)
             {
@@ -859,13 +875,19 @@ class RevAttributes extends Rete.Component {
                   vals.push(inattr[key+i]) 
             } else
               vals.push(inattr[key])
-            var ev = outattr[key].split(tokens[0]).join(`setrange(${tokens[1]},${tokens[2]},[${vals}])`)
+            var ev;
+            if (tokens[2] == "")
+              ev = outattr[key].split(tokens[0]).join(`setrange(${tokens[1]},${tokens[3]},[${vals}])`)
+            else if (tokens[2] == "+")
+              ev = outattr[key].split(tokens[0]).join(`setrange(${tokens[1]+tokens[3]-1},${tokens[1]},[${vals}])`)
+            else
+              throw "error"
             var setrange = (first, last, data) =>
             {
               var remain = Math.max(first, last) - Math.min(first, last) + 1;
               var bits = 0;
-              var check = 1<<((remain - 1)%32);
-              for (var i=bitstream.len; i <= Math.max(first, last); i++)
+              var check = 1; //1<<((remain - 1)%32); TODO: CHECK!
+              for (var i=bitstream.len; i <= Math.max(first, last); i++) 
                 bitstream[i] = '?';
               if (last >= first)
                 for (var i=first; i <= last; i++)
@@ -874,7 +896,13 @@ class RevAttributes extends Rete.Component {
                   bits++;
                   check = (check >>> 1) | (check << 31)
                 }
-
+              else
+                for (var i=first; i >= last; i--)
+                {
+                  bitstream[i] = data[bits>>5] & check ? '1' : '0'
+                  bits++;
+                  check = (check << 1) | (check >>> 31)
+                }
             }
             eval(ev);
           } else
