@@ -4,7 +4,10 @@ function codeFlowDecoder(json)
   var getNode = (name) => {
     var nodes = Object.values(json.nodes).filter(n => n.name == name);
     if (nodes.length != 1)
-      throw "Sigle node not found"
+    {
+      console.log("Failed while looking for", name);
+      throw "Single node not found"
+    }
     return nodes[0];
   }
   var getChildren = (node) => {
@@ -22,14 +25,26 @@ function codeFlowDecoder(json)
     return true; // TODO: lazy
   }
 
-  var curNode = getNode("Input signal");
+  var curNode = getNode("Input signal", true);
   while (1)
   {
     var curChildren = getChildren(curNode);
     if (findChild(curChildren, "Assertion"))
     {
       flow.push(["Assert", findChild(curChildren, "Assertion").data.condition, flow[flow.length-1][0]])
-      curChildren = curChildren.filter(n => n.name != "Assertion");
+      var assertChild = getChildren(findChild(curChildren, "Assertion"))
+      var otherChild = curChildren.filter(n => n.name != "Assertion")
+      if (assertChild.length == 1 && otherChild.length == 0)
+      {
+        curChildren = assertChild;
+      } else
+      if (assertChild.length == 0 && otherChild.length == 1)
+      {
+        curChildren = curChildren.filter(n => n.name != "Assertion");
+      } else 
+      {
+        throw "Cant choose right path"
+      }
     }
     if (findChild(curChildren, "Print") || findChild(curChildren, "Histogram") || 
        findChild(curChildren, "Display signal"))
@@ -72,7 +87,9 @@ function codeFlowDecoder(json)
           [lut2.data.assign1, lut2.data.assign2, lut2.data.assign3, lut2.data.assign4].flat(1).join(";") ==
           "H, L;0;L, H;1;H;0;;")
       {
-        flow.push(["Manchester", parseInt(lut1.data.assign1[0])])
+        var lut2data = [1, 2, 3, 4].map(x => lut2.data["assign"+x])
+          .filter(x=>x[0] != "").map(x => [x[0].split(",").map(y=>y.trim()), x[1]])
+        flow.push(["Manchester", parseInt(lut1.data.assign1[0]), lut2data])
         curNode = lut2;
         continue;
       }
@@ -90,6 +107,15 @@ function codeFlowDecoder(json)
         curNode = curChildren[0]; // keep integer conversion as next element
         continue;
       }
+      {
+        var assign = ["assign1", "assign2", "assign3", "assign4"]
+         .map(x => lut.data[x])
+         .filter(x => x[0].length)
+         .map(x => [x[0].split(",").map(y=>y.trim()), x[1]])
+        flow.push(["LUT", assign])
+        curNode = curChildren[0]; 
+        continue;
+      }
     }
 
     if (curChildren.length == 1 && curChildren[0].name == "Bits to integer")
@@ -100,8 +126,9 @@ function codeFlowDecoder(json)
     }
     if (curChildren.length == 1 && curChildren[0].name == "Attributes")
     {
-      flow.push(["Attributes", curChildren[0].data.attribute1, curChildren[0].data.attribute2,
-        curChildren[0].data.attribute3, curChildren[0].data.attribute4])
+      var attrs = [0, 1, 2, 3, 4, 5, 6, 7, 8].map(x => curChildren[0].data["attribute"+x])
+        .filter(x => x)
+      flow.push(["Attributes", attrs])
       curNode = curChildren[0];
       continue;
     }
@@ -117,7 +144,7 @@ function codeFlowDecoder(json)
       curNode = findChild(curChildren, "SubArray");
       continue;
     }
-    if (curChildren.length == 1 && curChildren[0].name == "Split" && curChildren[0].data.break)
+    if (curChildren.length == 1 && curChildren[0].name == "Split" /* && curChildren[0].data.break*/)
     {
       flow.push(["Split", curChildren[0].data.condition])
       curNode = curChildren[0];
@@ -132,16 +159,11 @@ function codeFlowDecoder(json)
   return flow;
 }
 
-function codeSynthDecode(json)
+function codeSynthDecode(flow)
 {
   var fullcode = [];
   var trailing = [];
-  for (var fi=0; fi<flow.length; fi++)
-  {
-    var inject = false;
-    var c = flow[fi];
-    var code = [`// ${c}`];
-    var inject = [];
+  var synthElement = (c) => {
     switch (c[0])
     {
       case "Quantize":
@@ -173,8 +195,10 @@ function codeSynthDecode(json)
       break;
       case "Assert":
         var cond = c[1];
-        if (c[2] == "Pair LUT")
+        if (c[2].includes("LUT"))
           cond = c[1].split("arr.length").join("datalen");
+        else if (c[2] == "Attributes")
+          cond = c[1].replace(new RegExp("arr\\.(\\w+)"), "pHandler->getIntegerAttribute(\"$1\")")//c[1].split("arr.").join("pHandler->getIntegerAttribute(...)");
         else
           cond = c[1].split("arr.length").join("len");
         code.push(`if (!(${cond}))`);
@@ -182,6 +206,7 @@ function codeSynthDecode(json)
       break;
       case "Manchester":
         code.push("// TODO");
+        synthElement(["LUT", c[2]])
       break;
       case "Conditional skip first":
         code.push(`if (${c[1]})`);
@@ -240,6 +265,51 @@ function codeSynthDecode(json)
         code.push(`    return false;`);
         code.push(`}`);
       break;
+      case "LUT":
+        code.push(`uint8_t databits[32] = {0};`);
+        code.push(`int datalen{0};`);
+        code.push(``);
+        code.push(`auto pushBit = [&databits, &datalen](bool b)`);
+        code.push(`{`);
+        code.push(`  if (b && datalen/8 < sizeof(databits))`);
+        code.push(`    databits[datalen/8] |= 1 << (7-(datalen & 7));`);
+        code.push(`  datalen++;`);
+        code.push(`};`);
+        code.push(``);
+
+        code.push(`auto pushSymbol = [pushBit](char c)`);
+        code.push(`{`);
+        code.push(`  assert(c=='0' || c=='1');`);
+        code.push(`  pushBit(c=='1');`);
+        code.push(`};`);
+        code.push(`assert(len%2 == 0);`);
+        code.push(`for (int i=0; i<len; i++)`);
+        code.push(`{`);
+        
+        for (var i=0; i<c[1].length; i++)
+        {
+          var pulse = c[1][i][0];
+          var symbol = c[1][i][1];
+          if (pulse.length != 1)
+            throw "only single pulse allowed"
+          var pulseFlag = pulse[0].substr(-1);
+          var pulseLen = parseInt(pulse[0]);
+          if (pulseFlag != "L" && pulseFlag != "H")
+            throw "needs pulse flag"
+          var el = i>0 ? "else" : ""
+          if (pulseFlag == "H")
+            code.push(`${el} if (arr[i] == ${pulseLen} && i%2 == 0)`);
+          else if (pulseFlag == "L")
+            code.push(`${el} if (arr[i] == ${pulseLen} && i%2 == 1)`);
+          if (symbol == "")
+            code.push(";")
+          else
+            code.push(`pushSymbol('${symbol}');`)
+        }
+        code.push(`  else`);
+        code.push(`    return false;`);
+        code.push(`}`);
+      break;
       case "Bits to integer":
         inject.push(`// Bits to integer`);
         inject.push(`uint8_t bitsData[32] = {0};`);
@@ -272,26 +342,52 @@ function codeSynthDecode(json)
         code.push(`  return v;`);
         code.push(`};`);
 
-        for (var i=1; i<c.length; i++)
+        for (var i=0; i<c[1].length; i++)
         {
-          var key = c[i][0];
-          var val = c[i][1];
+          var key = c[1][i][0];
+          var val = c[1][i][1];
           if (!key || key == "")
             continue;
+
+          if (val == "arr")
+          {
+            if (flow[fi-1][0] == "Assert" && flow[fi-1][2].includes("LUT"))
+            {
+              var m = flow[fi-1][1].match("arr.length\\s*==\\s*(\\d+)")
+              if (!m)
+                throw "Cant guess the data length"
+              var bits = parseInt(m[1])
+              val = `arr[${bits-1}:0]`
+            } else
+             throw "Cant guess the data length"
+          }
+
           if (val[0] == "\"")
             code.push(`pHandler->addStringAttribute("${key}", ${val});`);
-          else if (val == "arr")
+          else if (val.match("arr\\[(\\d+)\\s*(\\+?):\\s*(\\d+)]"))
           {
-            code.push(`assert(datalen <= 32);`);
-            code.push(`pHandler->addIntegerAttribute("${key}", extractBits(0, datalen));`);
-          }
-          else
-            code.push(`pHandler->addIntegerAttribute("${key}", ${val});`);
+            var m = val.match("arr\\[(\\d+)\\s*(\\+?):\\s*(\\d+)]");
+            var first = m[2] == "" ? parseInt(m[1]) : (parseInt(m[1]) + parseInt(m[3]) - 1);
+            var last = m[2] == "" ? parseInt(m[3]) : parseInt(m[1]);
+            var index = null;
+            while (first-last >= 32)
+            {
+              index = (index === null) ? 0 : index;
+              code.push(`pHandler->addIntegerAttribute("${key}${index === null ? "" : index}"), ${Math.min(first, last+32-1)}, ${last});`)
+              last += 32;
+              index++;
+            }
+
+            code.push(`pHandler->addIntegerAttribute("${key}${index === null ? "" : index}"), ${first}, ${last});`)
+          } else
+            throw "problem"
+
+//            code.push(`pHandler->addIntegerAttribute("${key}", ${val});`);
         }
-        code.push(`return true;`);
+//        code.push(`return true;`);
       break;
       case "Error":
-        code.push("// Dont know how to process ${c[1]}")
+        code.push(`// Dont know how to process ${JSON.stringify(c[1])}`)
       break;
     }
     if (inject.length)
@@ -305,6 +401,15 @@ function codeSynthDecode(json)
     }
   }
 
+  for (var fi=0; fi<flow.length; fi++)
+  {
+    var inject = false;
+    var c = flow[fi];
+    var code = [`// ${c}`];
+    var inject = [];
+    synthElement(c)
+  }
+  code.push(`return true;`);
   fullcode.push(trailing);
   fullcode.push([`return false;`]);
   return fullcode.map(c=>c.join("\n")).join("\n");
@@ -313,10 +418,16 @@ function codeSynthDecode(json)
 function codeFlowEncoder(json)
 {
   var flow = [];
-  var getNode = (name) => {
+  var getNode = (name, needed) => {
     var nodes = Object.values(json.nodes).filter(n => n.name == name);
     if (nodes.length != 1)
-      throw "Sigle node not found"
+    {
+      if (needed)
+      {
+        console.log("Failed while looking for", name);
+        throw "Single node not found"
+      }
+    }
     return nodes[0];
   }
   var getChildren = (node) => {
@@ -330,7 +441,7 @@ function codeFlowEncoder(json)
     return nodes[0];
   }
 
-  var curNode = getNode("Reverse Attributes");
+  var curNode = getNode("Reverse Attributes", true);
   var attr = [curNode.data.attribute1, curNode.data.attribute2, curNode.data.attribute3, curNode.data.attribute4,
     curNode.data.attribute5, curNode.data.attribute6, curNode.data.attribute7, curNode.data.attribute8]
     .filter(x=>x[0] != "")
@@ -385,7 +496,7 @@ function codeFlowEncoder(json)
         continue;
       } else if (singleInstance) {
         var lutzero = lutdata.find(l=>l[0] == "0")[1].split(",").map(x=>x.trim())
-        var lutone = lutdata.find(l=>l[0] == "0")[1].split(",").map(x=>x.trim())
+        var lutone = lutdata.find(l=>l[0] == "1")[1].split(",").map(x=>x.trim())
         flow.push(["Lookup simple sequence", {lut:{zero:lutzero, one:lutone}, sequence:seqdata}])
         curNode = getChildren(curChildren[0])[0];
         continue;
@@ -416,7 +527,7 @@ function codeSynthEncode(flow)
         code.push("int bits = 0;");
         code.push("auto writeBits = [&](uint32_t value, int first, int last) {");
         code.push("  bits = max(bits, max(first, last));");
-        code.push("  if (first >= last)");
+        code.push("  if (first <= last)");
         code.push("    for (int i=first; i<=last; i++)");
         code.push("    {");
         code.push("      if (i >= 0 && i/8 < sizeof(data))");
@@ -477,6 +588,17 @@ function codeSynthEncode(flow)
         }
         encodeElement(["PushPulse-end"])
       break;
+      case "Lookup pause":
+        encodeElement(["PushPulse-begin"])
+        // do full synth
+        for (var s of attr[1].prefix)
+          code.push(`    pushPulse(${parseInt(s)}, '${s.substr(-1)}');`);
+        encodeElement(["Lookup", {lut:attr[1]}])
+        for (var s of attr[1].suffix)
+          code.push(`    pushPulse(${parseInt(s)}, '${s.substr(-1)}');`);
+        encodeElement(["PushPulse-end"])
+        code.push(`pHandler->repeatWithPause(${attr[1].repeat}, ${attr[1].pause});`)
+      break;
       case "Lookup":
         code.push(`for (int i=0; i<bits; i++)`);
         code.push(`  if (data[i/8] & (1<<(i&7)))`);
@@ -529,13 +651,14 @@ function codeSynth(json)
     var flow = codeFlowDecoder(json)
     return codeSynthDecode(flow);    
   } catch (e) {
+    console.log("Decoder synth error:", e)
   }
   console.log("trying encoder");
   try {
     var flow = codeFlowEncoder(json)
     return codeSynthEncode(flow);    
   } catch (e) {
-    console.log(e)
+    console.log("Encoder synth error:", e)
   }
   return "// unsupported design"
 }
@@ -601,12 +724,12 @@ function generateCode(json)
     return nodes[0];
   }
 
-  var inputNodeData = getNode("Input signal")?.data?.out?.data;
+  var inputNodeData = getNode("Input signal", false)?.data?.out?.data;
   var inputNodeAttributes = [];
   if (!inputNodeData)
   {
     inputNodeData = [];
-    inputNodeAttributes = getNode("Attributes")?.data
+    inputNodeAttributes = getNode("Attributes", true)?.data
     inputNodeAttributes = ["attribute1", "attribute2", "attribute3", "attribute4",
       "attribute5", "attribute6", "attribute7", "attribute8"].map(a => inputNodeAttributes[a])
       .filter(a => a[0] != "")
@@ -661,6 +784,10 @@ fullcode += `    assert(0);
   void pushPulse(int n)
   {
     printf("%d, ", n);
+  }
+  void repeatWithPause(int repeat, int pause)
+  {
+    printf("Repeat sequence %d times with %d us pauses in between\\n", repeat, pause);
   }
 };
 

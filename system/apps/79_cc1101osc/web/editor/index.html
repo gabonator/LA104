@@ -136,6 +136,7 @@ var attrSocket = new Rete.Socket('Attributes');
 var html = "Samples:<br>";
 for (var i in demo)
   html += `<button onClick="openDemo('${i}')">${i}</button>`;
+html += "<br><br>"
 document.querySelector("#panel").innerHTML = html;
 function openDemo(i)
 {
