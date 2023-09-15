@@ -1,10 +1,10 @@
-FROM gcc:7.3
+FROM gcc:latest
 
 
 RUN apt-get update \
     && apt-get -y install git bzr lib32z1 lib32ncurses5 nodejs vim zip imagemagick
 
-RUN ln -s `which nodejs` /usr/bin/node
+# RUN ln -s `which nodejs` /usr/bin/node
 
 WORKDIR /home/dev
 
