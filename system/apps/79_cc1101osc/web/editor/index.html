@@ -60,6 +60,7 @@ zero based indices, missing attr/default attr in demo
 <script src="retecomponents.js"></script>
 <script src="demo.js"></script>
 <script src="code.js"></script>
+<script src="rtl433.js"></script>
 
 <style>
 html, body {
@@ -156,7 +157,8 @@ var onNewData;
     var components = [new InputSignal(), new SubArray(), new Quantize(),
       new Histogram(), new Filter(), new Split(), new Pairs(), new LookupTable(), new Print(), new ToInteger(), new If(),
       new Attributes(), new DisplaySignal(), new Assert(), new Count(),
-      new Denoise(), new Select(), new Code(), new RevAttributes(), new Sequence()];
+      new Denoise(), new Select(), new Code(), new RevAttributes(), new Sequence(),
+      new Rtl433()];
 
     var getComponent = name => components.find(c=>c.constructor.name == name)
     var editor = new Rete.NodeEditor('demo@0.1.0', container);

@@ -208,7 +208,6 @@ class SubArray extends Rete.Component {
           _node.controls.get('len').setVisible(false)
         } else
           _node.controls.get('len').setVisible(true && !node.data.tillEnd)
-
         arr = arr.makeSlice(node.data.begin, node.data.len, node.data.tillEnd)
 
         outputs['out'] = arr;
@@ -986,5 +985,54 @@ class Sequence extends Rete.Component {
         var _node = this.editor.nodes.find(n => n.id == node.id);
         _node.outputs.get("out").name = outputs['out'].getInfo();
         _node.outputs.get("out").node.update();
+    }
+}
+
+class Rtl433 extends Rete.Component {
+    constructor(){
+        super("Rtl433 Decoder");
+        this.wasm = new WasmRtl433();
+    }
+
+    builder(node) {
+        var inp = new Rete.Input('in', "Signal", arrSocket);
+        var out = new Rete.Output('out', "Attributes", arrSocket);
+        var static1 = new StaticControl(this.editor, "static1")
+        node.data.static1 = "Unknown signal"
+
+        return node
+            .addInput(inp)
+            .addControl(static1)
+            .addOutput(out);
+    }
+
+    worker(node, inputs, outputs) {
+        var _node = this.editor.nodes.find(n => n.id == node.id)
+        var inp = inputs['in'].length ? inputs['in'][0] : new Signal();
+        var signals = [];
+        if (inp.type.substr(0, 5) == "multi")
+        {
+          for (var i=0; i<inp.multi.length; i++)
+            signals.push(inp.multi[i].data);
+        } else if (inp.type == "signal")
+          signals.push(inp.data);
+
+        _node.controls.get('static1').setValue(signals.length ? "Unknown" : "No data");
+
+        // check level alternation?
+        var kv = [];
+        for (var i=0; i<signals.length; i++)
+        {
+          var m = this.wasm.decode(inp.data);
+          if (m.length)
+          {
+            for (var attr in m[0])
+              kv.push([attr, m[0][attr]]);
+            _node.controls.get('static1').setValue(m[0].model + ((m.length > 1) ? "+" : ""));
+          }
+          if (kv.length)
+            break;
+        }
+        outputs['out'] = new Signal(kv, "attributes");
     }
 }

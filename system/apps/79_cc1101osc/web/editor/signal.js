@@ -131,8 +131,14 @@ class Signal
         copy.data = copy.data.slice(begin)
         copy.level = copy.level.slice(begin)
       } else {
-        copy.data = copy.data.slice(begin, begin+len)
-        copy.level = copy.level.slice(begin, begin+len)
+        if (len >= 0)
+        {
+          copy.data = copy.data.slice(begin, begin+len)
+          copy.level = copy.level.slice(begin, begin+len)
+        } else {
+          copy.data = copy.data.slice(begin, len)
+          copy.level = copy.level.slice(begin, len)
+        }
       }
     }
     if (this.type == "multi")
