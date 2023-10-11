@@ -145,9 +145,11 @@ function openDemo(i)
   if (i.split("_")[0] == "do")
     d();
   else if (i.split("_")[0] == "decode" || i.split("_")[0] == "encode")
-    onNewModel(d);
+    return onNewModel(d);
+  else if (i.split("_")[0] == "signal")
+    return onNewData(d);
   else
-    onNewData(d);
+    return onNewData(i.split(",").map(n=>parseInt(n)));
 }
 
 var onNewData;
@@ -161,6 +163,8 @@ var onNewData;
       new Rtl433()];
 
     var getComponent = name => components.find(c=>c.constructor.name == name)
+    await getComponent("Rtl433").ready
+
     var editor = new Rete.NodeEditor('demo@0.1.0', container);
     editor.use(ConnectionPlugin.default);
     editor.use(VueRenderPlugin.default);    
@@ -210,6 +214,7 @@ var onNewData;
           editor.trigger('process');
         }
       }
+      return Promise.resolve();
     }
 
     onNewModel = async (model) => {
@@ -218,6 +223,11 @@ var onNewData;
       editor.clear();
       for (var i in model.components)
       {
+        if (!("id" in model.components[i]))
+        {
+          index++;
+          continue;
+        }
         var component = await getComponent(model.components[i].id).createNode() 
         for (var j in model.components[i])
           if (j != "id")
@@ -245,8 +255,20 @@ var onNewData;
       }
     }
     reteJson = () => editor.toJSON();
-//    onNewModel(demo.decode_nexus);
-    onNewModel(demo.decode_came001unip);
+    if (document.location.hash.length > 2)
+    {
+//      var promise = Promise.resolve();
+      var ids = document.location.hash.substr(1).split(";");//.map(id => ((id) => {console.log(id); return openDemo(id)}))
+      var processId = () =>
+      {
+        if (ids.length == 0)
+          return Promise.resolve();
+        return openDemo(ids.shift()).then(processId)
+      }
+      processId().then(()=>{console.log("done"); editor.trigger('process')})
+    }
+    else
+      onNewModel(demo.decode_came001unip);
     editor.view.resize();
     //AreaPlugin.zoomAt(editor);
     editor.view.area.zoom(0.75, 0, -120);

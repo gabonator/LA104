@@ -1,68 +1,60 @@
-class Wasm
-{
-  readAsync(url) 
-  {
-    return new Promise( (resolve, reject) =>
-    {
-      var xhr = new XMLHttpRequest();
-      xhr.open('GET', url, true);
-      xhr.responseType = 'arraybuffer';
-      xhr.onload = function xhr_onload() {
-        if (xhr.status == 200 || (xhr.status == 0 && xhr.response)) { // file URLs can return 0
-          resolve(xhr.response);
-          return;
-        }
-        reject();
-      };
-      xhr.onerror = onerror;
-      xhr.send(null);
-    });
-  }
-
-  load(binary, imports) 
-  {
-    var WASM_PAGE_SIZE = 65536;
-    var TOTAL_MEMORY = 131072;
-    var DYNAMICTOP_PTR = 48928;
-    var HEAP_SIZE = 32768;
-
-    var abort = (what) => { throw 'abort(' + what + '). Build with -s ASSERTIONS=1 for more info.'};
-
-    var env = {
-      "abort": abort, "_abort": abort, "___assert_fail": abort, "___setErrNo": abort,
-      "___syscall140": abort, "___syscall146": abort, "___syscall54": abort, "___syscall6": abort,
-      "_emscripten_memcpy_big": abort, "_emscripten_resize_heap": abort, "abortOnCannotGrowMemory": abort, 
-      "_emscripten_get_heap_size": () => HEAP_SIZE,
-      "DYNAMICTOP_PTR": DYNAMICTOP_PTR,
-      memory:new WebAssembly.Memory({ 'initial': TOTAL_MEMORY / WASM_PAGE_SIZE, 'maximum': TOTAL_MEMORY / WASM_PAGE_SIZE }),
-      table:new WebAssembly.Table({'initial': 160,'maximum': 160, 'element': 'anyfunc'}),
-      '__memory_base': 1024, 
-      '__table_base': 0
-    };
-
-    return WebAssembly.instantiate(new Uint8Array(binary), {env:env})
-    .then( output => 
-     {
-      var exports = output.instance.exports;
-      Module = typeof Module !== 'undefined' ? Module : {};  
-      Module["memory"] = new Uint8Array(env.memory.buffer);
-      Module["imports"] = {};
-
-      for (var i in imports)
-        Module.imports[i] = exports[i];
-      return Module;
-    });
-  };
-}
-
 class WasmRtl433
 {
   constructor()
   {
-    var wasm = new Wasm;
-    this.getCode()
-      .then(code => wasm.load(code, {_convert:null, _buffer:null}))
-      .then(module => this.module = module);
+    this.ready = this.getCode()
+      .then(code => this.load(code))
+  }
+  load(wasmBinary)
+  {
+    var TOTAL_MEMORY = 67108864;
+    var WASM_PAGE_SIZE = 4096;
+
+    var env = {
+      emscripten_memcpy_big: (dest, src, num) => { return this._emscripten_memcpy_big(dest, src, num); },
+      emscripten_date_now: () => Date.now(),
+      fd_write:(fd, iov, iovcnt, pnum) => { return this._fd_write(fd, iov, iovcnt, pnum); },
+      memory:new WebAssembly.Memory({ 'initial': TOTAL_MEMORY / WASM_PAGE_SIZE, 'maximum': TOTAL_MEMORY / WASM_PAGE_SIZE }),
+    };
+
+    for (var i of ["__assert_fail", "exit", "strftime", "fd_close", "_tzset_js", "_mktime_js", 
+      "_localtime_js", "__syscall_fcntl64", "__syscall_openat", "__syscall_ioctl", "fd_read", 
+      "emscripten_resize_heap", "fd_seek"])
+    {
+      env[i] = () => { throw "not implemented" };
+    }
+
+    return WebAssembly.instantiate(wasmBinary, {env:env, wasi_snapshot_preview1: env})
+      .then(obj => {
+        this.exports = obj.instance.exports;
+        this.HEAPU8 = new Uint8Array(this.exports.memory.buffer);
+        this.HEAPU32 = new Uint32Array(this.exports.memory.buffer);
+        this.exports.__wasm_call_ctors();
+        this.analyseBuffer = new Uint32Array(
+          this.exports.memory.buffer,
+          this.exports.analyseBuffer.value,
+          1024*4
+        );
+      })
+  }
+
+  _emscripten_memcpy_big(dest, src, num)
+  {
+    this.HEAPU8.copyWithin(dest, src, src + num);
+  }
+  _fd_write(fd, iov, iovcnt, pnum) 
+  {
+    var ret = 0;
+    for (var i = 0; i < iovcnt; i++) {
+      var ptr = this.HEAPU32[iov>>2];
+      var len = this.HEAPU32[(iov+4)>>2];
+      iov += 8;
+      for (var j=ptr; j<ptr+len; j++)
+        this.stdout += String.fromCharCode(this.HEAPU8[j]);
+      ret += len;
+    }
+    this.HEAPU32[pnum>>2] = ret;
+    return 0;
   }
   getCode()
   {
@@ -76,31 +68,27 @@ class WasmRtl433
         var js = document.createElement("script");
         js.type = "text/javascript";
         js.src = "rtl433_wasm.js";
-        js.onload = () => resolve(Module.wasmBinary);
+        js.onload = () => {
+          resolve(wasmBinary)
+          wasmBinary = null;
+        };
         document.body.appendChild(js);
       });
     });
   }
-  getString(ptr)
-  {
-    var text = "";
-    for (var i=0; i<1000 && this.module['memory'][ptr+i] != 0; i++)
-      text += String.fromCharCode(this.module['memory'][ptr+i]);
-    return text;
-  };
   decode(sequence)
   {
-    var ptr = this.module.imports._buffer();
-    for (var i=0; i<sequence.length; i++)
+    if (!("exports" in this))
     {
-      var v = sequence[i];
-      this.module['memory'][ptr+i*4+0] = v & 0xff;
-      this.module['memory'][ptr+i*4+1] = (v >> 8) & 0xff;
-      this.module['memory'][ptr+i*4+2] = (v >> 16) & 0xff;
-      this.module['memory'][ptr+i*4+3] = (v >> 24) & 0xff;
+      console.log("Rtl433 not ready");
+      return;
     }
-
-    var result = this.module.imports._convert(ptr, sequence.length);
-    return JSON.parse(this.getString(result));
+    for (var i=0; i<sequence.length; i++)
+      this.analyseBuffer[i] = sequence[i];
+    this.stdout = "";
+    if (this.exports.analyse(this.exports.analyseBuffer.value, sequence.length))
+    {
+      return this.stdout.split("\n").filter(x=>x.length).map(JSON.parse);
+    }
   }
 }

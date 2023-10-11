@@ -992,6 +992,7 @@ class Rtl433 extends Rete.Component {
     constructor(){
         super("Rtl433 Decoder");
         this.wasm = new WasmRtl433();
+        this.ready = this.wasm.ready;
     }
 
     builder(node) {
@@ -1024,7 +1025,7 @@ class Rtl433 extends Rete.Component {
         for (var i=0; i<signals.length; i++)
         {
           var m = this.wasm.decode(inp.data);
-          if (m.length)
+          if (m && m.length)
           {
             for (var attr in m[0])
               kv.push([attr, m[0][attr]]);
@@ -1033,6 +1034,7 @@ class Rtl433 extends Rete.Component {
           if (kv.length)
             break;
         }
+
         outputs['out'] = new Signal(kv, "attributes");
     }
 }

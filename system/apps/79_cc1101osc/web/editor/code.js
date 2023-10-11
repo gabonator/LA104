@@ -818,5 +818,5 @@ fullcode += `  return 0;
   return codeIndent(fullcode.split("\n")).join("\n");
 }
 
-if (typeof(module.exports) != "undefined")
+if (typeof(module) != "undefined" && typeof(module.exports) != "undefined")
   module.exports = generateCode;
