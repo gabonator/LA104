@@ -8,9 +8,8 @@ void streamerResume();
 #ifndef __APPLE__
 
 extern int streamerBufferMaxCounter;
-extern const int streamerPeriodUs;
 extern volatile int streamerOverrun;
-extern RingBufCPP<uint16_t, 512> streamerBuffer;
+extern RingBuf<uint16_t, 512> streamerBuffer;
 extern uint16_t streamerSecondary[64];
 extern uint32_t streamerSecondaryIndex;
 extern volatile int streamerFlag;
@@ -24,7 +23,7 @@ void streamerEnd(){}
 bool isStreaming(){return true;}
 void streamerPause(){}
 void streamerResume(){}
-RingBufCPP<uint16_t, 512> streamerBuffer;
+RingBuf<uint16_t, 512> streamerBuffer;
 volatile int streamerOverrun;
 int streamerBufferMaxCounter;
 uint16_t streamerSecondary[64];

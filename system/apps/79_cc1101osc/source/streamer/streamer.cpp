@@ -16,96 +16,28 @@
 //#define ADC_FIFO_SIZE 512
 #define ADC_FIFO_HALFSIZE (ADC_FIFO_SIZE/2)
 
-
-// 0x40000000 + 0x20000 + 0x0044 DMA1_Channel4
-/*
-
-0x40020048 <- tuto je timer
-
-
-0x40000000 + 0x10000 + 0x2C00 TIM1
-0x40012c00+9*4
-typedef struct
-{
-  __IO uint16_t CR1;
-  uint16_t  RESERVED0;
-  __IO uint16_t CR2;
-  uint16_t  RESERVED1;
-  __IO uint16_t SMCR;
-  uint16_t  RESERVED2;
-  __IO uint16_t DIER;
-  uint16_t  RESERVED3;
-  __IO uint16_t SR;
-  uint16_t  RESERVED4;
-  __IO uint16_t EGR;
-  uint16_t  RESERVED5;
-  __IO uint16_t CCMR1;
-  uint16_t  RESERVED6;
-  __IO uint16_t CCMR2;
-  uint16_t  RESERVED7;
-  __IO uint16_t CCER;
-  uint16_t  RESERVED8;
-  __IO uint16_t CNT;
-  uint16_t  RESERVED9;
-  __IO uint16_t PSC;
-  uint16_t  RESERVED10;
-  __IO uint16_t ARR;
-  uint16_t  RESERVED11;
-  __IO uint16_t RCR;
-  uint16_t  RESERVED12;
-  __IO uint16_t CCR1;
-  uint16_t  RESERVED13;
-  __IO uint16_t CCR2;
-  uint16_t  RESERVED14;
-  __IO uint16_t CCR3;
-  uint16_t  RESERVED15;
-  __IO uint16_t CCR4;
-  uint16_t  RESERVED16;
-  __IO uint16_t BDTR;
-  uint16_t  RESERVED17;
-  __IO uint16_t DCR;
-  uint16_t  RESERVED18;
-  __IO uint16_t DMAR;
-  uint16_t  RESERVED19;
-} TIM_TypeDef;
-
-
-
-40020044
-typedef struct
-{
-  __IO uint32_t CCR;   /// TOTO
-  __IO uint32_t CNDTR; 
-  __IO uint32_t CPAR;
-  __IO uint32_t CMAR;
-} DMA_Channel_TypeDef;
-
-*/
-
 BIOS::OS::TInterruptHandler oldDMA1_Channel4_IRQ = nullptr;
 
 volatile uint16_t adc_fifo[ADC_FIFO_SIZE];
 volatile int streamerOverrun = 0;
 
-bool streamerBufferLogic = 0;
+volatile int streamerBufferLogic = 1;
 int streamerBufferCounter = 0;
 // 49.5 kHz !!
 int streamerBufferMaxCounter = 20000; // 1 second @ 50 kHz
-const int streamerPeriodUs = 20;
 volatile int totalSamples = 0;
 volatile int totalPulses = 0;
 volatile int totalPositive = 0;
+volatile int streamerOverflowA = 0;
+volatile int streamerOverflowB = 0;
 
-RingBufCPP<uint16_t, 512> streamerBuffer;
+RingBuf<uint16_t, 512> streamerBuffer;
 
-uint16_t streamerSecondary[64];
-uint32_t streamerSecondaryIndex = 0;
 uint32_t streamerTick = 0;
 volatile int streamerFlag = 0;
 
 #define GetLogic(idr) (((idr) >> 9) & 1) // B9
 
-void secondaryPush(int c);
 
 uint32_t streamerCCR()
 {
@@ -121,46 +53,69 @@ uint32_t streamerCurrent()
 
 void streamerProcess(const volatile uint16_t *data)
 {
-  const volatile uint16_t *end = data + ADC_FIFO_HALFSIZE;
-  while (data < end)
-  {   
-    totalSamples++;
-    int sample = GetLogic(*data++); 
-    totalPositive += sample;
-    if (sample == streamerBufferLogic)
+    const volatile uint16_t *end = data + ADC_FIFO_HALFSIZE;
+    while (data < end)
     {
-      streamerBufferCounter++;
-      // append [60000, 0] to buffer
-      if (streamerBufferCounter >= streamerBufferMaxCounter)
-      {
-        secondaryPush(streamerBufferCounter);
-        secondaryPush(0);
-
-        if (streamerBuffer.capacity() > 2)
-        {                                           
-          streamerBuffer.push(streamerBufferCounter | streamerFlag);
-          streamerBuffer.push(0 | streamerFlag);
+        totalSamples++;
+        int sample = GetLogic(*data++);
+        totalPositive += sample;
+        if (sample == streamerBufferLogic)
+        {
+            streamerBufferCounter++;
+            // append [60000, 0] to buffer
+            if (streamerBufferCounter >= streamerBufferMaxCounter)
+            {
+                if (streamerBuffer.avail() >= 2)
+                {
+                    int limit = streamerBufferCounter;
+                    if (limit > streamerBufferMaxCounter)
+                    {
+                        limit = streamerBufferMaxCounter;
+                        streamerBufferCounter -= streamerBufferMaxCounter;
+                    } else {
+                        streamerBufferCounter = 0;
+                    }
+                    streamerBuffer.push(limit);
+                    streamerBuffer.push(0);
+                } else
+                {
+                    //printf("ovfa!");
+                    streamerOverrun++;
+                }
+                //streamerBufferCounter = 0;
+            }
         } else
         {
-          streamerOverrun++;
+            // append ticks to buffer and toggle logic
+            if (streamerBuffer.avail() >= 1)
+            {
+                streamerBuffer.push(streamerBufferCounter);
+            }
+            else
+            {
+                //printf("ovfb!");
+                streamerOverrun++;
+
+                if (sample)
+                    streamerOverflowA += streamerBufferCounter;
+                else
+                    streamerOverflowB += streamerBufferCounter;
+            }
+
+            if (streamerBufferLogic)
+            {
+                streamerBufferCounter = 1 + streamerOverflowA;
+                streamerOverflowA = 0;
+            }
+            else
+            {
+                streamerBufferCounter = 1 + streamerOverflowB;
+                streamerOverflowB = 0;
+            }
+            streamerBufferLogic = 1 - streamerBufferLogic;
+            totalPulses++;
         }
-        streamerBufferCounter = 0;
-      }
-    } else
-    {
-      // append ticks to buffer and toggle logic
-      secondaryPush(streamerBufferCounter);
-
-      if (streamerBuffer.capacity() > 1)
-        streamerBuffer.push(streamerBufferCounter | streamerFlag);
-      else
-        streamerOverrun++;
-
-      streamerBufferCounter = 0;
-      streamerBufferLogic = 1 - streamerBufferLogic;
-      totalPulses++;
     }
-  }
 }
 
 void __irq__ streamerIrqHandler()
@@ -275,7 +230,14 @@ void streamerStop()
 bool streaming = false;
 void streamerBegin()
 {
-  streamerBufferLogic = 0;
+  streamerBufferLogic = 1;
+  streamerBufferCounter = 0;
+  totalSamples = 0;
+  totalPulses = 0;
+  totalPositive = 0;
+  streamerOverflowA = 0;
+  streamerOverflowB = 0;
+
   streamerInit();
   streamerStart();
   streaming = true;

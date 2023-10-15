@@ -1,8 +1,8 @@
 class WasmRtl433
 {
-  constructor()
+  constructor(path)
   {
-    this.ready = this.getCode()
+    this.ready = this.getCode(path)
       .then(code => this.load(code))
   }
   load(wasmBinary)
@@ -33,7 +33,7 @@ class WasmRtl433
         this.analyseBuffer = new Uint32Array(
           this.exports.memory.buffer,
           this.exports.analyseBuffer.value,
-          1024*4
+          4096*4
         );
       })
   }
@@ -56,7 +56,7 @@ class WasmRtl433
     this.HEAPU32[pnum>>2] = ret;
     return 0;
   }
-  getCode()
+  getCode(prefix)
   {
     return new Promise((resolve, reject) => {
       if (typeof(Module) != "undefined" && Module.wasmBinary)
@@ -67,7 +67,7 @@ class WasmRtl433
       window.addEventListener('load', () => {
         var js = document.createElement("script");
         js.type = "text/javascript";
-        js.src = "rtl433_wasm.js";
+        js.src = (prefix || "") + "rtl433_wasm.js";
         js.onload = () => {
           resolve(wasmBinary)
           wasmBinary = null;

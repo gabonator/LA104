@@ -3,100 +3,50 @@
 #include <stdint.h>
 #include <cstring>
 
+// simple two pointer ring buffer. Can hold MaxElements-1 elements, when
+// empty when first == last
+// producer is interrupt
+// consumer is main loop which can be interrupted any time
+
 template <typename Type, size_t MaxElements>
-class RingBufCPP
+class RingBuf
 {
+    Type buffer[MaxElements];
+    Type* wrap;
+    Type* first;
+    Type* last;
 public:
-RingBufCPP()
-{
-         _numElements = 0;
-         _head = 0;
-}
-
-void empty()
-{
-         _numElements = 0;
-         _head = 0;
-}
-
-bool push(Type obj)
-{
-    bool ret = false;
-        if (!isFull()) 
-        {
-            _buf[_head] = obj;
-            _head = (_head + 1)%MaxElements;
-            _numElements++;
-
-            ret = true;
-        }
-    return ret;
-}
-
-Type pull()
-{
-    size_t tail;
-
-        if (!isEmpty()) {
-            tail = getTail();
-            Type dest = _buf[tail];
-            _numElements--;
-            return dest;
-        }
-
-    return -1;
-}
-
-bool isFull()
-{
-    bool ret;
-
-        ret = _numElements >= MaxElements;
-
-    return ret;
-}
-
-size_t size()
-{
-    size_t ret;
-
-        ret = _numElements;
-
-    return ret;
-}
-
-size_t capacity()
-{
-    return MaxElements - _numElements;
-}
-
-bool isEmpty()
-{
-    bool ret;
-
-        ret = !_numElements;
-
-    return ret;
-}
-
-Type* peek(size_t num)
-{
-    Type *ret = NULL;
-
-        if (num < _numElements) //make sure not out of bounds
-            ret = &_buf[(getTail() + num)%MaxElements];
-
-    return ret;
-}
-
-protected:
-
-size_t getTail()
-{
-    return (_head + (MaxElements - _numElements))%MaxElements;
-}
-
-Type _buf[MaxElements];
-size_t _head;
-size_t _numElements;
+    RingBuf()
+    {
+        wrap = buffer + MaxElements;
+        first = buffer;
+        last = buffer;
+    }
+    int size()
+    {
+        if (last >= first)
+            return static_cast<int>(last - first);
+        else
+            return static_cast<int>(last - first + MaxElements);
+    }
+    int avail()
+    {
+        return static_cast<int>(MaxElements) - size() - 1;
+    }
+    void push(Type t)
+    {
+        //assert(avail() > 0);
+        *last++ = t;
+        if (last == wrap)
+            last = buffer;
+    }
+    Type pull()
+    {
+        //assert(size() > 0);
+        Type aux = *first++;
+        if (first == wrap)
+            first = buffer;
+        return aux;
+    }
 };
+

@@ -1,3 +1,4 @@
+set -e
 #https://developer.arm.com/open-source/gnu-toolchain/gnu-rm/downloads
 
 

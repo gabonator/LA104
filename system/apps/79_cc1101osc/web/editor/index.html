@@ -129,7 +129,7 @@ input:disabled { background: #ddd; color: #888}
 <div id="panel"></div>
 
 <script>
-
+var parentWindow = null;
 var numSocket = new Rete.Socket('Number value');
 var arrSocket = new Rete.Socket('Array value');
 var attrSocket = new Rete.Socket('Attributes');
@@ -273,6 +273,18 @@ var onNewData;
     //AreaPlugin.zoomAt(editor);
     editor.view.area.zoom(0.75, 0, -120);
     editor.trigger('process');
+/*
+    if (parentWindow)
+    {
+      console.log("Editor Loaded signal");
+      var event = new CustomEvent("EditorLoaded", {detail:{
+        data: [],
+        sender: window.document
+      }});
+      parentWindow.DispatchEvent(event);
+    } else
+      console.log("No parent ", parentWindow);
+*/
 })();
 
 window.document.addEventListener('SignalChanged', (e) => { 
@@ -280,4 +292,9 @@ window.document.addEventListener('SignalChanged', (e) => {
   onNewData(e.detail.data);
 }, false);
 
+window.document.addEventListener('SetParent', (e) => { 
+  console.log(e);
+  parentWindow = e.detail.sender; 
+  console.log("Set parent", parentWindow);
+}, false);
 </script>

@@ -151,16 +151,15 @@ class PreviewCanvas
   {
     if (len == 0)
       return;         
-
     this.ctx1.strokeStyle = ["rgba(0, 0, 0, 0.5)", "#ff0000", "#00ff00", "#0000ff", "#ff00ff", "#ffff00", "#00ffff"][len>>24];
     this.ctx2.strokeStyle = ["rgba(0, 0, 0, 0.5)", "#ff0000", "#00ff00", "#0000ff", "#ff00ff", "#ffff00", "#00ffff"][len>>24];
 
     var x0 = this.drawX;
-    this.drawX += (len&0xffffff)*this.zoom;
+    this.drawX += len*this.zoom;
     var x1 = this.drawX;
     if (this.drawX>=this.width*2)
       this.drawX -= this.width*2;
-    var y1 = level ? 80 : 20;
+    var y1 = level ? 20 : 80;
     if (this.drawY != y1)
       this.Line(x0, this.drawY, x0, y1);
     this.Line(x0, y1, x1, y1);

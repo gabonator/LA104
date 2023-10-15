@@ -9,6 +9,7 @@
 
 extern volatile int totalSamples;
 extern volatile int totalPositive;
+extern volatile int streamerOverrun;
 int lastSamples = 0;
 int lastPositive = 0;
 
@@ -73,7 +74,6 @@ int main(void)
   });
 
   BIOS::KEY::EKey key;
-  APP::Init();
 
   while ((key = BIOS::KEY::GetKey()) != BIOS::KEY::Escape) 
   {
@@ -91,7 +91,19 @@ int main(void)
     }
     EVERY(1000)
     {
-      BIOS::LCD::Printf(BIOS::LCD::Width-16, BIOS::LCD::Height-14, RGB565(b0b0b0), RGB565(404040), "%c", anim[animphase++&7]);
+      static int lastSamples1s = 0;
+      int samplesPerSecond = (totalSamples - lastSamples1s)/1000;
+      if (samplesPerSecond < 0)
+        samplesPerSecond = 0;
+      lastSamples1s = totalSamples;
+      const char* status = "   "; 
+      if (streamerOverrun > 0)
+      {
+        status = "OVR";
+        streamerOverrun = 0;
+      }
+      BIOS::LCD::Printf(BIOS::LCD::Width-16-9*8, BIOS::LCD::Height-14, RGB565(b0b0b0), RGB565(404040), 
+        "%s %2dk %c", status, samplesPerSecond, anim[animphase++&7]);
 //      BIOS::LCD::Printf(100, BIOS::LCD::Height-14, RGB565(ffb0b0), RGB565(404040), " %d %d ", totalSamples, totalPositive);
     }
     {EVERY(100)
@@ -117,8 +129,6 @@ int main(void)
         clr = RGB565(ffff40);
       BIOS::LCD::Bar(CRect(BIOS::LCD::Width-4, BIOS::LCD::Height-4, BIOS::LCD::Width, BIOS::LCD::Height), clr);
     }}
-
-    APP::Do();
   }
   APP::End();
 

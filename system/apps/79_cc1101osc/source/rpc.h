@@ -1,8 +1,6 @@
-//#include "../../../os_host/source/main/Shared.h"
-
 namespace RPC
 {
-  uint32_t GetRpcAdress(char* command)
+  uint32_t GetProcAddress(char* command)
   {
     #define EXPORT(symbol) if (strcmp(command, #symbol)==0) return (uint32_t)symbol;
 
@@ -31,8 +29,6 @@ namespace RPC
     EXPORT(CC1101::Read);
 
     EXPORT(APP::Info);
-    EXPORT(APP::GetConfigPtr);
-    EXPORT(APP::SetPrescaler);
 
     if (strcmp(command, "DBG::Print")==0)
       return (uint32_t)BIOS::DBG::Print;
@@ -66,10 +62,5 @@ namespace RPC
       return (uint32_t)static_cast<int(*)(int, int, uint16_t, uint16_t, const char*)>(BIOS::LCD::Print);
 
     return 0;
-  }
-
-  uint32_t GetProcAddress(char* name)
-  {
-    return GetRpcAdress(name);
   }
 }

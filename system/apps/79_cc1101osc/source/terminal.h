@@ -107,16 +107,24 @@ template <typename T> bool BulkTransfer(T& buffer, int length)
 
     for (int i=0; i<toSend; i+=2, length-=2)
     {
+      // this can be interrupted in any time
       uint16_t w = buffer.pull();
       temp[i] = w >> 8;
       temp[i+1] = w & 255;
     }
 
     if (!cdc_waitReady())
+    {
+      for (; length > 0; length-=2)
+        buffer.pull();
       return false;
-
+    }
     if (!cdc_transmit(temp, toSend))
+    {
+      for (; length > 0; length-=2)
+        buffer.pull();
       return false;
+    }
   }
 
   if (zlp)

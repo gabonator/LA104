@@ -98,6 +98,8 @@ namespace CC1101
 
   int Start()
   {
+    while (streamerBuffer.size())
+      streamerBuffer.pull();
     gModem.SetRxState();
     streamerBufferMaxCounter = 4000;
     streamerBegin();
@@ -108,23 +110,28 @@ namespace CC1101
   {
     streamerEnd();
     gModem.SetIdleState();
+    while (streamerBuffer.size())
+      streamerBuffer.pull();
     return true;
   }
 
   int Transfer()
   {
-    TERMINAL::BulkTransfer(streamerBuffer, streamerBuffer.size());
+    int count = streamerBuffer.size() & ~1;
+    // transfer only on-off pairs, first value is always On, second Off
+    TERMINAL::BulkTransfer(streamerBuffer, count); // TODO SHOW ERROR!!!
     return 0;
   }                 	
 
   int Status()
   {
+/*
     if (streamerOverrun)
     {
       streamerOverrun = 0;
       return 'E' * 256 + 'O';
     }
-
+*/
     return 0;
   }
 

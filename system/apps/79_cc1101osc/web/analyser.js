@@ -3,10 +3,32 @@ var detail = new DetailCanvas(900, 100);
 var gui = new RemoteGui();
 var aaa;
 var extWindows = [];
+var lastSignal;
+
+window.document.addEventListener('EditorLoaded', (e) => { 
+  console.log("!!! LOADED", e.detail.data);
+}, false);
 
 function remoteAdd(url)
 {
-    extWindows.push(window.open(url, "_blank", "width=1200,height=800,location=no,menubar=no"));
+    var w = window.open(url, "_blank", "width=1200,height=800,location=no,menubar=no");
+    w.onload = () => {
+/*
+        var event = new CustomEvent("SetParent", {detail:{
+          data: [],
+          sender: window.document
+        }});
+        w.document.dispatchEvent(event);
+
+        console.log("LOAD1");
+*/
+      setTimeout(() =>
+      {
+        if (lastSignal)
+          remoteAnalyse(lastSignal);
+      }, 500);
+    }
+    extWindows.push(w);
 }
 function remoteAnalyse(buf)
 {
@@ -58,6 +80,7 @@ class Memory
     var aux = [];
     var recording = false;
     var counter = this.counter;
+// TODO!    var polarity = 0; // last
     for (var i=buf.length-1; i>=0; i--)
     {
       var cur = buf[i] & 0xffffff;
@@ -81,11 +104,11 @@ class Memory
       pos += cur;
     }
     aux.reverse();
-    for (var i=2; i<aux.length; i++)
+    for (var i=1; i<aux.length; i++)
     {
-      if ((aux[i] & 0xffffff)==0)
+      if (aux[i]==0)
       {
-        aux[i-1] += aux[i+1] & 0xffffff;
+        aux[i-1] += aux[i+1];
         aux.splice(i, 2);
         i--;
       }
@@ -99,28 +122,32 @@ var memory = new Memory();
 function dumpRange(first, last)
 { 
   var buf = memory.getRange(-last, -first);
-  if ((buf[0] & 0xffffff) == 0 && (buf[1] & 0xffffff) > 2000)
-    buf[1] = 2000;
+//  if (buf[0] == 0 && buf[1] > 2000)
+//    buf[1] = 2000;
+  buf.shift(); // probably starts with gap
 
   var origbuf = [...buf];
   var ofsstart = 0;
   var ofsend = origbuf.length;
 
 //  console.log(buf);
+/*
   if (buf[0] == 0 && buf.length > 1)
   {
     buf.splice(0, 2);
     ofsstart += 2;
   }
+*/
   if ((buf.length % 2) == 0)
   {
     buf.pop();
     ofsend--;
   }
   detail.show(origbuf, ofsstart, ofsend);
-  buf = buf.map(x => x & 0xffffff);
   aaa = buf.map(x=>x/20);
   console.log("analyse: " + JSON.stringify(buf));
+
+  lastSignal = [...buf];
   remoteAnalyse(buf);
   analyse(buf);
 }
@@ -175,7 +202,8 @@ function document_write(msg)
 
 function onStart()
 {
-  if (simulator) {started = true; return; }
+  console.log("onstart");   // flush buf!
+//  if (simulator) {started = true; return; }
   if (COMM.onReceive)
   {
     console.log("Try later");
@@ -187,7 +215,8 @@ function onStart()
 
 function onStop()
 {
-  if (simulator) {started = false; return; }
+  console.log("onstart");
+//  if (simulator) {started = false; return; }
   if (COMM.onReceive)
   {
     console.log("Try later");
@@ -235,22 +264,28 @@ function onMain()
 
           MODEM.Transfer().then( (data) => 
           {
+//            console.log(data.length, data[0], data[1]);
+            console.log(data);
             if (data && data.length) 
             {
+              if (data.length % 2 != 0)
+                throw "not pairs";
+              data = data.map(x=>x*20); // sampler @ 50k smps -> microseconds
 //              var flags = data.map(x=>x>>12);
 //console.log(data);
-              data = data.map(x=>{ var val = (x & 0x0fff)*20; var flag = x>>12; return (flag << 24) | val; });
+//              data = data.map(x=>{ var val = (x & 0x0fff)*20; var flag = x>>12; return (flag << 24) | val; });
               memory.push(data);
               for (var i=0; i<data.length; i++)
               {
-                canvas.drawPulse(data[i], level);
-                pulseMachine(data[i], level = 1-level);
+                canvas.drawPulse(data[i], (i%2==0) ? 1 : 0);
+                pulseMachine(data[i], (i%2==0) ? 1 : 0)
+                //pulseMachine(data[i], level = 1-level);
               }
               canvas.drawPulseFinish();
             }
           })
-          .then( () => MODEM.Status())
-          .then( status => { if (status) { console.log("Buffer overflow!"); level = 1;} })
+//          .then( () => MODEM.Status())
+//          .then( status => { if (status) { console.log("Buffer overflow!"); level = 1;} })
           .catch(console.log);
         }, 200);
 
@@ -260,165 +295,91 @@ function onMain()
 }
 
  
-
-var decoder = new Decoder();
-document_write("<pre>started\n");
-var buf = [];
-var last;
-function pulseMachinePush(i)
+var pmGap = 0;
+var pmActive = false;
+var pmDuration = 0;
+var pmData = [];
+function pulseMachine(len, level)
 {
-  if (i==-1)
+  if (!pmActive)
   {
-/*
-    if (buf.length > 20 && buf.length < 1000)
+    if (level == 0)
+      pmGap += len;
+    else if (len > 0)
     {
-        k = 20;
-        l = 0;
-      var pulse = buf.map(x => x*k);
-      var arr = JSON.stringify(pulse);
-      console.log("l="+buf.length + " d=" + buf.reduce((a, b) => a+b, 0) + " " + arr);
-      document_write("<a href=\"javascript:send("+arr+")\">"+arr.substr(0, 100)+"..."+"</a>\n");
-
-      test360(pulse);
-
-      var is500 = x => x >= 400 && x <= 540;
-      var is1000 = x => x >= 920 && x <= 1020;
-      var is750 = x => x >= 700 && x <= 750;
-      if (is500(pulse[0]) && is500(pulse[1]) && is500(pulse[2]) && is500(pulse[3]) && is500(pulse[4]))
+      if (pmGap > 100000) // 100ms gap
       {
-
-        // quantize
-        var quantize = [];
-        for (var i=0; i<pulse.length; i++)
-        {
-          if (is500(pulse[i]))
-            quantize.push(500);
-          else if (is1000(pulse[i]))
-            quantize.push(1000);
-          else if (is750(pulse[i]))
-            quantize.push(7500);
-          else
-            quantize.push("unknown_"+pulse[i]);
-        }
-        console.log(JSON.stringify(quantize));
+        //console.log("PM: start");
+        pmActive = true;
+        pmDuration = 0;
+        pmData = [];
       }
-      //keyfobTest(buf);
-
-      var good = false;
-//      for (var k=14; k<60; k++)
-      {
-//        for (l=-6; l<=6; l++)
-        {
-          var d = decoder.decode(buf.map((x, i) => (x + ((i&1)*2-1)*l) * k ));
-//          var d = decoder.decode(buf.map(x => x*k ));
-          if (d.length)
-          {
-            document_write(k + "," + l + ": " + JSON.stringify(d)+"\n");
-//            console.log(JSON.stringify(buf));
-            console.log(d); 
-            good = true;
-//		break;
-          }
-        }
-//        if (good) break;
-      }
+      pmGap = 0;
     }
-*/
-    buf = [];
-    return;
   }
-  buf.push(i);
-}
-
-var enableFraming = true;
-var interval1 = 0, interval2 = 0, leading = true, terminated = false;
-function pulseMachine(interval, level)
-{
-  if (interval == -1)
+  if (pmActive)
   {
-    interval1 = 0;
-    interval2 = 0;
-    leading = true;
-    pulseMachinePush(-1);
-    return;
-  }
-
-  if (interval1 == 0)
-  {
-    interval += interval2;
-  }
-  
-  if (interval > 1600 && enableFraming)
-  {
-    pulseMachinePush(-1);
-    leading = true;     
-  }
-
-  if (interval1 != 0 && interval2 != 0)
-  {
-    if (interval2 > 1600 && enableFraming)
-    {
-      pulseMachinePush(-1);
-      leading = true;     
-    }
-
-    if (leading)
-    {
-      if (level == 0)   
-        leading = false;
-    }
+    if (!level)
+      pmGap += len;
     else
+      pmGap = 0;
+    if (pmGap > 30000) // 30 ms
     {
-      pulseMachinePush(interval2);
-    }
-  }
+      //console.log("PM: stop");
+      for (var i=1; i<pmData.length; i++)
+      {
+        if (pmData[i]==0)
+        {
+          pmData[i-1] += pmData[i+1];
+          pmData.splice(i, 2);
+          i--;
+        }
+      }
+      if (pmData.length < 20)
+        console.log("PM: short");
+      else
+      {
+        console.log("PM: good", pmData);
+        lastSignal = [...pmData];
+        remoteAnalyse(pmData);
+        analyse(pmData);
+        detail.show(pmData, 0, pmData.length);
 
-  interval2 = interval1;
-  interval1 = interval;
+      }
+      pmActive = false;
+      return;
+    }
+    if (pmDuration > 3*1000*1000)
+    {
+      console.log("PM: too long");
+      pmActive = false;
+      return;
+    }
+    if (pmData.length > 5000)
+    {
+      console.log("PM: too complex");
+      pmActive = false;
+      return;
+    }
+    pmData.push(len);
+    pmDuration += len;
+  }
 }
+
+var decoder = new WasmRtl433("editor/");
+document_write("<pre>started\n");
+
 
 function analyse(buf)
 {
-/*
-  var resp;
-  if ((resp = analysekeyfob(buf)))
-  {
-    return resp;
-  }        
-*/
   var d = decoder.decode(buf);
-  if (d.length)
+  if (d && d.length)
   {
     console.log(JSON.stringify(buf));
     console.log(JSON.stringify(d));
     logadd(JSON.stringify(d));
   }
 
-/*
-//  var k = 20;
-//  var l = 0;
-//      for (var k=14; k<60; k++)
-      {
-//        for (l=-6; l<=6; l++)
-        {
-//          var d = decoder.decode(buf.map((x, i) => (x + ((i&1)*2-1)*l) * k ));
-          var d = decoder.decode(buf);
-          if (d.length)
-          {
-            console.log(JSON.stringify(buf));
-            console.log(JSON.stringify(d));
-//console.log(buf.map(x => x*k));
-//            document_write(k + "," + l + ": " + JSON.stringify(d)+"\n");
-//            console.log(JSON.stringify(buf));
-//console.log("k="+k);
-//            console.log(d); 
-//            good = true;
-//		break;
-          }
-        }
-//        if (good) break;
-      }
-*/
 }
 
 Array.prototype.contains = function(v) {
@@ -484,137 +445,6 @@ function sendPulse(pulse)
   .then( () => MODEM.SetDataRate(4000) )
 }
 
-var lastTemp = 33.3;
-function example()
-{
-  var proto = new CWeather()
-  var attributes = proto.Example();
-  var newt = prompt("Set temperature", lastTemp);
-  if (newt)
-    lastTemp = newt;
-
-  attributes["temperature10"] = Math.floor(lastTemp*10); // 17.1 C
-
-  var pulse = proto.Modulate(attributes);
-  var aligned = [0, 2000, ... pulse]; 
-  detail.show(aligned, 2, aligned.length+1);
-}
-
-/*
-function analysekeyfob(nsig)
-{
-  var q = nsig.map(x => Math.floor((x+120)/240)).join("");
-  var preamble = "22222222222222222222222";
-  var pos = q.indexOf(preamble + "423333332"); //224");// + "22222222224");
-  if (pos == -1)
-  {
-    console.log("keyfob: Preamble not found");
-    return false; // 
-  }
-  q = q.substr(pos+9+preamble.length);
-//  console.log(q);
-  var r = "";
-  for (var i =0; i<q.length; i++)
-  {  
-    if (q.substr(i, 2) == "22")
-    {
-      r += "A";
-      i++;
-    }
-    else if (q.substr(i, 1) == "4")
-    { 
-      r += "B";
-    }
-    else 
-    {
-      r += "?";
-      console.log("keyfob: Wrong data");
-      return false;
-    }
-  }
-
-  var cmd = "";
-  if (r.substr(-7) == "AABAABB") // open 
-  {
-    cmd = "open";
-  } else
-  if (r.substr(-7) == "ABBBBBA") // close
-  {
-    cmd = "close";
-  } else
-  if (r.substr(-7) == "BBAABAA") // trunk
-  {
-    cmd = "trunk";
-  } else
-  {
-    console.log("keyfob: No matching suffix - " + r.substr(-7) );
-    return false;
-  } 
-
-  r = r.substr(0, r.length-7);
-  if (r.length != 64 + 8)
-  {
-    console.log("keyfob: Wrong code length");
-    return false;
-  } 
-
-  r = r.split("").map(c => c.charCodeAt(0) - 65);
-//console.log(r);
-  r = bitstreamToBytes(r);
-  var rs = r.map(x=>("0"+x.toString(16)).substr(-2)).join(" ")
-  console.log(rs + " " + cmd); // 77
-  return {protocol:"keyfob", data:{payload:r, command:cmd}};
-}
-
-function reconstruct(p)
-{
-  if (!p || p.protocol != "keyfob")
-    return false;
-  var pulses = "222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222"
-  pulses += "423333332";
-
-  var codeToPulse = code => code.split("").map(x => ((x=="A") ? "22" : "4")).join("");
- 
-  for (var bits=0; bits<72; bits++)
-  {
-    var bit = p.data.payload[Math.floor(bits/8)] & (1 << (bits%8));
-    if (bit == 0)
-      pulses += "22";
-    else
-      pulses += "4";
-  }
-
-  if (p.data.command == "open")
-    pulses += codeToPulse("AABAABB");
-  else
-  if (p.data.command == "close")
-    pulses += codeToPulse("ABBBBBA");
-  else
-  if (p.data.command == "trunk")
-    pulses += codeToPulse("BBAABAA");
-
-  var k = 250;
-  var intervals = pulses.split("").map(x=>parseInt(x)*k);
-  intervals = [0, 2000, ...intervals];
-
-  analysekeyfob(intervals);
-  detail.show(intervals, 2, intervals.length);
-}
-
-function bitstreamToBytes(str)
-{
-  var bytes = [];
-  for (var i=0; i<str.length; i++)
-  {
-    if ((i%8) == 0)
-      bytes.push(0);
-    bytes[Math.floor(i/8)] >>= 1;
-    if (str[i])
-      bytes[Math.floor(i/8)] |= 128;
-  }
-  return bytes;
-}
-*/
 
 var configStruct, configPtr;
 function configInit()
