@@ -22,6 +22,9 @@ const fileUpload = require('express-fileupload');
 const app = express();
 var crypto = require('crypto');
 
+const ALLOWED_DEVICES = ["la104", "ds213", "ds203"];
+function sanitize(str) { return str.replace(/[^a-zA-Z0-9_]/g, ""); }
+
 // Add headers
 app.use(function (req, res, next) {
     // Website you wish to allow to connect
@@ -50,8 +53,8 @@ function _toString(buffer)
 
 app.post('/compile/:device', function(req, res) 
 {
-  if (["la104", "ds213", "ds203"].indexOf(req.params.device) == -1)
-    return res.status(400).send('Unsupported device: ' + res.params.device);
+  var device = sanitize(req.params.device);
+  if (ALLOWED_DEVICES.indexOf(device) == -1) return res.status(400).send('Unsupported device');
 
   if (!req.files)
     return res.status(400).send('No files were uploaded.');
@@ -66,7 +69,7 @@ app.post('/compile/:device', function(req, res)
   if (!checkSafeIncludes(textIn))
     return res.status(400).send('Cannot compile this code');
 
-  compile(textIn, req.params.device).then( out =>
+  compile(textIn, device).then( out =>
   {
     if (out.code != 0)
     {
@@ -83,8 +86,8 @@ app.post('/compile/:device', function(req, res)
 
 app.post('/assembly/:device', function(req, res) 
 {
-  if (["la104", "ds213", "ds203"].indexOf(req.params.device) == -1)
-    return res.status(400).send('Unsupported device');
+  var device = sanitize(req.params.device);
+  if (ALLOWED_DEVICES.indexOf(device) == -1) return res.status(400).send('Unsupported device');
 
   if (!req.files)
     return res.status(400).send('No files were uploaded.');
@@ -99,7 +102,7 @@ app.post('/assembly/:device', function(req, res)
   if (!checkSafeIncludes(textIn))
     return res.status(400).send('Cannot compile this code');
 
-  debug(textIn, req.params.device).then( out =>
+  debug(textIn, device).then( out =>
   {
     res.end(JSON.stringify(out));
   });
@@ -107,8 +110,8 @@ app.post('/assembly/:device', function(req, res)
 
 app.post('/symbols/:device', function(req, res) 
 {
-  if (["la104", "ds213", "ds203"].indexOf(req.params.device) == -1)
-    return res.status(400).send('Unsupported device');
+  var device = sanitize(req.params.device);
+  if (ALLOWED_DEVICES.indexOf(device) == -1) return res.status(400).send('Unsupported device');
 
   if (!req.files)
     return res.status(400).send('No files were uploaded.');
@@ -123,7 +126,7 @@ app.post('/symbols/:device', function(req, res)
   if (!checkSafeIncludes(textIn))
     return res.status(400).send('Cannot compile this code');
 
-  symbols(textIn, req.params.device).then( out =>
+  symbols(textIn, device).then( out =>
   {
     res.end(JSON.stringify(out));
   });
@@ -150,7 +153,7 @@ function checkSafeIncludes(code)
   var lines = code.split("\n");
   for (var i=0; i<lines.length; i++)
   {
-    var line = lines[i];
+    var line = lines[i].trim();
     if (line.indexOf("#include") != -1)
     {
       if (allowed.indexOf(line) == -1)
