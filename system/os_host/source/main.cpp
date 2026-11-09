@@ -8,7 +8,6 @@ int main()
   BIOS::SYS::Init();
   BIOS::FAT::Init();
 
-#if defined(LA104) || defined(DS213)
   int len = (uint8_t*)&_addressRomEnd-(uint8_t*)&_addressRomBegin;
   uint32_t check = crc32b((uint8_t*)&_addressRomBegin, len);
   if (check != 0)
@@ -16,7 +15,6 @@ int main()
       BIOS::DBG::Print("CRC error!");
       while (BIOS::KEY::GetKey() != BIOS::KEY::F1);
   }
-#endif
 
 #ifndef DISABLE_USB
   BIOS::USB::Enable();
@@ -26,7 +24,7 @@ int main()
   BIOS::OS::SetArgument((char*)"");
 
   char shell[64] = "shell.elf";
-
+  // TODO: read the keys directly!!
 #ifdef LA104
   while (BIOS::KEY::GetKey() == BIOS::KEY::F3)
 #endif

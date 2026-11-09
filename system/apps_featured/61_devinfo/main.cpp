@@ -96,7 +96,7 @@ void RedrawPage(const CRect& rcMain, int page)
     break;
     case 1:
       PrintLine("BIOS version:", "%04x", BIOS::SYS::GetAttribute(BIOS::SYS::EAttribute::BiosVersion));
-      PrintLine("BIOS checksum:", "%08x", *(uint32_t*)BIOS::SYS::GetAttribute(BIOS::SYS::EAttribute::FirmwareChecksum));
+      PrintLine("OS checksum:", "%08x", *(uint32_t*)BIOS::SYS::GetAttribute(BIOS::SYS::EAttribute::FirmwareChecksum));
       PrintLine("Build rev:", "%s", BIOS::SYS::GetAttribute(BIOS::SYS::EAttribute::BuildRevision));
       PrintLine("Build date:", "%s", BIOS::SYS::GetAttribute(BIOS::SYS::EAttribute::BuildDate));
       PrintLine("Build user:", "%s", BIOS::SYS::GetAttribute(BIOS::SYS::EAttribute::BuildUser));
@@ -105,7 +105,7 @@ void RedrawPage(const CRect& rcMain, int page)
     case 2:
       PrintLine("Serial number:", "%08x", BIOS::SYS::GetAttribute(BIOS::SYS::EAttribute::SerialNumber));
       PrintLine("License number:", "%08x", BIOS::SYS::GetAttribute(BIOS::SYS::EAttribute::LicenseNumber));
-      PrintLine("License validity:", "%s", FormatLicenseValid(BIOS::SYS::GetAttribute(BIOS::SYS::EAttribute::LicenseValid)));
+      PrintLine("License validity:", FormatLicenseValid(BIOS::SYS::GetAttribute(BIOS::SYS::EAttribute::LicenseValid)));
     break;
 /*
     case 3:

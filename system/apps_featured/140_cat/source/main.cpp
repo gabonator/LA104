@@ -16,7 +16,7 @@ void SoundOn()
 {
   WriteTim8(0x20, 0x3000);
   WriteTim8(0x00, 0x0081);
-  WriteTim8(0x40, 50); // volume
+  WriteTim8(0x40, 255); // volume
 }
 
 void SoundOff()
@@ -25,16 +25,19 @@ void SoundOff()
   WriteTim8(0x00, 0x0080);
 }
 
-void Sound(int f)
+void Sound(int div)
 {
-    if (!f)
+    if (!div)
     {
         SoundOff();
         return;
     }
     WriteTim8(0x24, 0);
     WriteTim8(0x28, 15-1);
-    int div = 72e6/15/f;
+    // int f = 1193180 / d;
+    // int div = 72e6/15/f;
+    // 72e6/15 / 1193180 * d = 4.023 * d
+    div *= 4;
     WriteTim8(0x2c, div-1);
     SoundOn();
 }

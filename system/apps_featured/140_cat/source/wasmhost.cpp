@@ -147,7 +147,20 @@ namespace CicoContext
     }
     void cicocontext_t::memoryVideoSet8(int seg, int ofs, uint8_t data)
     {
-#ifdef DS213
+#ifdef DS203
+        int page = ofs & 0x2000;
+        ofs &= 0x1fff;
+        int y = (ofs / 80)*2;
+        int x = (ofs % 80)*4;
+        if (page)
+            y ++;
+        assert(y < 200);
+        x += 40;
+        SetPixel(x++, y, data >> 6);
+        SetPixel(x++, y, (data >> 4) & 3);
+        SetPixel(x++, y, (data >> 2) & 3);
+        SetPixel(x++, y, (data >> 0) & 3);
+#elif DS213
         int page = ofs & 0x2000;
         ofs &= 0x1fff;
         int y = (ofs / 80)*2;
@@ -197,7 +210,7 @@ namespace CicoContext
         if (i == 0x1A)
         {
             ctx.c.r16 = 0;
-            ctx.d.r16 = GetTick() / 60;
+            ctx.d.r16 = GetTick() / 60; // / 60;
             return;
         }
         if (i == 0x10)
@@ -216,7 +229,7 @@ namespace CicoContext
             if ((val & 3) == 0)
                 PlayTone(0);
             else
-                PlayTone(1193180 / port42buf);
+                PlayTone(/*1193180 / */ port42buf);
         }
         if (port == 0x42)
             port42buf = (port42buf>>8) | (val<<8);
