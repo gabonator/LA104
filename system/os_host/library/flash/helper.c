@@ -43,6 +43,14 @@ int linearFlashProgram(struct LinearFlashing* flash, ui32 address,
 
     /* Read back new page if page as changed. */
     if(oldPage != flash->currentPage) {
+      /* Previous page was not completed (non contiguous write), store it
+         before its buffer gets overwritten */
+      if (flash->pageBufferTainted) {
+        err = flashPageWriteIfNeeded(oldPage, flash->pageBuffer);
+        if (err)
+          return err;
+      }
+
       err = flashPageRead(flash->currentPage, flash->pageBuffer);
 
       /* Return if we get errors here. */
@@ -64,8 +72,13 @@ int linearFlashProgram(struct LinearFlashing* flash, ui32 address,
             processLen);
     flash->pageBufferTainted = TRUE;
 
-    /* Decrease handled bytes from total length. */
+    /* Decrease handled bytes from total length and move to the data for
+       the next page. Without advancing address and buffer, a write crossing
+       page boundary stored its beginning twice into the first page and the
+       rest was never written. */
     length -= processLen;
+    address += processLen;
+    buffer = (const flashdata_t*)((const unsigned char*)buffer + processLen);
 
     /* Writeback buffer if needed */
     if (writeback) {
@@ -76,6 +89,7 @@ int linearFlashProgram(struct LinearFlashing* flash, ui32 address,
         return err;
 
       writeback = FALSE;
+      flash->pageBufferTainted = FALSE;
     }
   }
 

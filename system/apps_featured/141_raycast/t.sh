@@ -1,0 +1,1 @@
+g++ -D HOST host/host.cpp source/game.cpp -o game.elf

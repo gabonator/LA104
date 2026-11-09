@@ -63,7 +63,7 @@ arm-none-eabi-g++ -Wall -Os -Werror -fno-common -mcpu=cortex-m3 -mthumb -msoft-f
   ../source/gui/Gui.cpp \
   ../source/framework/Serialize.cpp \
 
-arm-none-eabi-gcc -mcpu=cortex-m3 -mthumb -o output.elf -nostartfiles -T ../app_ds203.ld \
+arm-none-eabi-gcc -mcpu=cortex-m3 -mthumb -o output_ds203.elf -nostartfiles -T ../app_ds203.ld \
   ./main.o \
   ./startup.o \
   ./interrupt.o \
@@ -85,17 +85,19 @@ arm-none-eabi-gcc -mcpu=cortex-m3 -mthumb -o output.elf -nostartfiles -T ../app_
   ./dac.o \
   ./private.o \
 
-arm-none-eabi-objcopy -O binary ./output.elf ./output.bin
-arm-none-eabi-objcopy -O ihex ./output.elf ./system_ds203.hex
+arm-none-eabi-objcopy -O binary ./output_ds203.elf ./output_ds203.bin
+node ../../../tools/crc32/force.js ./output_ds203.bin ./output_ds203.elf 0x6ab02021 ./hash_ds203
 
-arm-none-eabi-readelf -all output.elf > output.txt
-arm-none-eabi-objdump -d -S output.elf > output.asm
+arm-none-eabi-objcopy -O ihex ./output_ds203.elf ./system_ds203.hex
+
+arm-none-eabi-readelf -all output_ds203.elf > output_ds203.txt
+arm-none-eabi-objdump -d -S output_ds203.elf > output_ds203.asm
 
 find . -type f -name '*.o' -delete
 find . -type f -name '*.d' -delete
 
-nm --print-size --size-sort -gC output.elf | grep " B " > symbols_ram.txt
-nm --print-size --size-sort -gC output.elf | grep " T " > symbols_rom.txt
-nm --print-size --size-sort -gC output.elf > symbols_all.txt
-nm output.elf > symbols_all2.txt
-cat symbols_all.txt | grep _address
+nm --print-size --size-sort -gC output_ds203.elf | grep " B " > symbols_ds203_ram.txt
+nm --print-size --size-sort -gC output_ds203.elf | grep " T " > symbols_ds203_rom.txt
+nm --print-size --size-sort -gC output_ds203.elf > symbols_ds203_all.txt
+nm output_ds203.elf > symbols_ds203_all2.txt
+cat symbols_ds203_all.txt | grep _address
