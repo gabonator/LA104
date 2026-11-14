@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FPGA Build Server</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'Segoe UI', Consolas, monospace; background: #1a1a2e; color: #e0e0e0; height: 100vh; display: flex; flex-direction: column; }
+
+  header { background: #16213e; padding: 12px 20px; display: flex; align-items: center; gap: 20px; border-bottom: 1px solid #0f3460; }
+  header h1 { font-size: 16px; color: #e94560; white-space: nowrap; }
+
+  .status-badge { padding: 4px 12px; border-radius: 12px; font-size: 12px; font-weight: bold; text-transform: uppercase; }
+  .status-idle { background: #333; color: #888; }
+  .status-building { background: #e94560; color: #fff; animation: pulse 1s infinite; }
+  .status-success { background: #0a8a0a; color: #fff; }
+  .status-failed { background: #a00; color: #fff; }
+  @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.6; } }
+
+  .timer { font-size: 12px; color: #888; margin-left: auto; }
+
+  .controls { background: #16213e; padding: 12px 20px; display: flex; gap: 10px; align-items: center; flex-wrap: wrap; border-bottom: 1px solid #0f3460; }
+
+  .file-label { display: inline-block; padding: 6px 14px; background: #0f3460; color: #e0e0e0; border-radius: 4px; cursor: pointer; font-size: 13px; }
+  .file-label:hover { background: #1a4a8a; }
+  .file-label input { display: none; }
+
+  .file-list { font-size: 12px; color: #aaa; max-width: 400px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+  button { padding: 6px 18px; border: none; border-radius: 4px; cursor: pointer; font-size: 13px; font-weight: bold; }
+  button:disabled { opacity: 0.4; cursor: not-allowed; }
+  .btn-upload { background: #0f3460; color: #e0e0e0; }
+  .btn-upload:hover:not(:disabled) { background: #1a4a8a; }
+  .btn-build { background: #e94560; color: #fff; }
+  .btn-build:hover:not(:disabled) { background: #ff5a75; }
+  .btn-download { background: #0a8a0a; color: #fff; }
+  .btn-download:hover:not(:disabled) { background: #0c0; }
+  .btn-reset { background: #555; color: #ccc; }
+  .btn-reset:hover:not(:disabled) { background: #777; }
+
+  .terminal-wrap { flex: 1; overflow: hidden; position: relative; }
+  #terminal {
+    position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+    overflow-y: auto; padding: 10px 16px;
+    font-family: 'Consolas', 'Courier New', monospace; font-size: 13px; line-height: 1.5;
+    background: #0a0a1a; color: #c8c8c8;
+    white-space: pre-wrap; word-wrap: break-word;
+  }
+
+  footer { background: #16213e; padding: 6px 20px; font-size: 11px; color: #555; border-top: 1px solid #0f3460; display: flex; justify-content: space-between; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>FPGA Build Server</h1>
+  <span id="statusBadge" class="status-badge status-idle">IDLE</span>
+  <span class="timer" id="timer"></span>
+</header>
+
+<div class="controls">
+  <label class="file-label">
+    Choose Files
+    <input type="file" id="fileInput" multiple accept=".v,.sv,.ip,.asf,.sdc,.qsf,.tcl,.hex,.mif">
+  </label>
+  <span class="file-list" id="fileList">No files selected</span>
+  <button class="btn-upload" id="btnUpload" disabled>Upload</button>
+  <button class="btn-build" id="btnBuild">Build</button>
+  <button class="btn-download" id="btnDownload" disabled>Download app.bin</button>
+  <button class="btn-reset" id="btnReset">Reset</button>
+</div>
+
+<div class="terminal-wrap">
+  <div id="terminal"></div>
+</div>
+
+<footer>
+  <span id="byteCount">0 bytes</span>
+  <span id="connStatus">Disconnected</span>
+</footer>
+
+<script>
+// ---------------------------------------------------------------------------
+// ANSI terminal renderer
+// ---------------------------------------------------------------------------
+const ANSI_COLORS = [
+  '#000000','#cc0000','#00cc00','#cccc00','#0000cc','#cc00cc','#00cccc','#c8c8c8',
+  '#555555','#ff5555','#55ff55','#ffff55','#5555ff','#ff55ff','#55ffff','#ffffff'
+];
+
+class AnsiTerminal {
+  constructor(el) {
+    this.el = el;
+    this.fg = null;
+    this.bg = null;
+    this.bold = false;
+    this.currentSpan = null;
+    this.totalBytes = 0;
+    this._buf = '';
+  }
+
+  clear() {
+    this.el.innerHTML = '';
+    this.fg = null;
+    this.bg = null;
+    this.bold = false;
+    this.currentSpan = null;
+    this.totalBytes = 0;
+    this._buf = '';
+  }
+
+  _makeSpan() {
+    const s = document.createElement('span');
+    const styles = [];
+    if (this.fg !== null) styles.push('color:' + this.fg);
+    if (this.bg !== null) styles.push('background:' + this.bg);
+    if (this.bold) styles.push('font-weight:bold');
+    if (styles.length) s.setAttribute('style', styles.join(';'));
+    this.el.appendChild(s);
+    this.currentSpan = s;
+    return s;
+  }
+
+  _getSpan() {
+    return this.currentSpan || this._makeSpan();
+  }
+
+  _newStyle() {
+    this.currentSpan = null;
+  }
+
+  _applysgr(params) {
+    if (params.length === 0) params = [0];
+    let i = 0;
+    while (i < params.length) {
+      const p = params[i];
+      if (p === 0) { this.fg = null; this.bg = null; this.bold = false; }
+      else if (p === 1) { this.bold = true; }
+      else if (p === 22) { this.bold = false; }
+      else if (p >= 30 && p <= 37) { this.fg = ANSI_COLORS[p - 30 + (this.bold ? 8 : 0)]; }
+      else if (p === 38 && params[i+1] === 5) { this.fg = this._256color(params[i+2]); i += 2; }
+      else if (p === 39) { this.fg = null; }
+      else if (p >= 40 && p <= 47) { this.bg = ANSI_COLORS[p - 40]; }
+      else if (p === 48 && params[i+1] === 5) { this.bg = this._256color(params[i+2]); i += 2; }
+      else if (p === 49) { this.bg = null; }
+      else if (p >= 90 && p <= 97) { this.fg = ANSI_COLORS[p - 90 + 8]; }
+      else if (p >= 100 && p <= 107) { this.bg = ANSI_COLORS[p - 100 + 8]; }
+      i++;
+    }
+    this._newStyle();
+  }
+
+  _256color(n) {
+    if (n == null) return null;
+    if (n < 16) return ANSI_COLORS[n];
+    if (n < 232) {
+      n -= 16;
+      const r = Math.floor(n / 36) * 51;
+      const g = Math.floor((n % 36) / 6) * 51;
+      const b = (n % 6) * 51;
+      return `rgb(${r},${g},${b})`;
+    }
+    const v = (n - 232) * 10 + 8;
+    return `rgb(${v},${v},${v})`;
+  }
+
+  write(text) {
+    this.totalBytes += new Blob([text]).size;
+    // Buffer incomplete escape sequences
+    text = this._buf + text;
+    this._buf = '';
+
+    let i = 0;
+    while (i < text.length) {
+      const esc = text.indexOf('\x1b', i);
+      if (esc === -1) {
+        // No more escapes, output rest as text
+        if (i < text.length) {
+          this._getSpan().appendChild(document.createTextNode(text.slice(i)));
+        }
+        break;
+      }
+      // Output text before escape
+      if (esc > i) {
+        this._getSpan().appendChild(document.createTextNode(text.slice(i, esc)));
+      }
+      // Check if we have enough chars for the sequence
+      if (esc + 1 >= text.length) {
+        this._buf = text.slice(esc);
+        break;
+      }
+      if (text[esc + 1] === '[') {
+        // CSI sequence: ESC [ params letter
+        const rest = text.slice(esc + 2);
+        const m = rest.match(/^([\d;]*)([A-Za-z])/);
+        if (m) {
+          const params = m[1] ? m[1].split(';').map(Number) : [];
+          const cmd = m[2];
+          if (cmd === 'm') {
+            this._applysgr(params);
+          }
+          // Skip other CSI commands (cursor movement etc)
+          i = esc + 2 + m[0].length;
+        } else if (esc + 2 + rest.length < text.length || rest.length > 20) {
+          // Broken sequence, skip ESC[
+          i = esc + 2;
+        } else {
+          // Incomplete sequence at end of buffer
+          this._buf = text.slice(esc);
+          break;
+        }
+      } else {
+        // Unknown escape, skip ESC char
+        i = esc + 1;
+      }
+    }
+  }
+}
+
+// ---------------------------------------------------------------------------
+// UI
+// ---------------------------------------------------------------------------
+const terminal = document.getElementById('terminal');
+const statusBadge = document.getElementById('statusBadge');
+const timerEl = document.getElementById('timer');
+const fileInput = document.getElementById('fileInput');
+const fileListEl = document.getElementById('fileList');
+const btnUpload = document.getElementById('btnUpload');
+const btnBuild = document.getElementById('btnBuild');
+const btnDownload = document.getElementById('btnDownload');
+const btnReset = document.getElementById('btnReset');
+const byteCountEl = document.getElementById('byteCount');
+const connStatusEl = document.getElementById('connStatus');
+
+const term = new AnsiTerminal(terminal);
+let ws = null;
+let buildTimerInterval = null;
+let buildStart = null;
+let autoScroll = true;
+
+terminal.addEventListener('scroll', () => {
+  autoScroll = terminal.scrollHeight - terminal.scrollTop - terminal.clientHeight < 40;
+});
+
+function scrollToBottom() {
+  if (autoScroll) terminal.scrollTop = terminal.scrollHeight;
+}
+
+function formatTime(sec) {
+  const m = Math.floor(sec / 60);
+  const s = sec % 60;
+  return m + ':' + String(s).padStart(2, '0');
+}
+
+function updateTimer() {
+  if (!buildStart) return;
+  timerEl.textContent = formatTime(Math.round((Date.now() - buildStart) / 1000));
+}
+
+function formatBytes(n) {
+  if (n < 1024) return n + ' B';
+  if (n < 1048576) return (n / 1024).toFixed(1) + ' KB';
+  return (n / 1048576).toFixed(1) + ' MB';
+}
+
+function applyStatus(s) {
+  const st = s.status;
+  statusBadge.textContent = st.toUpperCase();
+  statusBadge.className = 'status-badge status-' + st;
+  btnBuild.disabled = (st === 'building');
+  btnReset.disabled = (st === 'building');
+  btnDownload.disabled = !s.artifact_size;
+
+  if (st === 'building' && !buildTimerInterval) {
+    buildStart = s.started ? new Date(s.started).getTime() : Date.now();
+    buildTimerInterval = setInterval(updateTimer, 1000);
+  }
+  if (st !== 'building' && buildTimerInterval) {
+    clearInterval(buildTimerInterval);
+    buildTimerInterval = null;
+    if (s.finished && s.started) {
+      const d = Math.round((new Date(s.finished) - new Date(s.started)) / 1000);
+      timerEl.textContent = formatTime(d) + ' (finished)';
+    }
+  }
+}
+
+// WebSocket
+function connectWS() {
+  if (ws && ws.readyState <= 1) return;
+
+  const proto = location.protocol === 'https:' ? 'wss:' : 'ws:';
+  ws = new WebSocket(proto + '//' + location.host + '/ws');
+  ws.binaryType = 'arraybuffer';
+
+  ws.onopen = () => {
+    connStatusEl.textContent = 'Connected';
+    connStatusEl.style.color = '#6bcb77';
+  };
+
+  ws.onmessage = (e) => {
+    if (e.data instanceof ArrayBuffer) {
+      // Binary frame: raw process output
+      const text = new TextDecoder().decode(e.data);
+      term.write(text);
+      byteCountEl.textContent = formatBytes(term.totalBytes);
+      scrollToBottom();
+    } else {
+      // Text frame: JSON control message
+      try {
+        const msg = JSON.parse(e.data);
+        if (msg.type === 'status') applyStatus(msg);
+      } catch (err) {}
+    }
+  };
+
+  ws.onclose = () => {
+    connStatusEl.textContent = 'Disconnected';
+    connStatusEl.style.color = '#ff6b6b';
+    setTimeout(connectWS, 3000);
+  };
+
+  ws.onerror = () => {
+    connStatusEl.textContent = 'Error';
+    connStatusEl.style.color = '#ff6b6b';
+  };
+}
+
+// File selection
+fileInput.addEventListener('change', () => {
+  const names = Array.from(fileInput.files).map(f => f.name);
+  fileListEl.textContent = names.length ? names.join(', ') : 'No files selected';
+  btnUpload.disabled = names.length === 0;
+});
+
+// Upload
+btnUpload.addEventListener('click', () => {
+  const fd = new FormData();
+  for (const f of fileInput.files) fd.append('files', f);
+  btnUpload.disabled = true;
+  btnUpload.textContent = 'Uploading...';
+
+  fetch('/upload', { method: 'POST', body: fd })
+    .then(r => r.json())
+    .then(data => {
+      btnUpload.textContent = 'Upload';
+      btnUpload.disabled = false;
+      if (data.error) {
+        alert('Upload error: ' + data.error);
+      } else {
+        term.write('\x1b[33m[ui] Uploaded ' + data.count + ' file(s): ' + data.uploaded.join(', ') + '\x1b[0m\r\n');
+        scrollToBottom();
+      }
+    })
+    .catch(err => {
+      btnUpload.textContent = 'Upload';
+      btnUpload.disabled = false;
+      alert('Upload failed: ' + err);
+    });
+});
+
+// Build
+btnBuild.addEventListener('click', () => {
+  term.clear();
+  timerEl.textContent = '0:00';
+  byteCountEl.textContent = '0 B';
+  fetch('/build', { method: 'POST' })
+    .then(r => r.json())
+    .then(data => { if (data.error) alert(data.error); })
+    .catch(err => alert('Build request failed: ' + err));
+});
+
+// Download
+btnDownload.addEventListener('click', () => {
+  window.location.href = '/artifact';
+});
+
+// Reset
+btnReset.addEventListener('click', () => {
+  fetch('/reset', { method: 'POST' })
+    .then(r => r.json())
+    .then(data => {
+      if (!data.error) {
+        term.clear();
+        timerEl.textContent = '';
+        buildStart = null;
+        byteCountEl.textContent = '0 B';
+      } else {
+        alert(data.error);
+      }
+    });
+});
+
+// Fallback status polling
+setInterval(() => {
+  fetch('/status').then(r => r.json()).then(applyStatus).catch(() => {});
+}, 5000);
+
+connectWS();
+</script>
+
+</body>
+</html>
