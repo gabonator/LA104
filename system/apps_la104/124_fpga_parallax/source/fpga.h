@@ -23,6 +23,9 @@
 
 class CFpga
 {
+    uint16_t mSavedSpiCr1;
+    uint32_t mSavedGpiobCrl;
+
     uint8_t SpiTransfer(uint8_t data)
     {
         while (*SPI3_SR & SPI_RXNE) (void)*SPI3_DR;
@@ -45,44 +48,44 @@ class CFpga
 
 public:
     bool Flash(CBufferedReader& fw)
-//    bool Flash(char* name)
     {
-//        CBufferedReader fw;
-//        if ( !fw.Open(name) )
-//            return false;
+      volatile uint16_t* ptrSpi = (uint16_t*)0x40003C0C; // SPI3_DR_ADDRESS
+      volatile uint32_t* bit_SPI3_txe = (volatile uint32_t *)0x42078104;
+      volatile uint32_t* cdone = (volatile uint32_t*)0x4222010c;
 
-        int count = 0xb720;
-        volatile uint16_t* ptrSpi = (uint16_t*)0x40003C0C;
-        volatile uint32_t* bit_SPI3_txe = (volatile uint32_t *)0x42078104;
-        volatile uint32_t* cdone = (volatile uint32_t*)0x4222010c;
-        volatile int counter;
+      // reset
+      *((volatile uint32_t*)0x4221819c) = 0;
+      *((volatile uint32_t*)0x42218198) = 0;
+      BIOS::SYS::DelayMs(5);
+      *((volatile uint32_t*)0x42218198) = 1;
+      BIOS::SYS::DelayMs(5);
 
-        // reset
-        *((volatile uint32_t*)0x4221819c) = 0;
-        *((volatile uint32_t*)0x42218198) = 0;
-        counter = 7;
-        while (counter--);
+      int count = fw.GetFileSize();
+      _ASSERT(count == 0xb720 - 72);
+      CStream spiStream((uint8_t*)ptrSpi, 1);
+      while (count--)
+      {
+        fw >> spiStream;
+        while (bit_SPI3_txe == 0);
+      }
+      volatile int counter = 72;
+      while (counter--) {
+      //for (int i=0; i<72; i++) {
+        *((uint8_t*)ptrSpi) = 255;
+        while (bit_SPI3_txe == 0);
+      }
 
-        *((volatile uint32_t*)0x42218198) = 1;
-        counter = 0x1baf;
-        while (counter--);
-
-        CStream spiStream((uint8_t*)ptrSpi, 1);
-        while (count--)
-        {
-            fw >> spiStream;
-            while (bit_SPI3_txe == 0);
-        }
-
-        *((volatile uint32_t*)0x4221819c) = 1;
-
-//        fw.Close();
-        BIOS::SYS::DelayMs(10);
-        return !!*cdone;
+      BIOS::SYS::DelayMs(5);
+      *((volatile uint32_t*)0x4221819c) = 1;
+      BIOS::SYS::DelayMs(5);
+      return !!*cdone;
     }
 
     void SpiInit()
     {
+        mSavedSpiCr1 = *SPI3_CR1;
+        mSavedGpiobCrl = *GPIOB_CRL;
+
         *RCC_APB1ENR |= (1u << 15);
         *SPI3_CR1 = 0;
         *SPI3_CR1 = (1u << 6) | (1u << 2) | (1u << 9) | (1u << 8) | (3u << 3);
@@ -93,6 +96,13 @@ public:
         SpiCs(true);
         for (int i = 0; i < 5; i++) SpiTransfer(0xFF);
         SpiCs(false);
+    }
+
+    void SpiDeinit()
+    {
+        while (*SPI3_SR & SPI_BSY);
+        *SPI3_CR1 = mSavedSpiCr1;
+        *GPIOB_CRL = mSavedGpiobCrl;
     }
 
     bool IsConfigured()

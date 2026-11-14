@@ -37,9 +37,10 @@ int _main(void)
     // Flash bitstream
     CONSOLE::Print("Flashing parallax.fpg...\n");
     CBufferedReader fw;
+
     if (!fw.Open((char*)"parallax.fpg")) {
         CONSOLE::Color(RGB565(ff0000));
-        CONSOLE::Print("Open failed!\n");
+        CONSOLE::Print("Not found!\n");
         while (BIOS::KEY::GetKey() != BIOS::KEY::EKey::Escape);
         BIOS::FAT::SetSharedBuffer(nullptr);
         return 1;
@@ -53,6 +54,7 @@ int _main(void)
         BIOS::FAT::SetSharedBuffer(nullptr);
         return 1;
     }
+    fw.Close();
 
     CONSOLE::Color(RGB565(00ff00));
     CONSOLE::Print("FPGA configured!\n");
@@ -107,6 +109,7 @@ int _main(void)
 
     fpga.WriteReg(FPGA_CMD_RELEASE, 0);
     fpga.BusReclaim();
+    fpga.SpiDeinit();
 
     BIOS::FAT::SetSharedBuffer(nullptr);
     return 0;
